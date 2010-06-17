@@ -1,0 +1,56 @@
+# Specifies intentionally untracked file system entries to ignore.
+#
+# Notes:
+# 1. Do not commit .gitignore files in sub directories of the repository,
+# as they would have to be explicitly excluded when generating the installer,
+# building the project and in other situations.
+# 2. Use the full path to a dir when you want to exclude a directory
+# and everything it contains. Start with repo-root, which is "/",
+# and do NOT use a "/" at the end, as this would fail if that dir is a symlink.
+# good example:
+# /game/maps
+# bad examples:
+# game/maps
+# game/maps/
+#
+# For more details about how this file works, see:
+# http://www.kernel.org/pub/software/scm/git/docs/gitignore.html
+#
+
+# CMake related
+# though it is cleaner to not build directly in the repository root
+/CMakeFiles
+/CMakeCache.txt
+
+
+# NTai build folders
+/vstudio/Intermediate
+
+# SVN
+/.svn
+
+# Windows libraries used by spring when compiling with MinGW
+# recommended: place the dir somewhere else, and specify with
+# MINGWLIBS=<your-path-here>/mingwlibs
+/mingwlibs
+
+# Windows libraries used by spring when compiling with Visual Studio
+/vclibs
+
+# Misc file endings (eg. build or temp files)
+*.o
+*.log
+*~
+.*.swp
+*.a
+*.gch
+*.dir
+*.obj
+*.dll
+*.user
+*.ncb
+*.suo
+
+# ???
+progress.make
+
