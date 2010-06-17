@@ -1,0 +1,118 @@
+--[[
+ Task Queues!
+]]--
+
+	-- Randomize the randomizer
+	for _=-5,os.time()%100 do
+		math.random();
+	end
+
+local kernel_lsts ={
+	{"bit","bit","bit","assembler","byte","byte","assembler","byte","byte","byte","byte","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer"},
+	{"assembler","byte","assembler","byte","byte","byte","byte","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte"},
+	{"bit","bit","bit","assembler","byte","assembler","byte","byte","byte","byte","byte","byte","byte","byte","assembler","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","assembler","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer"},
+	{"assembler","bit","bit","bit","byte","assembler","byte","byte","byte","pointer","byte","pointer","byte","assembler","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer"},
+	{"assembler","assembler","byte","byte","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer"},
+	{"bit","bit","bit","assembler","assembler","byte","byte","byte","byte","byte","assembler","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","assembler","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte"},
+	{"bit","assembler","bit","bit","assembler","byte","byte","byte","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","assembler","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer"},
+	{"assembler","bit","bit","bit","assembler","byte","byte","byte","byte","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","assembler","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte"},
+	{"byte","assembler","byte","assembler","byte","byte","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","assembler","pointer","byte","pointer","byte","pointer","byte","pointer","assembler","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer"},
+	{"byte","assembler","byte","byte","byte","assembler","byte","byte","byte","pointer","byte","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","assembler","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte","pointer","byte"},
+}
+
+local hole_lsts = {
+	{"bug","bug","bug","trojan","worm","worm","trojan","worm","worm","worm","worm","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos"},
+	{"trojan","worm","trojan","worm","worm","worm","worm","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm"},
+	{"bug","bug","bug","trojan","worm","trojan","worm","worm","worm","worm","worm","worm","worm","worm","trojan","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","trojan","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos"},
+	{"trojan","bug","bug","bug","worm","trojan","worm","worm","worm","dos","worm","dos","worm","trojan","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos"},
+	{"trojan","trojan","worm","worm","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos"},
+	{"bug","bug","bug","trojan","trojan","worm","worm","worm","worm","worm","trojan","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","trojan","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm"},
+	{"bug","trojan","bug","bug","trojan","worm","worm","worm","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","trojan","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos"},
+	{"trojan","bug","bug","bug","trojan","worm","worm","worm","worm","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","trojan","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm"},
+	{"worm","trojan","worm","trojan","worm","worm","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","trojan","dos","worm","dos","worm","dos","worm","dos","trojan","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos"},
+	{"worm","trojan","worm","worm","worm","trojan","worm","worm","worm","dos","worm","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","trojan","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm","dos","worm"},
+}
+
+local carrier_lsts = {
+	{"packet","packet","packet","gateway","connection","connection","gateway","connection","connection","connection","connection","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow"},
+	{"gateway","connection","gateway","connection","connection","connection","connection","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection"},
+	{"packet","packet","packet","gateway","connection","gateway","connection","connection","connection","connection","connection","connection","connection","connection","gateway","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","gateway","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow"},
+	{"gateway","packet","packet","packet","connection","gateway","connection","connection","connection","flow","connection","flow","connection","gateway","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow"},
+	{"gateway","gateway","connection","connection","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow"},
+	{"packet","packet","packet","gateway","gateway","connection","connection","connection","connection","connection","gateway","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","gateway","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection"},
+	{"packet","gateway","packet","packet","gateway","connection","connection","connection","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","gateway","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow"},
+	{"gateway","packet","packet","packet","gateway","connection","connection","connection","connection","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","gateway","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection"},
+	{"connection","gateway","connection","gateway","connection","connection","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","gateway","flow","connection","flow","connection","flow","connection","flow","gateway","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow"},
+	{"connection","gateway","connection","connection","connection","gateway","connection","connection","connection","flow","connection","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","gateway","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection","flow","connection"},
+}
+
+local holeold_lsts = {
+	{"bugold","bugold","bugold","trojanold","wormold","wormold","trojanold","wormold","wormold","wormold","wormold","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos"},
+	{"trojanold","wormold","trojanold","wormold","wormold","wormold","wormold","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold"},
+	{"bugold","bugold","bugold","trojanold","wormold","trojanold","wormold","wormold","wormold","wormold","wormold","wormold","wormold","wormold","trojanold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","trojanold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos"},
+	{"trojanold","bugold","bugold","bugold","wormold","trojanold","wormold","wormold","wormold","dos","wormold","dos","wormold","trojanold","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos"},
+	{"trojanold","trojanold","wormold","wormold","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos"},
+	{"bugold","bugold","bugold","trojanold","trojanold","wormold","wormold","wormold","wormold","wormold","trojanold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","trojanold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold"},
+	{"bugold","trojanold","bugold","bugold","trojanold","wormold","wormold","wormold","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","trojanold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos"},
+	{"trojanold","bugold","bugold","bugold","trojanold","wormold","wormold","wormold","wormold","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","trojanold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold"},
+	{"wormold","trojanold","wormold","trojanold","wormold","wormold","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","trojanold","dos","wormold","dos","wormold","dos","wormold","dos","trojanold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos"},
+	{"wormold","trojanold","wormold","wormold","wormold","trojanold","wormold","wormold","wormold","dos","wormold","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","trojanold","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold","dos","wormold"},
+}
+
+local thbase_lsts = {
+	{"fairy","fairy","fairy","alice","reimu","reimu","alice","reimu","reimu","reimu","reimu","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa"},
+	{"alice","reimu","alice","reimu","reimu","reimu","reimu","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu"},
+	{"fairy","fairy","fairy","alice","reimu","alice","reimu","reimu","reimu","reimu","reimu","reimu","reimu","reimu","alice","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","alice","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa"},
+	{"alice","fairy","fairy","fairy","reimu","alice","reimu","reimu","reimu","marisa","reimu","marisa","reimu","alice","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa"},
+	{"alice","alice","reimu","reimu","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa"},
+	{"fairy","fairy","fairy","alice","alice","reimu","reimu","reimu","reimu","reimu","alice","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","alice","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu"},
+	{"fairy","alice","fairy","fairy","alice","reimu","reimu","reimu","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","alice","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa"},
+	{"alice","fairy","fairy","fairy","alice","reimu","reimu","reimu","reimu","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","alice","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu"},
+	{"reimu","alice","reimu","alice","reimu","reimu","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","alice","marisa","reimu","marisa","reimu","marisa","reimu","marisa","alice","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa"},
+	{"reimu","alice","reimu","reimu","reimu","alice","reimu","reimu","reimu","marisa","reimu","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","alice","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu","marisa","reimu"},
+}
+
+taskqueues = {
+
+	-- Cons:
+	assembler = {"socket"},
+	trojan = {"window"},
+	trojanold = {"windowold"},
+	gateway = {"port"},
+	alice = {"thminifac"},
+
+	-- Minifacs:
+	socket = {"bit"},
+	window = {"bug"},
+	windowold = {"bugold"},
+	port = {"kp_dispatch"}, -- here use the dispatch command (31581)
+	thminifac = {"fairy"},
+
+	-- Homebases:
+	kernel = (
+		function()
+			return kernel_lsts[math.random(1,#kernel_lsts)]
+		end
+		),
+	hole = (
+		function()
+			return hole_lsts[math.random(1,#hole_lsts)]
+		end
+		),
+	carrier = (
+		function()
+			return carrier_lsts[math.random(1,#carrier_lsts)]
+		end
+		),
+	holeold = (
+		function()
+			return holeold_lsts[math.random(1,#holeold_lsts)]
+		end
+		),
+	thbase = (
+		function()
+			return thbase_lsts[math.random(1,#thbase_lsts)]
+		end
+		),
+
+}

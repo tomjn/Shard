@@ -572,7 +572,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Copying AIInfo.lua"
-						CommandLine="mkdir &quot;$(TargetDir)&quot;&#x0D;&#x0A;COPY &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
+						CommandLine="mkdir &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;xcopy &quot;$(InputDir)\ai&quot; &quot;$(TargetDir)ai\&quot; /F /E /Y /H /R /L&#x0D;&#x0A;"
 						Outputs="AIInfo.lua"
 					/>
 				</FileConfiguration>
@@ -595,9 +595,9 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Copying AIOptions.lua"
-						CommandLine="mkdir &quot;$(TargetDir)&quot;&#x0D;&#x0A;COPY &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
-						Outputs="AIOptions.lua"
+						Description=""
+						CommandLine="mkdir &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;"
+						Outputs=""
 					/>
 				</FileConfiguration>
 				<FileConfiguration

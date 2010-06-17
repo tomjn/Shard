@@ -1,0 +1,29 @@
+--[[
+Attackers!
+]]--
+
+attackerlist = {
+	"tc_bonebeast",
+	"tc_crawler",
+	"tc_dragon",
+	"tc_enforcer",
+	"tc_ghoul",
+	"tc_gunner",
+	"tc_lich",
+	"tc_lich_ai",
+	"tc_mage",
+	"tc_mancubus",
+	"tc_mermeoth",
+	"tc_redeemer",
+	"tc_rictus",
+	"tc_Seeker",
+	"tc_skeleton",
+	"tc_suicide",
+	"tc_witch",
+	"tc_witch_shield",
+	"tc_purgatory_ai",
+	"tc_kaboom",
+	"tc_pestilence",
+	"tc_agares",
+	"tc_belial",
+}
