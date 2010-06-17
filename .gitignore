@@ -28,6 +28,7 @@
 
 # SVN
 /.svn
+*/.svn
 
 # Windows libraries used by spring when compiling with MinGW
 # recommended: place the dir somewhere else, and specify with
