@@ -1,0 +1,7 @@
+LIBRARY      "Shard"
+
+EXPORTS
+    ; Explicit exports can go here
+   init   @1
+   handleEvent         @2
+   release         @3
