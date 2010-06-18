@@ -78,9 +78,9 @@ CTestAI::CTestAI(IGame* game)
 	luaL_openlibs(L);
 	luaopen_api(L);
 	
-	unittype = SWIG_TypeQuery(L,"IUnit");
+	unittype = SWIG_TypeQuery(L,"IUnit *");
 	// Push in our IGame pointer
-	swig_type_info* type = SWIG_TypeQuery(L,"IGame");
+	swig_type_info* type = SWIG_TypeQuery(L,"IGame *");
 	SWIG_NewPointerObj(L,game,type,0);
 	lua_setglobal(L, "game_engine");
 
