@@ -4,6 +4,7 @@
 #include "ExternalAI/Interface/AISEvents.h"
 #include "ExternalAI/Interface/AISCommands.h"
 
+#include <iterator>
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
