@@ -1,6 +1,4 @@
 #include "TestAI.h"
-#include "API/swig.h"
-//#include "API/api_wrap.h"
 
 IGame* global_game = 0;
 
@@ -67,6 +65,7 @@ int lua_epcall(lua_State *L, int nargs){
 	return status;
 }
 IAI* CTestAI::ai = 0;
+
 CTestAI::CTestAI(IGame* game)
 : game(game){
 	CTestAI::ai = this;
@@ -79,6 +78,7 @@ CTestAI::CTestAI(IGame* game)
 	luaL_openlibs(L);
 	luaopen_api(L);
 	
+	unittype = SWIG_TypeQuery(L,"IUnit");
 	// Push in our IGame pointer
 	swig_type_info* type = SWIG_TypeQuery(L,"IGame");
 	SWIG_NewPointerObj(L,game,type,0);
@@ -164,8 +164,7 @@ void CTestAI::UnitCreated(IUnit* unit){
 	lua_getglobal(L, "ai");
 	lua_getfield(L, -1, "UnitCreated");
 	lua_getglobal(L, "ai");
-	swig_type_info* type = SWIG_TypeQuery(L,"IUnit");
-	SWIG_NewPointerObj(L,unit,type,0);
+	SWIG_NewPointerObj(L,unit,unittype,0);
 	if(lua_isfunction(L,-3)){
 		lua_epcall(L, 2);
 	}
@@ -175,8 +174,7 @@ void CTestAI::UnitBuilt(IUnit* unit){
 	lua_getglobal(L, "ai");
 	lua_getfield(L, -1, "UnitBuilt");
 	lua_getglobal(L, "ai");
-	swig_type_info* type = SWIG_TypeQuery(L,"IUnit");
-	SWIG_NewPointerObj(L,unit,type,0);
+	SWIG_NewPointerObj(L,unit,unittype,0);
 	if(lua_isfunction(L,-3)){
 		lua_epcall(L, 2);
 	}
@@ -186,8 +184,7 @@ void CTestAI::UnitDead(IUnit* unit){
 	lua_getglobal(L, "ai");
 	lua_getfield(L, -1, "UnitDead");
 	lua_getglobal(L, "ai");
-	swig_type_info* type = SWIG_TypeQuery(L,"IUnit");
-	SWIG_NewPointerObj(L,unit,type,0);
+	SWIG_NewPointerObj(L,unit,unittype,0);
 	if(lua_isfunction(L,-3)){
 		lua_epcall(L, 2);
 	}
@@ -197,8 +194,7 @@ void CTestAI::UnitIdle(IUnit* unit){
 	lua_getglobal(L, "ai");
 	lua_getfield(L, -1, "UnitIdle");
 	lua_getglobal(L, "ai");
-	swig_type_info* type = SWIG_TypeQuery(L,"IUnit");
-	SWIG_NewPointerObj(L,unit,type,0);
+	SWIG_NewPointerObj(L,unit,unittype,0);
 	if(lua_isfunction(L,-3)){
 		lua_epcall(L, 2);
 	}
@@ -208,15 +204,13 @@ void CTestAI::UnitDamaged(IUnit* unit, IUnit* attacker){
 	lua_getglobal(L, "ai");
 	lua_getfield(L, -1, "UnitDamaged");
 	lua_getglobal(L, "ai");
-	swig_type_info* type = SWIG_TypeQuery(L,"IUnit");
-	SWIG_NewPointerObj(L,unit,type,0);
-	SWIG_NewPointerObj(L,attacker,type,0);
+	SWIG_NewPointerObj(L,unit,unittype,0);
+	SWIG_NewPointerObj(L,attacker,unittype,0);
 	if(lua_isfunction(L,-4)){
 		lua_epcall(L, 3);
 	}
 }
 
 void CTestAI::PushIUnit(IUnit* unit){
-	swig_type_info* type = SWIG_TypeQuery(L,"IUnit");
-	SWIG_NewPointerObj(L,unit,type,1);
+	SWIG_NewPointerObj(L,unit,unittype,1);
 }

@@ -10,6 +10,7 @@ extern "C" {
 	#include "lualib.h"
 	#include "lauxlib.h"
 }
+#include "API/swig.h"
 
 class CTestAI : public IAI {
 public:
@@ -35,6 +36,7 @@ public:
 	static IAI* ai;
 protected:
 
+	swig_type_info* unittype;
 	void LoadLuaFile(std::string filename);
 	IGame* game;
 	
