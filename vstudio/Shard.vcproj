@@ -596,7 +596,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
-						CommandLine="mkdir &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;"
+						CommandLine="mkdir &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 						Outputs=""
 					/>
 				</FileConfiguration>
@@ -941,10 +941,6 @@
 				</File>
 				<File
 					RelativePath="..\src\lua\ltm.c"
-					>
-				</File>
-				<File
-					RelativePath="..\src\lua\luac.c"
 					>
 				</File>
 				<File
