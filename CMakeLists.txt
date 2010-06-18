@@ -4,7 +4,8 @@
 set(mySourceDirRel         "src") # Common values are "" or "src"
 set(additionalSources      ${CUtils_SRC})
 set(additionalCompileFlags "")
-set(additionalLibraries    ${Cpp_AIWRAPPER_TARGET})
+set(additionalLibraries    ${Cpp_AIWRAPPER_TARGET} lua)
 
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/rts/lib/lua/include)
 include_directories(BEFORE ${Cpp_AIWRAPPER_GENERATED_SRC_DIR})
 ConfigureNativeSkirmishAI(mySourceDirRel additionalSources additionalCompileFlags additionalLibraries)
