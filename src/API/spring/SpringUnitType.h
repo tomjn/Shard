@@ -31,7 +31,7 @@ public:
 	
 protected:
 	std::vector<springai::UnitDef*> boptions;
+	CSpringGame* game;
 	springai::AICallback* callback;
 	springai::UnitDef* unitDef;
-	CSpringGame* game;
 };

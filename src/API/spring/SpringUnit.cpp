@@ -8,7 +8,7 @@
 #include "ExternalAI/Interface/AISCommands.h"
 
 CSpringUnit::CSpringUnit(springai::AICallback* callback, springai::Unit* u, IGame* game)
-: unit(u), callback(callback), dead(false), game(game){
+: callback(callback), unit(u), dead(false), game(game){
 	//
 	
 }
