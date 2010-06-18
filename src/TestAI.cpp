@@ -1,6 +1,6 @@
 #include "TestAI.h"
 //#include "API/swig.h"
-#include "API/api_wrap.cxx"
+#include "API/api_wrap.h"
 
 IGame* global_game = 0;
 
