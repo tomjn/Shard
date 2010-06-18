@@ -722,8 +722,20 @@
 						>
 						<Tool
 							Name="VCCustomBuildTool"
-							CommandLine="swig -v -c++ -lua  -o $(InputDir)api_wrap.h $(InputPath)&#x0D;&#x0A;swig -c++ -lua -external-runtime ../src/API/swig.h"
+							CommandLine="swig -v -c++ -lua  -o $(InputDir)api_wrap.cpp $(InputPath)&#x0D;&#x0A;swig -c++ -lua -external-runtime ../src/API/swig.h"
 							Outputs="api.i"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\src\API\api_wrap.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							PreprocessorDefinitions="STATIC_LINKED"
 						/>
 					</FileConfiguration>
 				</File>
