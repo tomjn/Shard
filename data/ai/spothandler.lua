@@ -2,7 +2,7 @@
 MetalSpotHandler = class(AIBase)
 
 function MetalSpotHandler:Init()
-	self.spots = game:GetMetalSpots()
+	self.spots = game.map:GetMetalSpots()
 	--[[{}
 	spotCount = game:SpotCount()
 	for i=0, spotCount-1 do
@@ -22,12 +22,12 @@ function MetalSpotHandler:ClosestFreeSpot(unittype,position)
 	local pos = nil
 	local bestDistance = 10000
 	
-	spotCount = game:SpotCount()
+	spotCount = game.map:SpotCount()
 	for i,v in ipairs(self.spots) do
 		local p = v
 		local dist = distance(position,p)
 		if dist < bestDistance then
-			if game:CanBuildHere(unittype,p) then
+			if game.map:CanBuildHere(unittype,p) then
 				bestDistance = dist
 				pos = p
 			end

@@ -27,16 +27,6 @@ game = {}
 		return game_engine:IsPaused()
 	end
 	
-	function game:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance) -- returns Position
-		--
-		return game_engine:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
-	end
-	
-	function game:CanBuildHere(unittype,position) -- returns boolean
-		--
-		return game_engine:CanBuildHere(unittype,position)
-	end
-	
 	function game:GetTypeByName(typename) -- returns unittype
 		--
 		return game_engine:GetTypeByName(typename)
@@ -51,11 +41,6 @@ game = {}
 	function game:ReadFile(filename) -- returns string with file contents
 		--
 		return game_engine:ReadFile(filename)
-	end
-	
-	function game:ExecuteFile(filename) -- executes given file (use require include or dofile when possible) DEPRECATED
-		--
-		return game_engine:ExecuteFile(filename)
 	end
 	
 	function game:FileExists(filename) -- returns boolean
@@ -87,71 +72,11 @@ game = {}
 		return f
 	end
 	
-	function game:GetMapFeatures()
-		local fv = game_engine:GetMapFeatures()
-		local f = {}
-		local i = 0
-		while i  < fv:size() do
-			table.insert(f,fv[i])
-			i = i + 1
-		end
-		fv = nil
-		return f
-	end
-	
-	function game:GetMapFeatures(position,radius)
-		local fv = game_engine:GetMapFeatures(position,radius)
-		local f = {}
-		local i = 0
-		while i  < fv:size() do
-			table.insert(f,fv[i])
-			i = i + 1
-		end 
-		fv = nil
-		return f
-	end
-	
-	
-	function game:SpotCount() -- returns the nubmer of metal spots
-		--
-		return game_engine:SpotCount()
-	end
-	
-	function game:GetSpot(idx) -- returns a Position for the given spot
-		--
-		return game_engine:GetSpot(idx)
-	end
-	
-	function game:GetMetalSpots() -- returns a table of spot positions
-		--
-		local count = game_engine:SpotCount()
-		--local fv = game_engine:GetMetalSpots()
-		local f = {}
-		local i = 0
-		while i  < count do
-			table.insert(f,game_engine:GetSpot(i))
-			i = i + 1
-		end 
-		--fv = nil
-		return f
-	end
-	
-	function game:MapDimensions() -- returns a Position holding the dimensions of the map
-		--
-		return game_engine:MapDimensions()
-	end
-	
 	
 	function game:GameName() -- returns the shortname of this game
 		--
 		return game_engine:GameName()
 	end
-	
-	function game:MapName() -- returns the name of this map
-		--
-		return game_engine:MapName()
-	end
-	
 	
 	function game:AddMarker(position,label) -- adds a marker
 		--
@@ -162,28 +87,6 @@ game = {}
 	function game:SendToContent(stringvar) -- returns a string passed from any lua gadgets
 		--
 		return game_engine:SendToContent(stringvar)
-	end
-	
-	
-	function game:AverageWind() -- returns (minwind+maxwind)/2
-		--
-		return game_engine:AverageWind()
-	end
-	
-	
-	function game:MinimumWindSpeed() -- returns minimum windspeed
-		--
-		return game_engine:MinimumWindSpeed()
-	end
-	
-	function game:MaximumWindSpeed() -- returns maximum wind speed
-		--
-		return game_engine:MaximumWindSpeed()
-	end
-	
-
-	function game:TidalStrength() -- returns tidal strength
-		return game_engine:TidalStrength()
 	end
 	
 	function game:GetResource(idx) --  returns a Resource object
@@ -217,6 +120,98 @@ game = {}
 		end
 	end
 
+map = {}
+
+game.map = map
+
+
+	function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance) -- returns Position
+		--
+		return game_engine:Map():FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
+	end
+	
+	function map:CanBuildHere(unittype,position) -- returns boolean
+		--
+		return game_engine:Map():CanBuildHere(unittype,position)
+	end
+	
+	function map:GetMapFeatures()
+		local fv = game_engine:Map():GetMapFeatures()
+		local f = {}
+		local i = 0
+		while i  < fv:size() do
+			table.insert(f,fv[i])
+			i = i + 1
+		end
+		fv = nil
+		return f
+	end
+	
+	function map:GetMapFeatures(position,radius)
+		local fv = game_engine:Map():GetMapFeatures(position,radius)
+		local f = {}
+		local i = 0
+		while i  < fv:size() do
+			table.insert(f,fv[i])
+			i = i + 1
+		end 
+		fv = nil
+		return f
+	end
+
+	function map:SpotCount() -- returns the nubmer of metal spots
+		--
+		return game_engine:Map():SpotCount()
+	end
+	
+	function map:GetSpot(idx) -- returns a Position for the given spot
+		--
+		return game_engine:Map():GetSpot(idx)
+	end
+	
+	function map:GetMetalSpots() -- returns a table of spot positions
+		--
+		local count = game_engine:Map():SpotCount()
+		--local fv = game_engine:Map():GetMetalSpots()
+		local f = {}
+		local i = 0
+		while i  < count do
+			table.insert(f,game_engine:Map():GetSpot(i))
+			i = i + 1
+		end 
+		--fv = nil
+		return f
+	end
+	
+	function map:MapDimensions() -- returns a Position holding the dimensions of the map
+		--
+		return game_engine:Map():MapDimensions()
+	end
+	
+	function map:MapName() -- returns the name of this map
+		--
+		return game_engine:Map():MapName()
+	end
+	
+	function map:AverageWind() -- returns (minwind+maxwind)/2
+		--
+		return game_engine:Map():AverageWind()
+	end
+	
+	
+	function map:MinimumWindSpeed() -- returns minimum windspeed
+		--
+		return game_engine:Map():MinimumWindSpeed()
+	end
+	
+	function map:MaximumWindSpeed() -- returns maximum wind speed
+		return game_engine:Map():MaximumWindSpeed()
+	end
+	
+
+	function map:TidalStrength() -- returns tidal strength
+		return game_engine:Map():TidalStrength()
+	end
 --}
 --[[
 {,

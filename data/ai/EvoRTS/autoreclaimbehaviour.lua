@@ -23,7 +23,7 @@ end
 
 function AutoReclaimBehaviour:Activate()
 	self.active = true
-	local fcount = game:GetMapFeatures(self.unit:Internal():GetPosition(),200)
+	local fcount = game.map:GetMapFeatures(self.unit:Internal():GetPosition(),200)
 	self.unit:Internal():AreaReclaim(self.unit:Internal():GetPosition(),500)
 end
 
@@ -36,7 +36,7 @@ function AutoReclaimBehaviour:Priority()
 	--	return 100
 	--end
 	--return 0
-	return 49 + game:GetMapFeatures(self.unit:Internal():GetPosition(),500)
+	return 49 + game.map:GetMapFeatures(self.unit:Internal():GetPosition(),500)
 end
 
 function AutoReclaimBehaviour:UnitDead(unit)

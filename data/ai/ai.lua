@@ -11,7 +11,7 @@ AI = class(AIBase)
 function AI:Init()
 
 	game:SendToConsole("OHAI DER")
-	game:SendToConsole("Shard by AF - playing:"..game:GameName())
+	game:SendToConsole("Shard by AF - playing:"..game:GameName().." on:"..game.map:MapName())
 
 	self.unithandler = UnitHandler()
 	self.unithandler:Init()
@@ -21,18 +21,6 @@ function AI:Init()
 
 	self.metalspothandler = MetalSpotHandler()
 	self.metalspothandler:Init()
-end
-
-
-function AI:ExecuteGameFile(filename)
-	local customname = game:GameName().."\\"..filename
-	if game:FileExists(customname) then
-		game:SendToConsole("loading overide: "..customname)
-		game:ExecuteFile(customname)
-	else
-		--game:SendToConsole("custom override nonexistant: "..customname)
-		game:ExecuteFile(filename)
-	end
 end
 
 function AI:Update()
