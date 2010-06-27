@@ -2,7 +2,7 @@
 #define IMAPFEATURE_H
 
 #include <string>
-#include "../Position.h"
+
 
 class IMapFeature {
 public:

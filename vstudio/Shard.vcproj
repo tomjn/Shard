@@ -635,6 +635,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\src\API\interfaces\IMap.h"
+					>
+				</File>
+				<File
 					RelativePath="..\src\API\interfaces\IMapFeature.h"
 					>
 				</File>
@@ -647,11 +651,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\src\API\interfaces\Resource.h"
+					RelativePath="..\src\API\interfaces\ResourceData.h"
 					>
 				</File>
 				<File
-					RelativePath="..\src\API\interfaces\ResourceUsage.h"
+					RelativePath="..\src\API\interfaces\ResourceTransfer.h"
 					>
 				</File>
 			</Filter>
@@ -662,7 +666,15 @@
 					Name="Headers"
 					>
 					<File
+						RelativePath="..\src\API\spring\spring_api.h"
+						>
+					</File>
+					<File
 						RelativePath="..\src\API\spring\SpringGame.h"
+						>
+					</File>
+					<File
+						RelativePath="..\src\API\spring\SpringMap.h"
 						>
 					</File>
 					<File
@@ -683,6 +695,10 @@
 					>
 					<File
 						RelativePath="..\src\API\spring\SpringGame.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\src\API\spring\SpringMap.cpp"
 						>
 					</File>
 					<File
@@ -722,7 +738,7 @@
 						>
 						<Tool
 							Name="VCCustomBuildTool"
-							CommandLine="swig -v -c++ -lua  -o $(InputDir)api_wrap.cpp $(InputPath)&#x0D;&#x0A;swig -c++ -lua -external-runtime ../src/API/swig.h"
+							CommandLine="swig -v -c++ -lua  -o $(InputDir)api_wrap.cpp $(InputPath)&#x0D;&#x0A;swig -c++ -lua -external-runtime ../src/API/swig.h&#x0D;&#x0A;"
 							Outputs="api.i"
 						/>
 					</FileConfiguration>

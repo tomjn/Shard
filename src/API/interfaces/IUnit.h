@@ -1,8 +1,6 @@
 #ifndef IUNIT_H
 #define IUNIT_H
 
-#include "ResourceUsage.h"
-#include "IMapFeature.h"
 #include "IUnitType.h"
 #include "../Position.h"
 
@@ -58,7 +56,7 @@ public:
 	virtual bool CanBuild(IUnitType* t)=0;
 
 	virtual int ResourceUsageCount()=0;
-	virtual SResourceUsage GetResourceUsage(int idx)=0;
+	virtual SResourceTransfer GetResourceUsage(int idx)=0;
 
 };
 

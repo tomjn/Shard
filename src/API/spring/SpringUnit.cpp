@@ -1,11 +1,4 @@
-#include "Unit.h"
-#include "UnitDef.h"
-#include "SpringUnit.h"
-#include "SpringUnitType.h"
-#include "Engine.h"
-#include "AICallback.h"
-#include "ExternalAI/Interface/AISEvents.h"
-#include "ExternalAI/Interface/AISCommands.h"
+#include "spring_api.h"
 
 CSpringUnit::CSpringUnit(springai::AICallback* callback, springai::Unit* u, IGame* game)
 : callback(callback), unit(u), dead(false), game(game){
@@ -130,7 +123,7 @@ bool CSpringUnit::Build(IUnitType* t){
 	springai::UnitDef* ud = type->GetUnitDef();
 	int xs = ud->GetXSize();
 	double dsp = 100.0/double(xs);
-	p = game->FindClosestBuildSite(t,p,1500,dsp);
+	p = game->Map()->FindClosestBuildSite(t,p,1500,dsp);
 	return Build(t,p);
 }
 
@@ -268,6 +261,6 @@ int CSpringUnit::ResourceUsageCount(){
 	return 0;
 }
 
-SResourceUsage CSpringUnit::GetResourceUsage(int idx){
-	return SResourceUsage();
+SResourceTransfer CSpringUnit::GetResourceUsage(int idx){
+	return SResourceTransfer();
 }

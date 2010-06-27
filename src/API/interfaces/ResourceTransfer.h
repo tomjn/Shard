@@ -1,14 +1,18 @@
 #ifndef SRESOURCEUSAGE_H
 #define SRESOURCEUSAGE_H
 
-#include "Resource.h"
 
-struct SResourceUsage {
-	SResourceUsage(){
+struct SResourceTransfer {
+	SResourceTransfer(){
 		consumption = 0;
 		generation = 0;
+		rate = 1;
 	}
-	SResource resource;
+	SResourceData resource;
+
+	double amount;
+	unsigned int rate;
+
 	double consumption;
 	double generation;
 

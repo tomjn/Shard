@@ -1,26 +1,10 @@
-#include "SpringGame.h"
-#include "SpringUnitType.h"
-#include "SpringUnit.h"
-#include "ExternalAI/Interface/AISEvents.h"
-#include "ExternalAI/Interface/AISCommands.h"
 
 #include <iterator>
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
 
-#include "Unit.h"
-#include "UnitDef.h"
-#include "Engine.h"
-#include "DataDirs.h"
-#include "Map.h"
-#include "Mod.h"
-#include "Game.h"
-#include "Cheats.h"
-#include "Economy.h"
-
-
-int lua_epcall(lua_State *L, int nargs);
+#include "spring_api.h"
 
 CSpringGame::CSpringGame(springai::AICallback* callback)
 : callback(callback){
@@ -37,40 +21,19 @@ CSpringGame::CSpringGame(springai::AICallback* callback)
 			definitions[name] = udef;
 		}
 	}
-	metal = NULL;
-	std::vector<springai::Resource*> resources = callback->GetResources();
-	if(!resources.empty()){
-
-		std::vector<springai::Resource*>::iterator i = resources.begin();
-		for(;i != resources.end();++i){
-			springai::Resource* r = *i;
-			std::string name = r->GetName();
-			if(name == "Metal"){
-				this->metal = r;
-				break;
-			}
-		}
-	}
-
-	if(metal){
-		std::vector<SAIFloat3> positions = callback->GetMap()->GetResourceMapSpotsPositions(*metal,0);
-		if(!positions.empty()){
-			std::vector<SAIFloat3>::iterator j = positions.begin();
-			for(;j != positions.end();++j){
-				Position p;
-				p.x = j->x;
-				p.y = j->y;
-				p.z = j->z;
-				metalspots.push_back(p);
-			}
-		}
-	}
+	map = new CSpringMap(callback,this);
 
 }
 
 CSpringGame::~CSpringGame(){
 	delete ai;
+	delete map;
 }
+
+IMap* CSpringGame::Map(){
+	return map;
+}
+
 
 std::string CSpringGame::GameID(){
 	return "";//callback->;
@@ -92,28 +55,7 @@ bool CSpringGame::IsPaused(){
 	return callback->GetGame()->IsPaused();
 }
 
-Position CSpringGame::FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance){
-	CSpringUnitType* ut = (CSpringUnitType*)t;
-	SAIFloat3 p;
-	p.x = builderPos.x;
-	p.y = builderPos.y;
-	p.z = builderPos.z;
-	p = callback->GetMap()->FindClosestBuildSite(*(ut->GetUnitDef()),p,searchRadius,minimumDistance,0);
-	Position pos;
-	pos.x = p.x;
-	pos.y = p.y;
-	pos.z = p.z;
-	return pos;
-}
 
-bool CSpringGame::CanBuildHere(IUnitType* t, Position pos){
-	CSpringUnitType* ut = (CSpringUnitType*)t;
-	SAIFloat3 p;
-	p.x = pos.x;
-	p.y = pos.y;
-	p.z = pos.z;
-	return callback->GetMap()->IsPossibleToBuildAt(*(ut->GetUnitDef()),p,UNIT_COMMAND_BUILD_NO_FACING);
-}
 
 IUnitType* CSpringGame::GetTypeByName(std::string typeName){
 	std::map<std::string,CSpringUnitType*>::iterator i = definitions.find(typeName);
@@ -149,72 +91,15 @@ std::string CSpringGame::ReadFile(std::string filename){
 	return s;
 }
 
-int CSpringGame::report (int status) {
-	const char *msg;
-	if (status) {
-		msg = lua_tostring(ai->L, -1);
-		if (msg == NULL){
-			msg = "(error with no message)";
-		}
-		std::string ermsg = "status=";
-		ermsg += status;
-		ermsg += std::string(", ");
-		ermsg += msg;
-		SendToConsole(ermsg);
-		//fprintf(stderr, "status=%d, %s\n", status, msg);
-		lua_pop(ai->L, 1);
-	}
-	return status;
-}
-
-void CSpringGame::ExecuteFile(std::string filename){
-	std::string f = ConfigFolderPath();
-	f += "\\ai\\";
-	f += filename;
-	int err = luaL_loadfile (ai->L, f.c_str());
-	if (err == 0){
-		int status = lua_epcall(ai->L, 0);
-		if (status == 0){
-			
-		}
-	}else{
-		SendToConsole("failed to load in: " + f);
-		report(err);
-	}
-}
-
 IAI* CSpringGame::Me(){
 	return ai;
-}
-
-int CSpringGame::SpotCount(){
-	return metalspots.size();
-}
-
-Position CSpringGame::GetSpot(int idx){
-	return metalspots[idx];
-}
-
-std::vector<Position>& CSpringGame::GetMetalSpots(){
-	return metalspots;
-}
-
-Position CSpringGame::MapDimensions(){
-	
-	Position p;
-	p.x = callback->GetMap()->GetWidth();
-	p.z = callback->GetMap()->GetHeight();
-	
-	return p;
 }
 
 std::string CSpringGame::GameName(){
 	return callback->GetMod()->GetShortName();
 }
 
-std::string CSpringGame::MapName(){
-	return callback->GetMap()->GetName();
-}
+
 
 bool CSpringGame::FileExists(std::string filename){
 	filename = ConfigFolderPath() + std::string("\\ai\\")+filename;
@@ -244,68 +129,13 @@ std::string CSpringGame::SendToContent(std::string data){
 	return returndata;
 }
 
-double CSpringGame::AverageWind(){
-	float minwind = callback->GetMap()->GetMinWind();
-	float maxwind = callback->GetMap()->GetMaxWind();
-	return (minwind+maxwind)/2;
-}
 
-double CSpringGame::MinimumWindSpeed(){
-	return callback->GetMap()->GetMinWind();
-}
-
-double CSpringGame::MaximumWindSpeed(){
-	return callback->GetMap()->GetMaxWind();
-}
-
-double CSpringGame::TidalStrength(){
-	return callback->GetMap()->GetTidalStrength();
-}
 
 IUnitType* CSpringGame::ToIUnitType(springai::UnitDef* def){
 	std::string name = def->GetName();
 	return GetTypeByName(name);
 }
 
-/*void CSpringGame::GetEnemiesLua(){
-	std::vector<springai::Unit*> enemies = callback->GetEnemyUnits();
-	if( enemies.empty()){
-		lua_pushnil(ai->L);
-		return;
-	} else{
-		lua_newtable(ai->L);
-		int top = lua_gettop(ai->L);
-		int index = 1;
-
-		for (std::vector<springai::Unit*>::iterator it = enemies.begin(); it != enemies.end(); ++it) {
-			//const char* key = it->first.c_str();
-			//const char* value = it->second.c_str();
-			
-			//key
-			lua_pushinteger(ai->L,index);//lua_pushstring(L, key);
-
-			//value
-			CSpringUnit* unit = new CSpringUnit(callback,*it,this);
-			ai->PushIUnit(unit);
-			//lua_pushstring(ai->L, value);
-			lua_settable(ai->L, -3);
-			++index;
-		}
-		::lua_pushvalue(ai->L,-1);
-		/*lua_createtable(ai->L, enemies.size(), 0);
-		int newTable = lua_gettop(ai->L);
-		
-		std::vector<springai::Unit*>::const_iterator iter = enemies.begin();
-		while(iter != enemies.end()) {
-			CSpringUnit* unit = new CSpringUnit(callback,*iter,this);
-			ai->PushIUnit(unit);
-			//lua_pushstring(L, (*iter).c_str());
-			lua_rawseti(ai->L, newTable, index);
-			++iter;
-			++index;
-		}*//*
-	}
-}*/
 std::vector<IUnit*> CSpringGame::GetEnemies(){
 	std::vector<IUnit*> enemiesv;
 	
@@ -316,15 +146,6 @@ std::vector<IUnit*> CSpringGame::GetEnemies(){
 		enemiesv.push_back(unit);
 	}
 	return enemiesv;
-}
-
-
-int CSpringGame::Test(){
-	return 1;
-}
-
-int CSpringGame::Test(lua_State* L){
-	return 5;
 }
 
 std::vector<IUnit*> CSpringGame::GetFriendlies(){
@@ -338,42 +159,10 @@ std::vector<IUnit*> CSpringGame::GetFriendlies(){
 	}
 	return friendliesv;
 }
- 
-std::vector<IMapFeature*> CSpringGame::GetMapFeatures(){
-	std::vector< IMapFeature*> mapFeatures;
-	
-	std::vector<springai::Feature*> features = callback->GetFeatures();
-	std::vector<springai::Feature*>::iterator i = features.begin();
-	for(;i != features.end(); ++i){
-		CSpringMapFeature* f = new CSpringMapFeature(callback,*i,this);
-		mapFeatures.push_back(f);
-	}
-	return mapFeatures;
-}
-
-std::vector<IMapFeature*> CSpringGame::GetMapFeatures(Position p, double radius){
-	SAIFloat3 pos;
-	pos.x = p.x;
-	pos.y = p.y;
-	pos.z = p.z;
-	std::vector< IMapFeature*> mapFeatures;
-	
-	std::vector<springai::Feature*> features = callback->GetFeaturesIn(pos,radius);
-	std::vector<springai::Feature*>::iterator i = features.begin();
-	for(;i != features.end(); ++i){
-		CSpringMapFeature* f = new CSpringMapFeature(callback,*i,this);
-		mapFeatures.push_back(f);
-	}
-	return mapFeatures;
-}
-
-springai::Resource* CSpringGame::GetMetalResource(){
-	return metal;
-}
 
 
-SResource CSpringGame::GetResource(int idx){
-	SResource res;
+SResourceData CSpringGame::GetResource(int idx){
+	SResourceData res;
 	std::vector<springai::Resource*> resources = callback->GetResources();
 	if(!resources.empty()){
 
@@ -405,8 +194,8 @@ int CSpringGame::GetResourceCount(){
 
 }
 
-SResource CSpringGame::GetResource(std::string name){
-	SResource res;
+SResourceData CSpringGame::GetResource(std::string name){
+	SResourceData res;
 	std::vector<springai::Resource*> resources = callback->GetResources();
 	if(!resources.empty()){
 

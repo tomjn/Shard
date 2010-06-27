@@ -7,21 +7,19 @@
 
 %module api
 %{
-	#include <vector>
-	#include "Position.h"
-	#include "interfaces/IGame.h"
-	#include "interfaces/IMapFeature.h"
-	#include "interfaces/IAI.h"
-	#include "interfaces/IUnitType.h"
-	#include "interfaces/IUnit.h"
+	#include "interfaces/api.h"
 %}
 
 %include "Position.h"
-%include "interfaces/IGame.h"
+%include "interfaces/ResourceData.h"
+%include "interfaces/ResourceTransfer.h"
 %include "interfaces/IMapFeature.h"
-%include "interfaces/IAI.h"
+%include "interfaces/IMap.h"
 %include "interfaces/IUnitType.h"
 %include "interfaces/IUnit.h"
+%include "interfaces/IGame.h"
+%include "interfaces/IAI.h"
+
 
 %template(vectorUnitTypes) std::vector<IUnitType*>; 
 %template(vectorUnits) std::vector<IUnit*>;

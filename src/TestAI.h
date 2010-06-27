@@ -1,9 +1,7 @@
 #pragma once
 
-#include "API/interfaces/IGame.h"
-#include "API/interfaces/IAI.h"
-#include <vector>
-#include <map>
+#include "API/interfaces/api.h"
+
 
 extern "C" {
 	#include "lua.h"

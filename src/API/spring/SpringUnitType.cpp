@@ -40,7 +40,8 @@ bool CSpringUnitType::CanBuildWhenNotDeployed(){
 }
 
 bool CSpringUnitType::Extractor(){
-	return unitDef->GetResourceExtractorRange(*game->GetMetalResource());
+	springai::Resource* r = ((CSpringMap*)game->Map())->GetMetalResource();
+	return false;//unitDef->GetResourceExtractorRange(*r);
 }
 
 float CSpringUnitType::GetMaxHealth(){

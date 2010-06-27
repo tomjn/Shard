@@ -1,7 +1,5 @@
 #pragma once
 
-#include "IUnit.h"
-
 class IAI {
 public:
 	virtual void Init()=0;

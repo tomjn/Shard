@@ -1,8 +1,4 @@
-#include "Feature.h"
-#include "FeatureDef.h"
-#include "Engine.h"
-#include "AICallback.h"
-#include "SpringMapFeature.h"
+#include "spring_api.h"
 
 CSpringMapFeature::CSpringMapFeature(springai::AICallback* callback, springai::Feature* f, IGame* game)
 :callback(callback),feature(f),game(game){

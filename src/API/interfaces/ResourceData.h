@@ -1,8 +1,10 @@
 #ifndef SRESOURCE_H
 #define SRESOURCE_H
 
-struct SResource {
-	SResource(){
+#include <string>
+
+struct SResourceData {
+	SResourceData(){
 		income = 0;
 		usage = 0;
 		name = "";
