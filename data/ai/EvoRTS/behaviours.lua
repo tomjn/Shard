@@ -5,30 +5,40 @@ require "attackerbehaviour"
 require "missingfactorybehaviour"
 require "engineerturretbehaviour"
 require "autoreclaimbehaviour"
+require "LowEnergyBehaviour"
 
 behaviours = {
 	--eorb = {
 	--	AutoReclaimBehaviour,
 	--},
+	ecommander = {
+		TaskQueueBehaviour,
+		LowEnergyBehaviour,
+		EngineerTurretBehaviour,
+	}
 	eengineer5 = {
 		TaskQueueBehaviour,
 		MissingFactoryBehaviour,
 		EngineerTurretBehaviour,
+		LowEnergyBehaviour,
 	},
 	eamphibengineer = {
 		TaskQueueBehaviour,
 		MissingFactoryBehaviour,
 		EngineerTurretBehaviour,
+		LowEnergyBehaviour,
 	},
 	eairengineer = {
 		TaskQueueBehaviour,
 		MissingFactoryBehaviour,
 		EngineerTurretBehaviour,
+		LowEnergyBehaviour,
 	},
 	eallterrengineer = {
 		TaskQueueBehaviour,
 		MissingFactoryBehaviour,
 		EngineerTurretBehaviour,
+		LowEnergyBehaviour,
 	},
 }
 
