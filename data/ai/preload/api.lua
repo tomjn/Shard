@@ -122,8 +122,6 @@ game = {}
 
 map = {}
 
-game.map = map
-
 
 	function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance) -- returns Position
 		--
@@ -148,7 +146,8 @@ game.map = map
 	end
 	
 	function map:GetMapFeatures(position,radius)
-		local fv = game_engine:Map():GetMapFeatures(position,radius)
+		local m = game_engine:Map()
+		local fv = m:GetMapFeatures(position,radius)
 		local f = {}
 		local i = 0
 		while i  < fv:size() do
@@ -160,23 +159,24 @@ game.map = map
 	end
 
 	function map:SpotCount() -- returns the nubmer of metal spots
-		--
-		return game_engine:Map():SpotCount()
+		local m = game_engine:Map()
+		return m:SpotCount()
 	end
 	
 	function map:GetSpot(idx) -- returns a Position for the given spot
-		--
-		return game_engine:Map():GetSpot(idx)
+		local m = game_engine:Map()
+		return m:GetSpot(idx)
 	end
 	
 	function map:GetMetalSpots() -- returns a table of spot positions
 		--
-		local count = game_engine:Map():SpotCount()
+		local m = game_engine:Map()
+		local count = m:SpotCount()
 		--local fv = game_engine:Map():GetMetalSpots()
 		local f = {}
 		local i = 0
 		while i  < count do
-			table.insert(f,game_engine:Map():GetSpot(i))
+			table.insert(f,m:GetSpot(i))
 			i = i + 1
 		end 
 		--fv = nil
@@ -184,34 +184,38 @@ game.map = map
 	end
 	
 	function map:MapDimensions() -- returns a Position holding the dimensions of the map
-		--
-		return game_engine:Map():MapDimensions()
+		local m = game_engine:Map()
+		return m:MapDimensions()
 	end
 	
 	function map:MapName() -- returns the name of this map
-		--
-		return game_engine:Map():MapName()
+		local m = game_engine:Map()
+		return m:MapName()
 	end
 	
 	function map:AverageWind() -- returns (minwind+maxwind)/2
-		--
-		return game_engine:Map():AverageWind()
+		local m = game_engine:Map()
+		return m:AverageWind()
 	end
 	
 	
 	function map:MinimumWindSpeed() -- returns minimum windspeed
-		--
-		return game_engine:Map():MinimumWindSpeed()
+		local m = game_engine:Map()
+		return m:MinimumWindSpeed()
 	end
 	
 	function map:MaximumWindSpeed() -- returns maximum wind speed
-		return game_engine:Map():MaximumWindSpeed()
+		local m = game_engine:Map()
+		return m:MaximumWindSpeed()
 	end
 	
 
 	function map:TidalStrength() -- returns tidal strength
-		return game_engine:Map():TidalStrength()
+		local m = game_engine:Map()
+		return m:TidalStrength()
 	end
+	
+	game.map = map
 --}
 --[[
 {,

@@ -15,7 +15,7 @@ behaviours = {
 		TaskQueueBehaviour,
 		LowEnergyBehaviour,
 		EngineerTurretBehaviour,
-	}
+	},
 	eengineer5 = {
 		TaskQueueBehaviour,
 		MissingFactoryBehaviour,
