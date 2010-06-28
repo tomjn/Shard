@@ -39,7 +39,7 @@ function AttackHandler:DoTargetting()
 		-- find somewhere to attack
 		local cells = {}
 		local celllist = {}
-		local mapdimensions = game:MapDimensions()
+		local mapdimensions = game.map:MapDimensions()
 		--enemies = game:GetEnemies()
 		local enemies = game:GetEnemies()
 
