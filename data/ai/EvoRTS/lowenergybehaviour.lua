@@ -15,7 +15,7 @@ function LowEnergyBehaviour:UnitIdle(unit)
 		if not self:IsActive() then
 			res = game:GetResource("energy")
 			if res == nil then
-				game::SendToConsole("res == nil in LowEnergyBehaviour")
+				game:SendToConsole("res == nil in LowEnergyBehaviour")
 			else
 				if res.reserves == 0 then
 					self.underfire = true
