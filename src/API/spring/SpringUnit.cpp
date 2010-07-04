@@ -257,10 +257,13 @@ bool CSpringUnit::CanBuild(IUnitType* t){
 	return false;
 }
 
-int CSpringUnit::ResourceUsageCount(){
-	return 0;
-}
-
 SResourceTransfer CSpringUnit::GetResourceUsage(int idx){
-	return SResourceTransfer();
+	springai::Resource* r = springai::Resource::GetInstance(callback,idx);
+	SResourceTransfer rt;
+	rt.consumption = this->unit->GetResourceUse(*r);
+	rt.generation = this->unit->GetResourceMake(*r);
+	rt.rate = 1;
+	rt.resource = game->GetResource(idx);
+	rt.gameframe = game->Frame();
+	return rt;
 }

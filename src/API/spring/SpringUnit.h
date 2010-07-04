@@ -63,7 +63,6 @@ public:
 
 	virtual bool CanBuild(IUnitType* t);
 
-	virtual int ResourceUsageCount();
 	virtual SResourceTransfer GetResourceUsage(int idx);
 
 protected:

@@ -10,7 +10,6 @@ struct SResourceTransfer {
 	}
 	SResourceData resource;
 
-	double amount;
 	unsigned int rate;
 
 	double consumption;

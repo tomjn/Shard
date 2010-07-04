@@ -2579,56 +2579,6 @@ fail:
 }
 
 
-static int _wrap_SResourceTransfer_amount_set(lua_State* L) {
-  int SWIG_arg = 0;
-  SResourceTransfer *arg1 = (SResourceTransfer *) 0 ;
-  double arg2 ;
-  
-  SWIG_check_num_args("amount",2,2)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("amount",1,"SResourceTransfer *");
-  if(!lua_isnumber(L,2)) SWIG_fail_arg("amount",2,"double");
-  
-  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_SResourceTransfer,0))){
-    SWIG_fail_ptr("SResourceTransfer_amount_set",1,SWIGTYPE_p_SResourceTransfer);
-  }
-  
-  arg2 = (double)lua_tonumber(L, 2);
-  if (arg1) (arg1)->amount = arg2;
-  
-  return SWIG_arg;
-  
-  if(0) SWIG_fail;
-  
-fail:
-  lua_error(L);
-  return SWIG_arg;
-}
-
-
-static int _wrap_SResourceTransfer_amount_get(lua_State* L) {
-  int SWIG_arg = 0;
-  SResourceTransfer *arg1 = (SResourceTransfer *) 0 ;
-  double result;
-  
-  SWIG_check_num_args("amount",1,1)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("amount",1,"SResourceTransfer *");
-  
-  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_SResourceTransfer,0))){
-    SWIG_fail_ptr("SResourceTransfer_amount_get",1,SWIGTYPE_p_SResourceTransfer);
-  }
-  
-  result = (double) ((arg1)->amount);
-  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
-  return SWIG_arg;
-  
-  if(0) SWIG_fail;
-  
-fail:
-  lua_error(L);
-  return SWIG_arg;
-}
-
-
 static int _wrap_SResourceTransfer_rate_set(lua_State* L) {
   int SWIG_arg = 0;
   SResourceTransfer *arg1 = (SResourceTransfer *) 0 ;
@@ -2839,7 +2789,6 @@ static swig_lua_method swig_SResourceTransfer_methods[] = {
 };
 static swig_lua_attribute swig_SResourceTransfer_attributes[] = {
     { "resource", _wrap_SResourceTransfer_resource_get, _wrap_SResourceTransfer_resource_set},
-    { "amount", _wrap_SResourceTransfer_amount_get, _wrap_SResourceTransfer_amount_set},
     { "rate", _wrap_SResourceTransfer_rate_get, _wrap_SResourceTransfer_rate_set},
     { "consumption", _wrap_SResourceTransfer_consumption_get, _wrap_SResourceTransfer_consumption_set},
     { "generation", _wrap_SResourceTransfer_generation_get, _wrap_SResourceTransfer_generation_set},
@@ -4841,30 +4790,6 @@ static int _wrap_IUnit_CanBuild(lua_State* L) {
 }
 
 
-static int _wrap_IUnit_ResourceUsageCount(lua_State* L) {
-  int SWIG_arg = 0;
-  IUnit *arg1 = (IUnit *) 0 ;
-  int result;
-  
-  SWIG_check_num_args("ResourceUsageCount",1,1)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("ResourceUsageCount",1,"IUnit *");
-  
-  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnit,0))){
-    SWIG_fail_ptr("IUnit_ResourceUsageCount",1,SWIGTYPE_p_IUnit);
-  }
-  
-  result = (int)(arg1)->ResourceUsageCount();
-  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
-  return SWIG_arg;
-  
-  if(0) SWIG_fail;
-  
-fail:
-  lua_error(L);
-  return SWIG_arg;
-}
-
-
 static int _wrap_IUnit_GetResourceUsage(lua_State* L) {
   int SWIG_arg = 0;
   IUnit *arg1 = (IUnit *) 0 ;
@@ -4929,7 +4854,6 @@ static swig_lua_method swig_IUnit_methods[] = {
     {"WeaponCount", _wrap_IUnit_WeaponCount}, 
     {"MaxWeaponsRange", _wrap_IUnit_MaxWeaponsRange}, 
     {"CanBuild", _wrap_IUnit_CanBuild}, 
-    {"ResourceUsageCount", _wrap_IUnit_ResourceUsageCount}, 
     {"GetResourceUsage", _wrap_IUnit_GetResourceUsage}, 
     {0,0}
 };
