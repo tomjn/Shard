@@ -118,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\..\..\AI\Wrappers\Cpp;..\..\..\..\rts;..\..\..\..\"
+				AdditionalIncludeDirectories="..\..\..\..\AI\Wrappers\Cpp;..\..\..\..\rts;..\..\..\..\;..\src\lua"
 				PreprocessorDefinitions="BUILDING_SKIRMISH_AI;BUILDING_AI"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="..\..\..\..\game\AI\Skirmish\$(ProjectName)\dev\SkirmishAI.dll"
+				OutputFile="D:\Spring\AI\Skirmish\$(ProjectName)\dev\SkirmishAI.dll"
 				ModuleDefinitionFile="export.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)linker\$(TargetName).pdb"
@@ -582,7 +582,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Copying AIInfo.lua"
-						CommandLine="mkdir &quot;$(TargetDir)&quot;&#x0D;&#x0A;COPY &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
+						CommandLine="mkdir &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;xcopy &quot;$(InputDir)\ai&quot; &quot;$(TargetDir)ai\&quot; /F /E /Y /H /R&#x0D;&#x0A;"
 						Outputs="AIInfo.lua"
 					/>
 				</FileConfiguration>
@@ -605,9 +605,9 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Copying AIOptions.lua"
-						CommandLine="mkdir &quot;$(TargetDir)&quot;&#x0D;&#x0A;COPY &quot;$(InputPath)&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
-						Outputs="AIOptions.lua"
+						Description=""
+						CommandLine=""
+						Outputs=""
 					/>
 				</FileConfiguration>
 			</File>
@@ -740,6 +740,14 @@
 							Name="VCCustomBuildTool"
 							CommandLine="swig -v -c++ -lua  -o $(InputDir)api_wrap.cpp $(InputPath)&#x0D;&#x0A;swig -c++ -lua -external-runtime ../src/API/swig.h&#x0D;&#x0A;"
 							Outputs="api.i"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="swig -v -c++ -lua  -o $(InputDir)api_wrap.cpp $(InputPath)&#x0D;&#x0A;swig -c++ -lua -external-runtime ../src/API/swig.h&#x0D;&#x0A;"
 						/>
 					</FileConfiguration>
 				</File>
