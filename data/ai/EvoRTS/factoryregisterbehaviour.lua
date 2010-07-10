@@ -5,7 +5,11 @@ function FactoryRegisterBehaviour:Init()
 end
 
 function FactoryRegisterBehaviour:UnitFinished(unit)
-    ai.factories = ai.factories + 1
+    if ai.factories ~= nil then
+		ai.factories = ai.factories + 1
+	else
+		ai.factories = 1
+	end
 end
 
 function FactoryRegisterBehaviour:UnitIdle(unit)
@@ -28,5 +32,9 @@ function FactoryRegisterBehaviour:Priority()
 end
 
 function FactoryRegisterBehaviour:UnitDead(unit)
-	ai.factories = ai.factories - 1
+	if ai.factories ~= nil then
+		ai.factories = ai.factories - 1
+	else
+		ai.factories = 0
+	end
 end
