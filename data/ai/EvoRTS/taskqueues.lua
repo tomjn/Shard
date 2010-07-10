@@ -17,6 +17,8 @@ local function AirOrLand()
 		else 
 			return "eminifac"
 		end
+	else
+		return nil
 	end
 end
 
@@ -164,6 +166,7 @@ local engineers = {
    "elrpc",
    "efusion2",
    "eheavyturret2",
+   "efusion2",
    "efusion2",
    "esolar2",
    "emetalextractor",
