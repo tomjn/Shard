@@ -2,7 +2,7 @@
 require "taskqueues"
 require "taskqueuebehaviour"
 require "attackerbehaviour"
-require "missingfactorybehaviour"
+--require "missingfactorybehaviour"
 require "engineerturretbehaviour"
 require "autoreclaimbehaviour"
 require "LowEnergyBehaviour"
@@ -35,25 +35,25 @@ behaviours = {
 	},
 	eengineer5 = {
 		TaskQueueBehaviour,
-		MissingFactoryBehaviour,
+		--MissingFactoryBehaviour,
 		EngineerTurretBehaviour,
 		LowEnergyBehaviour,
 	},
 	eamphibengineer = {
 		TaskQueueBehaviour,
-		MissingFactoryBehaviour,
+		--MissingFactoryBehaviour,
 		EngineerTurretBehaviour,
 		LowEnergyBehaviour,
 	},
 	eairengineer = {
 		TaskQueueBehaviour,
-		MissingFactoryBehaviour,
+		--MissingFactoryBehaviour,
 		EngineerTurretBehaviour,
 		LowEnergyBehaviour,
 	},
 	eallterrengineer = {
 		TaskQueueBehaviour,
-		MissingFactoryBehaviour,
+		--MissingFactoryBehaviour,
 		EngineerTurretBehaviour,
 		LowEnergyBehaviour,
 	},
