@@ -6,11 +6,28 @@ require "missingfactorybehaviour"
 require "engineerturretbehaviour"
 require "autoreclaimbehaviour"
 require "LowEnergyBehaviour"
+require "factoryregisterbehaviour"
 
 behaviours = {
 	--eorb = {
 	--	AutoReclaimBehaviour,
 	--},
+	ebasefactory = {
+		TaskQueueBehaviour,
+		FactoryRegisterBehaviour,
+	},
+	eairplant = {
+		TaskQueueBehaviour,
+		FactoryRegisterBehaviour,
+	},
+	eamphibfac = {
+		TaskQueueBehaviour,
+		FactoryRegisterBehaviour,
+	},
+	eminifac = {
+		TaskQueueBehaviour,
+		FactoryRegisterBehaviour,
+	},
 	ecommander = {
 		TaskQueueBehaviour,
 		LowEnergyBehaviour,
