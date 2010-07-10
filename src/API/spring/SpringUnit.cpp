@@ -122,7 +122,7 @@ bool CSpringUnit::Build(IUnitType* t){
 	CSpringUnitType* type = (CSpringUnitType*)t;
 	springai::UnitDef* ud = type->GetUnitDef();
 	int xs = ud->GetXSize();
-	double dsp = 100.0/double(xs);
+	double dsp = 200.0/double(xs);
 	p = game->Map()->FindClosestBuildSite(t,p,1500,dsp);
 	return Build(t,p);
 }
