@@ -17,7 +17,6 @@ function MissingFactoryBehaviour:UnitIdle(unit)
 			self.unit:ElectBehaviour()
 		end
 	end
-	
 end
 
 function MissingFactoryBehaviour:Update()
@@ -52,9 +51,9 @@ end
 function MissingFactoryBehaviour:UnitDead(unit)
 	if unit:Internal():Name() == "ecommandfactory" then
 		self.build = true
-		game:SendToConsole("missingfactory activated")
+		--game:SendToConsole("missingfactory activated")
 	elseif unit:Internal():Name() == "ebasefactory" then
 		self.build = true
-		game:SendToConsole("missingfactory activated")
+		--game:SendToConsole("missingfactory activated")
 	end
 end
