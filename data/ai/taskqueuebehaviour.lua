@@ -30,6 +30,7 @@ function TaskQueueBehaviour:UnitIdle(unit)
 	end
 	if unit:Internal():ID() == self.unit:Internal():ID() then
 		self.progress = true
+		self.countdown = 0
 		--self.unit:ElectBehaviour()
 	end
 end
@@ -48,9 +49,15 @@ function TaskQueueBehaviour:Update()
 		return
 	end
 	local f = game:Frame()
-	if math.mod(f,3) == 0 then
-		if self.progress == true then
+	local s = self.countdown
+	if self.progress == true then
+	--if math.mod(f,3) == 0 then
+		if (ai.tqblastframe ~= f) or (ai.tqblastframe == nil) or (self.countdown == 15) then
+			self.countdown = 0
+			ai.tqblastframe = f
 			self:ProgressQueue()
+		else
+			self.countdown = self.countdown + 1
 		end
 	end
 end
