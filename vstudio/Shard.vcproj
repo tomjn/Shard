@@ -120,7 +120,7 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\..\..\..\AI\Wrappers\Cpp;..\..\..\..\rts;..\..\..\..\;..\src\lua"
 				PreprocessorDefinitions="BUILDING_SKIRMISH_AI;BUILDING_AI"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				ProgramDataBaseFileName="$(IntDir)\linker\vc90.pdb"
 				WarningLevel="4"
