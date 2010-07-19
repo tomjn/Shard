@@ -5,6 +5,7 @@ function TaskQueueBehaviour:Init()
 	u = self.unit
 	u = u:Internal()
 	self.name = u:Name()
+	self.countdown = 0
 	if self:HasQueues() then
 		self.queue = self:GetQueue()
 	end
@@ -57,7 +58,11 @@ function TaskQueueBehaviour:Update()
 			ai.tqblastframe = f
 			self:ProgressQueue()
 		else
-			self.countdown = self.countdown + 1
+			if self.countdown == nil then
+				self.countdown = 1
+			else
+				self.countdown = self.countdown + 1
+			end
 		end
 	end
 end
