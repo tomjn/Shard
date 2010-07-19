@@ -9,6 +9,13 @@
 --------------------------------------------------------------------------------
 
 local options = {
+	{ -- string
+		key     = 'performancetimers',
+		name    = 'Performance Lag Timers',
+		desc    = 'Will log times and display times if spikes occur or heavy load is encountered',
+		type    = 'bool',
+		def     = false,
+	},
 }
 
 return options
