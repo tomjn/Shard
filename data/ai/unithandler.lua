@@ -25,9 +25,7 @@ function UnitHandler:UnitCreated(unit)
 	u:Init()
 	self.behaviourFactory:AddBehaviours(u)
 	for k,v in pairs(self.units) do
-		--if k ~= v then
-			v:UnitCreated(u)
-		--end
+		v:UnitCreated(u)
 	end
 end
 
