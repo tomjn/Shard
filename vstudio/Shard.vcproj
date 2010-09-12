@@ -220,14 +220,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Wrappers\Cpp\ClbFeatureDefCollisionVolumeImpl.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\Wrappers\Cpp\ClbFeatureDefCollisionVolumeImpl.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\Wrappers\Cpp\ClbGroupSupportedCommandImpl.cpp"
 				>
 			</File>
@@ -236,23 +228,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\Wrappers\Cpp\ClbUnitDefCollisionVolumeImpl.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\Wrappers\Cpp\ClbUnitDefCollisionVolumeImpl.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\Wrappers\Cpp\ClbUnitSupportedCommandImpl.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\..\Wrappers\Cpp\ClbUnitSupportedCommandImpl.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\..\Wrappers\Cpp\CollisionVolume.h"
 				>
 			</File>
 			<File
@@ -277,6 +257,22 @@
 			</File>
 			<File
 				RelativePath="..\..\..\Wrappers\Cpp\DataDirs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\Wrappers\Cpp\Debug.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\Wrappers\Cpp\Debug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\Wrappers\Cpp\Drawer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\Wrappers\Cpp\Drawer.h"
 				>
 			</File>
 			<File
