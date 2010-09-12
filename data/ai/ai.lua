@@ -28,32 +28,32 @@ function AI:Update()
 		return
 	end
 	
-	local x = os.clock()
+	--local x = os.clock()
 	
-	local mx = os.clock()
+	--local mx = os.clock()
 	self.metalspothandler:Update()
-	mx = (os.clock() - mx)
+	--mx = (os.clock() - mx)
 	
-	local ax = os.clock()
+	--local ax = os.clock()
 	self.attackhandler:Update()
-	ax = (os.clock() - ax)
+	--ax = (os.clock() - ax)
 	
-	local ux = os.clock()
+	--local ux = os.clock()
 	self.unithandler:Update()
-	ux = (os.clock() - ux)
+	--ux = (os.clock() - ux)
 	
-	local ti = (os.clock() - x)
-	if ti > 0.0252 then
-		if mx > 0.0084 then
-			game:SendToConsole("mspot handler update time: "..mx)
-		end
-		if ax > 0.0084 then
-			game:SendToConsole("atkhandler update time: "..ax)
-		end
-		if ux > 0.0084 then
-			game:SendToConsole("unithandler update time: "..ux)
-		end
-	end
+	--local ti = (os.clock() - x)
+	--if ti > 0.0252 then
+	--	if mx > 0.0084 then
+	--		game:SendToConsole("mspot handler update time: "..mx)
+	--	end
+	--	if ax > 0.0084 then
+	--		game:SendToConsole("atkhandler update time: "..ax)
+	--	end
+	--	if ux > 0.0084 then
+	--		game:SendToConsole("unithandler update time: "..ux)
+	--	end
+	--end
 	--game:SendToConsole("test is "..game:Test())
 	--t = game:GetEnemies()
 	--if t == nil then
