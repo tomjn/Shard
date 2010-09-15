@@ -1,6 +1,8 @@
 #include "spring_api.h"
+#include "WrappResource.h"
+#include "ExternalAI/Interface/AISCommands.h" // for UNIT_COMMAND_BUILD_NO_FACING
 
-CSpringUnit::CSpringUnit(springai::AICallback* callback, springai::Unit* u, IGame* game)
+CSpringUnit::CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, IGame* game)
 : callback(callback), unit(u), dead(false), game(game){
 	//
 	
@@ -93,28 +95,17 @@ bool CSpringUnit::CanBuildWhenNotDeployed(){
 
 
 void CSpringUnit::Stop(){
-	SStopUnitCommand c;
-	c.unitId = this->unit->GetUnitId();
-	callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_STOP,&c);
+	this->unit->Stop();
 }
 
 void CSpringUnit::Move(Position p){
-	SMoveUnitCommand c;
-	c.unitId = this->unit->GetUnitId();
-	c.toPos.x = p.x;
-	c.toPos.y = p.y;
-	c.toPos.z = p.z;
-	callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_MOVE,&c);
-	
+	const springai::AIFloat3 pos(p.x, p.y, p.z);
+	this->unit->MoveTo(pos);
 }
 
 void CSpringUnit::MoveAndFire(Position p){
-	SFightUnitCommand c;
-	c.unitId = this->unit->GetUnitId();
-	c.toPos.x = p.x;
-	c.toPos.y = p.y;
-	c.toPos.z = p.z;
-	callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_FIGHT,&c);
+	const springai::AIFloat3 pos(p.x, p.y, p.z);
+	this->unit->Fight(pos);
 }
 
 bool CSpringUnit::Build(IUnitType* t){
@@ -145,78 +136,49 @@ bool CSpringUnit::Build(std::string typeName, Position p){
 }
 
 bool CSpringUnit::Build(IUnitType* t, Position p){
-	//
-	SBuildUnitCommand c;
-
 	CSpringUnitType* st = (CSpringUnitType*)t;
-	c.toBuildUnitDefId = st->GetUnitDef()->GetUnitDefId();
-	c.buildPos.x = p.x;
-	c.buildPos.y = p.y;
-	c.buildPos.z = p.z;
-	c.timeOut = 10000;
-	c.options = 0;
-	c.facing = UNIT_COMMAND_BUILD_NO_FACING;
-	c.unitId = unit->GetUnitId();
-
-	int e = callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_BUILD,&c);
-	return (e == 0);
+	springai::UnitDef* ud = st->GetUnitDef();
+	const springai::AIFloat3 pos(p.x, p.y, p.z);
+	this->unit->Build(ud, pos, UNIT_COMMAND_BUILD_NO_FACING, 0, 10000);
+	return true;
 }
 
 bool CSpringUnit::Reclaim(IMapFeature* mapFeature){
-	SReclaimUnitCommand c;
-	c.unitId = this->unit->GetUnitId();
-	c.toReclaimUnitIdOrFeatureId = mapFeature->ID();
-	
-	int e = callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_RECLAIM,&c);
-	return (e == 0);
+	springai::Feature* f = ((CSpringMapFeature*)mapFeature)->feature;
+	this->unit->ReclaimFeature(f);
+	return true;
 }
 
 bool CSpringUnit::AreaReclaim(Position p, double radius){
-	SReclaimAreaUnitCommand c;
-	c.unitId = this->unit->GetUnitId();
-	c.radius = radius;
-	SAIFloat3 pos;
-	pos.x = p.x;
-	pos.y = p.y;
-	pos.z = p.z;
-	c.pos = pos;
-	
-	int e = callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_RECLAIM_AREA,&c);
-	return (e == 0);
+	const springai::AIFloat3 pos(p.x, p.y, p.z);
+	this->unit->ReclaimInArea(pos, radius);
+	return true;
 }
 
 bool CSpringUnit::Reclaim(IUnit* unit){
-	SReclaimUnitCommand c;
-	c.unitId = this->unit->GetUnitId();
-	c.toReclaimUnitIdOrFeatureId = unit->ID();
-	
-	int e = callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_RECLAIM,&c);
-	return (e == 0);
+	springai::Unit* u = ((CSpringUnit*)unit)->unit;
+	this->unit->ReclaimUnit(u);
+	return true;
 }
 
 bool CSpringUnit::Attack(IUnit* unit){
-	SAttackUnitCommand c;
-	c.toAttackUnitId = unit->ID();
-	c.unitId = this->unit->GetUnitId();
-	
-	int e = callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_ATTACK,&c);
-	return (e == 0);
+	springai::Unit* u = ((CSpringUnit*)unit)->unit;
+	this->unit->Attack(u);
+	return true;
 }
 
 bool CSpringUnit::Repair(IUnit* unit){
-	SRepairUnitCommand c;
-	c.toRepairUnitId = unit->ID();
-	c.unitId = this->unit->GetUnitId();
-	int e = callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_REPAIR,&c);
-	return (e == 0);
+	springai::Unit* u = ((CSpringUnit*)unit)->unit;
+	this->unit->Attack(u);
+	return true;
 }
 
 Position CSpringUnit::GetPosition(){
 	Position p;
-	SAIFloat3 f = unit->GetPos();
-	p.x = f.x;
-	p.y = f.y;
-	p.z = f.z;
+	const springai::AIFloat3 pos = unit->GetPos();
+	p.x = pos.x;
+	p.y = pos.y;
+	p.z = pos.z;
 	return p;
 }
 
@@ -262,10 +224,10 @@ bool CSpringUnit::CanBuild(IUnitType* t){
 }
 
 SResourceTransfer CSpringUnit::GetResourceUsage(int idx){
-	springai::Resource* r = springai::Resource::GetInstance(callback,idx);
+	springai::Resource* r = springai::WrappResource::GetInstance(callback->GetSkirmishAIId(), idx);
 	SResourceTransfer rt;
-	rt.consumption = this->unit->GetResourceUse(*r);
-	rt.generation = this->unit->GetResourceMake(*r);
+	rt.consumption = this->unit->GetResourceUse(r);
+	rt.generation = this->unit->GetResourceMake(r);
 	rt.rate = 1;
 	rt.resource = game->GetResource(idx);
 	rt.gameframe = game->Frame();

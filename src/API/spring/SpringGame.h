@@ -9,7 +9,7 @@ class CSpringGame;
 
 class CSpringGame : public IGame {
 public:
-	CSpringGame(springai::AICallback* callback);
+	CSpringGame(springai::OOAICallback* callback);
 	virtual ~CSpringGame();
 	
 	virtual IMap* Map();
@@ -47,7 +47,7 @@ public:
 protected:
 
 	CSpringMap* map;
-	springai::AICallback* callback;
+	springai::OOAICallback* callback;
 	CTestAI* ai;
 	std::map<std::string,CSpringUnitType*> definitions;
 };

@@ -4,10 +4,9 @@
 #include "../interfaces/api.h"
 
 
-#include "AICallback.h"
+#include "OOAICallback.h"
 
 #include "ExternalAI/Interface/AISEvents.h"
-#include "ExternalAI/Interface/AISCommands.h"
 #include "Unit.h"
 #include "UnitDef.h"
 #include "Feature.h"
@@ -20,6 +19,8 @@
 #include "Cheats.h"
 #include "Economy.h"
 #include "Resource.h"
+#include "Drawer.h"
+#include "Lua.h"
 
 class CSpringMapFeature;
 class CSpringMap;

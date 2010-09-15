@@ -31,13 +31,13 @@ namespace cpptestai {
 class CCppTestAI {
 
 private:
-	springai::AICallback* callback;
-	int teamId;
+	springai::OOAICallback* callback;
+	int skirmishAIId;
 	CSpringGame* game;
 	std::map<int,CSpringUnit*> aliveUnits;
 
 public:
-	CCppTestAI(springai::AICallback* callback);
+	CCppTestAI(springai::OOAICallback* callback);
 	~CCppTestAI();
 
 	int HandleEvent(int topic, const void* data);

@@ -3,9 +3,8 @@
 
 class Position {
 public:
-	Position(){
-		x = y = z = 0;
-	}
+	Position() : x(0.0f), y(0.0f), z(0.0f) {}
+
 	float x;
 	float y;
 	float z;

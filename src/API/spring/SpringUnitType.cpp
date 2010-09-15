@@ -1,15 +1,9 @@
 #include "spring_api.h"
 
-#include "Engine.h"
-#include "AICallback.h"
-#include "ExternalAI/Interface/AISEvents.h"
-#include "ExternalAI/Interface/AISCommands.h"
-#include "UnitDef.h"
 #include "SpringGame.h"
 #include "SpringUnitType.h"
-#include "Resource.h"
 
-CSpringUnitType::CSpringUnitType(CSpringGame* game, springai::AICallback* callback, springai::UnitDef* unitDef)
+CSpringUnitType::CSpringUnitType(CSpringGame* game, springai::OOAICallback* callback, springai::UnitDef* unitDef)
 : game(game), callback(callback), unitDef(unitDef){
 	boptions = unitDef->GetBuildOptions();
 }
@@ -44,7 +38,7 @@ bool CSpringUnitType::CanBuildWhenNotDeployed(){
 
 bool CSpringUnitType::Extractor(){
 	springai::Resource* r = ((CSpringMap*)game->Map())->GetMetalResource();
-	return unitDef->GetResourceExtractorRange(*r);
+	return unitDef->GetResourceExtractorRange(r);
 }
 
 float CSpringUnitType::GetMaxHealth(){

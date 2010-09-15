@@ -1,28 +1,14 @@
 #include "spring_api.h"
 
-#include "AICallback.h"
-
-#include "ExternalAI/Interface/AISEvents.h"
-#include "ExternalAI/Interface/AISCommands.h"
-
 #include <iterator>
 #include <stdlib.h>
-
-#include "Unit.h"
-#include "UnitDef.h"
-#include "Engine.h"
-#include "DataDirs.h"
-#include "Map.h"
-#include "Mod.h"
-#include "Game.h"
-#include "Cheats.h"
-#include "Economy.h"
-#include "Resource.h"
 
 #include "SpringUnitType.h"
 #include "SpringMap.h"
 
-CSpringMap::CSpringMap(springai::AICallback* callback, CSpringGame* game)
+#include "ExternalAI/Interface/AISCommands.h" // for UNIT_COMMAND_BUILD_NO_FACING
+
+CSpringMap::CSpringMap(springai::OOAICallback* callback, CSpringGame* game)
 :	callback(callback),
 	game(game),
 	metal(NULL)	{
@@ -44,9 +30,9 @@ CSpringMap::CSpringMap(springai::AICallback* callback, CSpringGame* game)
 
 	
 	if(metal){
-		std::vector<SAIFloat3> positions = callback->GetMap()->GetResourceMapSpotsPositions(*metal,0);
+		std::vector<springai::AIFloat3> positions = callback->GetMap()->GetResourceMapSpotsPositions(metal);
 		if(!positions.empty()){
-			std::vector<SAIFloat3>::iterator j = positions.begin();
+			std::vector<springai::AIFloat3>::iterator j = positions.begin();
 			for(;j != positions.end();++j){
 				Position p;
 				p.x = j->x;
@@ -65,25 +51,19 @@ CSpringMap::~CSpringMap(){
 
 Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance){
 	CSpringUnitType* ut = (CSpringUnitType*)t;
-	SAIFloat3 p;
-	p.x = builderPos.x;
-	p.y = builderPos.y;
-	p.z = builderPos.z;
-	p = callback->GetMap()->FindClosestBuildSite(*(ut->GetUnitDef()),p,searchRadius,minimumDistance,0);
-	Position pos;
-	pos.x = p.x;
-	pos.y = p.y;
-	pos.z = p.z;
-	return pos;
-}
-
-bool CSpringMap::CanBuildHere(IUnitType* t, Position pos){
-	CSpringUnitType* ut = (CSpringUnitType*)t;
-	SAIFloat3 p;
+	const springai::AIFloat3 bPos(builderPos.x, builderPos.y, builderPos.z);
+	const springai::AIFloat3 pos = callback->GetMap()->FindClosestBuildSite(ut->GetUnitDef(), bPos, searchRadius, minimumDistance, 0);
+	Position p;
 	p.x = pos.x;
 	p.y = pos.y;
 	p.z = pos.z;
-	return callback->GetMap()->IsPossibleToBuildAt(*(ut->GetUnitDef()),p,UNIT_COMMAND_BUILD_NO_FACING);
+	return p;
+}
+
+bool CSpringMap::CanBuildHere(IUnitType* t, Position p){
+	CSpringUnitType* ut = (CSpringUnitType*)t;
+	const springai::AIFloat3 pos(p.x, p.y, p.z);
+	return callback->GetMap()->IsPossibleToBuildAt(ut->GetUnitDef(), pos, UNIT_COMMAND_BUILD_NO_FACING);
 }
 
 int CSpringMap::SpotCount(){
@@ -143,10 +123,7 @@ std::vector<IMapFeature*> CSpringMap::GetMapFeatures(){
 }
 
 std::vector<IMapFeature*> CSpringMap::GetMapFeatures(Position p, double radius){
-	SAIFloat3 pos;
-	pos.x = p.x;
-	pos.y = p.y;
-	pos.z = p.z;
+	const springai::AIFloat3 pos(p.x, p.y, p.z);
 	std::vector< IMapFeature*> mapFeatures;
 	
 	std::vector<springai::Feature*> features = callback->GetFeaturesIn(pos,radius);

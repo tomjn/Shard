@@ -6,7 +6,7 @@
 
 #include "spring_api.h"
 
-CSpringGame::CSpringGame(springai::AICallback* callback)
+CSpringGame::CSpringGame(springai::OOAICallback* callback)
 : callback(callback){
 	ai = new CTestAI(this);
 	callback->GetCheats()->SetEnabled(true);
@@ -40,11 +40,7 @@ std::string CSpringGame::GameID(){
 }
 
 void CSpringGame::SendToConsole(std::string message){
-	
-	SSendTextMessageCommand cmd;
-	cmd.text = message.c_str();
-	cmd.zone = 0;
-	callback->GetEngine()->HandleCommand(0, -1, COMMAND_SEND_TEXT_MESSAGE, &cmd);
+	callback->GetGame()->SendTextMessage(message.c_str(), 0);
 }
 
 int CSpringGame::Frame(){
@@ -112,21 +108,12 @@ bool CSpringGame::FileExists(std::string filename){
 }
 
 void CSpringGame::AddMarker(Position p,std::string label){
-	SAddPointDrawCommand c;
-	c.pos.x = p.x;
-	c.pos.z = p.z;
-
-	c.label = label.c_str();
-	callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_BUILD,&c);
+	const springai::AIFloat3 pos(p.x, p.y, p.z);
+	callback->GetMap()->GetDrawer()->AddPoint(pos, label.c_str());
 }
 
 std::string CSpringGame::SendToContent(std::string data){
-	SCallLuaRulesCommand c;
-	c.data = data.c_str();
-	c.inSize = -1;
-	callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_CALL_LUA_RULES,&c);
-	std::string returndata = c.ret_outData;
-	return returndata;
+	return callback->GetLua()->CallRules(data.c_str(), -1);
 }
 
 
@@ -172,10 +159,10 @@ SResourceData CSpringGame::GetResource(int idx){
 			if(r->GetResourceId() == idx){
 				res.name = r->GetName();;
 				res.gameframe = this->Frame();
-				res.income = callback->GetEconomy()->GetIncome(*r);
-				res.usage = callback->GetEconomy()->GetUsage(*r);
-				res.capacity = callback->GetEconomy()->GetStorage(*r);
-				res.reserves = callback->GetEconomy()->GetCurrent(*r);
+				res.income = callback->GetEconomy()->GetIncome(r);
+				res.usage = callback->GetEconomy()->GetUsage(r);
+				res.capacity = callback->GetEconomy()->GetStorage(r);
+				res.reserves = callback->GetEconomy()->GetCurrent(r);
 				return res;
 				break;
 			}
@@ -206,10 +193,10 @@ SResourceData CSpringGame::GetResource(std::string name){
 			if(rname == name){
 				res.name = rname;
 				res.gameframe = this->Frame();
-				res.income = callback->GetEconomy()->GetIncome(*r);
-				res.usage = callback->GetEconomy()->GetUsage(*r);
-				res.capacity = callback->GetEconomy()->GetStorage(*r);
-				res.reserves = callback->GetEconomy()->GetCurrent(*r);
+				res.income = callback->GetEconomy()->GetIncome(r);
+				res.usage = callback->GetEconomy()->GetUsage(r);
+				res.capacity = callback->GetEconomy()->GetStorage(r);
+				res.reserves = callback->GetEconomy()->GetCurrent(r);
 				return res;
 				break;
 			}

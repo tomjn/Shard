@@ -6,7 +6,7 @@
 
 class CSpringUnit : public IUnit {
 public:
-	CSpringUnit(springai::AICallback* callback, springai::Unit* u, IGame* game);
+	CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, IGame* game);
 	virtual ~CSpringUnit();
 
 	virtual int ID();
@@ -67,7 +67,7 @@ public:
 
 protected:
 	
-	springai::AICallback* callback;
+	springai::OOAICallback* callback;
 	springai::Unit* unit;
 	bool dead;
 	IGame* game;

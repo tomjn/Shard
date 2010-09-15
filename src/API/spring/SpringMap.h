@@ -4,7 +4,7 @@
 class CSpringMap : public IMap {
 public:
 	//
-	CSpringMap(springai::AICallback* callback, CSpringGame* game);
+	CSpringMap(springai::OOAICallback* callback, CSpringGame* game);
 	virtual ~CSpringMap();
 
 
@@ -31,13 +31,11 @@ public:
 	springai::Resource* GetMetalResource();
 
 protected:
-	springai::AICallback* callback;
+	springai::OOAICallback* callback;
 	CSpringGame* game;
 	
 	std::vector<Position> metalspots;
 	springai::Resource* metal;
-	
-	
 };
 
 #endif

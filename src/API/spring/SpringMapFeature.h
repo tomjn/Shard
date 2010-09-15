@@ -10,16 +10,16 @@
 class CSpringMapFeature : public IMapFeature {
 public:
 	
-	CSpringMapFeature(springai::AICallback* callback, springai::Feature* f, IGame* game);
+	CSpringMapFeature(springai::OOAICallback* callback, springai::Feature* f, IGame* game);
 	virtual ~CSpringMapFeature();
 
 	virtual int ID();
 	virtual std::string Name();
 	virtual Position GetPosition();
 
-protected:
-	springai::AICallback* callback;
 	springai::Feature* feature;
+protected:
+	springai::OOAICallback* callback;
 	IGame* game;
 };
 

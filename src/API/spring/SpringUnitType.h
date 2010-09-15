@@ -8,7 +8,7 @@ class CSpringUnitType;
 
 class CSpringUnitType : public IUnitType {
 public:
-	CSpringUnitType(CSpringGame* game, springai::AICallback* callback, springai::UnitDef* unitDef);
+	CSpringUnitType(CSpringGame* game, springai::OOAICallback* callback, springai::UnitDef* unitDef);
 	virtual ~CSpringUnitType();
 
 	virtual std::string Name();
@@ -32,6 +32,6 @@ public:
 protected:
 	std::vector<springai::UnitDef*> boptions;
 	CSpringGame* game;
-	springai::AICallback* callback;
+	springai::OOAICallback* callback;
 	springai::UnitDef* unitDef;
 };

@@ -1,7 +1,7 @@
 #include "spring_api.h"
 
-CSpringMapFeature::CSpringMapFeature(springai::AICallback* callback, springai::Feature* f, IGame* game)
-:callback(callback),feature(f),game(game){
+CSpringMapFeature::CSpringMapFeature(springai::OOAICallback* callback, springai::Feature* f, IGame* game)
+:feature(f),callback(callback),game(game){
 	//
 }
 
@@ -18,10 +18,10 @@ std::string CSpringMapFeature::Name(){
 }
 
 Position CSpringMapFeature::GetPosition(){
-	SAIFloat3 p = feature->GetPosition();
-	Position pos;
-	pos.x = p.x;
-	pos.y = p.y;
-	pos.z = p.z;
-	return pos;
+	const springai::AIFloat3 pos = feature->GetPosition();
+	Position p;
+	p.x = pos.x;
+	p.y = pos.y;
+	p.z = pos.z;
+	return p;
 }
