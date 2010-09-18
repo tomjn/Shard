@@ -64,7 +64,21 @@ CSpringMap::~CSpringMap(){
 
 
 Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance){
+	if(t == NULL){
+		Position err;
+		err.x = 0;
+		err.y = 1;
+		err.z = 0;
+		return err;
+	}
 	CSpringUnitType* ut = (CSpringUnitType*)t;
+	if(ut->GetUnitDef() == 0){
+		Position err;
+		err.x = 0;
+		err.y = 1;
+		err.z = 0;
+		return err;
+	}
 	SAIFloat3 p;
 	p.x = builderPos.x;
 	p.y = builderPos.y;
