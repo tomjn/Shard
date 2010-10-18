@@ -40,7 +40,6 @@ std::string CSpringGame::GameID(){
 }
 
 void CSpringGame::SendToConsole(std::string message){
-	
 	SSendTextMessageCommand cmd;
 	cmd.text = message.c_str();
 	cmd.zone = 0;
@@ -125,8 +124,7 @@ std::string CSpringGame::SendToContent(std::string data){
 	c.data = data.c_str();
 	c.inSize = -1;
 	callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_CALL_LUA_RULES,&c);
-	std::string returndata = c.ret_outData;
-	return returndata;
+	return c.ret_outData;
 }
 
 
