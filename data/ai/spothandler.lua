@@ -1,14 +1,16 @@
--- ahoi there!!!
-MetalSpotHandler = class(AIBase)
+MetalSpotHandler = class(Module)
+
+
+function MetalSpotHandler:Name()
+	return "MetalSpotHandler"
+end
+
+function MetalSpotHandler:internalName()
+	return "metalspothandler"
+end
 
 function MetalSpotHandler:Init()
 	self.spots = game.map:GetMetalSpots()
-	--[[{}
-	spotCount = game:SpotCount()
-	for i=0, spotCount-1 do
-		p = game:GetSpot(i)
-		table.insert(self.spots,p)
-	end]]--
 end
 
 function distance(pos1,pos2)

@@ -1,4 +1,12 @@
-AttackHandler = class(AIBase)
+AttackHandler = class(Module)
+
+function AttackHandler:Name()
+	return "AttackHandler"
+end
+
+function AttackHandler:internalName()
+	return "attackhandler"
+end
 
 function AttackHandler:Init()
 	self.recruits = {}
