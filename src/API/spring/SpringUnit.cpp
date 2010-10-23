@@ -127,13 +127,15 @@ bool CSpringUnit::Build(IUnitType* t){
 		}else{
 			int xs = ud->GetXSize();
 			int ms = std::max(ud->GetXSize(),ud->GetZSize());
+			double dsp = 5;
 			double radius = 500;
 			if(ms > 8){
 				radius = 900;
+				dsp = 4;
 			} else if (ms > 15){
 				radius = 1800;
+				dsp=2;
 			}
-			double dsp = 50;
 			p = game->Map()->FindClosestBuildSite(t,p,radius,dsp);
 			return Build(t,p);
 		}
