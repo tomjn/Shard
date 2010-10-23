@@ -136,6 +136,9 @@ bool CSpringUnit::Build(IUnitType* t){
 				radius = 1800;
 				dsp=2;
 			}
+			if(ud->IsNeedGeo()){
+				radius = 3000;
+			}
 			p = game->Map()->FindClosestBuildSite(t,p,radius,dsp);
 			return Build(t,p);
 		}
