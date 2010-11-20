@@ -11,5 +11,7 @@ public:
 	virtual void UnitDead(IUnit* unit)=0;
 	virtual void UnitIdle(IUnit* unit)=0;
 
+	virtual void UnitGiven(IUnit* unit)=0;
+
 	virtual void UnitDamaged(IUnit* unit, IUnit* attacker)=0;
 };

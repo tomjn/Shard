@@ -159,6 +159,15 @@ void CTestAI::GameEnd(){
 	}
 }
 
+void CTestAI::UnitGiven(IUnit* unit){
+	lua_getglobal(L, "ai");
+	lua_getfield(L, -1, "UnitGiven");
+	lua_getglobal(L, "ai");
+	SWIG_NewPointerObj(L,unit,unittype,0);
+	if(lua_isfunction(L,-3)){
+		lua_epcall(L, 2);
+	}
+}
 
 void CTestAI::UnitCreated(IUnit* unit){
 	lua_getglobal(L, "ai");

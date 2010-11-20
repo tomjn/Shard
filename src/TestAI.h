@@ -25,6 +25,8 @@ public:
 	virtual void UnitDead(IUnit* unit);
 	virtual void UnitIdle(IUnit* unit);
 
+	virtual void UnitGiven(IUnit* unit);
+
 	virtual void UnitDamaged(IUnit* unit, IUnit* attacker);
 	
 	lua_State *L;

@@ -52,9 +52,37 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 			game->Me()->Update();
 			break;
 		}
+		case EVENT_UNIT_GIVEN: {
+			struct SUnitGivenEvent* evt = (struct SUnitGivenEvent*) data;
+			if(evt->unitId < 0){
+				game->SendToConsole("shard-runtime warning: unitgiven evt->unit < 0");
+				break;
+			}
+			// it might not have been given to us! Could have been given to another team
+			springai::Unit* unit = springai::Unit::GetInstance(callback,evt->unitId);
+			if(callback->GetTeamId() == unit->GetTeam()){
+				CSpringUnit* u = new CSpringUnit(callback,unit,game);
+				aliveUnits[evt->unitId] = u;
+				game->Me()->UnitGiven(u);
+			}
+			break;
+		}
+		case EVENT_UNIT_CREATED: {
+			struct SUnitCreatedEvent* evt = (struct SUnitCreatedEvent*) data;
+			if(evt->unit < 0){
+				game->SendToConsole("shard-runtime warning: unitcreated evt->unit < 0");
+				break;
+			}
+			springai::Unit* unit = springai::Unit::GetInstance(callback,evt->unit);
+			CSpringUnit* u = new CSpringUnit(callback,unit,game);
+			aliveUnits[evt->unit] = u;
+			game->Me()->UnitCreated(u);
+			break;
+		}
 		case EVENT_UNIT_FINISHED: {
 			struct SUnitFinishedEvent* evt = (struct SUnitFinishedEvent*) data;
 			if(evt->unit < 0){
+				game->SendToConsole("shard-runtime warning: unitfinished evt->unit < 0");
 				break;
 			}
 			CSpringUnit* u = 0;
@@ -72,6 +100,7 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 		case EVENT_UNIT_DESTROYED: {
 			struct SUnitDestroyedEvent* evt = (struct SUnitDestroyedEvent*) data;
 			if(evt->unit < 0){
+				game->SendToConsole("shard-runtime warning: unitdestroyed evt->unit < 0");
 				break;
 			}
 			CSpringUnit* u = aliveUnits[evt->unit];
@@ -81,6 +110,7 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 		case EVENT_UNIT_DAMAGED: {
 			struct SUnitDamagedEvent* evt = (struct SUnitDamagedEvent*) data;
 			if(evt->unit < 0){
+				game->SendToConsole("shard-runtime warning: unitdamaged evt->unit < 0");
 				break;
 			}
 			CSpringUnit* u = aliveUnits[evt->unit];
@@ -94,21 +124,11 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 		case EVENT_UNIT_IDLE: {
 			struct SUnitIdleEvent* evt = (struct SUnitIdleEvent*) data;
 			if(evt->unit < 0){
+				game->SendToConsole("shard-runtime warning: unitidle evt->unit < 0");
 				break;
 			}
 			CSpringUnit* u = aliveUnits[evt->unit];
 			game->Me()->UnitIdle(u);
-			break;
-		}
-		case EVENT_UNIT_CREATED: {
-			struct SUnitCreatedEvent* evt = (struct SUnitCreatedEvent*) data;
-			if(evt->unit < 0){
-				break;
-			}
-			springai::Unit* unit = springai::Unit::GetInstance(callback,evt->unit);
-			CSpringUnit* u = new CSpringUnit(callback,unit,game);
-			aliveUnits[evt->unit] = u;
-			game->Me()->UnitCreated(u);
 			break;
 		}
 		default: {
