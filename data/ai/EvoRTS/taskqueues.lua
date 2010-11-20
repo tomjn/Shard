@@ -22,27 +22,29 @@ local function AirOrLand()
 	end
 end
 
+local function Destroyer()
+   if (ai.factories < 4) then
+   		return "eexperimentalfac"
+	else
+		return nil
+	end
+end
+
+local function StartFactory()
+	local r = math.random(0,1)
+	if r == 0 then
+			return "ebasefactory"
+		else
+			return "eminifac"
+	end
+end
+
+
 local factory = {
    "eengineer5",
    "eengineer5",
    "elighttank3",
    "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
-   "elighttank3",
    "eengineer5",
    "eengineer5",
    "eriottank2",
@@ -58,6 +60,24 @@ local factory = {
    "eriottank2",
    "eengineer5",
    "eriottank2",
+   "eheavytank3",
+   "emediumtank3",
+   "emediumtank3",
+   "emediumtank3",
+   "eaatank",
+   "eaatank",
+   "eaatank",
+   "emissiletank",
+   "emissiletank",
+   "emissiletank",
+   "eheavytank3",
+   "eheavytank3",
+   "eheavytank3",
+   "eheavytank3",
+   "efatso2",
+   "efatso2",
+   "efatso2",
+   "efatso2",
    "efatso2",
    "emediumtank3",
    "eaatank",
@@ -92,7 +112,8 @@ local firstEngineer = {
    "emetalextractor",
    "emetalextractor",
    "emetalextractor",
-   "ebasefactory",
+   StartFactory,
+   "esolar2",
    "esolar2",
    "esolar2",
    "elightturret2",
@@ -100,6 +121,8 @@ local firstEngineer = {
    "emetalextractor",
    "emetalextractor",
    "emetalextractor",
+   "esolar2",
+   "esolar2",
    "elightturret2",
    "efusion2",
    "emetalextractor",
@@ -149,6 +172,7 @@ local engineers = {
    "emetalextractor",
    "emetalextractor",
    "esolar2",
+   "elightturret2",
    "emetalextractor",
    "esolar2",
    "emetalextractor",
@@ -159,10 +183,12 @@ local engineers = {
    "elightturret2",
    "emetalextractor",
    "emetalextractor",
+   "elightturret2",
    "esolar2",
    "emetalextractor",
    "ejammer2",
    "esolar2",
+   "elightturret2",
    "elrpc",
    "efusion2",
    "eheavyturret2",
@@ -180,6 +206,7 @@ local engineers = {
    "eaaturret",
    "estorage",
    "efusion2",
+   Destroyer,
 }
 
 local airplant = {
@@ -316,19 +343,6 @@ local amphibfactory = {
 
 local allterrfactory = {
    "eallterrengineer",
-   "eallterrlight",
-   "eallterrlight",
-   "eallterrlight",
-   "eallterrlight",
-   "eallterrriot",
-   "eallterrriot",
-   "eallterrmed",
-   "eallterrmed",
-   "eallterrmed",
-   "eallterrmed",
-   "eallterrheavy",
-   "eallterrheavy",
-   "eallterrheavy",
    "eallterrengineer",
    "eallterrlight",
    "eallterrlight",
@@ -340,37 +354,25 @@ local allterrfactory = {
    "eallterrmed",
    "eallterrmed",
    "eallterrmed",
-   "eallterrheavy",
-   "eallterrheavy",
-   "eallterrheavy",
+   "eallterrengineer",
    "eallterrengineer",
    "eallterrlight",
    "eallterrlight",
-   "eallterrlight",
-   "eallterrlight",
-   "eallterrriot",
-   "eallterrriot",
-   "eallterrmed",
-   "eallterrmed",
-   "eallterrmed",
-   "eallterrmed",
    "eallterrheavy",
    "eallterrheavy",
    "eallterrheavy",
+   "eallterrheavy",
+   "eallterrheavy",
+   "eallterrheavy",
+   "eallterrassault",
+   "eallterrassault",
+   "eallterrassault",
+   "eallterrassault",
    "eallterrengineer",
-   "eallterrlight",
-   "eallterrlight",
-   "eallterrlight",
-   "eallterrlight",
-   "eallterrriot",
-   "eallterrriot",
-   "eallterrmed",
-   "eallterrmed",
-   "eallterrmed",
-   "eallterrmed",
-   "eallterrheavy",
-   "eallterrheavy",
-   "eallterrheavy",   
+}
+
+local destroyerfactory = {
+   "eexkrabgroth",
 }
 
 local function engineerlist(beh)
@@ -392,5 +394,6 @@ taskqueues = {
    eairplant = airplant,
    eamphibfac = amphibfactory,
    eminifac = allterrfactory,
+   eexperimentalfac = destroyerfactory,
    
 }
