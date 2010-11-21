@@ -19,6 +19,12 @@ end
 function AIBase:UnitBuilt(unit)
 end
 
+function AIBase:UnitGiven(unit)
+	self:UnitCreated(unit)
+	self:UnitBuilt(unit)
+end
+
+
 function AIBase:UnitDead(unit)
 end
 
