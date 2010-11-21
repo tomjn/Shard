@@ -10,6 +10,8 @@ function TaskQueueBehaviour:Init()
 		self.queue = self:GetQueue()
 	end
 	
+	self.waiting = {}
+	
 end
 
 function TaskQueueBehaviour:HasQueues()
@@ -33,6 +35,16 @@ function TaskQueueBehaviour:UnitIdle(unit)
 		self.progress = true
 		self.countdown = 0
 		--self.unit:ElectBehaviour()
+	end
+end
+
+function TaskQueueBehaviour:UnitDead(unit)
+	if unit:Internal():ID() == self.unit:Internal():ID() then
+		for k,v in pairs(self.behaviours) do
+			ai.modules.sleep.Kill(self.waiting[k])
+			self.waiting[k] = nil
+		end
+		self.waiting = nil
 	end
 end
 
@@ -66,7 +78,13 @@ function TaskQueueBehaviour:Update()
 		end
 	end
 end
-
+TaskQueueWakeup = class(function(a,tqb)
+	a.tqb = tqb
+end)
+function TaskQueueWakeup:wakeup()
+	game:sendtoconsole("advancing queue from sleep1")
+	self.tqb:ProgressQueue()
+end
 function TaskQueueBehaviour:ProgressQueue()
 	self.progress = false
 	if self.queue ~= nil then
@@ -80,33 +98,47 @@ function TaskQueueBehaviour:ProgressQueue()
 		
 		local utype = nil
 		local value = val
-		if type(val) == "function" then
-			value = val(self)
-		end
-		utype = game:GetTypeByName(value)
-		if utype ~= nil then
-			unit = self.unit:Internal()
-			if unit:CanBuild(utype) then
-				if utype:Extractor() then
-					-- find a free spot!
-					
-					p = unit:GetPosition()
-					p = ai.metalspothandler:ClosestFreeSpot(utype,p)
-					if p ~= nil then
-						success = self.unit:Internal():Build(utype,p)
-						self.progress = not success
+		if type(val) == "table" then
+			local action = value.action
+			if action == "wait" then
+				t = TaskQueueWakeup(self)
+				tqb = self
+				ai.sleep:Wait({ wakeup = function() tqb:ProgressQueue() end, },value.frames)
+				return
+			end
+		else
+			if type(val) == "function" then
+				value = val(self)
+			end
+			if utype ~= "next" then
+				utype = game:GetTypeByName(value)
+				if utype ~= nil then
+					unit = self.unit:Internal()
+					if unit:CanBuild(utype) then
+						if utype:Extractor() then
+							-- find a free spot!
+							
+							p = unit:GetPosition()
+							p = ai.metalspothandler:ClosestFreeSpot(utype,p)
+							if p ~= nil then
+								success = self.unit:Internal():Build(utype,p)
+								self.progress = not success
+							else
+								self.progress = true
+							end
+						else
+							self.progress = not self.unit:Internal():Build(utype)
+						end
 					else
 						self.progress = true
 					end
 				else
-					self.progress = not self.unit:Internal():Build(utype)
+					game:SendToConsole("Cannot build:"..value..", couldnt grab the unit type from the engine")
+					self.progress = true
 				end
 			else
 				self.progress = true
 			end
-		else
-			game:SendToConsole("Cannot build:"..value..", couldnt grab the unit type from the engine")
-			self.progress = true
 		end
 	end
 end
