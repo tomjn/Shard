@@ -1,5 +1,5 @@
 require "spothandler"
 require "unithandler"
 require "attackhandler"
-
-modules = { UnitHandler, AttackHandler, MetalSpotHandler }
+require "modules/sleep"
+modules = { UnitHandler, AttackHandler, MetalSpotHandler, Sleep }
