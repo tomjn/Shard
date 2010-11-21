@@ -6,13 +6,15 @@ math.randomseed( os.time() )
 math.random(); math.random(); math.random()
 
 local function AirOrLand()
-   if (ai.factories < 4) or (ai.factories == nil) then
-		local r = math.random(0,4)
+   if (ai.factories < 5) or (ai.factories == nil) then
+		local r = math.random(0,5)
 		if r == 0 then
 			return "ebasefactory"
 		elseif r == 1 then
 			return "eairplant"
 		elseif r == 2 then
+			return "eairplant"
+		elseif r == 3 then
 			return "eamphibfac"
 		else 
 			return "eminifac"
@@ -42,6 +44,7 @@ end
 
 local factory = {
    "eengineer5",
+   { action="wait",frames=32},
    "eengineer5",
    "elighttank3",
    "elighttank3",
@@ -69,6 +72,7 @@ local factory = {
    "eaatank",
    "emissiletank",
    "emissiletank",
+   { action="wait",frames=200},
    "emissiletank",
    "eheavytank3",
    "eheavytank3",
@@ -106,6 +110,7 @@ local factory = {
    "emissiletank",
    "efatso2",
    "emissiletank",
+   { action="wait",frames=200},
 }
 
 local firstEngineer = {
@@ -113,6 +118,7 @@ local firstEngineer = {
    "emetalextractor",
    "emetalextractor",
    StartFactory,
+   { action="wait",frames=64},
    "esolar2",
    "esolar2",
    "esolar2",
@@ -124,6 +130,7 @@ local firstEngineer = {
    "esolar2",
    "esolar2",
    "elightturret2",
+   { action="wait",frames=64},
    "efusion2",
    "emetalextractor",
    "emetalextractor",
@@ -139,6 +146,7 @@ local firstEngineer = {
    "emetalextractor",
    "eaaturret",
    AirOrLand,
+   { action="wait",frames=64},
    "emetalextractor",
    "esolar2",
    "emetalextractor",
@@ -152,6 +160,7 @@ local firstEngineer = {
    "elightturret2",
    "eaaturret",
    "eheavyturret2",
+   { action="wait",frames=64},
    "efusion2",
 }
 
@@ -165,6 +174,7 @@ local engineers = {
    "emetalextractor",
    "emetalextractor",
    "elightturret2",
+   { action="wait",frames=64},
    "efusion2",
    AirOrLand,
    "eaaturret",
@@ -192,7 +202,9 @@ local engineers = {
    "elrpc",
    "efusion2",
    "eheavyturret2",
+   { action="wait",frames=64},
    "efusion2",
+   { action="wait",frames=64},
    "efusion2",
    "esolar2",
    "emetalextractor",
@@ -205,12 +217,36 @@ local engineers = {
    "estorage",
    "eaaturret",
    "estorage",
+   { action="wait",frames=64},
    "efusion2",
    Destroyer,
 }
 
 local airplant = {
    "eairengineer",
+   { action="wait",frames=64},
+   "efighter",
+   "ebomber",
+   "ebomber",
+   "egunship2",
+   "egunship2",
+   "efighter",
+   "ebomber",
+   "ebomber",
+   "egunship2",
+   "egunship2",
+   "efighter",
+   "ebomber",
+   "ebomber",
+   "egunship2",
+   "egunship2",
+   "efighter",
+   "ebomber",
+   "ebomber",
+   "egunship2",
+   "egunship2",
+   "eairengineer",
+   { action="wait",frames=64},
    "efighter",
    "ebomber",
    "ebomber",
@@ -237,27 +273,7 @@ local airplant = {
    "ebomber",
    "egunship2",
    "egunship2",
-   "efighter",
-   "ebomber",
-   "ebomber",
-   "egunship2",
-   "egunship2",
-   "efighter",
-   "ebomber",
-   "ebomber",
-   "egunship2",
-   "egunship2",
-   "efighter",
-   "ebomber",
-   "ebomber",
-   "egunship2",
-   "egunship2",
-   "eairengineer",
-   "efighter",
-   "ebomber",
-   "ebomber",
-   "egunship2",
-   "egunship2",
+   { action="wait",frames=64},
    "efighter",
    "ebomber",
    "ebomber",
@@ -277,6 +293,7 @@ local airplant = {
 
 local amphibfactory = {
    "eamphibengineer",
+   { action="wait",frames=64},
    "eamphibbuggy",
    "eamphibbuggy",
    "eamphibbuggy",
@@ -344,6 +361,7 @@ local amphibfactory = {
 local allterrfactory = {
    "eallterrengineer",
    "eallterrengineer",
+   { action="wait",frames=64},
    "eallterrlight",
    "eallterrlight",
    "eallterrlight",
@@ -372,6 +390,7 @@ local allterrfactory = {
 }
 
 local destroyerfactory = {
+   { action="wait",frames=200},
    "eexkrabgroth",
 }
 
