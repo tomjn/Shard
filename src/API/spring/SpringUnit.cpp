@@ -127,14 +127,17 @@ bool CSpringUnit::Build(IUnitType* t){
 		}else{
 			int xs = ud->GetXSize();
 			int ms = std::max(ud->GetXSize(),ud->GetZSize());
-			double dsp = 5;
+			double dsp = 6;
 			double radius = 500;
-			if(ms > 8){
+			if(ms < 4){
 				radius = 900;
-				dsp = 4;
+				dsp = 8;
+			} else if(ms > 8){
+				radius = 900;
+				dsp = 5;
 			} else if (ms > 15){
 				radius = 1800;
-				dsp=2;
+				dsp=3;
 			}
 			if(ud->IsNeedGeo()){
 				radius = 3000;

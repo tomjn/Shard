@@ -17,6 +17,9 @@ function Unit:Init()
 end
 
 function Unit:Update()
+	if self.behaviours == nil then
+		self.behaviours = {}
+	end
 	for k,v in pairs(self.behaviours) do
 		v:Update(unit)
 	end
@@ -45,12 +48,16 @@ function Unit:UnitDead(unit)
 	for k,v in pairs(self.behaviours) do
 		v:UnitDead(unit)
 	end
-	if unit:Internal():ID() == self.engineunit:Internal():ID() then
-		for k,v in pairs(self.behaviours) do
-			self.behaviours[k] = nil
+	if self:Internal() ~= nil then
+		if unit:Internal():ID() == self:Internal():ID() then
+			if self.behaviours then
+				for k,v in pairs(self.behaviours) do
+					self.behaviours[k] = nil
+				end
+				self.behaviours = nil
+			end
+			self.engineUnit = nil
 		end
-		self.behaviours = nil
-		self.engineUnit = nil
 	end
 end
 
