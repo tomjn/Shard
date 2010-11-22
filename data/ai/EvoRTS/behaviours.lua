@@ -5,7 +5,7 @@ require "attackerbehaviour"
 --require "missingfactorybehaviour"
 require "engineerturretbehaviour"
 require "autoreclaimbehaviour"
-require "LowEnergyBehaviour"
+require "lowenergybehaviour"
 require "factoryregisterbehaviour"
 
 behaviours = {
