@@ -3,7 +3,7 @@
 #ifdef _WIN32
 	#define SLASH "\\"
 #else
-	#define "/"
+	#define SLASH "/"
 #endif
 
 IGame* global_game = 0;
