@@ -129,7 +129,7 @@ bool CTestAI::LoadLuaFile(std::string filename){
 		}
 	} else {
 		std::string message = "error loading \"";
-		message += filename;
+		message += f;
 		message += "\" with error code: ";
 		message += err;
 		this->game->SendToConsole(message);
