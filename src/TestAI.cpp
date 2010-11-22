@@ -1,5 +1,11 @@
 #include "TestAI.h"
 
+#ifdef _WIN32
+	#define SLASH "\\"
+#else
+	#define "/"
+#endif
+
 IGame* global_game = 0;
 
 extern "C" {
@@ -87,19 +93,21 @@ CTestAI::CTestAI(IGame* game)
 
 	// Setup LUA_PATH
 	std::string f = game->ConfigFolderPath();
-	f += "\\ai\\";
-	std::string g = game->GameName()+"\\";
+	f += SLASH;
+	f += "ai";
+	f += SLASH;
+	std::string g = game->GameName()+SLASH;
 	std::string p;
 
-	p  = f+g+"preload\\?;";
-	p += f+g+"preload\\?.lua;";
-	p += f+"preload\\?;";
-	p += f+"preload\\?.lua;";
+	p  = f+g+"preload"+SLASH+"?;";
+	p += f+g+"preload"+SLASH+"?.lua;";
+	p += f+"preload"+SLASH+"?;";
+	p += f+"preload"+SLASH+"?.lua;";
 	
 	p += f+g+"?;";
 	p += f+g+"?.lua;";
-	p += f+g+"preload\\?;";
-	p += f+g+"preload\\?.lua;";
+	p += f+g+"preload"+SLASH+"?;";
+	p += f+g+"preload"+SLASH+"?.lua;";
 	
 	p += f+"?;";
 	p += f+"?.lua;";
@@ -115,9 +123,12 @@ CTestAI::CTestAI(IGame* game)
 	LoadLuaFile("ai.lua");
 }
 
+
 bool CTestAI::LoadLuaFile(std::string filename){
 	std::string f = game->ConfigFolderPath();
-	f += "\\ai\\";
+	f += SLASH;
+	f += "ai";
+	f += SLASH;
 	f += filename;
 	int err = luaL_loadfile (this->L, f.c_str());
 	if (err == 0){
