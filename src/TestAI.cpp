@@ -72,10 +72,11 @@ CTestAI::CTestAI(IGame* game)
 	global_game = game;
 
 	// create our Lua environment
-	L = lua_open();
+	L = luaL_newstate();
 
 	// load our libraries
 	luaL_openlibs(L);
+	// load SWIG generated apis
 	luaopen_api(L);
 	
 	unittype = SWIG_TypeQuery(L,"IUnit *");
