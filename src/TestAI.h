@@ -37,7 +37,7 @@ public:
 protected:
 
 	swig_type_info* unittype;
-	void LoadLuaFile(std::string filename);
+	bool LoadLuaFile(std::string filename);
 	IGame* game;
 	
 };

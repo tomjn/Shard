@@ -72,7 +72,7 @@ CTestAI::CTestAI(IGame* game)
 	global_game = game;
 
 	// create our Lua environment
-	L = luaL_newstate();
+	this->L = luaL_newstate();
 
 	// load our libraries
 	luaL_openlibs(L);
@@ -115,7 +115,7 @@ CTestAI::CTestAI(IGame* game)
 	LoadLuaFile("ai.lua");
 }
 
-void CTestAI::LoadLuaFile(std::string filename){
+bool CTestAI::LoadLuaFile(std::string filename){
 	std::string f = game->ConfigFolderPath();
 	f += "\\ai\\";
 	f += filename;
@@ -123,8 +123,17 @@ void CTestAI::LoadLuaFile(std::string filename){
 	if (err == 0){
 		int status = lua_epcall (L, 0);
 		if (status == 0){
-			
-	   }
+			return true;
+		} else{
+			return false;
+		}
+	} else {
+		std::string message = "error loading \"";
+		message += filename;
+		message += "\" with error code: ";
+		message += err;
+		this->game->SendToConsole(message);
+		return false;
 	}
 }
 
