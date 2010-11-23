@@ -50,6 +50,13 @@ CSpringMap::~CSpringMap(){
 
 
 Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance){
+	if(t == NULL){
+		Position err;
+		err.x = 0;
+		err.y = 1;
+		err.z = 0;
+		return err;
+	}
 	CSpringUnitType* ut = (CSpringUnitType*)t;
 	const springai::AIFloat3 bPos(builderPos.x, builderPos.y, builderPos.z);
 	const springai::AIFloat3 pos = callback->GetMap()->FindClosestBuildSite(ut->GetUnitDef(), bPos, searchRadius, minimumDistance, 0);

@@ -1,4 +1,13 @@
-UnitHandler = class(AIBase)
+UnitHandler = class(Module)
+
+
+function UnitHandler:Name()
+	return "UnitHandler"
+end
+
+function UnitHandler:internalName()
+	return "unithandler"
+end
 
 function UnitHandler:Init()
 	self.units = {}

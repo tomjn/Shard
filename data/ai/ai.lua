@@ -1,10 +1,8 @@
 require "api"
-require "spothandler"
-require "behaviour"
 require "behaviourfactory"
 require "unit"
-require "unithandler"
-require "attackhandler"
+require "module"
+require "modules"
 
 AI = class(AIBase)
 
@@ -13,54 +11,29 @@ function AI:Init()
 	game:SendToConsole("OHAI DER")
 	game:SendToConsole("Shard by AF - playing:"..game:GameName().." on:"..game.map:MapName())
 
-	self.unithandler = UnitHandler()
-	self.unithandler:Init()
-
-	self.attackhandler = AttackHandler()
-	self.attackhandler:Init()
-
-	self.metalspothandler = MetalSpotHandler()
-	self.metalspothandler:Init()
+	self.modules = {}
+	for i,m in ipairs(modules) do
+		newmodule = m()
+		local internalname = newmodule:internalName()
+		
+		self[internalname] = newmodule
+		table.insert(self.modules,newmodule)
+		newmodule:Init()
+		game:SendToConsole("added "..newmodule:Name().." module")
+	end
 end
 
 function AI:Update()
 	if self.gameend == true then
 		return
 	end
-	
-	--local x = os.clock()
-	
-	--local mx = os.clock()
-	self.metalspothandler:Update()
-	--mx = (os.clock() - mx)
-	
-	--local ax = os.clock()
-	self.attackhandler:Update()
-	--ax = (os.clock() - ax)
-	
-	--local ux = os.clock()
-	self.unithandler:Update()
-	--ux = (os.clock() - ux)
-	
-	--local ti = (os.clock() - x)
-	--if ti > 0.0252 then
-	--	if mx > 0.0084 then
-	--		game:SendToConsole("mspot handler update time: "..mx)
-	--	end
-	--	if ax > 0.0084 then
-	--		game:SendToConsole("atkhandler update time: "..ax)
-	--	end
-	--	if ux > 0.0084 then
-	--		game:SendToConsole("unithandler update time: "..ux)
-	--	end
-	--end
-	--game:SendToConsole("test is "..game:Test())
-	--t = game:GetEnemies()
-	--if t == nil then
-	--	game:SendToConsole("t is nil! ")
-	--else
-	--	game:SendToConsole("enemycount: "..#t)
-	--end
+	for i,m in ipairs(self.modules) do
+		if m == nil then
+			game:SendToConsole("nil module!")
+		else
+			m:Update()
+		end
+	end
 end
 
 function AI:UnitCreated(unit)
@@ -71,9 +44,9 @@ function AI:UnitCreated(unit)
 		game:SendToConsole("shard found nil unit")
 		return
 	end
-	self.metalspothandler:UnitCreated(unit)
-	self.attackhandler:UnitCreated(unit)
-	self.unithandler:UnitCreated(unit)
+	for i,m in ipairs(self.modules) do
+		m:UnitCreated(unit)
+	end
 end
 
 function AI:UnitBuilt(unit)
@@ -84,9 +57,9 @@ function AI:UnitBuilt(unit)
 		game:SendToConsole("shard-warning: unitbuilt nil ")
 		return
 	end
-	self.metalspothandler:UnitBuilt(unit)
-	self.attackhandler:UnitBuilt(unit)
-	self.unithandler:UnitBuilt(unit)
+	for i,m in ipairs(self.modules) do
+		m:UnitBuilt(unit)
+	end
 end
 
 function AI:UnitDead(unit)
@@ -96,9 +69,9 @@ function AI:UnitDead(unit)
 	if unit == nil then
 		return
 	end
-	self.metalspothandler:UnitDead(unit)
-	self.attackhandler:UnitDead(unit)
-	self.unithandler:UnitDead(unit)
+	for i,m in ipairs(self.modules) do
+		m:UnitDead(unit)
+	end
 end
 
 function AI:UnitIdle(unit)
@@ -110,15 +83,8 @@ function AI:UnitIdle(unit)
 		return
 	end
 	
-	local x = os.clock()
-	
-	self.metalspothandler:UnitIdle(unit)
-	self.attackhandler:UnitIdle(unit)
-	self.unithandler:UnitIdle(unit)
-	
-	local ti = (os.clock() - x)
-	if ti > 0.02 then
-		game:SendToConsole("unitidle time: "..ti)
+	for i,m in ipairs(self.modules) do
+		m:UnitIdle(unit)
 	end
 end
 
@@ -129,13 +95,16 @@ function AI:UnitDamaged(unit,attacker)
 	if unit == nil then
 		return
 	end
-	self.metalspothandler:UnitDamaged(unit,attacker)
-	self.attackhandler:UnitDamaged(unit,attacker)
-	self.unithandler:UnitDamaged(unit,attacker)
+	for i,m in ipairs(self.modules) do
+		m:UnitDamaged(unit,attacker)
+	end
 end
 
 function AI:GameEnd()
 	self.gameend = true
+	for i,m in ipairs(self.modules) do
+		m:GameEnd(unit)
+	end
 end
 -- create and use an AI
 ai = AI()

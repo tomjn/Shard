@@ -1,3 +1,4 @@
+require "behaviour"
 BehaviourFactory = class(AIBase)
 
 require "behaviours"

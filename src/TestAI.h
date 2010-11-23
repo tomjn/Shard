@@ -25,6 +25,8 @@ public:
 	virtual void UnitDead(IUnit* unit);
 	virtual void UnitIdle(IUnit* unit);
 
+	virtual void UnitGiven(IUnit* unit);
+
 	virtual void UnitDamaged(IUnit* unit, IUnit* attacker);
 	
 	lua_State *L;
@@ -35,7 +37,7 @@ public:
 protected:
 
 	swig_type_info* unittype;
-	void LoadLuaFile(std::string filename);
+	bool LoadLuaFile(std::string filename);
 	IGame* game;
 	
 };

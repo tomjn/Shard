@@ -2,6 +2,7 @@
 -- Created by Tom J Nowell 2010
 -- Shard AI
 
+require "hooks"
 require "class"
 require "aibase"
 

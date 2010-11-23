@@ -112,13 +112,32 @@ bool CSpringUnit::Build(IUnitType* t){
 	Position p = this->GetPosition();
 	CSpringUnitType* type = (CSpringUnitType*)t;
 	springai::UnitDef* ud = type->GetUnitDef();
-	if(ud->GetType() == std::string("factory")){
-		return Build(t,p);
-	}else{
-		int xs = ud->GetXSize();
-		double dsp = 200.0/double(xs);
-		p = game->Map()->FindClosestBuildSite(t,p,1500,dsp);
-		return Build(t,p);
+	if(ud){
+		if((!ud->IsAbleToMove())&&(ud->GetType() == std::string("factory"))){
+			return Build(t,p);
+		}else{
+			int xs = ud->GetXSize();
+			int ms = std::max(ud->GetXSize(),ud->GetZSize());
+			double dsp = 6;
+			double radius = 500;
+			if(ms < 4){
+				radius = 900;
+				dsp = 8;
+			} else if(ms > 8){
+				radius = 900;
+				dsp = 5;
+			} else if (ms > 15){
+				radius = 1800;
+				dsp=3;
+			}
+			if(ud->IsNeedGeo()){
+				radius = 3000;
+			}
+			p = game->Map()->FindClosestBuildSite(t,p,radius,dsp);
+			return Build(t,p);
+		}
+	} else{
+		return false;
 	}
 }
 

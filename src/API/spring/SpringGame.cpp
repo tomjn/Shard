@@ -119,8 +119,12 @@ std::string CSpringGame::SendToContent(std::string data){
 
 
 IUnitType* CSpringGame::ToIUnitType(springai::UnitDef* def){
-	std::string name = def->GetName();
-	return GetTypeByName(name);
+	if(def){
+		std::string name = def->GetName();
+		return GetTypeByName(name);
+	}else{
+		return NULL;
+	}
 }
 
 std::vector<IUnit*> CSpringGame::GetEnemies(){
