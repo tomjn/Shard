@@ -103,7 +103,7 @@ end
 function AI:GameEnd()
 	self.gameend = true
 	for i,m in ipairs(self.modules) do
-		m:GameEnd(unit)
+		m:GameEnd()
 	end
 end
 -- create and use an AI
