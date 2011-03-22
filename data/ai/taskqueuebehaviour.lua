@@ -39,12 +39,15 @@ function TaskQueueBehaviour:UnitIdle(unit)
 end
 
 function TaskQueueBehaviour:UnitDead(unit)
-	if unit:Internal():ID() == self.unit:Internal():ID() then
-		for k,v in pairs(self.behaviours) do
-			ai.modules.sleep.Kill(self.waiting[k])
-			self.waiting[k] = nil
+	if self.unit ~= nil then
+		if unit:Internal():ID() == self.unit:Internal():ID() then
+			for k,v in pairs(self.behaviours) do
+				ai.modules.sleep.Kill(self.waiting[k])
+				self.waiting[k] = nil
+			end
+			self.waiting = nil
+			self.unit = nil
 		end
-		self.waiting = nil
 	end
 end
 
