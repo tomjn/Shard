@@ -5588,6 +5588,36 @@ fail:
 }
 
 
+static int _wrap_IAI_UnitGiven(lua_State* L) {
+  int SWIG_arg = 0;
+  IAI *arg1 = (IAI *) 0 ;
+  IUnit *arg2 = (IUnit *) 0 ;
+  
+  SWIG_check_num_args("UnitGiven",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("UnitGiven",1,"IAI *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("UnitGiven",2,"IUnit *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IAI,0))){
+    SWIG_fail_ptr("IAI_UnitGiven",1,SWIGTYPE_p_IAI);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("IAI_UnitGiven",2,SWIGTYPE_p_IUnit);
+  }
+  
+  (arg1)->UnitGiven(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IAI_UnitDamaged(lua_State* L) {
   int SWIG_arg = 0;
   IAI *arg1 = (IAI *) 0 ;
@@ -5637,6 +5667,7 @@ static swig_lua_method swig_IAI_methods[] = {
     {"UnitBuilt", _wrap_IAI_UnitBuilt}, 
     {"UnitDead", _wrap_IAI_UnitDead}, 
     {"UnitIdle", _wrap_IAI_UnitIdle}, 
+    {"UnitGiven", _wrap_IAI_UnitGiven}, 
     {"UnitDamaged", _wrap_IAI_UnitDamaged}, 
     {0,0}
 };
