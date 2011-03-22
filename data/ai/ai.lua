@@ -36,67 +36,67 @@ function AI:Update()
 	end
 end
 
-function AI:UnitCreated(unit)
+function AI:UnitCreated(engineunit)
 	if self.gameend == true then
 		return
 	end
-	if unit == nil then
-		game:SendToConsole("shard found nil unit")
+	if engineunit == nil then
+		game:SendToConsole("shard found nil engineunit")
 		return
 	end
 	for i,m in ipairs(self.modules) do
-		m:UnitCreated(unit)
+		m:UnitCreated(engineunit)
 	end
 end
 
-function AI:UnitBuilt(unit)
+function AI:UnitBuilt(engineunit)
 	if self.gameend == true then
 		return
 	end
-	if unit == nil then
-		game:SendToConsole("shard-warning: unitbuilt nil ")
+	if engineunit == nil then
+		game:SendToConsole("shard-warning: unitbuilt engineunit nil ")
 		return
 	end
 	for i,m in ipairs(self.modules) do
-		m:UnitBuilt(unit)
+		m:UnitBuilt(engineunit)
 	end
 end
 
-function AI:UnitDead(unit)
+function AI:UnitDead(engineunit)
 	if self.gameend == true then
 		return
 	end
-	if unit == nil then
+	if engineunit == nil then
 		return
 	end
 	for i,m in ipairs(self.modules) do
-		m:UnitDead(unit)
+		m:UnitDead(engineunit)
 	end
 end
 
-function AI:UnitIdle(unit)
+function AI:UnitIdle(engineunit)
 	if self.gameend == true then
 		return
 	end
-	if unit == nil then
-		game:SendToConsole("shard-warning: idle unit nil")
+	if engineunit == nil then
+		game:SendToConsole("shard-warning: idle engineunit nil")
 		return
 	end
 	
 	for i,m in ipairs(self.modules) do
-		m:UnitIdle(unit)
+		m:UnitIdle(engineunit)
 	end
 end
 
-function AI:UnitDamaged(unit,attacker)
+function AI:UnitDamaged(engineunit,engineattacker)
 	if self.gameend == true then
 		return
 	end
-	if unit == nil then
+	if engineunit == nil then
 		return
 	end
 	for i,m in ipairs(self.modules) do
-		m:UnitDamaged(unit,attacker)
+		m:UnitDamaged(engineunit,engineattacker)
 	end
 end
 
