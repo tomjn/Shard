@@ -27,10 +27,10 @@ function UnitHandler:GameEnd()
 	end
 end
 
-function UnitHandler:UnitCreated(unit)
+function UnitHandler:UnitCreated(engineunit)
 	u = Unit()
-	self.units[unit:ID()] = u
-	u:SetEngineRepresentation(unit)
+	self.units[engineunit:ID()] = u
+	u:SetEngineRepresentation(engineunit)
 	u:Init()
 	self.behaviourFactory:AddBehaviours(u)
 	for k,v in pairs(self.units) do
@@ -38,8 +38,8 @@ function UnitHandler:UnitCreated(unit)
 	end
 end
 
-function UnitHandler:UnitBuilt(unit)
-	u = self:AIRepresentation(unit)
+function UnitHandler:UnitBuilt(engineunit)
+	u = self:AIRepresentation(engineunit)
 	for k,v in pairs(self.units) do
 		v:UnitBuilt(u)
 	end

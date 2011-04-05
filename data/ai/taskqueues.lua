@@ -43,7 +43,7 @@ local corecommanderlist = {
 	"corllt",
 	CoreWindSolar,
 }
-local coreconstructionkbot {
+local coreconstructionkbot = {
 	CoreWindSolar,
 	"cormex",
 	CoreWindSolar,
@@ -88,7 +88,7 @@ local armcommander = {
 	"armsolar",
 }
 
-local armconstructionkbot {
+local armconstructionkbot = {
 	"armsolar",
 	"armmex",
 	"armsolar",

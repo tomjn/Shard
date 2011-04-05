@@ -17,7 +17,7 @@ local infos = {
 	{
 		key    = 'shortName',
 		value  = 'Shard',
-		desc   = 'Shard',
+		desc   = 'machine conform name.',
 	},
 	{
 		key    = 'version',
@@ -26,12 +26,12 @@ local infos = {
 	{
 		key    = 'name',
 		value  = 'Shard',
-		desc   = 'Shard',
+		desc   = 'human readable name.',
 	},
 	{
 		key    = 'description',
 		value  = 'Shard by AF',
-		desc   = 'tooltip.',
+		desc   = 'this should help noobs to find out whether this AI is what they want',
 	},
 	{
 		key    = 'url',

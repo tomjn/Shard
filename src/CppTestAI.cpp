@@ -107,8 +107,11 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: unitdestroyed evt->unit < 0");
 				break;
 			}
-			CSpringUnit* u = aliveUnits[evt->unit];
+			std::map<int, CSpringUnit* >::iterator i = aliveUnits.find(evt->unit);
+			CSpringUnit* u = i->second;
 			game->Me()->UnitDead(u);
+			aliveUnits.erase(i);
+			delete u;
 			break;
 		}
 		case EVENT_UNIT_DAMAGED: {
