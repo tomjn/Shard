@@ -21,7 +21,8 @@
 # though it is cleaner to not build directly in the repository root
 /CMakeFiles
 /CMakeCache.txt
-
+/Makefile
+/cmake_install.cmake
 
 # NTai build folders
 /vstudio/Intermediate
@@ -39,6 +40,7 @@
 
 # Misc file endings (eg. build or temp files)
 *.o
+*.so
 *.log
 *~
 .*.swp
