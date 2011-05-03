@@ -746,8 +746,8 @@ SWIG_UnpackDataName(const char *c, void *ptr, size_t sz, const char *name) {
 extern "C" {
 #endif
 
-#include "lua.h"
-#include "lauxlib.h"
+#include "lua/lua.h"
+#include "lua/lauxlib.h"
 #include <stdlib.h>  /* for malloc */
 #include <assert.h>  /* for a few sanity tests */
 
