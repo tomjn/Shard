@@ -130,3 +130,12 @@ function AttackHandler:AddRecruit(attkbehaviour)
 	end
 end
 
+function AttackHandler:RemoveRecruit(attkbehaviour)
+	for i,v in ipairs(self.recruits) do
+		if v == attkbehaviour then
+			table.remove(self.recruits,i)
+			return true
+		end
+	end
+	return false
+end

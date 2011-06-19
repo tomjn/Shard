@@ -22,6 +22,13 @@ function AttackerBehaviour:UnitBuilt(unit)
 	end
 end
 
+
+function AttackerBehaviour:UnitDead(unit)
+	if unit:Internal():ID() == self.unit:Internal():ID() then
+		ai.attackhandler:RemoveRecruit(self)
+	end
+end
+
 function AttackerBehaviour:UnitIdle(unit)
 	if unit:Internal():ID() == self.unit:Internal():ID() then
 		self.attacking = false
