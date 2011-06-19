@@ -1,0 +1,310 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{EF72E4F8-4594-46EC-8880-86A2B9B6907D}</ProjectGuid>
+    <RootNamespace>Shard</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Output\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)Intermediate\$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)Output\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)Intermediate\$(Configuration)\</IntDir>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\AI\Wrappers\Cpp;..\..\..\..\rts;..\..\..\..\;..\src\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>BUILDING_SKIRMISH_AI;BUILDING_AI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <ProgramDataBaseFileName>$(IntDir)linker\vc90.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CallingConvention>StdCall</CallingConvention>
+    </ClCompile>
+    <Link>
+      <OutputFile>E:\Spring\AI\Skirmish\$(ProjectName)\dev\SkirmishAI.dll</OutputFile>
+      <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(TargetDir)linker\$(TargetName).pdb</ProgramDatabaseFile>
+      <ProfileGuidedDatabase>
+      </ProfileGuidedDatabase>
+      <ImportLibrary>$(TargetDir)linker\$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\..\..\AI\Wrappers\Cpp;..\..\..\..\rts;..\..\..\..\;..\src\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>BUILDING_SKIRMISH_AI;BUILDING_AI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <ProgramDataBaseFileName>$(IntDir)linker\vc90.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CallingConvention>StdCall</CallingConvention>
+    </ClCompile>
+    <Link>
+      <OutputFile>D:\Spring\AI\Skirmish\$(ProjectName)\dev\SkirmishAI.dll</OutputFile>
+      <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(TargetDir)linker\$(TargetName).pdb</ProgramDatabaseFile>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <ProfileGuidedDatabase>
+      </ProfileGuidedDatabase>
+      <ImportLibrary>$(TargetDir)linker\$(TargetName).lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\Wrappers\Cpp\AICallback.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Camera.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Cheats.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\ClbGroupSupportedCommandImpl.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\ClbUnitSupportedCommandImpl.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\CurrentCommand.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Damage.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\DataDirs.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Debug.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Drawer.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Economy.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Engine.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Feature.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\FeatureDef.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\FlankingBonus.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Game.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Group.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Gui.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Info.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Line.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Log.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Map.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Mod.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\ModParam.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\MoveData.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\OptionValues.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\OrderPreview.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Point.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Resource.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Roots.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Shield.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\SkirmishAI.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\SkirmishAIs.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Teams.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Unit.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\UnitDef.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\Version.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\WeaponDef.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\WeaponMount.cpp" />
+    <ClCompile Include="..\src\AIExport.cpp" />
+    <ClCompile Include="..\src\CppTestAI.cpp" />
+    <ClCompile Include="..\src\TestAI.cpp" />
+    <ClCompile Include="..\src\API\spring\SpringGame.cpp" />
+    <ClCompile Include="..\src\API\spring\SpringMap.cpp" />
+    <ClCompile Include="..\src\API\spring\SpringMapFeature.cpp" />
+    <ClCompile Include="..\src\API\spring\SpringUnit.cpp" />
+    <ClCompile Include="..\src\API\spring\SpringUnitType.cpp" />
+    <ClCompile Include="..\src\API\api_wrap.cpp">
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">STATIC_LINKED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ClCompile Include="..\src\lua\lundump.c" />
+    <ClCompile Include="..\src\lua\lapi.c" />
+    <ClCompile Include="..\src\lua\lauxlib.c" />
+    <ClCompile Include="..\src\lua\lbaselib.c" />
+    <ClCompile Include="..\src\lua\lcode.c" />
+    <ClCompile Include="..\src\lua\ldblib.c" />
+    <ClCompile Include="..\src\lua\ldebug.c" />
+    <ClCompile Include="..\src\lua\ldo.c" />
+    <ClCompile Include="..\src\lua\ldump.c" />
+    <ClCompile Include="..\src\lua\lfunc.c" />
+    <ClCompile Include="..\src\lua\lgc.c" />
+    <ClCompile Include="..\src\lua\linit.c" />
+    <ClCompile Include="..\src\lua\liolib.c" />
+    <ClCompile Include="..\src\lua\llex.c" />
+    <ClCompile Include="..\src\lua\lmathlib.c" />
+    <ClCompile Include="..\src\lua\lmem.c" />
+    <ClCompile Include="..\src\lua\loadlib.c" />
+    <ClCompile Include="..\src\lua\lobject.c" />
+    <ClCompile Include="..\src\lua\lopcodes.c" />
+    <ClCompile Include="..\src\lua\loslib.c" />
+    <ClCompile Include="..\src\lua\lparser.c" />
+    <ClCompile Include="..\src\lua\lstate.c" />
+    <ClCompile Include="..\src\lua\lstring.c" />
+    <ClCompile Include="..\src\lua\lstrlib.c" />
+    <ClCompile Include="..\src\lua\ltable.c" />
+    <ClCompile Include="..\src\lua\ltablib.c" />
+    <ClCompile Include="..\src\lua\ltm.c" />
+    <ClCompile Include="..\src\lua\lvm.c" />
+    <ClCompile Include="..\src\lua\lzio.c" />
+    <ClCompile Include="..\src\lua\print.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Wrappers\Cpp\AICallback.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Camera.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Cheats.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\ClbGroupSupportedCommandImpl.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\ClbUnitSupportedCommandImpl.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\CurrentCommand.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Damage.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\DataDirs.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Debug.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Drawer.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Economy.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Engine.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Feature.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\FeatureDef.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\FlankingBonus.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Game.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Group.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Gui.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\IncludesHeaders.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\IncludesSources.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Info.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Line.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Log.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Map.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Mod.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\ModParam.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\MoveData.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\OptionValues.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\OrderPreview.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Point.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Resource.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Roots.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Shield.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\SkirmishAI.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\SkirmishAIs.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\SupportedCommand.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Teams.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Unit.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\UnitDef.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\Version.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\WeaponDef.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\WeaponMount.h" />
+    <ClInclude Include="..\src\AIExport.h" />
+    <ClInclude Include="..\src\CppTestAI.h" />
+    <ClInclude Include="..\src\TestAI.h" />
+    <ClInclude Include="..\src\API\Position.h" />
+    <ClInclude Include="..\src\API\interfaces\api.h" />
+    <ClInclude Include="..\src\API\interfaces\IAI.h" />
+    <ClInclude Include="..\src\API\interfaces\IGame.h" />
+    <ClInclude Include="..\src\API\interfaces\IMap.h" />
+    <ClInclude Include="..\src\API\interfaces\IMapFeature.h" />
+    <ClInclude Include="..\src\API\interfaces\IUnit.h" />
+    <ClInclude Include="..\src\API\interfaces\IUnitType.h" />
+    <ClInclude Include="..\src\API\interfaces\ResourceData.h" />
+    <ClInclude Include="..\src\API\interfaces\ResourceTransfer.h" />
+    <ClInclude Include="..\src\API\spring\spring_api.h" />
+    <ClInclude Include="..\src\API\spring\SpringGame.h" />
+    <ClInclude Include="..\src\API\spring\SpringMap.h" />
+    <ClInclude Include="..\src\API\spring\SpringMapFeature.h" />
+    <ClInclude Include="..\src\API\spring\SpringUnit.h" />
+    <ClInclude Include="..\src\API\spring\SpringUnitType.h" />
+    <ClInclude Include="..\src\API\swig.h" />
+    <ClInclude Include="..\src\lua\lapi.h" />
+    <ClInclude Include="..\src\lua\lauxlib.h" />
+    <ClInclude Include="..\src\lua\lcode.h" />
+    <ClInclude Include="..\src\lua\ldebug.h" />
+    <ClInclude Include="..\src\lua\ldo.h" />
+    <ClInclude Include="..\src\lua\lfunc.h" />
+    <ClInclude Include="..\src\lua\lgc.h" />
+    <ClInclude Include="..\src\lua\llex.h" />
+    <ClInclude Include="..\src\lua\llimits.h" />
+    <ClInclude Include="..\src\lua\lmem.h" />
+    <ClInclude Include="..\src\lua\lobject.h" />
+    <ClInclude Include="..\src\lua\lopcodes.h" />
+    <ClInclude Include="..\src\lua\lparser.h" />
+    <ClInclude Include="..\src\lua\lstate.h" />
+    <ClInclude Include="..\src\lua\lstring.h" />
+    <ClInclude Include="..\src\lua\ltable.h" />
+    <ClInclude Include="..\src\lua\ltm.h" />
+    <ClInclude Include="..\src\lua\lua.h" />
+    <ClInclude Include="..\src\lua\luaconf.h" />
+    <ClInclude Include="..\src\lua\lualib.h" />
+    <ClInclude Include="..\src\lua\lundump.h" />
+    <ClInclude Include="..\src\lua\lvm.h" />
+    <ClInclude Include="..\src\lua\lzio.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="export.def" />
+    <CustomBuild Include="..\data\AIInfo.lua">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Copying AIInfo.lua</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mkdir "$(TargetDir)"
+copy "%(FullPath)" "$(TargetDir)"
+xcopy "%(RootDir)%(Directory)\ai" "$(TargetDir)ai\" /F /E /Y /H /R
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AIInfo.lua;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Copying AIInfo.lua</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mkdir "$(TargetDir)"
+copy "%(FullPath)" "$(TargetDir)"
+xcopy "%(RootDir)%(Directory)\ai" "$(TargetDir)ai\" /F /E /Y /H /R
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AIInfo.lua;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\data\AIOptions.lua">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\src\API\api.i">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">swig -v -c++ -lua  -o %(RootDir)%(Directory)api_wrap.cpp %(FullPath)
+swig -c++ -lua -external-runtime ../src/API/swig.h
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">api.i;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">swig -v -c++ -lua  -o %(RootDir)%(Directory)api_wrap.cpp %(FullPath)
+swig -c++ -lua -external-runtime ../src/API/swig.h
+</Command>
+    </CustomBuild>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

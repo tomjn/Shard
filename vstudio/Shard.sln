@@ -1,7 +1,7 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shard", "Shard.vcproj", "{EF72E4F8-4594-46EC-8880-86A2B9B6907D}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shard", "Shard.vcxproj", "{EF72E4F8-4594-46EC-8880-86A2B9B6907D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
