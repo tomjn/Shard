@@ -39,24 +39,29 @@ function UnitHandler:UnitCreated(engineunit)
 end
 
 function UnitHandler:UnitBuilt(engineunit)
-	u = self:AIRepresentation(engineunit)
-	for k,v in pairs(self.units) do
-		v:UnitBuilt(u)
+	local u = self:AIRepresentation(engineunit)
+	if u ~= nil then
+		for k,v in pairs(self.units) do
+			v:UnitBuilt(u)
+		end
 	end
 end
 
-function UnitHandler:UnitDead(unit)
-	u = self:AIRepresentation(unit)
-	for k,v in pairs(self.units) do
-		v:UnitDead(u)
+function UnitHandler:UnitDead(engineunit)
+	local u = self:AIRepresentation(engineunit)
+	if u ~= nil then
+		for k,v in pairs(self.units) do
+			v:UnitDead(u)
+		end
 	end
-	self.units[unit] = nil
+	self.units[unit:ID()] = nil
 end
-function UnitHandler:UnitDamaged(unit,attacker)
-	u = self:AIRepresentation(unit)
-	a = self:AIRepresentation(attacker)
+
+function UnitHandler:UnitDamaged(engineunit,attacker)
+	local u = self:AIRepresentation(engineunit)
+	local a = self:AIRepresentation(attacker)
 	for k,v in pairs(self.units) do
-		v:UnitDamaged(u)
+		v:UnitDamaged(u,a)
 	end
 end
 
@@ -76,9 +81,11 @@ function UnitHandler:AIRepresentation(engineUnit)
 	return u
 end
 
-function UnitHandler:UnitIdle(unit)
-	u = self:AIRepresentation(unit)
-	for k,v in pairs(self.units) do
-		v:UnitIdle(u)
+function UnitHandler:UnitIdle(engineunit)
+	local u = self:AIRepresentation(engineunit)
+	if u ~= nil then
+		for k,v in pairs(self.units) do
+			v:UnitIdle(u)
+		end
 	end
 end
