@@ -104,10 +104,12 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				break;
 			}
 			std::map<int, CSpringUnit* >::iterator i = aliveUnits.find(evt->unit);
-			CSpringUnit* u = i->second;
-			game->Me()->UnitDead(u);
-			aliveUnits.erase(i);
-			delete u;
+			if(i != aliveUnits.end()){
+				CSpringUnit* u = i->second;
+				game->Me()->UnitDead(u);
+				aliveUnits.erase(i);
+				delete u;
+			}
 			break;
 		}
 		case EVENT_UNIT_DAMAGED: {
@@ -116,7 +118,10 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: unitdamaged evt->unit < 0");
 				break;
 			}
-			CSpringUnit* u = aliveUnits[evt->unit];
+			CSpringUnit* u = 0;
+			if (aliveUnits.find(evt->unit) != aliveUnits.end()){
+				u = aliveUnits[evt->unit];
+			}
 			CSpringUnit* a = 0;
 			if (aliveUnits.find(evt->attacker) != aliveUnits.end()){
 				a = aliveUnits[evt->attacker];
