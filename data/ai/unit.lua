@@ -2,6 +2,7 @@ Unit = class(AIBase)
 
 function Unit:SetEngineRepresentation(engineUnit)
 	self.engineUnit = engineUnit
+	self.engineID = engineUnit:ID()
 end
 
 function Unit:Internal()
@@ -49,7 +50,9 @@ function Unit:UnitDead(unit)
 		v:UnitDead(unit)
 	end
 	if self:Internal() ~= nil then
-		if unit:Internal():ID() == self:Internal():ID() then
+		local unitInternal = unit:Internal()
+		local unitID = unitInternal:ID()
+		if unitID == self.engineID then
 			if self.behaviours then
 				for k,v in pairs(self.behaviours) do
 					self.behaviours[k] = nil
