@@ -54,7 +54,7 @@ function UnitHandler:UnitDead(engineunit)
 			v:UnitDead(u)
 		end
 	end
-	self.units[unit:ID()] = nil
+	self.units[engineunit:ID()] = nil
 end
 
 function UnitHandler:UnitDamaged(engineunit,attacker)
