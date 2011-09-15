@@ -16,9 +16,7 @@ function AttackerBehaviour:Init()
 end
 
 function AttackerBehaviour:UnitBuilt(unit)
-	local unitInternal = unit:Internal()
-	local unitID = unitInternal:ID()
-	if unitID == self.unit.engineID then
+	if unit.engineID == self.unit.engineID then
 		self.attacking = false
 		ai.attackhandler:AddRecruit(self)
 	end
@@ -26,17 +24,13 @@ end
 
 
 function AttackerBehaviour:UnitDead(unit)
-	local unitInternal = unit:Internal()
-	local unitID = unitInternal:ID()
-	if unitID == self.unit.engineID then
+	if unit.engineID == self.unit.engineID then
 		ai.attackhandler:RemoveRecruit(self)
 	end
 end
 
 function AttackerBehaviour:UnitIdle(unit)
-	local unitInternal = unit:Internal()
-	local unitID = unitInternal:ID()
-	if unitID == self.unit.engineID then
+	if unit.engineID == self.unit.engineID then
 		self.attacking = false
 		ai.attackhandler:AddRecruit(self)
 	end

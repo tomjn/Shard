@@ -22,7 +22,7 @@ function TaskQueueBehaviour:UnitBuilt(unit)
 	if not self:IsActive() then
 		return
 	end
-	if unit:Internal():ID() == self.unit:Internal():ID() then
+	if unit.engineID == self.unit.engineID then
 		self.progress = true
 	end
 end
@@ -31,7 +31,7 @@ function TaskQueueBehaviour:UnitIdle(unit)
 	if not self:IsActive() then
 		return
 	end
-	if unit:Internal():ID() == self.unit:Internal():ID() then
+	if unit.engineID == self.unit.engineID then
 		self.progress = true
 		self.countdown = 0
 		--self.unit:ElectBehaviour()
@@ -40,10 +40,11 @@ end
 
 function TaskQueueBehaviour:UnitDead(unit)
 	if self.unit ~= nil then
-		if unit:Internal():ID() == self.unit:Internal():ID() then
-			for k,v in pairs(self.behaviours) do
-				ai.modules.sleep.Kill(self.waiting[k])
-				self.waiting[k] = nil
+		if unit.engineID == self.unit.engineID then
+			if self.waiting ~= nil then
+				for k,v in pairs(self.waiting) do
+					ai.modules.sleep.Kill(self.waiting[k])
+				end
 			end
 			self.waiting = nil
 			self.unit = nil
