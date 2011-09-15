@@ -49,20 +49,17 @@ function Unit:UnitDead(unit)
 	for k,v in pairs(self.behaviours) do
 		v:UnitDead(unit)
 	end
-	if self:Internal() ~= nil then
-		local unitInternal = unit:Internal()
-		local unitID = unitInternal:ID()
-		if unitID == self.engineID then
-			if self.behaviours then
-				for k,v in pairs(self.behaviours) do
-					self.behaviours[k] = nil
-				end
-				self.behaviours = nil
+	if unit.engineID == self.engineID then
+		if self.behaviours then
+			for k,v in pairs(self.behaviours) do
+				self.behaviours[k] = nil
 			end
-			self.engineUnit = nil
+			self.behaviours = nil
 		end
+		self.engineUnit = nil
 	end
 end
+
 
 function Unit:UnitDamaged(unit,attacker)
 	for k,v in pairs(self.behaviours) do
