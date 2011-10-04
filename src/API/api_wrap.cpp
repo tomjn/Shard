@@ -3950,30 +3950,6 @@ fail:
 }
 
 
-static int _wrap_IUnit_CanMorph(lua_State* L) {
-  int SWIG_arg = 0;
-  IUnit *arg1 = (IUnit *) 0 ;
-  bool result;
-  
-  SWIG_check_num_args("IUnit::CanMorph",1,1)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::CanMorph",1,"IUnit *");
-  
-  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnit,0))){
-    SWIG_fail_ptr("IUnit_CanMorph",1,SWIGTYPE_p_IUnit);
-  }
-  
-  result = (bool)(arg1)->CanMorph();
-  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
-  return SWIG_arg;
-  
-  if(0) SWIG_fail;
-  
-fail:
-  lua_error(L);
-  return SWIG_arg;
-}
-
-
 static int _wrap_IUnit_CanAssistBuilding(lua_State* L) {
   int SWIG_arg = 0;
   IUnit *arg1 = (IUnit *) 0 ;
@@ -4670,6 +4646,37 @@ fail:
 }
 
 
+static int _wrap_IUnit_MorphInto(lua_State* L) {
+  int SWIG_arg = 0;
+  IUnit *arg1 = (IUnit *) 0 ;
+  IUnitType *arg2 = (IUnitType *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::MorphInto",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::MorphInto",1,"IUnit *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::MorphInto",2,"IUnitType *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("IUnit_MorphInto",1,SWIGTYPE_p_IUnit);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("IUnit_MorphInto",2,SWIGTYPE_p_IUnitType);
+  }
+  
+  result = (bool)(arg1)->MorphInto(arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IUnit_GetPosition(lua_State* L) {
   int SWIG_arg = 0;
   IUnit *arg1 = (IUnit *) 0 ;
@@ -4923,7 +4930,6 @@ static swig_lua_method swig_IUnit_methods[] = {
     {"Type", _wrap_IUnit_Type}, 
     {"CanMove", _wrap_IUnit_CanMove}, 
     {"CanDeploy", _wrap_IUnit_CanDeploy}, 
-    {"CanMorph", _wrap_IUnit_CanMorph}, 
     {"CanAssistBuilding", _wrap_IUnit_CanAssistBuilding}, 
     {"CanMoveWhenDeployed", _wrap_IUnit_CanMoveWhenDeployed}, 
     {"CanFireWhenDeployed", _wrap_IUnit_CanFireWhenDeployed}, 
@@ -4937,6 +4943,7 @@ static swig_lua_method swig_IUnit_methods[] = {
     {"Reclaim", _wrap_IUnit_Reclaim}, 
     {"Attack", _wrap_IUnit_Attack}, 
     {"Repair", _wrap_IUnit_Repair}, 
+    {"MorphInto", _wrap_IUnit_MorphInto}, 
     {"GetPosition", _wrap_IUnit_GetPosition}, 
     {"GetHealth", _wrap_IUnit_GetHealth}, 
     {"GetMaxHealth", _wrap_IUnit_GetMaxHealth}, 

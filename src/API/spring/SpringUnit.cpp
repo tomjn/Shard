@@ -66,11 +66,6 @@ bool CSpringUnit::CanBuild(){
 }
 
 
-bool CSpringUnit::CanMorph(){
-	return false;
-}
-
-
 bool CSpringUnit::CanAssistBuilding(IUnit* unit){
 	return this->unit->GetDef()->IsAbleToAssist();
 }
@@ -231,6 +226,27 @@ bool CSpringUnit::Repair(IUnit* unit){
 	c.toRepairUnitId = unit->ID();
 	c.unitId = this->unit->GetUnitId();
 	int e = callback->GetEngine()->HandleCommand(callback->GetTeamId(),-1,COMMAND_UNIT_REPAIR,&c);
+	return (e == 0);
+}
+/*
+[23:19:39] <[RoX]knorke> who/whatever wants to use the custom commands (morph,jump,...) must know the numbers
+[23:20:14] <[RoX]knorke> http://code.google.com/p/conflictterra/source/browse/games/CT/LuaRules/Gadgets/unit_morph.lua
+[23:20:20] <[RoX]knorke> local CMD_MORPH_STOP = 32210
+[23:20:21] <[RoX]knorke> local CMD_MORPH = 31210
+[23:20:47] <[RoX]knorke> http://code.google.com/p/conflictterra/source/browse/games/CT/LuaRules/Gadgets/Jumpjets_lua.lua
+[23:20:55] <[RoX]knorke> local CMD_JUMP = 38521
+*/
+bool CSpringUnit::MorphInto(IUnitType* t){
+	SCustomUnitCommand c;
+
+	c.params = new float[1];
+	CSpringUnitType* ut = (CSpringUnitType*)t;
+	c.params[0] = ut->GetUnitDef()->GetUnitDefId();
+	c.numParams = 1;
+	c.cmdId = 31210;
+
+	c.unitId = this->unit->GetUnitId();
+	int e = callback->GetEngine()->HandleCommand(callback->GetTeamId(),31210,COMMAND_UNIT_CUSTOM,&c);
 	return (e == 0);
 }
 

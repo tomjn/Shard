@@ -26,8 +26,6 @@ public:
 	virtual bool CanMove();
 	virtual bool CanDeploy();
 	virtual bool CanBuild();
-
-	virtual bool CanMorph();
 	
 	virtual bool CanAssistBuilding(IUnit* unit);
 
@@ -51,6 +49,9 @@ public:
 	virtual bool Reclaim(IUnit* unit);
 	virtual bool Attack(IUnit* unit);
 	virtual bool Repair(IUnit* unit);
+
+
+	virtual bool MorphInto(IUnitType* t);
 
 
 	virtual Position GetPosition();
