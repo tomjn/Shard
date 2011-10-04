@@ -3579,6 +3579,30 @@ fail:
 }
 
 
+static int _wrap_IUnit_Team(lua_State* L) {
+  int SWIG_arg = 0;
+  IUnit *arg1 = (IUnit *) 0 ;
+  int result;
+  
+  SWIG_check_num_args("IUnit::Team",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Team",1,"IUnit *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("IUnit_Team",1,SWIGTYPE_p_IUnit);
+  }
+  
+  result = (int)(arg1)->Team();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IUnit_Name(lua_State* L) {
   int SWIG_arg = 0;
   IUnit *arg1 = (IUnit *) 0 ;
@@ -4758,6 +4782,7 @@ delete arg1;
 }
 static swig_lua_method swig_IUnit_methods[] = {
     {"ID", _wrap_IUnit_ID}, 
+    {"Team", _wrap_IUnit_Team}, 
     {"Name", _wrap_IUnit_Name}, 
     {"IsAlive", _wrap_IUnit_IsAlive}, 
     {"IsCloaked", _wrap_IUnit_IsCloaked}, 
@@ -4972,6 +4997,30 @@ fail:
 }
 
 
+static int _wrap_IGame_GetTeamID(lua_State* L) {
+  int SWIG_arg = 0;
+  IGame *arg1 = (IGame *) 0 ;
+  int result;
+  
+  SWIG_check_num_args("IGame::GetTeamID",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IGame::GetTeamID",1,"IGame *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IGame,0))){
+    SWIG_fail_ptr("IGame_GetTeamID",1,SWIGTYPE_p_IGame);
+  }
+  
+  result = (int)(arg1)->GetTeamID();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IGame_GetEnemies(lua_State* L) {
   int SWIG_arg = 0;
   IGame *arg1 = (IGame *) 0 ;
@@ -5012,6 +5061,33 @@ static int _wrap_IGame_GetFriendlies(lua_State* L) {
   }
   
   result = (arg1)->GetFriendlies();
+  {
+    std::vector< IUnit * > * resultptr = new std::vector< IUnit * >((const std::vector< IUnit * > &) result);
+    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_std__vectorT_IUnit_p_t,1); SWIG_arg++;
+  }
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IGame_GetUnits(lua_State* L) {
+  int SWIG_arg = 0;
+  IGame *arg1 = (IGame *) 0 ;
+  std::vector< IUnit * > result;
+  
+  SWIG_check_num_args("IGame::GetUnits",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IGame::GetUnits",1,"IGame *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IGame,0))){
+    SWIG_fail_ptr("IGame_GetUnits",1,SWIGTYPE_p_IGame);
+  }
+  
+  result = (arg1)->GetUnits();
   {
     std::vector< IUnit * > * resultptr = new std::vector< IUnit * >((const std::vector< IUnit * > &) result);
     SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_std__vectorT_IUnit_p_t,1); SWIG_arg++;
@@ -5313,8 +5389,10 @@ static swig_lua_method swig_IGame_methods[] = {
     {"GetTypeByName", _wrap_IGame_GetTypeByName}, 
     {"ConfigFolderPath", _wrap_IGame_ConfigFolderPath}, 
     {"ReadFile", _wrap_IGame_ReadFile}, 
+    {"GetTeamID", _wrap_IGame_GetTeamID}, 
     {"GetEnemies", _wrap_IGame_GetEnemies}, 
     {"GetFriendlies", _wrap_IGame_GetFriendlies}, 
+    {"GetUnits", _wrap_IGame_GetUnits}, 
     {"GameName", _wrap_IGame_GameName}, 
     {"FileExists", _wrap_IGame_FileExists}, 
     {"AddMarker", _wrap_IGame_AddMarker}, 

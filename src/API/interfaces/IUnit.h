@@ -7,6 +7,7 @@
 class IUnit {
 public:
 	virtual int ID()=0;
+	virtual int Team()=0;
 	virtual std::string Name()=0;
 
 	virtual bool IsAlive()=0;

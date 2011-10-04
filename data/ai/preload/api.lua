@@ -52,6 +52,11 @@ game = {}
 		return game_engine:FileExists(filename)
 	end
 	
+	function game:GetTeamID(filename) -- returns boolean
+		--
+		return game_engine:GetTeamID(filename)
+	end
+	
 	function game:GetEnemies()
 		local ev = game_engine:GetEnemies()
 		local e = {}
@@ -62,6 +67,18 @@ game = {}
 		end
 		ev = nil
 		return e
+	end
+	
+	function game:GetUnits()
+		local fv = game_engine:GetUnits()
+		local f = {}
+		local i = 0
+		while i  < fv:size() do
+			table.insert(f,fv[i])
+			i = i + 1
+		end
+		fv = nil
+		return f
 	end
 	
 	function game:GetFriendlies()

@@ -10,6 +10,7 @@ public:
 	virtual ~CSpringUnit();
 
 	virtual int ID();
+	virtual int Team();
 	virtual std::string Name();
 
 	virtual void SetDead(bool dead=true);

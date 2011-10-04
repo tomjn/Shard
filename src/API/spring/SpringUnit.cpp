@@ -14,6 +14,10 @@ int CSpringUnit::ID(){
 	return unit->GetUnitId();
 }
 
+int CSpringUnit::Team(){
+	return unit->GetTeam();
+}
+
 std::string CSpringUnit::Name(){
 	springai::UnitDef* u = unit->GetDef();
 	if(u){

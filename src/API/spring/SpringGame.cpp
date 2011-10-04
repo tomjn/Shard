@@ -162,6 +162,22 @@ std::vector<IUnit*> CSpringGame::GetFriendlies(){
 	return friendliesv;
 }
 
+int CSpringGame::GetTeamID(){
+	return callback->GetTeamId();
+}
+
+std::vector<IUnit*> CSpringGame::GetUnits(){
+	std::vector<IUnit*> friendliesv;
+	
+	std::vector<springai::Unit*> friendlies = callback->GetTeamUnits();
+	std::vector<springai::Unit*>::iterator i = friendlies.begin();
+	for(;i != friendlies.end(); ++i){
+		CSpringUnit* unit = new CSpringUnit(callback,*i,this);
+		friendliesv.push_back(unit);
+	}
+	return friendliesv;
+}
+
 
 SResourceData CSpringGame::GetResource(int idx){
 	SResourceData res;
