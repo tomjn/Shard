@@ -13,17 +13,13 @@ public:
 
 	virtual std::string Name();
 
-	virtual bool CanDeploy();
-	virtual bool CanMoveWhenDeployed();
-	virtual bool CanFireWhenDeployed();
-	virtual bool CanBuildWhenDeployed();
-	virtual bool CanBuildWhenNotDeployed();
-
+	virtual float ReclaimSpeed();
 	virtual bool Extractor();
 
 	virtual float GetMaxHealth();
 
 	virtual int WeaponCount();
+	virtual float MaxWeaponDamage();
 
 	springai::UnitDef* GetUnitDef();
 
