@@ -188,7 +188,8 @@ SResourceData CSpringGame::GetResource(int idx){
 		for(;i != resources.end();++i){
 			springai::Resource* r = *i;
 			if(r->GetResourceId() == idx){
-				res.name = r->GetName();;
+				res.id = r->GetResourceId();
+				res.name = r->GetName();
 				res.gameframe = this->Frame();
 				res.income = callback->GetEconomy()->GetIncome(*r);
 				res.usage = callback->GetEconomy()->GetUsage(*r);
@@ -223,6 +224,7 @@ SResourceData CSpringGame::GetResource(std::string name){
 			std::string rname = r->GetName();
 			if(rname == name){
 				res.name = rname;
+				res.id = r->GetResourceId();
 				res.gameframe = this->Frame();
 				res.income = callback->GetEconomy()->GetIncome(*r);
 				res.usage = callback->GetEconomy()->GetUsage(*r);
