@@ -29,6 +29,20 @@ float CSpringUnitType::ReclaimSpeed(){
 	return unitDef->GetReclaimSpeed();
 }
 
+float CSpringUnitType::ResourceCost(int idx){
+	std::vector<springai::Resource*> resources = callback->GetResources();
+	if(!resources.empty()){
+		std::vector<springai::Resource*>::iterator i = resources.begin();
+		for(;i != resources.end();++i){
+			springai::Resource* r = *i;
+			if(r->GetResourceId() == idx){
+				return unitDef->GetCost(*r);
+			}
+		}
+	}
+	return -1;
+}
+
 bool CSpringUnitType::Extractor(){
 	springai::Resource* r = ((CSpringMap*)game->Map())->GetMetalResource();
 	return unitDef->GetResourceExtractorRange(*r);

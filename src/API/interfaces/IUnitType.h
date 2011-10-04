@@ -7,6 +7,7 @@ public:
 
 	virtual float ReclaimSpeed()=0;
 	virtual bool Extractor()=0;
+	virtual float ResourceCost(int idx)=0;
 
 	virtual float GetMaxHealth()=0;
 

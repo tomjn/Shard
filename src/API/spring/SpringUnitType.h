@@ -16,6 +16,8 @@ public:
 	virtual float ReclaimSpeed();
 	virtual bool Extractor();
 
+	virtual float ResourceCost(int idx);
+
 	virtual float GetMaxHealth();
 
 	virtual int WeaponCount();
