@@ -3387,116 +3387,20 @@ fail:
 }
 
 
-static int _wrap_IUnitType_CanDeploy(lua_State* L) {
+static int _wrap_IUnitType_ReclaimSpeed(lua_State* L) {
   int SWIG_arg = 0;
   IUnitType *arg1 = (IUnitType *) 0 ;
-  bool result;
+  float result;
   
-  SWIG_check_num_args("IUnitType::CanDeploy",1,1)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnitType::CanDeploy",1,"IUnitType *");
-  
-  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnitType,0))){
-    SWIG_fail_ptr("IUnitType_CanDeploy",1,SWIGTYPE_p_IUnitType);
-  }
-  
-  result = (bool)(arg1)->CanDeploy();
-  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
-  return SWIG_arg;
-  
-  if(0) SWIG_fail;
-  
-fail:
-  lua_error(L);
-  return SWIG_arg;
-}
-
-
-static int _wrap_IUnitType_CanMoveWhenDeployed(lua_State* L) {
-  int SWIG_arg = 0;
-  IUnitType *arg1 = (IUnitType *) 0 ;
-  bool result;
-  
-  SWIG_check_num_args("IUnitType::CanMoveWhenDeployed",1,1)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnitType::CanMoveWhenDeployed",1,"IUnitType *");
+  SWIG_check_num_args("IUnitType::ReclaimSpeed",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnitType::ReclaimSpeed",1,"IUnitType *");
   
   if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnitType,0))){
-    SWIG_fail_ptr("IUnitType_CanMoveWhenDeployed",1,SWIGTYPE_p_IUnitType);
+    SWIG_fail_ptr("IUnitType_ReclaimSpeed",1,SWIGTYPE_p_IUnitType);
   }
   
-  result = (bool)(arg1)->CanMoveWhenDeployed();
-  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
-  return SWIG_arg;
-  
-  if(0) SWIG_fail;
-  
-fail:
-  lua_error(L);
-  return SWIG_arg;
-}
-
-
-static int _wrap_IUnitType_CanFireWhenDeployed(lua_State* L) {
-  int SWIG_arg = 0;
-  IUnitType *arg1 = (IUnitType *) 0 ;
-  bool result;
-  
-  SWIG_check_num_args("IUnitType::CanFireWhenDeployed",1,1)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnitType::CanFireWhenDeployed",1,"IUnitType *");
-  
-  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnitType,0))){
-    SWIG_fail_ptr("IUnitType_CanFireWhenDeployed",1,SWIGTYPE_p_IUnitType);
-  }
-  
-  result = (bool)(arg1)->CanFireWhenDeployed();
-  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
-  return SWIG_arg;
-  
-  if(0) SWIG_fail;
-  
-fail:
-  lua_error(L);
-  return SWIG_arg;
-}
-
-
-static int _wrap_IUnitType_CanBuildWhenDeployed(lua_State* L) {
-  int SWIG_arg = 0;
-  IUnitType *arg1 = (IUnitType *) 0 ;
-  bool result;
-  
-  SWIG_check_num_args("IUnitType::CanBuildWhenDeployed",1,1)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnitType::CanBuildWhenDeployed",1,"IUnitType *");
-  
-  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnitType,0))){
-    SWIG_fail_ptr("IUnitType_CanBuildWhenDeployed",1,SWIGTYPE_p_IUnitType);
-  }
-  
-  result = (bool)(arg1)->CanBuildWhenDeployed();
-  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
-  return SWIG_arg;
-  
-  if(0) SWIG_fail;
-  
-fail:
-  lua_error(L);
-  return SWIG_arg;
-}
-
-
-static int _wrap_IUnitType_CanBuildWhenNotDeployed(lua_State* L) {
-  int SWIG_arg = 0;
-  IUnitType *arg1 = (IUnitType *) 0 ;
-  bool result;
-  
-  SWIG_check_num_args("IUnitType::CanBuildWhenNotDeployed",1,1)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnitType::CanBuildWhenNotDeployed",1,"IUnitType *");
-  
-  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnitType,0))){
-    SWIG_fail_ptr("IUnitType_CanBuildWhenNotDeployed",1,SWIGTYPE_p_IUnitType);
-  }
-  
-  result = (bool)(arg1)->CanBuildWhenNotDeployed();
-  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  result = (float)(arg1)->ReclaimSpeed();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
   return SWIG_arg;
   
   if(0) SWIG_fail;
@@ -3579,6 +3483,30 @@ fail:
 }
 
 
+static int _wrap_IUnitType_MaxWeaponDamage(lua_State* L) {
+  int SWIG_arg = 0;
+  IUnitType *arg1 = (IUnitType *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("IUnitType::MaxWeaponDamage",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnitType::MaxWeaponDamage",1,"IUnitType *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("IUnitType_MaxWeaponDamage",1,SWIGTYPE_p_IUnitType);
+  }
+  
+  result = (float)(arg1)->MaxWeaponDamage();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IUnitType_BuildOptions(lua_State* L) {
   int SWIG_arg = 0;
   IUnitType *arg1 = (IUnitType *) 0 ;
@@ -3612,14 +3540,11 @@ delete arg1;
 }
 static swig_lua_method swig_IUnitType_methods[] = {
     {"Name", _wrap_IUnitType_Name}, 
-    {"CanDeploy", _wrap_IUnitType_CanDeploy}, 
-    {"CanMoveWhenDeployed", _wrap_IUnitType_CanMoveWhenDeployed}, 
-    {"CanFireWhenDeployed", _wrap_IUnitType_CanFireWhenDeployed}, 
-    {"CanBuildWhenDeployed", _wrap_IUnitType_CanBuildWhenDeployed}, 
-    {"CanBuildWhenNotDeployed", _wrap_IUnitType_CanBuildWhenNotDeployed}, 
+    {"ReclaimSpeed", _wrap_IUnitType_ReclaimSpeed}, 
     {"Extractor", _wrap_IUnitType_Extractor}, 
     {"GetMaxHealth", _wrap_IUnitType_GetMaxHealth}, 
     {"WeaponCount", _wrap_IUnitType_WeaponCount}, 
+    {"MaxWeaponDamage", _wrap_IUnitType_MaxWeaponDamage}, 
     {"BuildOptions", _wrap_IUnitType_BuildOptions}, 
     {0,0}
 };
