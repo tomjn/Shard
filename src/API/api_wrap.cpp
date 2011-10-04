@@ -2932,6 +2932,57 @@ fail:
 }
 
 
+static int _wrap_IMapFeature_ResourceValue(lua_State* L) {
+  int SWIG_arg = 0;
+  IMapFeature *arg1 = (IMapFeature *) 0 ;
+  int arg2 ;
+  float result;
+  
+  SWIG_check_num_args("IMapFeature::ResourceValue",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IMapFeature::ResourceValue",1,"IMapFeature *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IMapFeature::ResourceValue",2,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IMapFeature,0))){
+    SWIG_fail_ptr("IMapFeature_ResourceValue",1,SWIGTYPE_p_IMapFeature);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  result = (float)(arg1)->ResourceValue(arg2);
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IMapFeature_Reclaimable(lua_State* L) {
+  int SWIG_arg = 0;
+  IMapFeature *arg1 = (IMapFeature *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IMapFeature::Reclaimable",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IMapFeature::Reclaimable",1,"IMapFeature *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IMapFeature,0))){
+    SWIG_fail_ptr("IMapFeature_Reclaimable",1,SWIGTYPE_p_IMapFeature);
+  }
+  
+  result = (bool)(arg1)->Reclaimable();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static void swig_delete_IMapFeature(void *obj) {
 IMapFeature *arg1 = (IMapFeature *) obj;
 delete arg1;
@@ -2940,6 +2991,8 @@ static swig_lua_method swig_IMapFeature_methods[] = {
     {"ID", _wrap_IMapFeature_ID}, 
     {"Name", _wrap_IMapFeature_Name}, 
     {"GetPosition", _wrap_IMapFeature_GetPosition}, 
+    {"ResourceValue", _wrap_IMapFeature_ResourceValue}, 
+    {"Reclaimable", _wrap_IMapFeature_Reclaimable}, 
     {0,0}
 };
 static swig_lua_attribute swig_IMapFeature_attributes[] = {
