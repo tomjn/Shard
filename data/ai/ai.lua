@@ -7,8 +7,6 @@ require "modules"
 AI = class(AIBase)
 
 function AI:Init()
-
-	game:SendToConsole("OHAI DER")
 	game:SendToConsole("Shard by AF - playing:"..game:GameName().." on:"..game.map:MapName())
 
 	self.modules = {}
