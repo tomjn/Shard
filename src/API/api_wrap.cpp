@@ -2194,6 +2194,56 @@ fail:
 }
 
 
+static int _wrap_SResourceData_id_set(lua_State* L) {
+  int SWIG_arg = 0;
+  SResourceData *arg1 = (SResourceData *) 0 ;
+  int arg2 ;
+  
+  SWIG_check_num_args("SResourceData::id",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("SResourceData::id",1,"SResourceData *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("SResourceData::id",2,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_SResourceData,0))){
+    SWIG_fail_ptr("SResourceData_id_set",1,SWIGTYPE_p_SResourceData);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  if (arg1) (arg1)->id = arg2;
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_SResourceData_id_get(lua_State* L) {
+  int SWIG_arg = 0;
+  SResourceData *arg1 = (SResourceData *) 0 ;
+  int result;
+  
+  SWIG_check_num_args("SResourceData::id",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("SResourceData::id",1,"SResourceData *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_SResourceData,0))){
+    SWIG_fail_ptr("SResourceData_id_get",1,SWIGTYPE_p_SResourceData);
+  }
+  
+  result = (int) ((arg1)->id);
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_SResourceData_name_set(lua_State* L) {
   int SWIG_arg = 0;
   SResourceData *arg1 = (SResourceData *) 0 ;
@@ -2503,6 +2553,7 @@ static swig_lua_method swig_SResourceData_methods[] = {
     {0,0}
 };
 static swig_lua_attribute swig_SResourceData_attributes[] = {
+    { "id", _wrap_SResourceData_id_get, _wrap_SResourceData_id_set},
     { "name", _wrap_SResourceData_name_get, _wrap_SResourceData_name_set},
     { "income", _wrap_SResourceData_income_get, _wrap_SResourceData_income_set},
     { "usage", _wrap_SResourceData_usage_get, _wrap_SResourceData_usage_set},
@@ -3435,6 +3486,33 @@ fail:
 }
 
 
+static int _wrap_IUnitType_ResourceCost(lua_State* L) {
+  int SWIG_arg = 0;
+  IUnitType *arg1 = (IUnitType *) 0 ;
+  int arg2 ;
+  float result;
+  
+  SWIG_check_num_args("IUnitType::ResourceCost",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnitType::ResourceCost",1,"IUnitType *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IUnitType::ResourceCost",2,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("IUnitType_ResourceCost",1,SWIGTYPE_p_IUnitType);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  result = (float)(arg1)->ResourceCost(arg2);
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IUnitType_GetMaxHealth(lua_State* L) {
   int SWIG_arg = 0;
   IUnitType *arg1 = (IUnitType *) 0 ;
@@ -3542,6 +3620,7 @@ static swig_lua_method swig_IUnitType_methods[] = {
     {"Name", _wrap_IUnitType_Name}, 
     {"ReclaimSpeed", _wrap_IUnitType_ReclaimSpeed}, 
     {"Extractor", _wrap_IUnitType_Extractor}, 
+    {"ResourceCost", _wrap_IUnitType_ResourceCost}, 
     {"GetMaxHealth", _wrap_IUnitType_GetMaxHealth}, 
     {"WeaponCount", _wrap_IUnitType_WeaponCount}, 
     {"MaxWeaponDamage", _wrap_IUnitType_MaxWeaponDamage}, 
