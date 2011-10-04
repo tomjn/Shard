@@ -15,8 +15,11 @@ game = {}
 	end
 	
 	function game:Frame() -- returns int/game frame number
-		--
-		return game_engine:Frame()
+		if Spring ~= nil then
+			return Spring.GetGameFrame() -- Spring Gadget API
+		else
+			return game_engine:Frame() -- Shard AI API
+		end
 	end
 	
 	function game:Test() -- debug
