@@ -118,8 +118,8 @@ game = {}
 		return game_engine:GetResourceCount()
 	end
 	
-	function game:GetResource(name) -- returns a Resource object, takes the name of the resource
-		return game_engine:GetResource(name)
+	function game:GetResourceByName(name) -- returns a Resource object, takes the name of the resource
+		return game_engine:GetResourceByName(name)
 	end
 	
 	function game:GetResources() -- returns a table of Resource objects, takes the name of the resource
@@ -166,9 +166,9 @@ map = {}
 		return f
 	end
 	
-	function map:GetMapFeatures(position,radius)
+	function map:GetMapFeaturesAt(position,radius)
 		local m = game_engine:Map()
-		local fv = m:GetMapFeatures(position,radius)
+		local fv = m:GetMapFeaturesAt(position,radius)
 		local f = {}
 		local i = 0
 		while i  < fv:size() do
