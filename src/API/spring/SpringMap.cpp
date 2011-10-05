@@ -156,7 +156,7 @@ std::vector<IMapFeature*> CSpringMap::GetMapFeatures(){
 	return mapFeatures;
 }
 
-std::vector<IMapFeature*> CSpringMap::GetMapFeatures(Position p, double radius){
+std::vector<IMapFeature*> CSpringMap::GetMapFeaturesAt(Position p, double radius){
 	SAIFloat3 pos;
 	pos.x = p.x;
 	pos.y = p.y;

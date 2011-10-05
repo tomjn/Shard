@@ -3131,7 +3131,7 @@ fail:
 }
 
 
-static int _wrap_IMap_GetMapFeatures__SWIG_0(lua_State* L) {
+static int _wrap_IMap_GetMapFeatures(lua_State* L) {
   int SWIG_arg = 0;
   IMap *arg1 = (IMap *) 0 ;
   SwigValueWrapper< std::vector< IMapFeature * > > result;
@@ -3158,7 +3158,7 @@ fail:
 }
 
 
-static int _wrap_IMap_GetMapFeatures__SWIG_1(lua_State* L) {
+static int _wrap_IMap_GetMapFeaturesAt(lua_State* L) {
   int SWIG_arg = 0;
   IMap *arg1 = (IMap *) 0 ;
   Position arg2 ;
@@ -3166,23 +3166,23 @@ static int _wrap_IMap_GetMapFeatures__SWIG_1(lua_State* L) {
   Position *argp2 ;
   SwigValueWrapper< std::vector< IMapFeature * > > result;
   
-  SWIG_check_num_args("IMap::GetMapFeatures",3,3)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IMap::GetMapFeatures",1,"IMap *");
-  if(!lua_isuserdata(L,2)) SWIG_fail_arg("IMap::GetMapFeatures",2,"Position");
-  if(!lua_isnumber(L,3)) SWIG_fail_arg("IMap::GetMapFeatures",3,"double");
+  SWIG_check_num_args("IMap::GetMapFeaturesAt",3,3)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IMap::GetMapFeaturesAt",1,"IMap *");
+  if(!lua_isuserdata(L,2)) SWIG_fail_arg("IMap::GetMapFeaturesAt",2,"Position");
+  if(!lua_isnumber(L,3)) SWIG_fail_arg("IMap::GetMapFeaturesAt",3,"double");
   
   if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IMap,0))){
-    SWIG_fail_ptr("IMap_GetMapFeatures",1,SWIGTYPE_p_IMap);
+    SWIG_fail_ptr("IMap_GetMapFeaturesAt",1,SWIGTYPE_p_IMap);
   }
   
   
   if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&argp2,SWIGTYPE_p_Position,0))){
-    SWIG_fail_ptr("IMap_GetMapFeatures",2,SWIGTYPE_p_Position);
+    SWIG_fail_ptr("IMap_GetMapFeaturesAt",2,SWIGTYPE_p_Position);
   }
   arg2 = *argp2;
   
   arg3 = (double)lua_tonumber(L, 3);
-  result = (arg1)->GetMapFeatures(arg2,arg3);
+  result = (arg1)->GetMapFeaturesAt(arg2,arg3);
   {
     std::vector< IMapFeature * > * resultptr = new std::vector< IMapFeature * >((const std::vector< IMapFeature * > &) result);
     SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,1); SWIG_arg++;
@@ -3194,65 +3194,6 @@ static int _wrap_IMap_GetMapFeatures__SWIG_1(lua_State* L) {
 fail:
   lua_error(L);
   return SWIG_arg;
-}
-
-
-static int _wrap_IMap_GetMapFeatures(lua_State* L) {
-  int argc;
-  int argv[4]={
-    1,2,3,4
-  };
-  
-  argc = lua_gettop(L);
-  if (argc == 1) {
-    int _v;
-    {
-      void *ptr;
-      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IMap, 0)) {
-        _v = 0;
-      } else {
-        _v = 1;
-      }
-    }
-    if (_v) {
-      return _wrap_IMap_GetMapFeatures__SWIG_0(L);
-    }
-  }
-  if (argc == 3) {
-    int _v;
-    {
-      void *ptr;
-      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IMap, 0)) {
-        _v = 0;
-      } else {
-        _v = 1;
-      }
-    }
-    if (_v) {
-      {
-        void *ptr;
-        if (lua_isuserdata(L,argv[1])==0 || SWIG_ConvertPtr(L,argv[1], (void **) &ptr, SWIGTYPE_p_Position, 0)) {
-          _v = 0;
-        } else {
-          _v = 1;
-        }
-      }
-      if (_v) {
-        {
-          _v = lua_isnumber(L,argv[2]);
-        }
-        if (_v) {
-          return _wrap_IMap_GetMapFeatures__SWIG_1(L);
-        }
-      }
-    }
-  }
-  
-  lua_pushstring(L,"Wrong arguments for overloaded function 'IMap_GetMapFeatures'\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    IMap::GetMapFeatures()\n"
-    "    IMap::GetMapFeatures(Position,double)\n");
-  lua_error(L);return 0;
 }
 
 
@@ -3452,6 +3393,7 @@ static swig_lua_method swig_IMap_methods[] = {
     {"GetMetalSpots", _wrap_IMap_GetMetalSpots}, 
     {"MapDimensions", _wrap_IMap_MapDimensions}, 
     {"GetMapFeatures", _wrap_IMap_GetMapFeatures}, 
+    {"GetMapFeaturesAt", _wrap_IMap_GetMapFeaturesAt}, 
     {"MinimumWindSpeed", _wrap_IMap_MinimumWindSpeed}, 
     {"MaximumWindSpeed", _wrap_IMap_MaximumWindSpeed}, 
     {"AverageWind", _wrap_IMap_AverageWind}, 
@@ -5354,7 +5296,7 @@ fail:
 }
 
 
-static int _wrap_IGame_GetResource__SWIG_0(lua_State* L) {
+static int _wrap_IGame_GetResource(lua_State* L) {
   int SWIG_arg = 0;
   IGame *arg1 = (IGame *) 0 ;
   int arg2 ;
@@ -5408,22 +5350,22 @@ fail:
 }
 
 
-static int _wrap_IGame_GetResource__SWIG_1(lua_State* L) {
+static int _wrap_IGame_GetResourceByName(lua_State* L) {
   int SWIG_arg = 0;
   IGame *arg1 = (IGame *) 0 ;
   std::string arg2 ;
   SResourceData result;
   
-  SWIG_check_num_args("IGame::GetResource",2,2)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IGame::GetResource",1,"IGame *");
-  if(!lua_isstring(L,2)) SWIG_fail_arg("IGame::GetResource",2,"std::string");
+  SWIG_check_num_args("IGame::GetResourceByName",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IGame::GetResourceByName",1,"IGame *");
+  if(!lua_isstring(L,2)) SWIG_fail_arg("IGame::GetResourceByName",2,"std::string");
   
   if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IGame,0))){
-    SWIG_fail_ptr("IGame_GetResource",1,SWIGTYPE_p_IGame);
+    SWIG_fail_ptr("IGame_GetResourceByName",1,SWIGTYPE_p_IGame);
   }
   
   (&arg2)->assign(lua_tostring(L,2),lua_strlen(L,2));
-  result = (arg1)->GetResource(arg2);
+  result = (arg1)->GetResourceByName(arg2);
   {
     SResourceData * resultptr = new SResourceData((const SResourceData &) result);
     SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_SResourceData,1); SWIG_arg++;
@@ -5435,60 +5377,6 @@ static int _wrap_IGame_GetResource__SWIG_1(lua_State* L) {
 fail:
   lua_error(L);
   return SWIG_arg;
-}
-
-
-static int _wrap_IGame_GetResource(lua_State* L) {
-  int argc;
-  int argv[3]={
-    1,2,3
-  };
-  
-  argc = lua_gettop(L);
-  if (argc == 2) {
-    int _v;
-    {
-      void *ptr;
-      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IGame, 0)) {
-        _v = 0;
-      } else {
-        _v = 1;
-      }
-    }
-    if (_v) {
-      {
-        _v = lua_isnumber(L,argv[1]);
-      }
-      if (_v) {
-        return _wrap_IGame_GetResource__SWIG_0(L);
-      }
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    {
-      void *ptr;
-      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IGame, 0)) {
-        _v = 0;
-      } else {
-        _v = 1;
-      }
-    }
-    if (_v) {
-      {
-        _v = lua_isstring(L,argv[1]);
-      }
-      if (_v) {
-        return _wrap_IGame_GetResource__SWIG_1(L);
-      }
-    }
-  }
-  
-  lua_pushstring(L,"Wrong arguments for overloaded function 'IGame_GetResource'\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    IGame::GetResource(int)\n"
-    "    IGame::GetResource(std::string)\n");
-  lua_error(L);return 0;
 }
 
 
@@ -5536,8 +5424,9 @@ static swig_lua_method swig_IGame_methods[] = {
     {"FileExists", _wrap_IGame_FileExists}, 
     {"AddMarker", _wrap_IGame_AddMarker}, 
     {"SendToContent", _wrap_IGame_SendToContent}, 
-    {"GetResourceCount", _wrap_IGame_GetResourceCount}, 
     {"GetResource", _wrap_IGame_GetResource}, 
+    {"GetResourceCount", _wrap_IGame_GetResourceCount}, 
+    {"GetResourceByName", _wrap_IGame_GetResourceByName}, 
     {"Me", _wrap_IGame_Me}, 
     {0,0}
 };

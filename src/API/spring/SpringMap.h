@@ -17,7 +17,7 @@ public:
 	virtual Position MapDimensions();
 
 	virtual std::vector<IMapFeature*> GetMapFeatures();
-	virtual std::vector<IMapFeature*> GetMapFeatures(Position p, double radius);
+	virtual std::vector<IMapFeature*> GetMapFeaturesAt(Position p, double radius);
 
 	virtual double MinimumWindSpeed();
 	virtual double MaximumWindSpeed();

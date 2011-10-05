@@ -44,7 +44,7 @@ public:
 
 	virtual SResourceData GetResource(int idx);
 	virtual int GetResourceCount();
-	virtual SResourceData GetResource(std::string name);
+	virtual SResourceData GetResourceByName(std::string name);
 	
 	IUnitType* ToIUnitType(springai::UnitDef* def);
 protected:

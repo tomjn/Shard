@@ -213,7 +213,7 @@ int CSpringGame::GetResourceCount(){
 
 }
 
-SResourceData CSpringGame::GetResource(std::string name){
+SResourceData CSpringGame::GetResourceByName(std::string name){
 	SResourceData res;
 	std::vector<springai::Resource*> resources = callback->GetResources();
 	if(!resources.empty()){

@@ -38,7 +38,7 @@ public:
 
 	virtual SResourceData GetResource(int idx)=0;
 	virtual int GetResourceCount()=0;
-	virtual SResourceData GetResource(std::string name)=0;
+	virtual SResourceData GetResourceByName(std::string name)=0;
 
 	virtual IAI* Me()=0;
 };
