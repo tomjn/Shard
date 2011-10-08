@@ -11,18 +11,19 @@ end
 
 function UnitHandler:Init()
 	self.units = {}
+	self.myUnits = {}
 	self.behaviourFactory = BehaviourFactory()
 	self.behaviourFactory:Init()
 end
 
 function UnitHandler:Update()
-	for k,v in pairs(self.units) do
+	for k,v in pairs(self.myUnits) do
 		v:Update()
 	end
 end
 
 function UnitHandler:GameEnd()
-	for k,v in pairs(self.units) do
+	for k,v in pairs(self.myUnits) do
 		v:GameEnd()
 	end
 end
@@ -32,8 +33,11 @@ function UnitHandler:UnitCreated(engineunit)
 	self.units[engineunit:ID()] = u
 	u:SetEngineRepresentation(engineunit)
 	u:Init()
-	self.behaviourFactory:AddBehaviours(u)
-	for k,v in pairs(self.units) do
+	if engineunit:Team() == game:GetTeamID() then
+		self.myUnits[engineunit:ID()] = u
+		self.behaviourFactory:AddBehaviours(u)
+	end
+	for k,v in pairs(self.myUnits) do
 		v:UnitCreated(u)
 	end
 end
@@ -41,7 +45,7 @@ end
 function UnitHandler:UnitBuilt(engineunit)
 	local u = self:AIRepresentation(engineunit)
 	if u ~= nil then
-		for k,v in pairs(self.units) do
+		for k,v in pairs(self.myUnits) do
 			v:UnitBuilt(u)
 		end
 	end
@@ -50,17 +54,18 @@ end
 function UnitHandler:UnitDead(engineunit)
 	local u = self:AIRepresentation(engineunit)
 	if u ~= nil then
-		for k,v in pairs(self.units) do
+		for k,v in pairs(self.myUnits) do
 			v:UnitDead(u)
 		end
 	end
 	self.units[engineunit:ID()] = nil
+	self.myUnits[engineunit:ID()] = nil
 end
 
 function UnitHandler:UnitDamaged(engineunit,attacker)
 	local u = self:AIRepresentation(engineunit)
 	local a = self:AIRepresentation(attacker)
-	for k,v in pairs(self.units) do
+	for k,v in pairs(self.myUnits) do
 		v:UnitDamaged(u,a)
 	end
 end
@@ -74,9 +79,13 @@ function UnitHandler:AIRepresentation(engineUnit)
 	if u == nil then
 		u = Unit()
 		self.units[engineUnit:ID()] = u
+		
 		u:SetEngineRepresentation(engineUnit)
 		u:Init()
-		self.behaviourFactory:AddBehaviours(u)
+		if engineunit:Team() == game:GetTeamID() then
+			self.behaviourFactory:AddBehaviours(u)
+			self.myUnits[engineUnit:ID()] = u
+		end
 	end
 	return u
 end

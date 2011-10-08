@@ -24,21 +24,23 @@ function AttackHandler:GameEnd()
 	--
 end
 
-function AttackHandler:UnitCreated(unit)
+function AttackHandler:UnitCreated(engineunit)
 	--
 end
 
-function AttackHandler:UnitBuilt(unit)
+function AttackHandler:UnitBuilt(engineunit)
 	--
 end
 
-function AttackHandler:UnitDead(unit)
-	self.counter = self.counter - 0.05
-	self.counter = math.max(self.counter,5)
+function AttackHandler:UnitDead(engineunit)
+	if engineunit:Team() == game:GetTeamID() then
+		self.counter = self.counter - 0.05
+		self.counter = math.max(self.counter,5)
+	end
 end
 
 
-function AttackHandler:UnitIdle(unit)
+function AttackHandler:UnitIdle(engineunit)
 	--
 end
 
