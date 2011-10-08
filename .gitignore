@@ -25,6 +25,8 @@
 
 # NTai build folders
 /vstudio/Intermediate
+/vstudio/Output
+/vstudio/ipch
 
 # SVN
 .svn
@@ -50,6 +52,10 @@
 *.user
 *.ncb
 *.suo
+*.old
+*.sdf
+*.opensdf
+*.filters
 
 # ???
 progress.make
