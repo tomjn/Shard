@@ -52,9 +52,9 @@ game = {}
 		return game_engine:FileExists(filename)
 	end
 	
-	function game:GetTeamID(filename) -- returns boolean
+	function game:GetTeamID() -- returns boolean
 		--
-		return game_engine:GetTeamID(filename)
+		return game_engine:GetTeamID()
 	end
 	
 	function game:GetEnemies()
