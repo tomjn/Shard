@@ -8,7 +8,9 @@ struct SResourceData {
 		income = 0;
 		usage = 0;
 		name = "";
+		id = 0;
 	}
+	int id;
 	std::string name;
 	double income;
 	double usage;

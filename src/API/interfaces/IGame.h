@@ -21,8 +21,10 @@ public:
 	virtual const char* ConfigFolderPath()=0;
 	virtual std::string ReadFile(std::string filename)=0;
 
+	virtual int GetTeamID()=0;
 	virtual std::vector<IUnit*> GetEnemies()=0;
 	virtual std::vector<IUnit*> GetFriendlies()=0;
+	virtual std::vector<IUnit*> GetUnits()=0;
 	
 
 	virtual std::string GameName()=0;
@@ -36,7 +38,7 @@ public:
 
 	virtual SResourceData GetResource(int idx)=0;
 	virtual int GetResourceCount()=0;
-	virtual SResourceData GetResource(std::string name)=0;
+	virtual SResourceData GetResourceByName(std::string name)=0;
 
 	virtual IAI* Me()=0;
 };

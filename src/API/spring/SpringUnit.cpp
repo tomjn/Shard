@@ -1,6 +1,7 @@
 #include "spring_api.h"
 #include "WrappResource.h"
 #include "ExternalAI/Interface/AISCommands.h" // for UNIT_COMMAND_BUILD_NO_FACING
+#include <vector>
 
 CSpringUnit::CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, IGame* game)
 : callback(callback), unit(u), dead(false), game(game){
@@ -14,6 +15,10 @@ CSpringUnit::~CSpringUnit(){
 
 int CSpringUnit::ID(){
 	return unit->GetUnitId();
+}
+
+int CSpringUnit::Team(){
+	return unit->GetTeam();
 }
 
 std::string CSpringUnit::Name(){
@@ -61,11 +66,6 @@ bool CSpringUnit::CanDeploy(){
 
 bool CSpringUnit::CanBuild(){
 	return (unit->GetDef()->GetBuildOptions().size() > 0);
-}
-
-
-bool CSpringUnit::CanMorph(){
-	return false;
 }
 
 
@@ -189,6 +189,19 @@ bool CSpringUnit::Attack(IUnit* unit){
 bool CSpringUnit::Repair(IUnit* unit){
 	springai::Unit* u = ((CSpringUnit*)unit)->unit;
 	this->unit->Attack(u);
+	return true;
+}
+/*
+[23:19:39] <[RoX]knorke> who/whatever wants to use the custom commands (morph,jump,...) must know the numbers
+[23:20:14] <[RoX]knorke> http://code.google.com/p/conflictterra/source/browse/games/CT/LuaRules/Gadgets/unit_morph.lua
+[23:20:20] <[RoX]knorke> local CMD_MORPH_STOP = 32210
+[23:20:21] <[RoX]knorke> local CMD_MORPH = 31210
+[23:20:47] <[RoX]knorke> http://code.google.com/p/conflictterra/source/browse/games/CT/LuaRules/Gadgets/Jumpjets_lua.lua
+[23:20:55] <[RoX]knorke> local CMD_JUMP = 38521
+*/
+bool CSpringUnit::MorphInto(IUnitType* t){
+	std::vector<float> params_list;
+	unit->ExecuteCustomCommand(31210, params_list);
 	return true;
 }
 

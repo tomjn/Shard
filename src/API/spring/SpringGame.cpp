@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "spring_api.h"
+#include "SkirmishAI.h"
 
 CSpringGame::CSpringGame(springai::OOAICallback* callback)
 : callback(callback){
@@ -151,6 +152,22 @@ std::vector<IUnit*> CSpringGame::GetFriendlies(){
 	return friendliesv;
 }
 
+int CSpringGame::GetTeamID(){
+	return callback->GetSkirmishAI()->GetTeamId();
+}
+
+std::vector<IUnit*> CSpringGame::GetUnits(){
+	std::vector<IUnit*> friendliesv;
+	
+	std::vector<springai::Unit*> friendlies = callback->GetTeamUnits();
+	std::vector<springai::Unit*>::iterator i = friendlies.begin();
+	for(;i != friendlies.end(); ++i){
+		CSpringUnit* unit = new CSpringUnit(callback,*i,this);
+		friendliesv.push_back(unit);
+	}
+	return friendliesv;
+}
+
 
 SResourceData CSpringGame::GetResource(int idx){
 	SResourceData res;
@@ -161,7 +178,8 @@ SResourceData CSpringGame::GetResource(int idx){
 		for(;i != resources.end();++i){
 			springai::Resource* r = *i;
 			if(r->GetResourceId() == idx){
-				res.name = r->GetName();;
+				res.id = r->GetResourceId();
+				res.name = r->GetName();
 				res.gameframe = this->Frame();
 				res.income = callback->GetEconomy()->GetIncome(r);
 				res.usage = callback->GetEconomy()->GetUsage(r);
@@ -185,7 +203,7 @@ int CSpringGame::GetResourceCount(){
 
 }
 
-SResourceData CSpringGame::GetResource(std::string name){
+SResourceData CSpringGame::GetResourceByName(std::string name){
 	SResourceData res;
 	std::vector<springai::Resource*> resources = callback->GetResources();
 	if(!resources.empty()){
@@ -196,6 +214,7 @@ SResourceData CSpringGame::GetResource(std::string name){
 			std::string rname = r->GetName();
 			if(rname == name){
 				res.name = rname;
+				res.id = r->GetResourceId();
 				res.gameframe = this->Frame();
 				res.income = callback->GetEconomy()->GetIncome(r);
 				res.usage = callback->GetEconomy()->GetUsage(r);

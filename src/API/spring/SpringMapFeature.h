@@ -17,6 +17,9 @@ public:
 	virtual std::string Name();
 	virtual Position GetPosition();
 
+	virtual float ResourceValue(int idx);
+	virtual bool Reclaimable();
+
 	springai::Feature* feature;
 protected:
 	springai::OOAICallback* callback;

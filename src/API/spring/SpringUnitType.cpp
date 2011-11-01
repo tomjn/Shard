@@ -1,5 +1,13 @@
 #include "spring_api.h"
 
+#include "Engine.h"
+#include "OOAICallback.h"
+#include "ExternalAI/Interface/AISEvents.h"
+#include "ExternalAI/Interface/AISCommands.h"
+#include "UnitDef.h"
+#include "WeaponMount.h"
+#include "WeaponDef.h"
+#include "Damage.h"
 #include "SpringGame.h"
 #include "SpringUnitType.h"
 
@@ -16,24 +24,22 @@ std::string CSpringUnitType::Name(){
 	return this->unitDef->GetName();
 }
 
-bool CSpringUnitType::CanDeploy(){
-	return false;
+float CSpringUnitType::ReclaimSpeed(){
+	return unitDef->GetReclaimSpeed();
 }
 
-bool CSpringUnitType::CanMoveWhenDeployed(){
-	return false;
-}
-
-bool CSpringUnitType::CanFireWhenDeployed(){
-	return true;
-}
-
-bool CSpringUnitType::CanBuildWhenDeployed(){
-	return true;
-}
-
-bool CSpringUnitType::CanBuildWhenNotDeployed(){
-	return true;
+float CSpringUnitType::ResourceCost(int idx){
+	std::vector<springai::Resource*> resources = callback->GetResources();
+	if(!resources.empty()){
+		std::vector<springai::Resource*>::iterator i = resources.begin();
+		for(;i != resources.end();++i){
+			springai::Resource* r = *i;
+			if(r->GetResourceId() == idx){
+				return unitDef->GetCost(r);
+			}
+		}
+	}
+	return -1;
 }
 
 bool CSpringUnitType::Extractor(){
@@ -47,6 +53,21 @@ float CSpringUnitType::GetMaxHealth(){
 
 int CSpringUnitType::WeaponCount(){
 	return unitDef->GetWeaponMounts().size();
+}
+
+float CSpringUnitType::MaxWeaponDamage(){
+	std::vector<springai::WeaponMount*> weaponMounts = unitDef->GetWeaponMounts();
+	if(weaponMounts.size() > 0){
+		float output = 0;
+		std::vector<springai::WeaponMount*>::iterator i = weaponMounts.begin();
+		for(; i != weaponMounts.begin();++i){
+			springai::WeaponMount* m = *i;
+			float damage = *(m->GetWeaponDef()->GetDamage()->GetTypes().begin());
+			output += damage;
+		}
+		return output;
+	}
+	return 0;
 }
 
 springai::UnitDef* CSpringUnitType::GetUnitDef(){

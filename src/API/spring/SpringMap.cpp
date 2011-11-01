@@ -129,7 +129,7 @@ std::vector<IMapFeature*> CSpringMap::GetMapFeatures(){
 	return mapFeatures;
 }
 
-std::vector<IMapFeature*> CSpringMap::GetMapFeatures(Position p, double radius){
+std::vector<IMapFeature*> CSpringMap::GetMapFeaturesAt(Position p, double radius){
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
 	std::vector< IMapFeature*> mapFeatures;
 	

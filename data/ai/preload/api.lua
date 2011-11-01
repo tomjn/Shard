@@ -15,8 +15,11 @@ game = {}
 	end
 	
 	function game:Frame() -- returns int/game frame number
-		--
-		return game_engine:Frame()
+		if Spring ~= nil then
+			return Spring.GetGameFrame() -- Spring Gadget API
+		else
+			return game_engine:Frame() -- Shard AI API
+		end
 	end
 	
 	function game:Test() -- debug
@@ -49,6 +52,11 @@ game = {}
 		return game_engine:FileExists(filename)
 	end
 	
+	function game:GetTeamID(filename) -- returns boolean
+		--
+		return game_engine:GetTeamID(filename)
+	end
+	
 	function game:GetEnemies()
 		local ev = game_engine:GetEnemies()
 		local e = {}
@@ -59,6 +67,18 @@ game = {}
 		end
 		ev = nil
 		return e
+	end
+	
+	function game:GetUnits()
+		local fv = game_engine:GetUnits()
+		local f = {}
+		local i = 0
+		while i  < fv:size() do
+			table.insert(f,fv[i])
+			i = i + 1
+		end
+		fv = nil
+		return f
 	end
 	
 	function game:GetFriendlies()
@@ -98,8 +118,8 @@ game = {}
 		return game_engine:GetResourceCount()
 	end
 	
-	function game:GetResource(name) -- returns a Resource object, takes the name of the resource
-		return game_engine:GetResource(name)
+	function game:GetResourceByName(name) -- returns a Resource object, takes the name of the resource
+		return game_engine:GetResourceByName(name)
 	end
 	
 	function game:GetResources() -- returns a table of Resource objects, takes the name of the resource
@@ -146,9 +166,9 @@ map = {}
 		return f
 	end
 	
-	function map:GetMapFeatures(position,radius)
+	function map:GetMapFeaturesAt(position,radius)
 		local m = game_engine:Map()
-		local fv = m:GetMapFeatures(position,radius)
+		local fv = m:GetMapFeaturesAt(position,radius)
 		local f = {}
 		local i = 0
 		while i  < fv:size() do
