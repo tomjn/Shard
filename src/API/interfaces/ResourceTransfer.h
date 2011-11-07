@@ -2,11 +2,13 @@
 #define SRESOURCEUSAGE_H
 
 
-struct SResourceTransfer {
+class SResourceTransfer {
+public:
 	SResourceTransfer(){
-		consumption = 0;
-		generation = 0;
-		rate = 1;
+		this->consumption = 0;
+		this->generation = 0;
+		this->rate = 1;
+		this->gameframe = 0;
 	}
 	SResourceData resource;
 

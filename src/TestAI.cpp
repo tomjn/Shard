@@ -35,7 +35,6 @@ int lua_epcall(lua_State *L, int nargs){
 	//return i;
 
 	//when i go to make a Lua call from c++ I do
-	int size0 = lua_gettop(L);
 	int error_index = lua_gettop(L) - nargs;
 
 	//push error handler onto stack..

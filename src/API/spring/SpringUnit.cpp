@@ -116,7 +116,6 @@ bool CSpringUnit::Build(IUnitType* t){
 		if((!ud->IsAbleToMove())&&(ud->GetType() == std::string("factory"))){
 			return Build(t,p);
 		}else{
-			int xs = ud->GetXSize();
 			int ms = std::max(ud->GetXSize(),ud->GetZSize());
 			double dsp = 6;
 			double radius = 500;

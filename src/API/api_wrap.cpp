@@ -739,8 +739,8 @@ SWIG_UnpackDataName(const char *c, void *ptr, size_t sz, const char *name) {
 extern "C" {
 #endif
 
-#include "lua/lua.h"
-#include "lua/lauxlib.h"
+#include "lua.h"
+#include "lauxlib.h"
 #include <stdlib.h>  /* for malloc */
 #include <assert.h>  /* for a few sanity tests */
 
@@ -1755,6 +1755,16 @@ SWIGINTERN IUnit *std_vector_Sl_IUnit_Sm__Sg____getitem__(std::vector< IUnit * >
 				return (*self)[idx];
 			}
 SWIGINTERN void std_vector_Sl_IUnit_Sm__Sg____setitem__(std::vector< IUnit * > *self,unsigned int idx,IUnit *val){
+				if (idx>=self->size())
+					throw std::out_of_range("in vector::__setitem__()");
+				(*self)[idx]=val;
+			}
+SWIGINTERN IMapFeature *std_vector_Sl_IMapFeature_Sm__Sg____getitem__(std::vector< IMapFeature * > *self,unsigned int idx){
+				if (idx>=self->size())
+					throw std::out_of_range("in vector::__getitem__()");
+				return (*self)[idx];
+			}
+SWIGINTERN void std_vector_Sl_IMapFeature_Sm__Sg____setitem__(std::vector< IMapFeature * > *self,unsigned int idx,IMapFeature *val){
 				if (idx>=self->size())
 					throw std::out_of_range("in vector::__setitem__()");
 				(*self)[idx]=val;
@@ -3134,7 +3144,7 @@ fail:
 static int _wrap_IMap_GetMapFeatures(lua_State* L) {
   int SWIG_arg = 0;
   IMap *arg1 = (IMap *) 0 ;
-  SwigValueWrapper< std::vector< IMapFeature * > > result;
+  std::vector< IMapFeature * > result;
   
   SWIG_check_num_args("IMap::GetMapFeatures",1,1)
   if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IMap::GetMapFeatures",1,"IMap *");
@@ -3164,7 +3174,7 @@ static int _wrap_IMap_GetMapFeaturesAt(lua_State* L) {
   Position arg2 ;
   double arg3 ;
   Position *argp2 ;
-  SwigValueWrapper< std::vector< IMapFeature * > > result;
+  std::vector< IMapFeature * > result;
   
   SWIG_check_num_args("IMap::GetMapFeaturesAt",3,3)
   if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IMap::GetMapFeaturesAt",1,"IMap *");
@@ -6610,6 +6620,453 @@ static swig_lua_class *swig_std_vector_Sl_IUnit_Sm__Sg__bases[] = {0};
 static const char *swig_std_vector_Sl_IUnit_Sm__Sg__base_names[] = {0};
 static swig_lua_class _wrap_class_std_vector_Sl_IUnit_Sm__Sg_ = { "vectorUnits", &SWIGTYPE_p_std__vectorT_IUnit_p_t,_wrap_new_vectorUnits, swig_delete_vectorUnits, swig_std_vector_Sl_IUnit_Sm__Sg__methods, swig_std_vector_Sl_IUnit_Sm__Sg__attributes, swig_std_vector_Sl_IUnit_Sm__Sg__bases, swig_std_vector_Sl_IUnit_Sm__Sg__base_names };
 
+static int _wrap_new_vectorMapFeature__SWIG_0(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *result = 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::vector",0,0)
+  result = (std::vector< IMapFeature * > *)new std::vector< IMapFeature * >();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,1); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_new_vectorMapFeature__SWIG_1(lua_State* L) {
+  int SWIG_arg = 0;
+  unsigned int arg1 ;
+  std::vector< IMapFeature * > *result = 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::vector",1,1)
+  if(!lua_isnumber(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::vector",1,"unsigned int");
+  SWIG_contract_assert((lua_tonumber(L,1)>=0),"number must not be negative")
+  arg1 = (unsigned int)lua_tonumber(L, 1);
+  result = (std::vector< IMapFeature * > *)new std::vector< IMapFeature * >(arg1);
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,1); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_new_vectorMapFeature__SWIG_2(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = 0 ;
+  std::vector< IMapFeature * > *result = 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::vector",1,1)
+  if(!lua_isuserdata(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::vector",1,"std::vector< IMapFeature * > const &");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("new_vectorMapFeature",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  result = (std::vector< IMapFeature * > *)new std::vector< IMapFeature * >((std::vector< IMapFeature * > const &)*arg1);
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,1); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_new_vectorMapFeature__SWIG_3(lua_State* L) {
+  int SWIG_arg = 0;
+  unsigned int arg1 ;
+  IMapFeature *arg2 = (IMapFeature *) 0 ;
+  std::vector< IMapFeature * > *result = 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::vector",2,2)
+  if(!lua_isnumber(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::vector",1,"unsigned int");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("std::vector< IMapFeature * >::vector",2,"IMapFeature *");
+  SWIG_contract_assert((lua_tonumber(L,1)>=0),"number must not be negative")
+  arg1 = (unsigned int)lua_tonumber(L, 1);
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IMapFeature,0))){
+    SWIG_fail_ptr("new_vectorMapFeature",2,SWIGTYPE_p_IMapFeature);
+  }
+  
+  result = (std::vector< IMapFeature * > *)new std::vector< IMapFeature * >(arg1,arg2);
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,1); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_new_vectorMapFeature(lua_State* L) {
+  int argc;
+  int argv[3]={
+    1,2,3
+  };
+  
+  argc = lua_gettop(L);
+  if (argc == 0) {
+    return _wrap_new_vectorMapFeature__SWIG_0(L);
+  }
+  if (argc == 1) {
+    int _v;
+    {
+      void *ptr;
+      if (lua_isuserdata(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_std__vectorT_IMapFeature_p_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      return _wrap_new_vectorMapFeature__SWIG_2(L);
+    }
+  }
+  if (argc == 1) {
+    int _v;
+    {
+      _v = lua_isnumber(L,argv[0]);
+    }
+    if (_v) {
+      return _wrap_new_vectorMapFeature__SWIG_1(L);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    {
+      _v = lua_isnumber(L,argv[0]);
+    }
+    if (_v) {
+      {
+        void *ptr;
+        if (SWIG_isptrtype(L,argv[1])==0 || SWIG_ConvertPtr(L,argv[1], (void **) &ptr, SWIGTYPE_p_IMapFeature, 0)) {
+          _v = 0;
+        } else {
+          _v = 1;
+        }
+      }
+      if (_v) {
+        return _wrap_new_vectorMapFeature__SWIG_3(L);
+      }
+    }
+  }
+  
+  lua_pushstring(L,"Wrong arguments for overloaded function 'new_vectorMapFeature'\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    std::vector< IMapFeature * >::vector()\n"
+    "    std::vector< IMapFeature * >::vector(unsigned int)\n"
+    "    std::vector< IMapFeature * >::vector(std::vector< IMapFeature * > const &)\n"
+    "    std::vector< IMapFeature * >::vector(unsigned int,IMapFeature *)\n");
+  lua_error(L);return 0;
+}
+
+
+static int _wrap_vectorMapFeature_size(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) 0 ;
+  unsigned int result;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::size",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::size",1,"std::vector< IMapFeature * > const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("vectorMapFeature_size",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  result = (unsigned int)((std::vector< IMapFeature * > const *)arg1)->size();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vectorMapFeature_max_size(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) 0 ;
+  unsigned int result;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::max_size",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::max_size",1,"std::vector< IMapFeature * > const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("vectorMapFeature_max_size",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  result = (unsigned int)((std::vector< IMapFeature * > const *)arg1)->max_size();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vectorMapFeature_empty(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::empty",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::empty",1,"std::vector< IMapFeature * > const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("vectorMapFeature_empty",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  result = (bool)((std::vector< IMapFeature * > const *)arg1)->empty();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vectorMapFeature_clear(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::clear",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::clear",1,"std::vector< IMapFeature * > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("vectorMapFeature_clear",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  (arg1)->clear();
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vectorMapFeature_push_back(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) 0 ;
+  IMapFeature *arg2 = (IMapFeature *) 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::push_back",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::push_back",1,"std::vector< IMapFeature * > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("std::vector< IMapFeature * >::push_back",2,"IMapFeature *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("vectorMapFeature_push_back",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IMapFeature,0))){
+    SWIG_fail_ptr("vectorMapFeature_push_back",2,SWIGTYPE_p_IMapFeature);
+  }
+  
+  (arg1)->push_back(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vectorMapFeature_pop_back(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::pop_back",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::pop_back",1,"std::vector< IMapFeature * > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("vectorMapFeature_pop_back",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  (arg1)->pop_back();
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vectorMapFeature_front(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) 0 ;
+  IMapFeature *result = 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::front",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::front",1,"std::vector< IMapFeature * > const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("vectorMapFeature_front",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  result = (IMapFeature *)((std::vector< IMapFeature * > const *)arg1)->front();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_IMapFeature,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vectorMapFeature_back(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) 0 ;
+  IMapFeature *result = 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::back",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::back",1,"std::vector< IMapFeature * > const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("vectorMapFeature_back",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  result = (IMapFeature *)((std::vector< IMapFeature * > const *)arg1)->back();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_IMapFeature,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vectorMapFeature___getitem(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) 0 ;
+  unsigned int arg2 ;
+  IMapFeature *result = 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::__getitem__",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::__getitem__",1,"std::vector< IMapFeature * > *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("std::vector< IMapFeature * >::__getitem__",2,"unsigned int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("vectorMapFeature___getitem",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  SWIG_contract_assert((lua_tonumber(L,2)>=0),"number must not be negative")
+  arg2 = (unsigned int)lua_tonumber(L, 2);
+  try {
+    result = (IMapFeature *)std_vector_Sl_IMapFeature_Sm__Sg____getitem__(arg1,arg2);
+  }
+  catch(std::out_of_range &_e) {
+    SWIG_exception(SWIG_IndexError, (&_e)->what());
+  }
+  
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_IMapFeature,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_vectorMapFeature___setitem(lua_State* L) {
+  int SWIG_arg = 0;
+  std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) 0 ;
+  unsigned int arg2 ;
+  IMapFeature *arg3 = (IMapFeature *) 0 ;
+  
+  SWIG_check_num_args("std::vector< IMapFeature * >::__setitem__",3,3)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("std::vector< IMapFeature * >::__setitem__",1,"std::vector< IMapFeature * > *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("std::vector< IMapFeature * >::__setitem__",2,"unsigned int");
+  if(!SWIG_isptrtype(L,3)) SWIG_fail_arg("std::vector< IMapFeature * >::__setitem__",3,"IMapFeature *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t,0))){
+    SWIG_fail_ptr("vectorMapFeature___setitem",1,SWIGTYPE_p_std__vectorT_IMapFeature_p_t);
+  }
+  
+  SWIG_contract_assert((lua_tonumber(L,2)>=0),"number must not be negative")
+  arg2 = (unsigned int)lua_tonumber(L, 2);
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&arg3,SWIGTYPE_p_IMapFeature,0))){
+    SWIG_fail_ptr("vectorMapFeature___setitem",3,SWIGTYPE_p_IMapFeature);
+  }
+  
+  try {
+    std_vector_Sl_IMapFeature_Sm__Sg____setitem__(arg1,arg2,arg3);
+  }
+  catch(std::out_of_range &_e) {
+    SWIG_exception(SWIG_IndexError, (&_e)->what());
+  }
+  
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static void swig_delete_vectorMapFeature(void *obj) {
+std::vector< IMapFeature * > *arg1 = (std::vector< IMapFeature * > *) obj;
+delete arg1;
+}
+static swig_lua_method swig_std_vector_Sl_IMapFeature_Sm__Sg__methods[] = {
+    {"size", _wrap_vectorMapFeature_size}, 
+    {"max_size", _wrap_vectorMapFeature_max_size}, 
+    {"empty", _wrap_vectorMapFeature_empty}, 
+    {"clear", _wrap_vectorMapFeature_clear}, 
+    {"push_back", _wrap_vectorMapFeature_push_back}, 
+    {"pop_back", _wrap_vectorMapFeature_pop_back}, 
+    {"front", _wrap_vectorMapFeature_front}, 
+    {"back", _wrap_vectorMapFeature_back}, 
+    {"__getitem", _wrap_vectorMapFeature___getitem}, 
+    {"__setitem", _wrap_vectorMapFeature___setitem}, 
+    {0,0}
+};
+static swig_lua_attribute swig_std_vector_Sl_IMapFeature_Sm__Sg__attributes[] = {
+    {0,0,0}
+};
+static swig_lua_class *swig_std_vector_Sl_IMapFeature_Sm__Sg__bases[] = {0};
+static const char *swig_std_vector_Sl_IMapFeature_Sm__Sg__base_names[] = {0};
+static swig_lua_class _wrap_class_std_vector_Sl_IMapFeature_Sm__Sg_ = { "vectorMapFeature", &SWIGTYPE_p_std__vectorT_IMapFeature_p_t,_wrap_new_vectorMapFeature, swig_delete_vectorMapFeature, swig_std_vector_Sl_IMapFeature_Sm__Sg__methods, swig_std_vector_Sl_IMapFeature_Sm__Sg__attributes, swig_std_vector_Sl_IMapFeature_Sm__Sg__bases, swig_std_vector_Sl_IMapFeature_Sm__Sg__base_names };
+
 #ifdef __cplusplus
 }
 #endif
@@ -6638,7 +7095,7 @@ static swig_type_info _swigt__p_Position = {"_p_Position", "Position *", 0, 0, (
 static swig_type_info _swigt__p_SResourceData = {"_p_SResourceData", "SResourceData *", 0, 0, (void*)&_wrap_class_SResourceData, 0};
 static swig_type_info _swigt__p_SResourceTransfer = {"_p_SResourceTransfer", "SResourceTransfer *", 0, 0, (void*)&_wrap_class_SResourceTransfer, 0};
 static swig_type_info _swigt__p_std__string = {"_p_std__string", "std::string *", 0, 0, (void*)&_wrap_class_std_string, 0};
-static swig_type_info _swigt__p_std__vectorT_IMapFeature_p_t = {"_p_std__vectorT_IMapFeature_p_t", "std::vector< IMapFeature * > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_IMapFeature_p_t = {"_p_std__vectorT_IMapFeature_p_t", "std::vector< IMapFeature * > *", 0, 0, (void*)&_wrap_class_std_vector_Sl_IMapFeature_Sm__Sg_, 0};
 static swig_type_info _swigt__p_std__vectorT_IUnitType_p_t = {"_p_std__vectorT_IUnitType_p_t", "std::vector< IUnitType * > *", 0, 0, (void*)&_wrap_class_std_vector_Sl_IUnitType_Sm__Sg_, 0};
 static swig_type_info _swigt__p_std__vectorT_IUnit_p_t = {"_p_std__vectorT_IUnit_p_t", "std::vector< IUnit * > *", 0, 0, (void*)&_wrap_class_std_vector_Sl_IUnit_Sm__Sg_, 0};
 static swig_type_info _swigt__p_std__vectorT_Position_t = {"_p_std__vectorT_Position_t", "std::vector< Position > *", 0, 0, (void*)0, 0};

@@ -3,12 +3,16 @@
 
 #include <string>
 
-struct SResourceData {
+class SResourceData {
+public:
 	SResourceData(){
-		income = 0;
-		usage = 0;
-		name = "";
-		id = 0;
+		this->income = 0;
+		this->usage = 0;
+		this->name = "";
+		this->id = 0;
+		this->reserves = 0;
+		this->capacity = 0;
+		this->gameframe = 0;
 	}
 	int id;
 	std::string name;
