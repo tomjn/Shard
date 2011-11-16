@@ -4,23 +4,23 @@
 #include "../interfaces/api.h"
 
 
-#include "OOAICallback.h"
+#include "AI/Wrappers/Cpp/src-generated/OOAICallback.h"
 
 #include "ExternalAI/Interface/AISEvents.h"
-#include "Unit.h"
-#include "UnitDef.h"
-#include "Feature.h"
-#include "FeatureDef.h"
-#include "Engine.h"
-#include "DataDirs.h"
-#include "Map.h"
-#include "Mod.h"
-#include "Game.h"
-#include "Cheats.h"
-#include "Economy.h"
-#include "Resource.h"
-#include "Drawer.h"
-#include "Lua.h"
+#include "AI/Wrappers/Cpp/src-generated/Unit.h"
+#include "AI/Wrappers/Cpp/src-generated/UnitDef.h"
+#include "AI/Wrappers/Cpp/src-generated/Feature.h"
+#include "AI/Wrappers/Cpp/src-generated/FeatureDef.h"
+#include "AI/Wrappers/Cpp/src-generated/Engine.h"
+#include "AI/Wrappers/Cpp/src-generated/DataDirs.h"
+#include "AI/Wrappers/Cpp/src-generated/Map.h"
+#include "AI/Wrappers/Cpp/src-generated/Mod.h"
+#include "AI/Wrappers/Cpp/src-generated/Game.h"
+#include "AI/Wrappers/Cpp/src-generated/Cheats.h"
+#include "AI/Wrappers/Cpp/src-generated/Economy.h"
+#include "AI/Wrappers/Cpp/src-generated/Resource.h"
+#include "AI/Wrappers/Cpp/src-generated/Drawer.h"
+#include "AI/Wrappers/Cpp/src-generated/Lua.h"
 
 class CSpringMapFeature;
 class CSpringMap;

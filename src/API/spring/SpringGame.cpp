@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "spring_api.h"
-#include "SkirmishAI.h"
+#include "AI/Wrappers/Cpp/src-generated/SkirmishAI.h"
 
 CSpringGame::CSpringGame(springai::OOAICallback* callback)
 : callback(callback){

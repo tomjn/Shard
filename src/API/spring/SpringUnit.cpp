@@ -1,5 +1,5 @@
 #include "spring_api.h"
-#include "WrappResource.h"
+#include "AI/Wrappers/Cpp/src-generated/WrappResource.h"
 #include "ExternalAI/Interface/AISCommands.h" // for UNIT_COMMAND_BUILD_NO_FACING
 #include <vector>
 
