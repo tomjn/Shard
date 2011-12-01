@@ -23,6 +23,7 @@ public:
 	
 	virtual const char* ConfigFolderPath();
 	virtual std::string ReadFile(std::string filename);
+	virtual bool LocatePath(std::string& filename);
 
 	virtual int GetTeamID();
 	virtual std::vector<IUnit*> GetEnemies();

@@ -20,6 +20,7 @@ public:
 
 	virtual const char* ConfigFolderPath()=0;
 	virtual std::string ReadFile(std::string filename)=0;
+	virtual bool LocatePath(std::string& filename)=0;
 
 	virtual int GetTeamID()=0;
 	virtual std::vector<IUnit*> GetEnemies()=0;

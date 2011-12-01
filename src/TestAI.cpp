@@ -91,10 +91,10 @@ CTestAI::CTestAI(IGame* game)
 	lua_setglobal(this->L, "game_engine");
 
 	// Setup LUA_PATH
-	std::string f = game->ConfigFolderPath();
+	std::string f = "ai";
 	f += SLASH;
-	f += "ai";
-	f += SLASH;
+	game->LocatePath(f);
+
 	std::string g = game->GameName()+SLASH;
 	std::string p;
 
@@ -124,12 +124,11 @@ CTestAI::CTestAI(IGame* game)
 
 
 bool CTestAI::LoadLuaFile(std::string filename){
-	std::string f = game->ConfigFolderPath();
-	f += SLASH;
-	f += "ai";
-	f += SLASH;
-	f += filename;
-	int err = luaL_loadfile (this->L, f.c_str());
+	filename.insert(0,"ai" SLASH); //prepend "ai/"
+	if (!game->LocatePath(filename)){
+		return false;
+	}
+	int err = luaL_loadfile (this->L, filename.c_str());
 	if (err == 0){
 		int status = lua_epcall (this->L, 0);
 		if (status == 0){
@@ -139,7 +138,7 @@ bool CTestAI::LoadLuaFile(std::string filename){
 		}
 	} else {
 		std::string message = "error loading \"";
-		message += f;
+		message += filename;
 		message += "\" with error code: ";
 		message += err;
 		this->game->SendToConsole(message);

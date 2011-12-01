@@ -108,6 +108,16 @@ bool CSpringGame::FileExists(std::string filename){
 	return r;
 }
 
+bool CSpringGame::LocatePath(std::string& filename){
+	static const size_t absPath_sizeMax = 2048;
+	char absPath[absPath_sizeMax];
+	const bool located = callback->GetDataDirs()->LocatePath(absPath, absPath_sizeMax, filename.c_str(), false, false, false, false);
+	if (located){
+		filename=absPath;
+	}
+	return located;
+}
+
 void CSpringGame::AddMarker(Position p,std::string label){
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
 	callback->GetMap()->GetDrawer()->AddPoint(pos, label.c_str());
