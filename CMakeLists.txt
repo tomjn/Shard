@@ -8,9 +8,10 @@ set(additionalLibraries    ${Cpp_AIWRAPPER_TARGET})
 
 
 if    (BUILD_Cpp_AIWRAPPER)
-	include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/lib/lua)
+	include_directories(BEFORE ${CMAKE_BINARY_DIR}) # for src-generated wrapper files
 	include_directories(BEFORE ${CMAKE_SOURCE_DIR})
 	include_directories(BEFORE ${Cpp_AIWRAPPER_INCLUDE_DIRS})
+	include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/lib/lua)
 	ConfigureNativeSkirmishAI(mySourceDirRel additionalSources additionalCompileFlags additionalLibraries)
 else  (BUILD_Cpp_AIWRAPPER)
 	message ("warning: Shard will not be built! (missing Cpp Wrapper)")
