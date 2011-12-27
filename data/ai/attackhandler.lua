@@ -61,7 +61,7 @@ function AttackHandler:DoTargetting()
 				if e ~= nil then
 					pos = e:GetPosition()
 					px = pos.x - math.fmod(pos.x,600)
-					pz = pos.x - math.fmod(pos.z,600)
+					pz = pos.z - math.fmod(pos.z,600)
 					px = px/600
 					pz = pz/600
 					if cells[px] == nil then
