@@ -57,7 +57,7 @@ int CSpringUnitType::WeaponCount(){
 
 float CSpringUnitType::MaxWeaponDamage(){
 	std::vector<springai::WeaponMount*> weaponMounts = unitDef->GetWeaponMounts();
-	if(weaponMounts.size() > 0){
+	if(!weaponMounts.empty()){
 		float output = 0;
 		std::vector<springai::WeaponMount*>::iterator i = weaponMounts.begin();
 		for(; i != weaponMounts.begin();++i){
