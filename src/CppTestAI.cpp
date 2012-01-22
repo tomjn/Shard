@@ -78,9 +78,11 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				break;
 			}
 			springai::Unit* unit = springai::WrappUnit::GetInstance(skirmishAIId, evt->unit);
-			CSpringUnit* u = new CSpringUnit(callback,unit,game);
-			aliveUnits[evt->unit] = u;
-			game->Me()->UnitCreated(u);
+			if(unit != NULL){
+				CSpringUnit* u = new CSpringUnit(callback,unit,game);
+				aliveUnits[evt->unit] = u;
+				game->Me()->UnitCreated(u);
+			}
 			break;
 		}
 		case EVENT_UNIT_FINISHED: {
@@ -95,10 +97,14 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 			}
 			if( u == 0){
 				springai::Unit* unit = springai::WrappUnit::GetInstance(skirmishAIId, evt->unit);
-				u = new CSpringUnit(callback,unit,game);
-				aliveUnits[evt->unit] = u;
+				if(unit != NULL){
+					u = new CSpringUnit(callback,unit,game);
+					aliveUnits[evt->unit] = u;
+				}
 			}
-			game->Me()->UnitBuilt(u);
+			if(u != 0){
+				game->Me()->UnitBuilt(u);
+			}
 			break;
 		}
 		case EVENT_UNIT_DESTROYED: {
