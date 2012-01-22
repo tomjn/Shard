@@ -5088,6 +5088,37 @@ fail:
 }
 
 
+static int _wrap_IGame_LocatePath(lua_State* L) {
+  int SWIG_arg = 0;
+  IGame *arg1 = (IGame *) 0 ;
+  std::string *arg2 = 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IGame::LocatePath",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IGame::LocatePath",1,"IGame *");
+  if(!lua_isuserdata(L,2)) SWIG_fail_arg("IGame::LocatePath",2,"std::string &");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IGame,0))){
+    SWIG_fail_ptr("IGame_LocatePath",1,SWIGTYPE_p_IGame);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_std__string,0))){
+    SWIG_fail_ptr("IGame_LocatePath",2,SWIGTYPE_p_std__string);
+  }
+  
+  result = (bool)(arg1)->LocatePath(*arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IGame_GetTeamID(lua_State* L) {
   int SWIG_arg = 0;
   IGame *arg1 = (IGame *) 0 ;
@@ -5426,6 +5457,7 @@ static swig_lua_method swig_IGame_methods[] = {
     {"GetTypeByName", _wrap_IGame_GetTypeByName}, 
     {"ConfigFolderPath", _wrap_IGame_ConfigFolderPath}, 
     {"ReadFile", _wrap_IGame_ReadFile}, 
+    {"LocatePath", _wrap_IGame_LocatePath}, 
     {"GetTeamID", _wrap_IGame_GetTeamID}, 
     {"GetEnemies", _wrap_IGame_GetEnemies}, 
     {"GetFriendlies", _wrap_IGame_GetFriendlies}, 
