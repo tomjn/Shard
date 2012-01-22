@@ -239,6 +239,12 @@
     <ClCompile Include="..\..\..\Wrappers\Cpp\src-generated\WrappVersion.cpp" />
     <ClCompile Include="..\..\..\Wrappers\Cpp\src-generated\WrappWeaponDef.cpp" />
     <ClCompile Include="..\..\..\Wrappers\Cpp\src-generated\WrappWeaponMount.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\src\AIColor.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\src\AIEvent.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\src\AIException.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\src\AIFloat3.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\src\CallbackAIException.cpp" />
+    <ClCompile Include="..\..\..\Wrappers\Cpp\src\EventAIException.cpp" />
     <ClCompile Include="..\lib\lua\lapi.c" />
     <ClCompile Include="..\lib\lua\lauxlib.c" />
     <ClCompile Include="..\lib\lua\lbaselib.c" />
@@ -470,6 +476,12 @@
     <ClInclude Include="..\..\..\Wrappers\Cpp\src-generated\WrappVersion.h" />
     <ClInclude Include="..\..\..\Wrappers\Cpp\src-generated\WrappWeaponDef.h" />
     <ClInclude Include="..\..\..\Wrappers\Cpp\src-generated\WrappWeaponMount.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\src\AIColor.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\src\AIEvent.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\src\AIException.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\src\AIFloat3.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\src\CallbackAIException.h" />
+    <ClInclude Include="..\..\..\Wrappers\Cpp\src\EventAIException.h" />
     <ClInclude Include="..\lib\lua\lapi.h" />
     <ClInclude Include="..\lib\lua\lauxlib.h" />
     <ClInclude Include="..\lib\lua\lcode.h" />
