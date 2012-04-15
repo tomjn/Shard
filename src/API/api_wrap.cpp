@@ -1537,8 +1537,9 @@ SWIG_Lua_dostring(lua_State *L, const char* str) {
 #define SWIGTYPE_p_std__vectorT_IUnitType_p_t swig_types[11]
 #define SWIGTYPE_p_std__vectorT_IUnit_p_t swig_types[12]
 #define SWIGTYPE_p_std__vectorT_Position_t swig_types[13]
-static swig_type_info *swig_types[15];
-static swig_module_info swig_module = {swig_types, 14, 0, 0, 0, 0};
+#define SWIGTYPE_p_std__vectorT_float_t swig_types[14]
+static swig_type_info *swig_types[16];
+static swig_module_info swig_module = {swig_types, 15, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -4867,6 +4868,239 @@ fail:
 }
 
 
+static int _wrap_IUnit_ExecuteCustomCommand__SWIG_0(lua_State* L) {
+  int SWIG_arg = 0;
+  IUnit *arg1 = (IUnit *) 0 ;
+  int arg2 ;
+  SwigValueWrapper< std::vector< float > > arg3 ;
+  short arg4 ;
+  int arg5 ;
+  std::vector< float > *argp3 ;
+  
+  SWIG_check_num_args("IUnit::ExecuteCustomCommand",5,5)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",1,"IUnit *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",2,"int");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",3,"std::vector< float >");
+  if(!lua_isnumber(L,4)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",4,"short");
+  if(!lua_isnumber(L,5)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",5,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("IUnit_ExecuteCustomCommand",1,SWIGTYPE_p_IUnit);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_std__vectorT_float_t,0))){
+    SWIG_fail_ptr("IUnit_ExecuteCustomCommand",3,SWIGTYPE_p_std__vectorT_float_t);
+  }
+  arg3 = *argp3;
+  
+  arg4 = (short)lua_tonumber(L, 4);
+  arg5 = (int)lua_tonumber(L, 5);
+  (arg1)->ExecuteCustomCommand(arg2,arg3,arg4,arg5);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IUnit_ExecuteCustomCommand__SWIG_1(lua_State* L) {
+  int SWIG_arg = 0;
+  IUnit *arg1 = (IUnit *) 0 ;
+  int arg2 ;
+  SwigValueWrapper< std::vector< float > > arg3 ;
+  short arg4 ;
+  std::vector< float > *argp3 ;
+  
+  SWIG_check_num_args("IUnit::ExecuteCustomCommand",4,4)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",1,"IUnit *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",2,"int");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",3,"std::vector< float >");
+  if(!lua_isnumber(L,4)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",4,"short");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("IUnit_ExecuteCustomCommand",1,SWIGTYPE_p_IUnit);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_std__vectorT_float_t,0))){
+    SWIG_fail_ptr("IUnit_ExecuteCustomCommand",3,SWIGTYPE_p_std__vectorT_float_t);
+  }
+  arg3 = *argp3;
+  
+  arg4 = (short)lua_tonumber(L, 4);
+  (arg1)->ExecuteCustomCommand(arg2,arg3,arg4);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IUnit_ExecuteCustomCommand__SWIG_2(lua_State* L) {
+  int SWIG_arg = 0;
+  IUnit *arg1 = (IUnit *) 0 ;
+  int arg2 ;
+  SwigValueWrapper< std::vector< float > > arg3 ;
+  std::vector< float > *argp3 ;
+  
+  SWIG_check_num_args("IUnit::ExecuteCustomCommand",3,3)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",1,"IUnit *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",2,"int");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",3,"std::vector< float >");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("IUnit_ExecuteCustomCommand",1,SWIGTYPE_p_IUnit);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_std__vectorT_float_t,0))){
+    SWIG_fail_ptr("IUnit_ExecuteCustomCommand",3,SWIGTYPE_p_std__vectorT_float_t);
+  }
+  arg3 = *argp3;
+  
+  (arg1)->ExecuteCustomCommand(arg2,arg3);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IUnit_ExecuteCustomCommand(lua_State* L) {
+  int argc;
+  int argv[6]={
+    1,2,3,4,5,6
+  };
+  
+  argc = lua_gettop(L);
+  if (argc == 3) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IUnit, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isnumber(L,argv[1]);
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_std__vectorT_float_t, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          return _wrap_IUnit_ExecuteCustomCommand__SWIG_2(L);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IUnit, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isnumber(L,argv[1]);
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_std__vectorT_float_t, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          {
+            _v = lua_isnumber(L,argv[3]);
+          }
+          if (_v) {
+            return _wrap_IUnit_ExecuteCustomCommand__SWIG_1(L);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IUnit, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isnumber(L,argv[1]);
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_std__vectorT_float_t, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          {
+            _v = lua_isnumber(L,argv[3]);
+          }
+          if (_v) {
+            {
+              _v = lua_isnumber(L,argv[4]);
+            }
+            if (_v) {
+              return _wrap_IUnit_ExecuteCustomCommand__SWIG_0(L);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  lua_pushstring(L,"Wrong arguments for overloaded function 'IUnit_ExecuteCustomCommand'\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    IUnit::ExecuteCustomCommand(int,std::vector< float >,short,int)\n"
+    "    IUnit::ExecuteCustomCommand(int,std::vector< float >,short)\n"
+    "    IUnit::ExecuteCustomCommand(int,std::vector< float >)\n");
+  lua_error(L);return 0;
+}
+
+
 static void swig_delete_IUnit(void *obj) {
 IUnit *arg1 = (IUnit *) obj;
 delete arg1;
@@ -4903,6 +5137,7 @@ static swig_lua_method swig_IUnit_methods[] = {
     {"MaxWeaponsRange", _wrap_IUnit_MaxWeaponsRange}, 
     {"CanBuild", _wrap_IUnit_CanBuild}, 
     {"GetResourceUsage", _wrap_IUnit_GetResourceUsage}, 
+    {"ExecuteCustomCommand", _wrap_IUnit_ExecuteCustomCommand}, 
     {0,0}
 };
 static swig_lua_attribute swig_IUnit_attributes[] = {
@@ -7131,6 +7366,7 @@ static swig_type_info _swigt__p_std__vectorT_IMapFeature_p_t = {"_p_std__vectorT
 static swig_type_info _swigt__p_std__vectorT_IUnitType_p_t = {"_p_std__vectorT_IUnitType_p_t", "std::vector< IUnitType * > *", 0, 0, (void*)&_wrap_class_std_vector_Sl_IUnitType_Sm__Sg_, 0};
 static swig_type_info _swigt__p_std__vectorT_IUnit_p_t = {"_p_std__vectorT_IUnit_p_t", "std::vector< IUnit * > *", 0, 0, (void*)&_wrap_class_std_vector_Sl_IUnit_Sm__Sg_, 0};
 static swig_type_info _swigt__p_std__vectorT_Position_t = {"_p_std__vectorT_Position_t", "std::vector< Position > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_float_t = {"_p_std__vectorT_float_t", "std::vector< float > *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_IAI,
@@ -7147,6 +7383,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__vectorT_IUnitType_p_t,
   &_swigt__p_std__vectorT_IUnit_p_t,
   &_swigt__p_std__vectorT_Position_t,
+  &_swigt__p_std__vectorT_float_t,
 };
 
 static swig_cast_info _swigc__p_IAI[] = {  {&_swigt__p_IAI, 0, 0, 0},{0, 0, 0, 0}};
@@ -7163,6 +7400,7 @@ static swig_cast_info _swigc__p_std__vectorT_IMapFeature_p_t[] = {  {&_swigt__p_
 static swig_cast_info _swigc__p_std__vectorT_IUnitType_p_t[] = {  {&_swigt__p_std__vectorT_IUnitType_p_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_IUnit_p_t[] = {  {&_swigt__p_std__vectorT_IUnit_p_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_Position_t[] = {  {&_swigt__p_std__vectorT_Position_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_float_t[] = {  {&_swigt__p_std__vectorT_float_t, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_IAI,
@@ -7179,6 +7417,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__vectorT_IUnitType_p_t,
   _swigc__p_std__vectorT_IUnit_p_t,
   _swigc__p_std__vectorT_Position_t,
+  _swigc__p_std__vectorT_float_t,
 };
 
 

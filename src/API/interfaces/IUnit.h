@@ -57,6 +57,8 @@ public:
 
 	virtual SResourceTransfer GetResourceUsage(int idx)=0;
 
+	virtual void ExecuteCustomCommand(int cmdId, std::vector<float> params_list, short options = 0, int timeOut = INT_MAX)=0;
+
 };
 
 #endif

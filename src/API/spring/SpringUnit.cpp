@@ -266,3 +266,8 @@ SResourceTransfer CSpringUnit::GetResourceUsage(int idx){
 	rt.gameframe = game->Frame();
 	return rt;
 }
+
+
+void CSpringUnit::ExecuteCustomCommand(int cmdId, std::vector<float> params_list, short options = 0, int timeOut = INT_MAX){
+	this->unit->ExecuteCustomCommand(cmdId,params_list,options,timeOut);
+}

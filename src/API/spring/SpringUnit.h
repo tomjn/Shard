@@ -67,6 +67,8 @@ public:
 
 	virtual SResourceTransfer GetResourceUsage(int idx);
 
+	virtual void ExecuteCustomCommand(int cmdId, std::vector<float> params_list, short options, int timeOut);
+
 protected:
 	
 	springai::OOAICallback* callback;

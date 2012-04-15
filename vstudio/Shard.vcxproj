@@ -62,7 +62,7 @@
       <CallingConvention>StdCall</CallingConvention>
     </ClCompile>
     <Link>
-      <OutputFile>E:\Spring\AI\Skirmish\$(ProjectName)\dev\SkirmishAI.dll</OutputFile>
+      <OutputFile>D:\Spring\AI\Skirmish\$(ProjectName)\dev\SkirmishAI.dll</OutputFile>
       <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)linker\$(TargetName).pdb</ProgramDatabaseFile>
