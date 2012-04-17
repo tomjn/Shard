@@ -3,6 +3,7 @@
 
 #include "IUnitType.h"
 #include "../Position.h"
+#include <climits>
 
 class IUnit {
 public:
