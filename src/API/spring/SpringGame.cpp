@@ -71,7 +71,7 @@ std::string CSpringGame::ReadFile(std::string filename){
 
 	std::ifstream InFile( filename.c_str());
 	if( !InFile ) {
-		//cerr << "Couldn´t open input file" << endl;
+		//cerr << "Couldn't open input file" << endl;
 		return "";
 	}
 	
