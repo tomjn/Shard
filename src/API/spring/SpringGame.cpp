@@ -71,7 +71,7 @@ std::string CSpringGame::ReadFile(std::string filename){
 
 	std::ifstream InFile( filename.c_str());
 	if( !InFile ) {
-		//cerr << "Couldn´t open input file" << endl;
+		//cerr << "CouldnÂ´t open input file" << endl;
 		return "";
 	}
 	
@@ -99,7 +99,7 @@ std::string CSpringGame::GameName(){
 
 
 bool CSpringGame::FileExists(std::string filename){
-	filename = ConfigFolderPath() + std::string("\\ai\\")+filename;
+	filename = ConfigFolderPath() + std::string("/ai/")+filename;
 	std::ifstream InFile( filename.c_str());
 	bool r = InFile.is_open();
 	if(r){
@@ -111,7 +111,8 @@ bool CSpringGame::FileExists(std::string filename){
 bool CSpringGame::LocatePath(std::string& filename){
 	static const size_t absPath_sizeMax = 2048;
 	char absPath[absPath_sizeMax];
-	const bool located = callback->GetDataDirs()->LocatePath(absPath, absPath_sizeMax, filename.c_str(), false, false, false, false);
+	const bool dir = !filename.empty() && (*filename.rbegin() == '/' || *filename.rbegin() == '\\');
+	const bool located = callback->GetDataDirs()->LocatePath(absPath, absPath_sizeMax, filename.c_str(), false /*writable*/, false /*create*/, dir, false /*common*/);
 	if (located){
 		filename=absPath;
 	}
