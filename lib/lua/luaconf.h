@@ -566,11 +566,17 @@
 /* the next trick should work on any Pentium, but sometimes clashes
    with a DirectX idiosyncrasy */
 #else
+/*
 
+//FAIL: this causes endless loops on some windows systems
 union luai_Cast { double l_d; long l_l; };
 #define lua_number2int(i,d) \
   { volatile union luai_Cast u; u.l_d = (d) + 6755399441055744.0; (i) = u.l_l; }
 #define lua_number2integer(i,n)		lua_number2int(i, n)
+*/
+
+#define lua_number2int(i,d)	((i)=(int)(d))
+#define lua_number2integer(i,d)	((i)=(lua_Integer)(d))
 
 #endif
 
