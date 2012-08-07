@@ -43,7 +43,7 @@ float CSpringUnitType::ResourceCost(int idx){
 }
 
 bool CSpringUnitType::Extractor(){
-	springai::Resource* r = ((CSpringMap*)game->Map())->GetMetalResource();
+	springai::Resource* r = static_cast<CSpringMap*>(game->Map())->GetMetalResource();
 	return unitDef->GetResourceExtractorRange(r);
 }
 

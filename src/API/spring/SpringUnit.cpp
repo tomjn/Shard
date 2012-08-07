@@ -112,7 +112,7 @@ void CSpringUnit::MoveAndFire(Position p){
 
 bool CSpringUnit::Build(IUnitType* t){
 	Position p = this->GetPosition();
-	CSpringUnitType* type = (CSpringUnitType*)t;
+	CSpringUnitType* type = static_cast<CSpringUnitType*>(t);
 	springai::UnitDef* ud = type->GetUnitDef();
 	if(ud){
 		if((!ud->IsAbleToMove())&&(ud->GetType() == std::string("factory"))){
@@ -156,7 +156,7 @@ bool CSpringUnit::Build(std::string typeName, Position p){
 }
 
 bool CSpringUnit::Build(IUnitType* t, Position p){
-	CSpringUnitType* st = (CSpringUnitType*)t;
+	CSpringUnitType* st = static_cast<CSpringUnitType*>(t);
 	springai::UnitDef* ud = st->GetUnitDef();
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
 	this->unit->Build(ud, pos, UNIT_COMMAND_BUILD_NO_FACING, 0, 10000);
@@ -164,7 +164,7 @@ bool CSpringUnit::Build(IUnitType* t, Position p){
 }
 
 bool CSpringUnit::Reclaim(IMapFeature* mapFeature){
-	springai::Feature* f = ((CSpringMapFeature*)mapFeature)->feature;
+	springai::Feature* f = static_cast<CSpringMapFeature*>(mapFeature)->feature;
 	this->unit->ReclaimFeature(f);
 	return true;
 }
@@ -176,19 +176,19 @@ bool CSpringUnit::AreaReclaim(Position p, double radius){
 }
 
 bool CSpringUnit::Reclaim(IUnit* unit){
-	springai::Unit* u = ((CSpringUnit*)unit)->unit;
+	springai::Unit* u = static_cast<CSpringUnit*>(unit)->unit;
 	this->unit->ReclaimUnit(u);
 	return true;
 }
 
 bool CSpringUnit::Attack(IUnit* unit){
-	springai::Unit* u = ((CSpringUnit*)unit)->unit;
+	springai::Unit* u = static_cast<CSpringUnit*>(unit)->unit;
 	this->unit->Attack(u);
 	return true;
 }
 
 bool CSpringUnit::Repair(IUnit* unit){
-	springai::Unit* u = ((CSpringUnit*)unit)->unit;
+	springai::Unit* u = static_cast<CSpringUnit*>(unit)->unit;
 	this->unit->Attack(u);
 	return true;
 }

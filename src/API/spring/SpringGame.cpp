@@ -197,7 +197,6 @@ SResourceData CSpringGame::GetResource(int idx){
 				res.capacity = callback->GetEconomy()->GetStorage(r);
 				res.reserves = callback->GetEconomy()->GetCurrent(r);
 				return res;
-				break;
 			}
 		}
 	}
@@ -232,7 +231,6 @@ SResourceData CSpringGame::GetResourceByName(std::string name){
 				res.capacity = callback->GetEconomy()->GetStorage(r);
 				res.reserves = callback->GetEconomy()->GetCurrent(r);
 				return res;
-				break;
 			}
 		}
 	}
