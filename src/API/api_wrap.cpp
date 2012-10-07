@@ -4125,6 +4125,32 @@ fail:
 }
 
 
+static int _wrap_IUnit_Wait(lua_State* L) {
+  int SWIG_arg = 0;
+  IUnit *arg1 = (IUnit *) 0 ;
+  int arg2 ;
+  
+  SWIG_check_num_args("IUnit::Wait",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Wait",1,"IUnit *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IUnit::Wait",2,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("IUnit_Wait",1,SWIGTYPE_p_IUnit);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  (arg1)->Wait(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IUnit_Stop(lua_State* L) {
   int SWIG_arg = 0;
   IUnit *arg1 = (IUnit *) 0 ;
@@ -5217,6 +5243,7 @@ static swig_lua_method swig_IUnit_methods[] = {
     {"CanFireWhenDeployed", _wrap_IUnit_CanFireWhenDeployed}, 
     {"CanBuildWhenDeployed", _wrap_IUnit_CanBuildWhenDeployed}, 
     {"CanBuildWhenNotDeployed", _wrap_IUnit_CanBuildWhenNotDeployed}, 
+    {"Wait", _wrap_IUnit_Wait}, 
     {"Stop", _wrap_IUnit_Stop}, 
     {"Move", _wrap_IUnit_Move}, 
     {"MoveAndFire", _wrap_IUnit_MoveAndFire}, 
@@ -5999,6 +6026,36 @@ fail:
 }
 
 
+static int _wrap_IAI_UnitMoveFailed(lua_State* L) {
+  int SWIG_arg = 0;
+  IAI *arg1 = (IAI *) 0 ;
+  IUnit *arg2 = (IUnit *) 0 ;
+  
+  SWIG_check_num_args("IAI::UnitMoveFailed",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IAI::UnitMoveFailed",1,"IAI *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IAI::UnitMoveFailed",2,"IUnit *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IAI,0))){
+    SWIG_fail_ptr("IAI_UnitMoveFailed",1,SWIGTYPE_p_IAI);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("IAI_UnitMoveFailed",2,SWIGTYPE_p_IUnit);
+  }
+  
+  (arg1)->UnitMoveFailed(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IAI_UnitGiven(lua_State* L) {
   int SWIG_arg = 0;
   IAI *arg1 = (IAI *) 0 ;
@@ -6078,6 +6135,7 @@ static swig_lua_method swig_IAI_methods[] = {
     {"UnitBuilt", _wrap_IAI_UnitBuilt}, 
     {"UnitDead", _wrap_IAI_UnitDead}, 
     {"UnitIdle", _wrap_IAI_UnitIdle}, 
+    {"UnitMoveFailed", _wrap_IAI_UnitMoveFailed}, 
     {"UnitGiven", _wrap_IAI_UnitGiven}, 
     {"UnitDamaged", _wrap_IAI_UnitDamaged}, 
     {0,0}

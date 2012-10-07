@@ -143,6 +143,23 @@ game = {}
 
 map = {}
 
+	-- function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
+	-- function map:CanBuildHere(unittype,position)
+	-- function map:GetMapFeatures()
+	-- function map:GetMapFeaturesAt(position,radius)
+	-- function map:SpotCount()
+	-- function map:GetSpot(idx)
+	-- function map:GetMetalSpots()
+	-- function map:MapDimensions()
+	-- function map:MapName()
+	-- function map:AverageWind()
+	-- function map:MinimumWindSpeed()
+	-- function map:MaximumWindSpeed()
+	-- function map:TidalStrength()
+	-- function map:MaximumHeight()
+	-- function map:MinimumHeight()
+
+-- ###################
 
 	function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance) -- returns Position
 		--
@@ -229,6 +246,16 @@ map = {}
 		local m = game_engine:Map()
 		return m:MaximumWindSpeed()
 	end
+
+	function map:MaximumHeight() -- returns maximum map height
+		local m = game_engine:Map()
+		return m:MaximumHeight()
+	end
+
+	function map:MinimumHeight() -- returns minimum map height
+		local m = game_engine:Map()
+		return m:MinimumHeight()
+	end
 	
 
 	function map:TidalStrength() -- returns tidal strength
@@ -240,52 +267,62 @@ map = {}
 --}
 --[[
 {,
-	Unit = {
-		function ID()-- returns this units ID
-		function Name() -- returns this units internal name e.g. corcom
-		function IsAlive()
-		
-		function IsCloaked()
-		
-		function Type() -- returns a unittype
 
-		function CanMove() -- returns boolean
-		function CanDeploy() -- returns boolean
-		function CanBuild() -- returns boolean
+IUnit/ engine unit objects
+	int ID()
+	int Team()
+	std::string Name()
 
-		function CanMorph() -- returns boolean
-		
-		function CanAssistBuilding(Unit) -- returns boolean
+	bool IsAlive()
 
-		function CanMoveWhenDeployed() -- returns boolean
-		function CanFireWhenDeployed() -- returns boolean
-		function CanBuildWhenDeployed() -- returns boolean
-		function CanBuildWhenNotDeployed() -- returns boolean
+	bool IsCloaked()
 
-		function Stop()
-		function Move(Position)
-		function MoveAndFire(Position)
+	void Forget() // makes the interface forget about this unit and cleanup
+	bool Forgotten() // for interface/debugging use
+	
+	IUnitType* Type()
 
-		-- the Build methods now return true if it worked, false if the command was bad
-		function Build(UnitType)
-		function Build(typeName)
-		function Build(typeName, Position)
-		function Build(UnitType, Position)
-		
-		function Reclaim(unit)
-		function Reclaim(mapFeature)
-		function Attack(unit)
-		function Repair(unit)
-		
-		function GetPosition() -- returns a Position
-		function GetHealth() -- returns a float
-		function GetMaxHealth() -- returns a float
-		
-		function WeaponCount() -- returns integer
-		function MaxWeaponsRange() -- float
-		
-		function CanBuild(unitType) -- boolean
-	},
+	bool CanMove()
+	bool CanDeploy()
+	bool CanBuild()
+	bool IsBeingBuilt()
+	
+	bool CanAssistBuilding(IUnit* unit)
+
+	bool CanMoveWhenDeployed()
+	bool CanFireWhenDeployed()
+	bool CanBuildWhenDeployed()
+	bool CanBuildWhenNotDeployed()
+
+	void Stop()
+	void Move(Position p)
+	void MoveAndFire(Position p)
+
+	bool Build(IUnitType* t)
+	bool Build(std::string typeName)
+	bool Build(std::string typeName, Position p)
+	bool Build(IUnitType* t, Position p)
+
+	bool AreaReclaim(Position p, double radius)
+	bool Reclaim(IMapFeature* mapFeature)
+	bool Reclaim(IUnit* unit)
+	bool Attack(IUnit* unit)
+	bool Repair(IUnit* unit)
+	bool MorphInto(IUnitType* t)
+	
+	Position GetPosition()
+	float GetHealth()
+	float GetMaxHealth()
+
+	int WeaponCount()
+	float MaxWeaponsRange()
+
+	bool CanBuild(IUnitType* t)
+
+	SResourceTransfer GetResourceUsage(int idx)
+
+	void ExecuteCustomCommand(int cmdId, std::vector<float> params_list, short options = 0, int timeOut = INT_MAX)
+
 	UnitType{
 		function Name() -- returns a string e.g. 'corcom'
 

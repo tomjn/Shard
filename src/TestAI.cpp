@@ -228,6 +228,16 @@ void CTestAI::UnitIdle(IUnit* unit){
 	}
 }
 
+void CTestAI::UnitMoveFailed(IUnit* unit){
+	lua_getglobal(this->L, "ai");
+	lua_getfield(this->L, -1, "UnitMoveFailed");
+	lua_getglobal(this->L, "ai");
+	SWIG_NewPointerObj(this->L,unit,unittype,0);
+	if(lua_isfunction(this->L,-3)){
+		lua_epcall(this->L, 2);
+	}
+}
+
 void CTestAI::UnitDamaged(IUnit* unit, IUnit* attacker){
 	lua_getglobal(this->L, "ai");
 	lua_getfield(this->L, -1, "UnitDamaged");

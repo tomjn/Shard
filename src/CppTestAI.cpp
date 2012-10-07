@@ -149,6 +149,16 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 			game->Me()->UnitIdle(u);
 			break;
 		}
+		case EVENT_UNIT_MOVE_FAILED: {
+			struct SUnitMoveFailedEvent* evt = (struct SUnitMoveFailedEvent*) data;
+			if(evt->unit < 0){
+				game->SendToConsole("shard-runtime warning: SUnitMoveFailedEvent evt->unit < 0");
+				break;
+			}
+			CSpringUnit* u = aliveUnits[evt->unit];
+			game->Me()->UnitMoveFailed(u);
+			break;
+		}
 		default: {
 			break;
 		}
@@ -157,3 +167,33 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 	// signal: everything went OK
 	return 0;
 }
+/*EVENT_NULL                         =  0,
+	EVENT_INIT                         =  1,
+	EVENT_RELEASE                      =  2,
+	EVENT_UPDATE                       =  3,
+	EVENT_MESSAGE                      =  4,
+	EVENT_UNIT_CREATED                 =  5,
+	EVENT_UNIT_FINISHED                =  6,
+	EVENT_UNIT_IDLE                    =  7,
+	EVENT_UNIT_MOVE_FAILED             =  8,
+	EVENT_UNIT_DAMAGED                 =  9,
+	EVENT_UNIT_DESTROYED               = 10,
+	EVENT_UNIT_GIVEN                   = 11,
+	EVENT_UNIT_CAPTURED                = 12,
+	EVENT_ENEMY_ENTER_LOS              = 13,
+	EVENT_ENEMY_LEAVE_LOS              = 14,
+	EVENT_ENEMY_ENTER_RADAR            = 15,
+	EVENT_ENEMY_LEAVE_RADAR            = 16,
+	EVENT_ENEMY_DAMAGED                = 17,
+	EVENT_ENEMY_DESTROYED              = 18,
+	EVENT_WEAPON_FIRED                 = 19,
+	EVENT_PLAYER_COMMAND               = 20,
+	EVENT_SEISMIC_PING                 = 21,
+	EVENT_COMMAND_FINISHED             = 22,
+	EVENT_LOAD                         = 23,
+	EVENT_SAVE                         = 24,
+	EVENT_ENEMY_CREATED                = 25,
+	EVENT_ENEMY_FINISHED               = 26,
+	EVENT_LUA_MESSAGE                  = 27,
+
+	*/

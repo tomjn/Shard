@@ -24,6 +24,7 @@ public:
 	virtual void UnitBuilt(IUnit* unit);
 	virtual void UnitDead(IUnit* unit);
 	virtual void UnitIdle(IUnit* unit);
+	virtual void UnitMoveFailed(IUnit* unit);
 
 	virtual void UnitGiven(IUnit* unit);
 

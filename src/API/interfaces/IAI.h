@@ -10,6 +10,7 @@ public:
 	virtual void UnitBuilt(IUnit* unit)=0;
 	virtual void UnitDead(IUnit* unit)=0;
 	virtual void UnitIdle(IUnit* unit)=0;
+	virtual void UnitMoveFailed(IUnit* unit)=0;
 
 	virtual void UnitGiven(IUnit* unit)=0;
 
