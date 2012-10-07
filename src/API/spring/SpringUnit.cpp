@@ -189,7 +189,7 @@ bool CSpringUnit::Attack(IUnit* unit){
 
 bool CSpringUnit::Repair(IUnit* unit){
 	springai::Unit* u = static_cast<CSpringUnit*>(unit)->unit;
-	this->unit->Attack(u);
+	this->unit->Repair(u);
 	return true;
 }
 /*
