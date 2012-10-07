@@ -98,6 +98,18 @@ function AI:UnitDamaged(engineunit,engineattacker)
 	end
 end
 
+function AI:UnitMoveFailed(engineunit)
+	if self.gameend == true then
+		return
+	end
+	if engineunit == nil then
+		return
+	end
+	for i,m in ipairs(self.modules) do
+		m:UnitMoveFailed(engineunit)
+	end
+end
+
 function AI:GameEnd()
 	self.gameend = true
 	for i,m in ipairs(self.modules) do

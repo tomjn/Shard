@@ -13,23 +13,25 @@ end
 function AIBase:GameEnd()
 end
 
-function AIBase:UnitCreated(unit)
+function AIBase:UnitCreated(engineunit)
 end
 
-function AIBase:UnitBuilt(unit)
+function AIBase:UnitBuilt(engineunit)
 end
 
-function AIBase:UnitGiven(unit)
-	self:UnitCreated(unit)
-	self:UnitBuilt(unit)
+function AIBase:UnitGiven(engineunit)
+	self:UnitCreated(engineunit)
+	self:UnitBuilt(engineunit)
 end
 
 
-function AIBase:UnitDead(unit)
+function AIBase:UnitDead(engineunit)
 end
 
-function AIBase:UnitIdle(unit)
+function AIBase:UnitIdle(engineunit)
 end
 
-function AIBase:UnitDamaged(unit,attacker)
+function AIBase:UnitDamaged(engineunit,attacker)
+end
+function AIBase:UnitMoveFailed(engineunit)
 end
