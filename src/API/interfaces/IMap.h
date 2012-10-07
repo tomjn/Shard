@@ -19,8 +19,8 @@ public:
 	virtual double MaximumWindSpeed()=0;
 	virtual double AverageWind()=0;
 
-	virtual float MaxHeight()=0;
-	virtual float MinHeight()=0;
+	virtual float MaximumHeight()=0;
+	virtual float MinimumHeight()=0;
 
 	virtual double TidalStrength()=0;
 

@@ -98,11 +98,11 @@ std::string CSpringMap::MapName(){
 	return callback->GetMap()->GetName();
 }
 
-float CSpringMap::MaxHeight(){
+float CSpringMap::MaximumHeight(){
 	return callback->GetMap()->GetMaxHeight();
 }
 
-float CSpringMap::MinHeight(){
+float CSpringMap::MinimumHeight(){
 	return callback->GetMap()->GetMinHeight();
 }
 

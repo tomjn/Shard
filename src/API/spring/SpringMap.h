@@ -23,8 +23,8 @@ public:
 	virtual double MaximumWindSpeed();
 	virtual double AverageWind();
 
-	virtual float MaxHeight();
-	virtual float MinHeight();
+	virtual float MaximumHeight();
+	virtual float MinimumHeight();
 
 	virtual double TidalStrength();
 
