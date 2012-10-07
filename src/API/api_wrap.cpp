@@ -3301,6 +3301,54 @@ fail:
 }
 
 
+static int _wrap_IMap_MaxHeight(lua_State* L) {
+  int SWIG_arg = 0;
+  IMap *arg1 = (IMap *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("IMap::MaxHeight",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IMap::MaxHeight",1,"IMap *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IMap,0))){
+    SWIG_fail_ptr("IMap_MaxHeight",1,SWIGTYPE_p_IMap);
+  }
+  
+  result = (float)(arg1)->MaxHeight();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IMap_MinHeight(lua_State* L) {
+  int SWIG_arg = 0;
+  IMap *arg1 = (IMap *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("IMap::MinHeight",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IMap::MinHeight",1,"IMap *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IMap,0))){
+    SWIG_fail_ptr("IMap_MinHeight",1,SWIGTYPE_p_IMap);
+  }
+  
+  result = (float)(arg1)->MinHeight();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IMap_TidalStrength(lua_State* L) {
   int SWIG_arg = 0;
   IMap *arg1 = (IMap *) 0 ;
@@ -3429,6 +3477,8 @@ static swig_lua_method swig_IMap_methods[] = {
     {"MinimumWindSpeed", _wrap_IMap_MinimumWindSpeed}, 
     {"MaximumWindSpeed", _wrap_IMap_MaximumWindSpeed}, 
     {"AverageWind", _wrap_IMap_AverageWind}, 
+    {"MaxHeight", _wrap_IMap_MaxHeight}, 
+    {"MinHeight", _wrap_IMap_MinHeight}, 
     {"TidalStrength", _wrap_IMap_TidalStrength}, 
     {"FindClosestBuildSite", _wrap_IMap_FindClosestBuildSite}, 
     {"CanBuildHere", _wrap_IMap_CanBuildHere}, 

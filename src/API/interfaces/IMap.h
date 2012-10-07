@@ -19,6 +19,9 @@ public:
 	virtual double MaximumWindSpeed()=0;
 	virtual double AverageWind()=0;
 
+	virtual float MaxHeight()=0;
+	virtual float MinHeight()=0;
+
 	virtual double TidalStrength()=0;
 
 	virtual Position FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance)=0;

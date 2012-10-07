@@ -98,6 +98,14 @@ std::string CSpringMap::MapName(){
 	return callback->GetMap()->GetName();
 }
 
+float CSpringMap::MaxHeight(){
+	return callback->GetMap()->GetMaxHeight();
+}
+
+float CSpringMap::MinHeight(){
+	return callback->GetMap()->GetMinHeight();
+}
+
 double CSpringMap::AverageWind(){
 	float minwind = callback->GetMap()->GetMinWind();
 	float maxwind = callback->GetMap()->GetMaxWind();
