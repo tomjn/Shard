@@ -161,7 +161,11 @@ bool CSpringUnit::Build(IUnitType* t, Position p){
 	CSpringUnitType* st = static_cast<CSpringUnitType*>(t);
 	springai::UnitDef* ud = st->GetUnitDef();
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
-	this->unit->Build(ud, pos, UNIT_COMMAND_BUILD_NO_FACING, 0, 10000);
+	try {
+		this->unit->Build(ud, pos, UNIT_COMMAND_BUILD_NO_FACING, 0, 10000);
+	} catch(...){
+		return false;
+	}
 	return true;
 }
 
