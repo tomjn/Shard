@@ -38,6 +38,13 @@ function TaskQueueBehaviour:UnitIdle(unit)
 	end
 end
 
+function TaskQueueBehaviour:UnitMoveFailed(unit)
+	if not self:IsActive() then
+		return
+	end
+	self:UnitIdle(unit)
+end
+
 function TaskQueueBehaviour:UnitDead(unit)
 	if self.unit ~= nil then
 		if unit.engineID == self.unit.engineID then

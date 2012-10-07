@@ -22,13 +22,13 @@ function Unit:Update()
 		self.behaviours = {}
 	end
 	for k,v in pairs(self.behaviours) do
-		v:Update(unit)
+		v:Update()
 	end
 end
 
 function Unit:GameEnd()
 	for k,v in pairs(self.behaviours) do
-		v:GameEnd(unit)
+		v:GameEnd()
 	end
 end
 
@@ -70,6 +70,12 @@ end
 function Unit:UnitIdle(unit)
 	for k,v in pairs(self.behaviours) do
 		v:UnitIdle(unit)
+	end
+end
+
+function Unit:UnitMoveFailed(unit)
+	for k,v in pairs(self.behaviours) do
+		v:UnitMoveFailed(unit)
 	end
 end
 
