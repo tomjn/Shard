@@ -23,6 +23,8 @@
 
 %template(vectorUnitTypes) std::vector<IUnitType*>; 
 %template(vectorUnits) std::vector<IUnit*>;
+%template(vectorFloat) std::vector<float>;
+%template(vectorInt) std::vector<int>;
 %template(vectorMapFeature) std::vector<IMapFeature*>;
 
 #endif
