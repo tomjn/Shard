@@ -64,6 +64,7 @@ public:
 	virtual float MaxWeaponsRange();
 
 	virtual bool CanBuild(IUnitType* t);
+	virtual bool IsBeingBuilt();
 
 	virtual SResourceTransfer GetResourceUsage(int idx);
 

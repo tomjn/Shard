@@ -215,6 +215,11 @@ Position CSpringUnit::GetPosition(){
 	return p;
 }
 
+
+bool CSpringUnit::IsBeingBuilt(){
+	return unit->IsBeingBuilt();
+}
+
 float CSpringUnit::GetHealth(){
 	return unit->GetHealth();
 }

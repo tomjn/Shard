@@ -23,6 +23,7 @@ public:
 	virtual bool CanMove()=0;
 	virtual bool CanDeploy()=0;
 	virtual bool CanBuild()=0;
+	virtual bool IsBeingBuilt()=0;
 	
 	virtual bool CanAssistBuilding(IUnit* unit)=0;
 
