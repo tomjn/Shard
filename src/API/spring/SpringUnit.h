@@ -34,6 +34,7 @@ public:
 	virtual bool CanBuildWhenDeployed();
 	virtual bool CanBuildWhenNotDeployed();
 	
+	virtual void Wait(int timeout);
 	
 	virtual void Stop();
 	virtual void Move(Position p);

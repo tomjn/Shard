@@ -94,7 +94,9 @@ bool CSpringUnit::CanBuildWhenNotDeployed(){
 
 
 
-
+void CSpringUnit::Wait(int timeout){
+	this->unit->Wait(timeout);
+}
 
 void CSpringUnit::Stop(){
 	this->unit->Stop();

@@ -32,6 +32,7 @@ public:
 	virtual bool CanBuildWhenDeployed()=0;
 	virtual bool CanBuildWhenNotDeployed()=0;
 
+	virtual void Wait(int timeout)=0;
 	virtual void Stop()=0;
 	virtual void Move(Position p)=0;
 	virtual void MoveAndFire(Position p)=0;
