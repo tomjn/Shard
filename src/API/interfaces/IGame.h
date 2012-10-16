@@ -8,6 +8,7 @@
 
 class IGame {
 public:
+	virtual ~IGame(){}
 	virtual void SendToConsole(std::string message)=0;
 	virtual int Frame()=0;
 	virtual bool IsPaused()=0;

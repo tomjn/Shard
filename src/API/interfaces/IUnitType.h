@@ -2,7 +2,7 @@
 
 class IUnitType {
 public:
-
+	virtual ~IUnitType(){}
 	virtual std::string Name()=0;
 
 	virtual float ReclaimSpeed()=0;

@@ -6,7 +6,7 @@
 
 class IMapFeature {
 public:
-
+	virtual ~IMapFeature(){}
 	virtual int ID()=0;
 	virtual std::string Name()=0;
 	virtual Position GetPosition()=0;

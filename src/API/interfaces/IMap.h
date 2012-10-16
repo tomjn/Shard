@@ -3,7 +3,7 @@
 
 class IMap {
 public:
-	//
+	virtual ~IMap(){}
 	virtual std::string MapName()=0;
 
 	virtual int SpotCount()=0;

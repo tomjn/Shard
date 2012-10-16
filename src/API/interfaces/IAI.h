@@ -2,6 +2,7 @@
 
 class IAI {
 public:
+	virtual ~IAI(){}
 	virtual void Init()=0;
 	virtual void Update()=0;
 	virtual void GameEnd()=0;

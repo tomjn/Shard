@@ -5,6 +5,7 @@
 
 class IPlayer {
 public:
+	virtual ~IPlayer(){}
 	virtual bool IsAI()=0;
 	virtual std::string Name()=0;
 };
