@@ -3422,6 +3422,58 @@ fail:
 }
 
 
+static int _wrap_IMap_FindClosestBuildSiteFacing(lua_State* L) {
+  int SWIG_arg = 0;
+  IMap *arg1 = (IMap *) 0 ;
+  IUnitType *arg2 = (IUnitType *) 0 ;
+  Position arg3 ;
+  double arg4 ;
+  double arg5 ;
+  int arg6 ;
+  Position *argp3 ;
+  Position result;
+  
+  SWIG_check_num_args("IMap::FindClosestBuildSiteFacing",6,6)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IMap::FindClosestBuildSiteFacing",1,"IMap *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IMap::FindClosestBuildSiteFacing",2,"IUnitType *");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IMap::FindClosestBuildSiteFacing",3,"Position");
+  if(!lua_isnumber(L,4)) SWIG_fail_arg("IMap::FindClosestBuildSiteFacing",4,"double");
+  if(!lua_isnumber(L,5)) SWIG_fail_arg("IMap::FindClosestBuildSiteFacing",5,"double");
+  if(!lua_isnumber(L,6)) SWIG_fail_arg("IMap::FindClosestBuildSiteFacing",6,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IMap,0))){
+    SWIG_fail_ptr("IMap_FindClosestBuildSiteFacing",1,SWIGTYPE_p_IMap);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("IMap_FindClosestBuildSiteFacing",2,SWIGTYPE_p_IUnitType);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("IMap_FindClosestBuildSiteFacing",3,SWIGTYPE_p_Position);
+  }
+  arg3 = *argp3;
+  
+  arg4 = (double)lua_tonumber(L, 4);
+  arg5 = (double)lua_tonumber(L, 5);
+  arg6 = (int)lua_tonumber(L, 6);
+  result = (arg1)->FindClosestBuildSiteFacing(arg2,arg3,arg4,arg5,arg6);
+  {
+    Position * resultptr = new Position((const Position &) result);
+    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_Position,1); SWIG_arg++;
+  }
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IMap_CanBuildHere(lua_State* L) {
   int SWIG_arg = 0;
   IMap *arg1 = (IMap *) 0 ;
@@ -3462,6 +3514,49 @@ fail:
 }
 
 
+static int _wrap_IMap_CanBuildHereFacing(lua_State* L) {
+  int SWIG_arg = 0;
+  IMap *arg1 = (IMap *) 0 ;
+  IUnitType *arg2 = (IUnitType *) 0 ;
+  Position arg3 ;
+  int arg4 ;
+  Position *argp3 ;
+  bool result;
+  
+  SWIG_check_num_args("IMap::CanBuildHereFacing",4,4)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IMap::CanBuildHereFacing",1,"IMap *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IMap::CanBuildHereFacing",2,"IUnitType *");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IMap::CanBuildHereFacing",3,"Position");
+  if(!lua_isnumber(L,4)) SWIG_fail_arg("IMap::CanBuildHereFacing",4,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IMap,0))){
+    SWIG_fail_ptr("IMap_CanBuildHereFacing",1,SWIGTYPE_p_IMap);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("IMap_CanBuildHereFacing",2,SWIGTYPE_p_IUnitType);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("IMap_CanBuildHereFacing",3,SWIGTYPE_p_Position);
+  }
+  arg3 = *argp3;
+  
+  arg4 = (int)lua_tonumber(L, 4);
+  result = (bool)(arg1)->CanBuildHereFacing(arg2,arg3,arg4);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static void swig_delete_IMap(void *obj) {
 IMap *arg1 = (IMap *) obj;
 delete arg1;
@@ -3481,7 +3576,9 @@ static swig_lua_method swig_IMap_methods[] = {
     {"MinimumHeight", _wrap_IMap_MinimumHeight}, 
     {"TidalStrength", _wrap_IMap_TidalStrength}, 
     {"FindClosestBuildSite", _wrap_IMap_FindClosestBuildSite}, 
+    {"FindClosestBuildSiteFacing", _wrap_IMap_FindClosestBuildSiteFacing}, 
     {"CanBuildHere", _wrap_IMap_CanBuildHere}, 
+    {"CanBuildHereFacing", _wrap_IMap_CanBuildHereFacing}, 
     {0,0}
 };
 static swig_lua_attribute swig_IMap_attributes[] = {

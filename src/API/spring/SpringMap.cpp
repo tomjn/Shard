@@ -48,8 +48,11 @@ CSpringMap::~CSpringMap(){
 	//
 }
 
-
 Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance){
+	return this->FindClosestBuildSiteFacing(t,builderPos,searchRadius,minimumDistance,UNIT_COMMAND_BUILD_NO_FACING);
+}
+
+Position CSpringMap::FindClosestBuildSiteFacing(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance,int facing){
 	if(t == NULL){
 		Position err;
 		err.x = 0;
@@ -59,7 +62,7 @@ Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, dou
 	}
 	CSpringUnitType* ut = static_cast<CSpringUnitType*>(t);
 	const springai::AIFloat3 bPos(builderPos.x, builderPos.y, builderPos.z);
-	const springai::AIFloat3 pos = callback->GetMap()->FindClosestBuildSite(ut->GetUnitDef(), bPos, searchRadius, minimumDistance, 0);
+	const springai::AIFloat3 pos = callback->GetMap()->FindClosestBuildSite(ut->GetUnitDef(), bPos, searchRadius, minimumDistance, facing);
 	Position p;
 	p.x = pos.x;
 	p.y = pos.y;
@@ -68,9 +71,13 @@ Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, dou
 }
 
 bool CSpringMap::CanBuildHere(IUnitType* t, Position p){
+	return this->CanBuildHereFacing(t,p,UNIT_COMMAND_BUILD_NO_FACING);
+}
+
+bool CSpringMap::CanBuildHereFacing(IUnitType* t, Position p, int facing){
 	CSpringUnitType* ut = static_cast<CSpringUnitType*>(t);
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
-	return callback->GetMap()->IsPossibleToBuildAt(ut->GetUnitDef(), pos, UNIT_COMMAND_BUILD_NO_FACING);
+	return callback->GetMap()->IsPossibleToBuildAt(ut->GetUnitDef(), pos, facing);
 }
 
 int CSpringMap::SpotCount(){

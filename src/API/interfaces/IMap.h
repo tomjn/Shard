@@ -25,7 +25,10 @@ public:
 	virtual double TidalStrength()=0;
 
 	virtual Position FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance)=0;
+	virtual Position FindClosestBuildSiteFacing(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance,int facing)=0;
+
 	virtual bool CanBuildHere(IUnitType* t, Position pos)=0;
+	virtual bool CanBuildHereFacing(IUnitType* t, Position pos,int facing)=0;
 
 	
 };

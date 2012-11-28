@@ -29,7 +29,10 @@ public:
 	virtual double TidalStrength();
 
 	virtual Position FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance);
+	virtual Position FindClosestBuildSiteFacing(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance,int facing);
+
 	virtual bool CanBuildHere(IUnitType* t, Position pos);
+	virtual bool CanBuildHereFacing(IUnitType* t, Position pos,int facing);
 	
 	springai::Resource* GetMetalResource();
 
