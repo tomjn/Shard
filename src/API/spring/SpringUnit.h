@@ -45,6 +45,9 @@ public:
 	virtual bool Build(std::string typeName, Position p);
 	virtual bool Build(IUnitType* t, Position p);
 
+	virtual bool Build(std::string typeName, Position p, int facing);
+	virtual bool Build(IUnitType* t, Position p, int facing);
+
 	virtual bool AreaReclaim(Position p, double radius);
 	virtual bool Reclaim(IMapFeature* mapFeature);
 	virtual bool Reclaim(IUnit* unit);

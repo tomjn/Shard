@@ -4469,10 +4469,92 @@ fail:
 }
 
 
+static int _wrap_IUnit_Build__SWIG_4(lua_State* L) {
+  int SWIG_arg = 0;
+  IUnit *arg1 = (IUnit *) 0 ;
+  std::string arg2 ;
+  Position arg3 ;
+  int arg4 ;
+  Position *argp3 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Build",4,4)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Build",1,"IUnit *");
+  if(!lua_isstring(L,2)) SWIG_fail_arg("IUnit::Build",2,"std::string");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::Build",3,"Position");
+  if(!lua_isnumber(L,4)) SWIG_fail_arg("IUnit::Build",4,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("IUnit_Build",1,SWIGTYPE_p_IUnit);
+  }
+  
+  (&arg2)->assign(lua_tostring(L,2),lua_strlen(L,2));
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("IUnit_Build",3,SWIGTYPE_p_Position);
+  }
+  arg3 = *argp3;
+  
+  arg4 = (int)lua_tonumber(L, 4);
+  result = (bool)(arg1)->Build(arg2,arg3,arg4);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IUnit_Build__SWIG_5(lua_State* L) {
+  int SWIG_arg = 0;
+  IUnit *arg1 = (IUnit *) 0 ;
+  IUnitType *arg2 = (IUnitType *) 0 ;
+  Position arg3 ;
+  int arg4 ;
+  Position *argp3 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Build",4,4)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Build",1,"IUnit *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::Build",2,"IUnitType *");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::Build",3,"Position");
+  if(!lua_isnumber(L,4)) SWIG_fail_arg("IUnit::Build",4,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("IUnit_Build",1,SWIGTYPE_p_IUnit);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("IUnit_Build",2,SWIGTYPE_p_IUnitType);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("IUnit_Build",3,SWIGTYPE_p_Position);
+  }
+  arg3 = *argp3;
+  
+  arg4 = (int)lua_tonumber(L, 4);
+  result = (bool)(arg1)->Build(arg2,arg3,arg4);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IUnit_Build(lua_State* L) {
   int argc;
-  int argv[4]={
-    1,2,3,4
+  int argv[5]={
+    1,2,3,4,5
   };
   
   argc = lua_gettop(L);
@@ -4582,13 +4664,88 @@ static int _wrap_IUnit_Build(lua_State* L) {
       }
     }
   }
+  if (argc == 4) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IUnit, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        void *ptr;
+        if (SWIG_isptrtype(L,argv[1])==0 || SWIG_ConvertPtr(L,argv[1], (void **) &ptr, SWIGTYPE_p_IUnitType, 0)) {
+          _v = 0;
+        } else {
+          _v = 1;
+        }
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_Position, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          {
+            _v = lua_isnumber(L,argv[3]);
+          }
+          if (_v) {
+            return _wrap_IUnit_Build__SWIG_5(L);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IUnit, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isstring(L,argv[1]);
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_Position, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          {
+            _v = lua_isnumber(L,argv[3]);
+          }
+          if (_v) {
+            return _wrap_IUnit_Build__SWIG_4(L);
+          }
+        }
+      }
+    }
+  }
   
   lua_pushstring(L,"Wrong arguments for overloaded function 'IUnit_Build'\n"
     "  Possible C/C++ prototypes are:\n"
     "    IUnit::Build(IUnitType *)\n"
     "    IUnit::Build(std::string)\n"
     "    IUnit::Build(std::string,Position)\n"
-    "    IUnit::Build(IUnitType *,Position)\n");
+    "    IUnit::Build(IUnitType *,Position)\n"
+    "    IUnit::Build(std::string,Position,int)\n"
+    "    IUnit::Build(IUnitType *,Position,int)\n");
   lua_error(L);return 0;
 }
 

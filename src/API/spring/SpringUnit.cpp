@@ -154,19 +154,37 @@ bool CSpringUnit::Build(std::string typeName){
 
 bool CSpringUnit::Build(std::string typeName, Position p){
 	IUnitType* t = game->GetTypeByName(typeName);
-	return Build(t,p);
+	return Build(t,p,UNIT_COMMAND_BUILD_NO_FACING);
 }
 
 bool CSpringUnit::Build(IUnitType* t, Position p){
-	CSpringUnitType* st = static_cast<CSpringUnitType*>(t);
-	springai::UnitDef* ud = st->GetUnitDef();
-	const springai::AIFloat3 pos(p.x, p.y, p.z);
-	try {
-		this->unit->Build(ud, pos, UNIT_COMMAND_BUILD_NO_FACING, 0, 10000);
-	} catch(...){
+	return Build(t,p,UNIT_COMMAND_BUILD_NO_FACING);
+}
+
+bool CSpringUnit::Build(std::string typeName, Position p, int facing){
+	IUnitType* t = game->GetTypeByName(typeName);
+	return Build(t,p,facing);
+}
+
+bool CSpringUnit::Build(IUnitType* t, Position p, int facing){
+	if(t){
+		CSpringUnitType* st = static_cast<CSpringUnitType*>(t);
+		springai::UnitDef* ud = st->GetUnitDef();
+		const springai::AIFloat3 pos(p.x, p.y, p.z);
+
+		if(this->game->Map()->CanBuildHereFacing(t,p,facing)){
+			try {
+				this->unit->Build(ud, pos, facing, 0, 10000);
+			} catch(...){
+				return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
+	} else {
 		return false;
 	}
-	return true;
 }
 
 bool CSpringUnit::Reclaim(IMapFeature* mapFeature){
