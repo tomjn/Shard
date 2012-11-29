@@ -58,6 +58,7 @@
 *.sdf
 *.opensdf
 *.filters
+.DS_Store
 
 # ???
 progress.make
