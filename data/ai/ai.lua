@@ -10,14 +10,16 @@ function AI:Init()
 	game:SendToConsole("Shard by AF - playing:"..game:GameName().." on:"..game.map:MapName())
 
 	self.modules = {}
-	for i,m in ipairs(modules) do
-		newmodule = m()
-		local internalname = newmodule:internalName()
-		
-		self[internalname] = newmodule
-		table.insert(self.modules,newmodule)
-		newmodule:Init()
-		game:SendToConsole("added "..newmodule:Name().." module")
+	if next(modules) ~= nil then
+		for i,m in ipairs(modules) do
+			newmodule = m()
+			local internalname = newmodule:internalName()
+			
+			self[internalname] = newmodule
+			table.insert(self.modules,newmodule)
+			newmodule:Init()
+			game:SendToConsole("added "..newmodule:Name().." module")
+		end
 	end
 end
 
