@@ -1,4 +1,3 @@
-
 #include <iterator>
 #include <iostream>
 #include <fstream>
@@ -139,6 +138,11 @@ IUnitType* CSpringGame::ToIUnitType(springai::UnitDef* def){
 	}
 }
 
+bool CSpringGame::HasEnemies(){
+	std::vector<springai::Unit*> enemies = callback->GetEnemyUnits();
+	return !enemies.empty();
+}
+
 std::vector<IUnit*> CSpringGame::GetEnemies(){
 	std::vector<IUnit*> enemiesv;
 	
@@ -150,7 +154,10 @@ std::vector<IUnit*> CSpringGame::GetEnemies(){
 	}
 	return enemiesv;
 }
-
+bool CSpringGame::HasFriendlies(){
+	std::vector<springai::Unit*> friendlies = callback->GetFriendlyUnits();
+	return !friendlies.empty();
+}
 std::vector<IUnit*> CSpringGame::GetFriendlies(){
 	std::vector<IUnit*> friendliesv;
 	
