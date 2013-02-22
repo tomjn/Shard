@@ -26,6 +26,10 @@ public:
 	virtual bool LocatePath(std::string& filename);
 
 	virtual int GetTeamID();
+	
+	virtual bool HasEnemies();
+	virtual bool HasFriendlies();
+	virtual std::vector<IUnit*> GetEnemies();
 	virtual std::vector<IUnit*> GetEnemies();
 	virtual std::vector<IUnit*> GetFriendlies();
 	virtual std::vector<IUnit*> GetUnits();
