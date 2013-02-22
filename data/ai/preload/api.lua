@@ -58,15 +58,20 @@ game = {}
 	end
 	
 	function game:GetEnemies()
-		local ev = game_engine:GetEnemies()
-		local e = {}
-		local i = 0
-		while i  < ev:size() do
-			table.insert(e,ev[i])
-			i = i + 1
+		local has_enemies = game_engine:HasEnemies()
+		if has_enemies ~= true then
+			return nil
+		else
+			local ev = game_engine:GetEnemies()
+			local e = {}
+			local i = 0
+			while i  < ev:size() do
+				table.insert(e,ev[i])
+				i = i + 1
+			end
+			ev = nil
+			return e
 		end
-		ev = nil
-		return e
 	end
 	
 	function game:GetUnits()
@@ -82,15 +87,20 @@ game = {}
 	end
 	
 	function game:GetFriendlies()
-		local fv = game_engine:GetFriendlies()
-		local f = {}
-		local i = 0
-		while i  < fv:size() do
-			table.insert(f,fv[i])
-			i = i + 1
+		local has_friendlies = game_engine:HasFriendlies()
+		if has_friendlies ~= true then
+			return nil
+		else
+			local fv = game_engine:GetFriendlies()
+			local f = {}
+			local i = 0
+			while i  < fv:size() do
+				table.insert(f,fv[i])
+				i = i + 1
+			end
+			fv = nil
+			return f
 		end
-		fv = nil
-		return f
 	end
 	
 	
