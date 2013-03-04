@@ -9,6 +9,7 @@
  * ----------------------------------------------------------------------------- */
 
 #define SWIGLUA
+#define SWIG_LUA_MODULE_GLOBAL
 
 
 #ifdef __cplusplus
@@ -966,7 +967,7 @@ SWIGINTERN int SWIG_Lua_module_set(lua_State* L)
   return 0;
 }
 
-/* registering a module in lua */
+/* registering a module in lua. Pushes the module table on the stack. */
 SWIGINTERN void  SWIG_Lua_module_begin(lua_State* L,const char* name)
 {
   assert(lua_istable(L,-1));  /* just in case */
@@ -983,8 +984,16 @@ SWIGINTERN void  SWIG_Lua_module_begin(lua_State* L,const char* name)
   lua_newtable(L);    /* the .set table */
   lua_rawset(L,-3);  /* add .set into metatable */
   lua_setmetatable(L,-2);  /* sets meta table in module */
+#ifdef SWIG_LUA_MODULE_GLOBAL
+  /* If requested, install the module directly into the global namespace. */
   lua_rawset(L,-3);        /* add module into parent */
   SWIG_Lua_get_table(L,name);   /* get the table back out */
+#else
+  /* Do not install the module table as global name. The stack top has
+     the module table with the name below. We pop the top and replace
+     the name with it. */
+  lua_replace(L,-2);
+#endif
 }
 
 /* ending the register */
@@ -5755,6 +5764,54 @@ fail:
 }
 
 
+static int _wrap_IGame_HasEnemies(lua_State* L) {
+  int SWIG_arg = 0;
+  IGame *arg1 = (IGame *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IGame::HasEnemies",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IGame::HasEnemies",1,"IGame *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IGame,0))){
+    SWIG_fail_ptr("IGame_HasEnemies",1,SWIGTYPE_p_IGame);
+  }
+  
+  result = (bool)(arg1)->HasEnemies();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IGame_HasFriendlies(lua_State* L) {
+  int SWIG_arg = 0;
+  IGame *arg1 = (IGame *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IGame::HasFriendlies",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IGame::HasFriendlies",1,"IGame *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IGame,0))){
+    SWIG_fail_ptr("IGame_HasFriendlies",1,SWIGTYPE_p_IGame);
+  }
+  
+  result = (bool)(arg1)->HasFriendlies();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static int _wrap_IGame_GetEnemies(lua_State* L) {
   int SWIG_arg = 0;
   IGame *arg1 = (IGame *) 0 ;
@@ -6071,6 +6128,8 @@ static swig_lua_method swig_IGame_methods[] = {
     {"ReadFile", _wrap_IGame_ReadFile}, 
     {"LocatePath", _wrap_IGame_LocatePath}, 
     {"GetTeamID", _wrap_IGame_GetTeamID}, 
+    {"HasEnemies", _wrap_IGame_HasEnemies}, 
+    {"HasFriendlies", _wrap_IGame_HasFriendlies}, 
     {"GetEnemies", _wrap_IGame_GetEnemies}, 
     {"GetFriendlies", _wrap_IGame_GetFriendlies}, 
     {"GetUnits", _wrap_IGame_GetUnits}, 
@@ -8982,8 +9041,9 @@ SWIGEXPORT int SWIG_init(lua_State* L)
   /* invoke user-specific initialization */
   SWIG_init_user(L);
   /* end module */
-  lua_pop(L,1);  /* tidy stack (remove module table)*/
-  lua_pop(L,1);  /* tidy stack (remove global table)*/
+  /* Note: We do not clean up the stack here (Lua will do this for us). At this
+     point, we have the globals table and out module table on the stack. Returning
+     one value makes the module table the result of the require command. */
   return 1;
 }
 
