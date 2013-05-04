@@ -11,29 +11,29 @@ end
 
 function LowEnergyBehaviour:UnitIdle(unit)
 	if unit:Internal():ID() == self.unit:Internal():ID() then
-		
+
 		if not self:IsActive() then
-			res = game:GetResource("energy")
+			res = game:GetResourceByName("energy")
 			if res == nil then
 				game:SendToConsole("res == nil in LowEnergyBehaviour")
-			else
-				if res.reserves == 0 then
-					self.underfire = true
-					self.unit:ElectBehaviour()
-				end
-			end
 		else
-			self.underfire = false
-			self.unit:ElectBehaviour()
+			if res.reserves == 0 then
+				self.underfire = true
+				self.unit:ElectBehaviour()
+			end
 		end
-		
+	else
+		self.underfire = false
+		self.unit:ElectBehaviour()
+	end
+
 	end
 	if unit:Internal():ID() == self.unit:Internal():ID() then
 		if self:IsActive() then
 			self.unit:ElectBehaviour()
 		end
 	end
-	
+
 end
 
 function LowEnergyBehaviour:Update()
@@ -42,7 +42,7 @@ end
 
 function LowEnergyBehaviour:Activate()
 	self.underfire = false
-	
+
 	local s = self.unit:Internal():Build("esolar2")
 	if s then
 		self.active = true
@@ -68,6 +68,6 @@ function LowEnergyBehaviour:UnitDead(unit)
 end
 
 function LowEnergyBehaviour:UnitDamaged(unit,attacker)
-	
+
 end
 
