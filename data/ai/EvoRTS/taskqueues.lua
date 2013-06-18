@@ -7,14 +7,12 @@ math.random(); math.random(); math.random()
 
 local function AirOrLand()
    if (ai.factories < 5) or (ai.factories == nil) then
-		local r = math.random(0,5)
+		local r = math.random(0,3)
 		if r == 0 then
 			return "ebasefactory"
 		elseif r == 1 then
 			return "eairplant"
 		elseif r == 2 then
-			return "eairplant"
-		elseif r == 3 then
 			return "eamphibfac"
 		else 
 			return "eminifac"
