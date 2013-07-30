@@ -219,12 +219,12 @@ map = {}
 	function map:GetMetalSpots() -- returns a table of spot positions
 		--
 		local m = game_engine:Map()
+		local fv = game_engine:Map():GetMetalSpots()
 		local count = m:SpotCount()
-		--local fv = game_engine:Map():GetMetalSpots()
 		local f = {}
 		local i = 0
 		while i  < count do
-			table.insert(f,m:GetSpot(i))
+			table.insert( f, m:GetSpot(i) )
 			i = i + 1
 		end 
 		--fv = nil
