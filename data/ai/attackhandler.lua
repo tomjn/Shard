@@ -53,7 +53,7 @@ function AttackHandler:DoTargetting()
 		--enemies = game:GetEnemies()
 		local enemies = game:GetEnemies()
 
-		if #enemies > 0 then
+		if enemies and #enemies > 0 then
 			-- figure out where all the enemies are!
 			for i=1,#enemies do
 				local e = enemies[i]
