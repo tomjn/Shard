@@ -15,9 +15,6 @@ public:
 	virtual bool IsAlive()=0;
 
 	virtual bool IsCloaked()=0;
-
-	virtual void Forget()=0; // makes the interface forget about this unit and cleanup
-	virtual bool Forgotten()=0; // for interface/debugging use
 	
 	virtual IUnitType* Type()=0;
 
