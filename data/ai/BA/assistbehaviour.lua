@@ -78,7 +78,11 @@ function AssistBehaviour:Update()
 				if self.IDByType == 1 then
 					if IsSiegeEquipmentNeeded() or unit:GetHealth() < unit:GetMaxHealth() * 0.9 then
 						self.IDByType = 2
-						ai.assisthandler:Release(unit)
+						self.unit:ElectBehaviour()
+					end
+				else
+					if not IsSiegeEquipmentNeeded() and unit:GetHealth() >= unit:GetMaxHealth() * 0.9 then
+						self.IDByType = 1
 						self.unit:ElectBehaviour()
 					end
 				end
@@ -122,19 +126,21 @@ end
 
 function AssistBehaviour:Activate()
 	EchoDebug("AssistBehaviour: activated on unit "..self.name)
-	self.active = true
-	self.target = nil
 	if self:DoIAssist() then
+		ai.assisthandler:Release(self.unit:Internal())
 		ai.assisthandler:AddFree(self)
 	end
+	self.active = true
+	self.target = nil
 end
 
 function AssistBehaviour:Deactivate()
 	EchoDebug("AssistBehaviour: deactivated on unit "..self.name)
+	ai.assisthandler:RemoveWorking(self)
+	ai.assisthandler:RemoveFree(self)
 	self.active = false
 	self.target = nil
 	self.assisting = nil
-	ai.assisthandler:RemoveFree(self)
 end
 
 function AssistBehaviour:Priority()

@@ -713,21 +713,27 @@ function MapHandler:ClosestFreeSpot(unittype, builder)
 
 	local position = builder:GetPosition()
 	local spots = {}
-	if builder:Name() == "armcom" or builder:Name() == "corcom" then
-		-- treat the commander like an amphibious unit
+	local bname = builder:Name()
+	if bname == "armcom" or bname == "corcom" then
+		-- give the commander both shp and bot spots
 		local pos = builder:GetPosition()
-		local network = self:MobilityNetworkHere("amp", pos)
+		local network = self:MobilityNetworkHere("bot", pos)
+		if network ~= nil then
+			-- EchoDebug("found bot metal spot network for commander")
+			spots = ai.mobNetworkMetals["bot"][network]
+		end
+		network = self:MobilityNetworkHere("shp", pos)
 		if network ~= nil then
 			-- EchoDebug("found underwater metal spot network for commander")
-			spots = ai.mobNetworkMetals["amp"][network]
-		else
-			network = self:MobilityNetworkHere("bot", pos)
-			if network ~= nil then
-				-- EchoDebug("found bot metal spot network for commander")
-				spots = ai.mobNetworkMetals["bot"][network]
+			if #spots == 0 then
+				spots = ai.mobNetworkMetals["shp"][network]
+			else
+				for i, p in pairs(ai.mobNetworkMetals["shp"][network]) do
+					table.insert(spots, p)
+				end
 			end
 		end
-		-- give the commander all metal spots if amphibious or kbot doesn't work out
+		-- give the commander all metal spots if shp or bot doesn't work out
 		if #spots == 0 then spots = ai.mobNetworkMetals["air"][1] end
 	else
 		local mtype, network = self:MobilityOfUnit(builder)

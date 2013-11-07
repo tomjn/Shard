@@ -59,24 +59,28 @@ function RunFromAttackBehaviour:Activate()
 	if self.unit:Internal():CanMove() then
 		-- try to find a friendly weapon and run there
 		local ownUnits = game:GetFriendlies()
-		local saviour = self.initialLocation -- fall back to where the fleeing unit was built
+		local salvation = self.initialLocation -- fall back to where the fleeing unit was built if no saviour can be found
 		local fleeing = self.unit:Internal()
-		local upos = fleeing:GetPosition()
+		local fn = fleeing:Name()
+		local fid = fleeing:ID()
+		local fpos = fleeing:GetPosition()
 		local bestDistance = 10000
 		for i,unit in pairs(ownUnits) do
 			local un = unit:Name()
-			if unit:ID() ~= self.unit:Internal():ID() and un ~= "corcom" and un ~= "armcom" and not ai.defendhandler:IsDefendingMe(unit, fleeing) then
-				if unitTable[un].isWeapon and unit:GetHealth() > unit:GetMaxHealth() * 0.75 and ai.maphandler:UnitCanGetToUnit(fleeing, unit) and not unit:IsBeingBuilt() then
-					local spos = unit:GetPosition()
-					local dist = distance(upos, spos) - unitTable[un].metalCost
-					if dist < bestDistance then
-						bestDistance = dist
-						saviour = spos
+			if unit:ID() ~= fid and un ~= "corcom" and un ~= "armcom" and not ai.defendhandler:IsDefendingMe(unit, fleeing) then
+				if unitTable[un].isWeapon and (unitTable[un].isBuilding or unitTable[un].metalCost > unitTable[fn].metalCost) then
+					local upos = unit:GetPosition()
+					if ai.targethandler:IsSafePosition(upos, fleeing) and unit:GetHealth() > unit:GetMaxHealth() * 0.75 and ai.maphandler:UnitCanGetToUnit(fleeing, unit) and not unit:IsBeingBuilt() then
+						local dist = distance(fpos, upos) - unitTable[un].metalCost
+						if dist < bestDistance then
+							bestDistance = dist
+							salvation = upos
+						end
 					end
 				end
 			end
 		end
-		self.unit:Internal():Move(RandomAway(saviour,100))
+		self.unit:Internal():Move(RandomAway(salvation,100))
 
 		self.active = true
 		EchoDebug("RunFromAttackBehaviour: unit ".. self.name .." runs away from danger")

@@ -143,7 +143,7 @@ function AssistHandler:DoMagnets()
 end
 
 -- returns any assistants assigned to a builder to being available
-function AssistHandler:Release(builder, bid, dead, doNotDemagnetsize)
+function AssistHandler:Release(builder, bid, dead, doNotDemagnetize)
 	if bid == nil then 
 		bid = builder:ID()
 	end
@@ -155,7 +155,7 @@ function AssistHandler:Release(builder, bid, dead, doNotDemagnetsize)
 		table.insert(self.free, asstbehaviour)
 	end
 	self.working[bid] = nil
-	if doNotDemagnetsize and not dead then
+	if doNotDemagnetize and not dead then
 		-- ignore
 	else
 		EchoDebug("demagnetizing " .. bid)
@@ -166,10 +166,10 @@ function AssistHandler:Release(builder, bid, dead, doNotDemagnetsize)
 				table.remove(self.magnets, i)
 			end
 		end
-		EchoDebug("resetting magnets...")
-		self:DoMagnets()
-		EchoDebug("magnets reset")
 	end
+	EchoDebug("resetting magnets...")
+	self:DoMagnets()
+	EchoDebug("magnets reset")
 	return true
 end
 
