@@ -104,7 +104,10 @@ function LosHandler:Update()
 		ai.conCount = 0
 		-- game:SendToConsole("updating los")
 		local ownUnits = game:GetFriendlies()
-		ai.friendlyCount = table.getn(ownUnits)
+		if ownUnits == nil then
+			ownUnits = {}
+		end
+		ai.friendlyCount = #ownUnits
 		self.losGrid = {}
 		for _, unit in pairs(ownUnits) do
 			local uname = unit:Name()
@@ -129,6 +132,9 @@ function LosHandler:Update()
 		end
 		-- update enemy jamming
 		local enemies = game:GetEnemies()
+		if enemies == nil then
+			enemies = {}
+		end
 		for _, e in pairs(enemies) do
 			local utable = unitTable[e:Name()]
 			if utable.jammerRadius > 0 then
