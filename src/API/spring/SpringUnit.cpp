@@ -12,6 +12,8 @@ CSpringUnit::CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, IG
 }
 
 CSpringUnit::~CSpringUnit(){
+	unit = NULL;
+	callback = NULL;
 	//
 }
 
