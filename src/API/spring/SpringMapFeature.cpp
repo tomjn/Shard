@@ -14,7 +14,10 @@ int CSpringMapFeature::ID(){
 }
 
 std::string CSpringMapFeature::Name(){
-	return feature->GetDef()->GetName();
+	if (feature->GetDef()!=NULL) {
+		return feature->GetDef()->GetName();
+	}
+	return "";
 }
 
 Position CSpringMapFeature::GetPosition(){
