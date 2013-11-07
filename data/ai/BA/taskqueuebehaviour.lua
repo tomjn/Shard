@@ -360,6 +360,7 @@ function TaskQueueBehaviour:GetQueue()
 		if unitTable[self.name].isBuilding and unitTable[self.name].techLevel < ai.maxFactoryLevel then
 			q = outmodedTaskqueues[self.name]
 			got = true
+			ai.assisthandler:Release(nil, self.id)
 		elseif self.outmodedFactory then
 			q = outmodedTaskqueues[self.name]
 			got = true
