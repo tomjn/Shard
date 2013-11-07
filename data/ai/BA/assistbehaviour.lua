@@ -159,6 +159,7 @@ function AssistBehaviour:UnitDead(unit)
 		if IDByTypeTaken[uname] ~= nil then IDByTypeTaken[uname][self.IDByType] = nil end
 		if ai.totalCons[uname] ~= nil then ai.totalCons[uname] = ai.totalCons[uname] - 1 end
 		self.IDByType = nil
+		ai.assisthandler:RemoveWorking(self)
 		ai.assisthandler:RemoveFree(self)
 	end
 end

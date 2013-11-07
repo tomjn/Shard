@@ -198,3 +198,20 @@ function AssistHandler:RemoveFree(asstbehaviour)
 	end
 	return false
 end
+
+function AssistHandler:RemoveWorking(asstbehaviour)
+	if asstbehaviour.target == nil then return false end
+	local targetID = asstbehaviour.target:ID()
+	for bid, workers in pairs(self.working) do
+		if bid == targetID then
+			for i, ab in pairs(workers) do
+				if ab == asstbehaviour then
+					table.remove(workers, i)
+					EchoDebug(asstbehaviour.name .. " removed from working assistants")
+					return true
+				end
+			end
+		end
+	end
+	return false
+end

@@ -25,6 +25,12 @@ function ExitFactoryBehaviour:UnitIdle(unit)
 
 end
 
+function ExitFactoryBehaviour:UnitDead(unit)
+	if unit.engineID == self.unit.engineID then
+		self.fresh = nil
+	end
+end
+
 function ExitFactoryBehaviour:Update()
 	if self.fresh then
 		local f = game:Frame()

@@ -26,7 +26,9 @@ local needNukes = false
 -- do we need siege equipment such as artillery and merl?
 local needSiege = false
 
-local AAUnitPerTypeLimit = 3
+local heavyPlasmaLimit = 3 -- changes with CheckForMapControl
+
+local AAUnitPerTypeLimit = 3 -- changes with CheckForMapControl
 
 local lastCheckFrame = 0
 local lastSiegeCheckFrame = 0
@@ -106,52 +108,51 @@ function CheckForDangers()
 		needTorpedo = false
 		lastCheckFrame = game:Frame()
 		local enemies = game:GetEnemies()
-		if enemies == nil then
-			return
-		end
-		for _, enemyUnit in pairs(enemies) do
-			if ai.loshandler:IsKnownEnemy(enemyUnit) > 1 then
-				local un = enemyUnit:Name()
-				if unitTable[un].mtype == "air" and unitTable[un].groundRange > 0 then
-					needAA = true
-					EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
-				else
-					for _, ut in pairs(airFacList) do
+		if enemies ~= nil then
+			for _, enemyUnit in pairs(enemies) do
+				if ai.loshandler:IsKnownEnemy(enemyUnit) > 1 then
+					local un = enemyUnit:Name()
+					if unitTable[un].mtype == "air" and unitTable[un].groundRange > 0 then
+						needAA = true
+						EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
+					else
+						for _, ut in pairs(airFacList) do
+							if un == ut then
+								needAA = true
+								EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
+								break
+							end
+						end
+					end
+					for _, ut in pairs(bigPlasmaList) do
 						if un == ut then
-							needAA = true
-							EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
+							needShields = true
+							EchoDebug("Spotted "..un.." enemy unit, now I need plasma shields!")
 							break
 						end
 					end
-				end
-				for _, ut in pairs(bigPlasmaList) do
-					if un == ut then
-						needShields = true
-						EchoDebug("Spotted "..un.." enemy unit, now I need plasma shields!")
-						break
-					end
-				end
-				for _, ut in pairs(nukeList) do
-					if un == ut then
-						needAntinuke = true
-						EchoDebug("Spotted "..un.." enemy unit, now I need antinukes!")
-						break
-					end
-				end
-				if unitTable[un].needsWater and enemyUnit:WeaponCount() > 0 then
-					needTorpedo = true
-					EchoDebug("Spotted "..un.." enemy unit, now I need torpedos!")
-				else
-					for _, ut in pairs(subFacList) do
+					for _, ut in pairs(nukeList) do
 						if un == ut then
-							needTorpedo = true
-							EchoDebug("Spotted "..un.." enemy unit, now I need torpedos!")
+							needAntinuke = true
+							EchoDebug("Spotted "..un.." enemy unit, now I need antinukes!")
 							break
 						end
 					end
-				end
-				if needAA and needShields and needAntinuke and needTorpedo then
-					break
+					if unitTable[un].needsWater and enemyUnit:WeaponCount() > 0 then
+						needTorpedo = true
+						EchoDebug("Spotted "..un.." enemy unit, now I need torpedos!")
+					else
+						for _, ut in pairs(subFacList) do
+							if un == ut then
+								needTorpedo = true
+								EchoDebug("Spotted "..un.." enemy unit, now I need torpedos!")
+								break
+							end
+						end
+					end
+					if needAA and needShields and needAntinuke and needTorpedo then
+						break
+					end
 				end
 			end
 		end
@@ -197,6 +198,7 @@ function CheckForMapControl()
 			ai.needToReclaim = false
 		end
 		AAUnitPerTypeLimit = math.ceil(Metal.income / 12)
+		heavyPlasmaLimit = math.ceil(ai.combatCount / 6)
 		-- game:SendToConsole("bomber counter: " .. ai.bomberhandler:GetCounter() .. "/" .. maxBomberCounter .. "  attack counter: " .. ai.attackhandler:GetCounter() .. "/" .. maxAttackCounter)
 		ai.needAdvanced = false
 		local attackCounter = ai.attackhandler:GetCounter()
@@ -1550,24 +1552,26 @@ end
 
 -- how many enemies are there in a radius around a position, also returns buildings and factories
 function CountEnemiesInRadius(pos, radius, maxCount)
-	local enemies = game:GetEnemies()
 	local buildingCount = 0
 	local factoryCount = 0
 	local enemyCount = 0
-	for _, e in pairs(enemies) do
-		local epos = e:GetPosition()
-		if distance(pos, epos) < radius then
-			if unitTable[e:Name()].isBuilding then
-				buildingCount = buildingCount + 1
-				if unitTable[e:Name()].buildOptions ~= nil then
-					factoryCount = factoryCount + 1
+	local enemies = game:GetEnemies()
+	if enemies ~= nil then
+		for _, e in pairs(enemies) do
+			local epos = e:GetPosition()
+			if distance(pos, epos) < radius then
+				if unitTable[e:Name()].isBuilding then
+					buildingCount = buildingCount + 1
+					if unitTable[e:Name()].buildOptions ~= nil then
+						factoryCount = factoryCount + 1
+					end
+				else
+					enemyCount = enemyCount + 1
 				end
-			else
-				enemyCount = enemyCount + 1
-			end
-			-- optimisation: if the limit is already exceeded, don't count further
-			if enemyCount >= maxCount then
-				break
+				-- optimisation: if the limit is already exceeded, don't count further
+				if enemyCount >= maxCount then
+					break
+				end
 			end
 		end
 	end
@@ -1797,8 +1801,13 @@ local function AreaLimit_HeavyPlasma(self)
 	else
 		unitName = "armbrtha"
 	end
-	local unit = self.unit:Internal()
-	return CheckBombard(unitName, unit)
+	unitName = BuildWithLimitedNumber(unitName, heavyPlasmaLimit)
+	if unitName ~= DummyUnitName then
+		local unit = self.unit:Internal()
+		return CheckBombard(unitName, unit)
+	else
+		return DummyUnitName
+	end
 end
 
 local function AreaLimit_LLT(self)
@@ -2574,6 +2583,7 @@ end
 
 local anyCommander = {
 	CheckMySideIfNeeded,
+	BuildMex,
 	BuildAppropriateFactory,
 	WindSolar,
 	TidalIfTidal,
@@ -2583,7 +2593,6 @@ local anyCommander = {
 	AreaLimit_LightAA,
 	AreaLimit_DepthCharge,
 	DoSomethingForTheEconomy,
-	BuildMex,
 }
 
 local anyConUnit = {

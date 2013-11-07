@@ -20,8 +20,8 @@ local function GetEcon()
 	extraMetal = Metal.income - Metal.usage
 	enoughMetalReserves = math.min(Metal.income * 2, Metal.capacity * 0.1)
 	lotsMetalReserves = math.min(Metal.income * 10, Metal.capacity * 0.5)
-	energyTooLow = Energy.reserves < Energy.income or Energy.income < 30
-	energyOkay = Energy.reserves >= Energy.income and Energy.income >= 30
+	energyTooLow = Energy.reserves < Energy.income or Energy.income < 40
+	energyOkay = Energy.reserves >= Energy.income and Energy.income >= 40
 	metalTooLow = Metal.reserves < enoughMetalReserves
 	metalOkay = Metal.reserves >= enoughMetalReserves
 	metalBelowHalf = Metal.reserves < lotsMetalReserves
@@ -113,7 +113,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 		if unitTable[value].extractsMetal > 0 then
 			-- metal extractor
 			EchoDebug("  mex")
-			if energyTooLow then
+			if energyTooLow and Metal.income > 3 then
 				value = DummyUnitName
 			end
 		elseif value == "corwin" or value == "armwin" or value == "cortide" or value == "armtide" or (unitTable[value].totalEnergyOut > 0 and not unitTable[value].buildOptions) then
@@ -132,7 +132,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 			-- factory
 			EchoDebug("  factory")
 			EchoDebug(ai.factories)
-			if ai.factories - ai.outmodedFactories <= 0 and metalOkay and energyOkay and Energy.income > 40 and Metal.reserves > unitTable[value].metalCost * 0.7 then
+			if ai.factories - ai.outmodedFactories <= 0 and metalOkay and energyOkay and Metal.income > 3 and Metal.reserves > unitTable[value].metalCost * 0.7 then
 				EchoDebug("   first factory")
 				-- build the first factory
 			elseif (advFactories[value] or expFactories[value]) and metalOkay and energyOkay then
@@ -157,7 +157,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 					value = DummyUnitName
 				end
 			else
-				if Metal.income > (unitTable[value].metalCost / 12) + 13 or metalTooLow or metalAboveHalf or Metal.income < (unitTable[value].metalCost / 38) + 4 or energyTooLow or ai.factories == 0 then
+				if Metal.income > (unitTable[value].metalCost / 12) + 13 or metalTooLow or Metal.income < (unitTable[value].metalCost / 38) + 2 or energyTooLow or ai.factories == 0 then
 					value = DummyUnitName
 				end
 			end
