@@ -103,41 +103,47 @@ function LosHandler:Update()
 		ai.combatCount = 0
 		ai.conCount = 0
 		-- game:SendToConsole("updating los")
-		local ownUnits = game:GetFriendlies()
-		ai.friendlyCount = table.getn(ownUnits)
 		self.losGrid = {}
-		for _, unit in pairs(ownUnits) do
-			local uname = unit:Name()
-			local utable = unitTable[uname]
-			if utable.isWeapon and not utable.isBuilding then ai.combatCount = ai.combatCount + 1 end
-			if utable.buildOptions and not utable.isBuilding then ai.conCount = ai.conCount + 1 end
-			local upos = unit:GetPosition()
-			if utable.losRadius > 0 then
-				self:FillCircle(upos.x, upos.z, utable.losRadius * 32, 2)
-			end
-			if utable.airLosRadius > 0 then
-				-- 4 will become 2 in IsKnownEnemy
-				self:FillCircle(upos.x, upos.z, (utable.losRadius + utable.airLosRadius) * 32, 4)
-			end
-			if utable.radarRadius > 0 then
-				self:FillCircle(upos.x, upos.z, utable.radarRadius, 1)
-			end
-			if utable.sonarRadius > 0 then
-				-- 3 will become 2 in IsKnownEnemy
-				self:FillCircle(upos.x, upos.z, utable.sonarRadius, 3)
+		ai.friendlyCount = 0
+		local ownUnits = game:GetFriendlies()
+		if ownUnits ~= nil then
+			ai.friendlyCount = table.getn(ownUnits)
+			for _, unit in pairs(ownUnits) do
+				local uname = unit:Name()
+				local utable = unitTable[uname]
+				if utable.isWeapon and not utable.isBuilding then ai.combatCount = ai.combatCount + 1 end
+				if utable.buildOptions and not utable.isBuilding then ai.conCount = ai.conCount + 1 end
+				local upos = unit:GetPosition()
+				if utable.losRadius > 0 then
+					self:FillCircle(upos.x, upos.z, utable.losRadius * 32, 2)
+				end
+				if utable.airLosRadius > 0 then
+					-- 4 will become 2 in IsKnownEnemy
+					self:FillCircle(upos.x, upos.z, (utable.losRadius + utable.airLosRadius) * 32, 4)
+				end
+				if utable.radarRadius > 0 then
+					self:FillCircle(upos.x, upos.z, utable.radarRadius, 1)
+				end
+				if utable.sonarRadius > 0 then
+					-- 3 will become 2 in IsKnownEnemy
+					self:FillCircle(upos.x, upos.z, utable.sonarRadius, 3)
+				end
 			end
 		end
 		-- update enemy jamming
 		local enemies = game:GetEnemies()
-		for _, e in pairs(enemies) do
-			local utable = unitTable[e:Name()]
-			if utable.jammerRadius > 0 then
-				local upos = e:GetPosition()
-				self:FillCircle(upos.x, upos.z, utable.jammerRadius, 1, true)
+		if enemies ~= nil then
+			for _, e in pairs(enemies) do
+				local utable = unitTable[e:Name()]
+				if utable.jammerRadius > 0 then
+					local upos = e:GetPosition()
+					self:FillCircle(upos.x, upos.z, utable.jammerRadius, 1, true)
+				end
 			end
+			-- update known enemies
+			self:UpdateEnemies()
 		end
-		-- update known enemies and wrecks
-		self:UpdateEnemies()
+		-- update known wrecks
 		self:UpdateWrecks()
 		if DebugEnabled then debugPlotLosFile:close() end
 	end
@@ -145,13 +151,8 @@ end
 
 function LosHandler:UpdateEnemies()
 	local enemies = game:GetEnemies()
-	-- game:SendToConsole("total enemies on map " .. #enemies)
-	if enemies == nil then
-		return
-	end
-	if #enemies == 0 then
-		return
-	end
+	if enemies == nil then return end
+	if #enemies == 0 then return end
 	-- game:SendToConsole("updating known enemies")
 	local known = {}
 	local exists = {}
@@ -245,13 +246,8 @@ end
 
 function LosHandler:UpdateWrecks()
 	local wrecks = game.map:GetMapFeatures()
-	-- game:SendToConsole("total enemies on map " .. #enemies)
-	if wrecks == nil then
-		return
-	end
-	if #wrecks == 0 then
-		return
-	end
+	if wrecks == nil then return end
+	if #wrecks == 0 then return end
 	-- game:SendToConsole("updating known wrecks")
 	local known = {}
 	if self.knownWrecks == nil then self.knownWrecks = {} end
