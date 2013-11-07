@@ -13,7 +13,6 @@ CSpringMap::CSpringMap(springai::OOAICallback* callback, CSpringGame* game)
 	game(game),
 	metal(NULL)	{
 
-	metal = NULL;
 	std::vector<springai::Resource*> resources = callback->GetResources();
 	if ( !resources.empty() ) {
 
@@ -36,6 +35,8 @@ CSpringMap::CSpringMap(springai::OOAICallback* callback, CSpringGame* game)
 
 CSpringMap::~CSpringMap(){
 	this->metalspots.clear();
+	game = NULL;
+	callback = NULL;
 }
 
 Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance){
@@ -43,12 +44,8 @@ Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, dou
 }
 
 Position CSpringMap::FindClosestBuildSiteFacing(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance,int facing){
-	if(t == NULL){
-		Position err;
-		err.x = 0;
-		err.y = 1;
-		err.z = 0;
-		return err;
+	if ((t == NULL) || (callback==NULL)){
+		return Position(0.0f, 1.0f, 0.0f);
 	}
 	CSpringUnitType* ut = static_cast<CSpringUnitType*>(t);
 	const springai::AIFloat3 bPos(builderPos.x, builderPos.y, builderPos.z);

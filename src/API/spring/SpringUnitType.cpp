@@ -17,7 +17,9 @@ CSpringUnitType::CSpringUnitType(CSpringGame* game, springai::OOAICallback* call
 }
 
 CSpringUnitType::~CSpringUnitType(){
-	//
+	game = NULL;
+	callback = NULL;
+	unitDef = NULL;
 }
 
 std::string CSpringUnitType::Name(){

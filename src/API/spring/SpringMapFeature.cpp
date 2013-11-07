@@ -6,21 +6,28 @@ CSpringMapFeature::CSpringMapFeature(springai::OOAICallback* callback, springai:
 }
 
 CSpringMapFeature::~CSpringMapFeature(){
-	//
+	feature = NULL;
+	callback = NULL;
+	game = NULL;
 }
 
 int CSpringMapFeature::ID(){
+	if (feature==NULL) {
+		return -1;
+	}
 	return feature->GetFeatureId();
 }
 
 std::string CSpringMapFeature::Name(){
-	if (feature->GetDef()!=NULL) {
-		return feature->GetDef()->GetName();
+	if ((feature == NULL) || (feature->GetDef()==NULL)) {
+		return "";
 	}
-	return "";
+	return feature->GetDef()->GetName();
 }
 
 Position CSpringMapFeature::GetPosition(){
+	if (feature == NULL)
+		return Position(0.0f,0.0f,0.0f);
 	const springai::AIFloat3 pos = feature->GetPosition();
 	Position p;
 	p.x = pos.x;
@@ -44,5 +51,7 @@ float CSpringMapFeature::ResourceValue(int idx){
 }
 
 bool CSpringMapFeature::Reclaimable(){
+	if (feature==NULL)
+		return false;
 	return feature->GetDef()->IsReclaimable();
 }

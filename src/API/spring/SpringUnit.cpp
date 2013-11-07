@@ -18,6 +18,9 @@ CSpringUnit::~CSpringUnit(){
 }
 
 int CSpringUnit::ID(){
+	if (unit==NULL) {
+		return -1;
+	}
 	return unit->GetUnitId();
 }
 
@@ -26,12 +29,14 @@ int CSpringUnit::Team(){
 }
 
 std::string CSpringUnit::Name(){
-	springai::UnitDef* u = unit->GetDef();
-	if(u){
-		return u->GetName();
-	}else{
+	if (unit == NULL) {
 		return "";
 	}
+	springai::UnitDef* u = unit->GetDef();
+	if(u == NULL){
+		return "";
+	}
+	return u->GetName();
 }
 
 void CSpringUnit::SetDead(bool dead){
