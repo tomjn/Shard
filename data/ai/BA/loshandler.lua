@@ -137,14 +137,13 @@ function LosHandler:Update()
 		end
 		-- update enemy jamming
 		local enemies = game:GetEnemies()
-		if enemies == nil then
-			enemies = {}
-		end
-		for _, e in pairs(enemies) do
-			local utable = unitTable[e:Name()]
-			if utable.jammerRadius > 0 then
-				local upos = e:GetPosition()
-				self:FillCircle(upos.x, upos.z, utable.jammerRadius, 1, true)
+		if enemies ~= nil then
+			for _, e in pairs(enemies) do
+				local utable = unitTable[e:Name()]
+				if utable.jammerRadius > 0 then
+					local upos = e:GetPosition()
+					self:FillCircle(upos.x, upos.z, utable.jammerRadius, 1, true)
+				end
 			end
 			-- update known enemies
 			self:UpdateEnemies()
