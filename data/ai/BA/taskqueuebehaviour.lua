@@ -153,7 +153,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 			EchoDebug("  defense")
 			if value == "corint" or value == "armbrtha" or value == "corsilo" or value == "armsilo" then
 				-- long-range plasma and nukes aren't really defense
-				if metalTooLow or energyTooLow or Metal.income < 35 or ai.factories == 0 or farTooFewCombats then
+				if metalTooLow or energyTooLow or Metal.income < 35 or ai.factories == 0 or notEnoughCombats then
 					value = DummyUnitName
 				end
 			else
@@ -565,16 +565,23 @@ function TaskQueueBehaviour:ProgressQueue()
 							if factory ~= nil then
 								EchoDebug("found factory")
 								local p = ai.buildsitehandler:ClosestBuildSpot(factory, utype, 10)
-								-- local p = map:FindClosestBuildSite(utype, factory:GetPosition(), 40, 10)
 								if p ~= nil then
-									EchoDebug("found spot near factory, building...")
-									success = self.unit:Internal():Build(utype, p)
-									self.progress = not success
+									local fpos = factory:GetPosition()
+									local fdist = distance(fpos, p)
+									if fdist < 400 then
+										EchoDebug("found spot near factory, building...")
+										success = self.unit:Internal():Build(utype, p)
+										self.progress = not success
+									else
+										EchoDebug("build spot near factory not within build range")
+									self.progress = true
+									end
 								else
 									EchoDebug("no spot near factory found")
 									self.progress = true
 								end
 							else
+								EchoDebug("no factory found")
 								self.progress = true
 							end
 						elseif value == "corgate" or value == "armgate" then
