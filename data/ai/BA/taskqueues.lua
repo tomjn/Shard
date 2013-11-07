@@ -2583,6 +2583,7 @@ end
 
 local anyCommander = {
 	CheckMySideIfNeeded,
+	BuildMex,
 	BuildAppropriateFactory,
 	WindSolar,
 	TidalIfTidal,
@@ -2592,7 +2593,6 @@ local anyCommander = {
 	AreaLimit_LightAA,
 	AreaLimit_DepthCharge,
 	DoSomethingForTheEconomy,
-	BuildMex,
 }
 
 local anyConUnit = {
