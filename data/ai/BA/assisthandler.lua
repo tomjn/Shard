@@ -21,6 +21,7 @@ end
 function AssistHandler:Init()
 	self.free = {}
 	self.working = {}
+	self.totalAssignments = 0
 	self.magnets = {}
 end
 
@@ -29,9 +30,8 @@ end
 function AssistHandler:Summon(builder, number, force)
 	if number == nil or number == 0 then number = #self.free end
 	if #self.free < number then 
-		-- if there aren't any assistants at all, build the thing anyway
-		if #self.working == 0 then return true end
-		if not force then return false end
+		-- EchoDebug("total assignments: " .. self.totalAssignments)
+		if self.totalAssignments ~= 0 and not force then return false end
 	end
 	local bid = builder:ID()
 	if #self.free >= number or (force and #self.free > 0) then
@@ -73,7 +73,10 @@ function AssistHandler:Summon(builder, number, force)
 		-- summon in order of distance
 		local summoned = {}
 		local n = 0
-		if self.working[bid] == nil then self.working[bid] = {} end
+		if self.working[bid] == nil then
+			self.totalAssignments = self.totalAssignments + 1
+			self.working[bid] = {}
+		end
 		for dist, i in pairsByKeys(bydistance) do
 			local asstbehaviour = self.free[i]
 			table.insert(self.working[bid], asstbehaviour)
@@ -129,7 +132,10 @@ function AssistHandler:DoMagnets()
 			end
 			if best then
 				local magnet = self.magnets[best]
-				if self.working[magnet.bid] == nil then self.working[magnet.bid] = {} end
+				if self.working[magnet.bid] == nil then
+					self.working[magnet.bid] = {}
+					self.totalAssignments = self.totalAssignments + 1
+				end
 				table.insert(self.working[magnet.bid], asstbehaviour)
 				asstbehaviour:Assign(magnet.builder)
 				table.remove(self.free, i)
@@ -155,6 +161,7 @@ function AssistHandler:Release(builder, bid, dead, doNotDemagnetize)
 		table.insert(self.free, asstbehaviour)
 	end
 	self.working[bid] = nil
+	self.totalAssignments = self.totalAssignments - 1
 	if doNotDemagnetize and not dead then
 		-- ignore
 	else
@@ -167,9 +174,9 @@ function AssistHandler:Release(builder, bid, dead, doNotDemagnetize)
 			end
 		end
 	end
-	EchoDebug("resetting magnets...")
+	-- EchoDebug("resetting magnets...")
 	self:DoMagnets()
-	EchoDebug("magnets reset")
+	-- EchoDebug("magnets reset")
 	return true
 end
 
@@ -207,6 +214,10 @@ function AssistHandler:RemoveWorking(asstbehaviour)
 			for i, ab in pairs(workers) do
 				if ab == asstbehaviour then
 					table.remove(workers, i)
+					if #workers == 0 then
+						self.working[bid] = nil
+						self.totalAssignments = self.totalAssignments - 1
+					end
 					EchoDebug(asstbehaviour.name .. " removed from working assistants")
 					return true
 				end
