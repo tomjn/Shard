@@ -37,7 +37,10 @@ local lastSiegeCheckFrame = 0
 local AreaCheckRange = 1500
 
 local tidalPower = 0
+
 local averageWind = 0
+local needWind = false
+local windRatio = 1
 
 local needAmphibiousCons = false
 
@@ -65,7 +68,21 @@ local function CheckMySide(self)
 	game:SendToConsole("per-type construction unit limit: " .. ConUnitPerTypeLimit)
 	minDefenseNetworkSize = ai.mobilityGridArea / 4 
 	-- set the averageWind
-	if averageWind == 0 then averageWind = map:AverageWind() end
+	if averageWind == 0 then
+		averageWind = map:AverageWind()
+		if averageWind > 11 then
+			needWind = true
+		else
+			needWind = false
+		end
+		local minWind = map:MinimumWindSpeed()
+		if minWind < 8 then
+			windRatio = minWind / 8
+		else
+			windRatio = 1
+		end
+		EchoDebug("wind/solar ratio: " .. windRatio)
+	end
 	-- set the tidal strength
 	if MapHasWater() then
 		if tidalPower == 0 then tidalPower = map:TidalStrength() end
@@ -372,6 +389,7 @@ function DoSomethingForTheEconomy(self)
 	end
 	-- maybe we need storage?
 	if unitName == DummyUnitName then
+		-- energy storage
 		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 0 then
 			if isWater then
 				if ai.mySide == CORESideName then
@@ -389,6 +407,7 @@ function DoSomethingForTheEconomy(self)
 		end
 	end
 	if unitName == DummyUnitName then
+		-- metal storage
 		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 0 then
 			if isWater then
 				if ai.mySide == CORESideName then
@@ -408,6 +427,73 @@ function DoSomethingForTheEconomy(self)
 
 	return unitName
 end
+
+--[[
+-- build advanced conversion or storage
+function DoSomethingAdvancedForTheEconomy(self)
+	local Energy = game:GetResourceByName("Energy")
+	local extraE = Energy.income - Energy.usage
+	local Metal = game:GetResourceByName("Metal")
+	local extraM = Metal.income - Metal.usage
+	local isWater = unitTable[self.unit:Internal():Name()].needsWater
+	local unitName = DummyUnitName
+	-- maybe we need conversion?
+	if extraE > 600 and extraM < 0 and Energy.income > 2000 then
+		if isWater then
+			if ai.mySide == CORESideName then
+				unitName = BuildWithLimitedNumber("coruwmm", 8)
+			else
+				unitName = BuildWithLimitedNumber("armuwmm", 8)
+			end		
+		else
+			if ai.mySide == CORESideName then
+				unitName = BuildWithLimitedNumber("cormmkr", 8)
+			else
+				unitName = BuildWithLimitedNumber("armmmkr", 8)
+			end
+		end
+	end
+	-- maybe we need storage?
+	if unitName == DummyUnitName then
+		-- energy storage
+		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 0 then
+			if isWater then
+				if ai.mySide == CORESideName then
+					unitName = BuildWithLimitedNumber("coruwadves", 3)
+				else
+					unitName = BuildWithLimitedNumber("armuwadves", 3)
+				end	
+			else
+				if ai.mySide == CORESideName then
+					unitName = BuildWithLimitedNumber("corestor", 3)
+				else
+					unitName = BuildWithLimitedNumber("armestor", 3)
+				end
+			end
+		end
+	end
+	if unitName == DummyUnitName then
+		-- metal storage
+		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 0 then
+			if isWater then
+				if ai.mySide == CORESideName then
+					unitName = BuildWithLimitedNumber("coruwadvms", 3)
+				else
+					unitName = BuildWithLimitedNumber("armuwadvms", 3)
+				end	
+			else
+				if ai.mySide == CORESideName then
+					unitName = BuildWithLimitedNumber("cormstor", 3)
+				else
+					unitName = BuildWithLimitedNumber("armmstor", 3)
+				end
+			end
+		end
+	end
+
+	return unitName
+end
+]]--
 
 function BuildAAIfNeeded(unitName)
 	if IsAANeeded() then
@@ -501,7 +587,11 @@ function Lvl2VehBreakthrough(self)
 	else
 		unitName = "armmanni"
 	end
-	return BuildSiegeIfNeeded(unitName)
+	unitName = BuildSiegeIfNeeded(unitName)
+	if unitName == DummyUnitName then
+		unitName = BuildDefendIfNeeded(unitName)
+	end
+	return unitName
 end
 
 function Lvl2BotBreakthrough(self)
@@ -934,7 +1024,16 @@ function Lvl3Battle(self)
 end
 
 function WindSolar()
-	if averageWind > 11 then
+	local wind = false
+	if needWind then
+		if windRatio == 1 then
+			wind = true
+		else
+			local r = math.random()
+			if r < windRatio then wind = true end
+		end
+	end
+	if wind then
 		if ai.mySide == CORESideName then
 			return "corwin"
 		else
@@ -2121,8 +2220,13 @@ local function AreaLimit_Sonar(self)
 	else
 		unitName = "armsonar"
 	end
-	local unit = self.unit:Internal()
-	return CheckAreaLimitSonar(unitName, unit)
+	unitName = BuildWithLimitedNumber(unitName, 1)
+	if unitName == DummyUnitName then
+		local unit = self.unit:Internal()
+		return CheckAreaLimitSonar(unitName, unit)
+	else
+		return unitName
+	end
 end
 
 local function AreaLimit_AdvancedSonar(self)
@@ -2136,8 +2240,13 @@ local function AreaLimit_AdvancedSonar(self)
 	else
 		unitName = "armason"
 	end
-	local unit = self.unit:Internal()
-	return CheckAreaLimitSonar(unitName, unit)
+	unitName = BuildWithLimitedNumber(unitName, 1)
+	if unitName == DummyUnitName then
+		local unit = self.unit:Internal()
+		return CheckAreaLimitSonar(unitName, unit)
+	else
+		return unitName
+	end
 end
 
 
@@ -2189,8 +2298,13 @@ local function AreaLimit_AdvancedRadar(self)
 	else
 		unitName = "armarad"
 	end
-	local unit = self.unit:Internal()
-	return CheckAreaLimitRadar(unitName, unit)
+	unitName = BuildWithLimitedNumber(unitName, 1)
+	if unitName == DummyUnitName then
+		local unit = self.unit:Internal()
+		return CheckAreaLimitRadar(unitName, unit)
+	else
+		return unitName
+	end
 end
 
 local function NanoTurret()
@@ -2598,17 +2712,18 @@ local anyCommander = {
 local anyConUnit = {
 	BuildAppropriateFactory,
 	NanoTurret,
-	BuildGeo,
-	BuildMex,
+	AreaLimit_LLT,
 	AreaLimit_SpecialLT,
 	AreaLimit_MediumAA,
 	AreaLimit_Radar,
 	WindSolar,
 	SolarAdv,
+	BuildGeo,
 	AreaLimit_HLT,
 	AreaLimit_Lvl1Plasma,
 	DoSomethingForTheEconomy,
 	AreaLimit_HeavyishAA,
+	BuildMex,
 }
 
 local anyConAmphibious = {

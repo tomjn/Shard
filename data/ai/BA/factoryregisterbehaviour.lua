@@ -24,9 +24,8 @@ function FactoryRegisterBehaviour:Init()
     	ai.factoriesAtLevel[level] = ai.factoriesAtLevel[level] + 1
     else
 		ai.factoriesAtLevel[level] = 1
-		if level > ai.maxFactoryLevel then ai.maxFactoryLevel = level end
 	end
-	if advFactories[un] then
+	if level > ai.maxFactoryLevel then
 		-- so that it will start producing combat units
 		ai.attackhandler:NeedLess()
 		ai.attackhandler:NeedLess()
@@ -37,6 +36,8 @@ function FactoryRegisterBehaviour:Init()
 		ai.raidhandler:NeedMore()
 		ai.raidhandler:NeedMore()
 		ai.raidhandler:NeedMore()
+		-- set the current maximum factory level
+		ai.maxFactoryLevel = level
 	end
 	-- game:SendToConsole(ai.factories .. " factories")
 	self.unit:ElectBehaviour()
@@ -68,11 +69,7 @@ end
 function FactoryRegisterBehaviour:UnitDead(unit)
 	if unit.engineID == self.unit.engineID then
 		-- game:SendToConsole("factory " .. self.name .. " died")
-		if ai.factories ~= nil then
-			ai.factories = ai.factories - 1
-		else
-			ai.factories = 0
-		end
+		ai.factories = ai.factories - 1
 		local un = self.name
 	    local level = unitTable[un].techLevel
 	   	EchoDebug("factory " .. un .. " level " .. level .. " died")

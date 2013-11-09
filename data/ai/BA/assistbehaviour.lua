@@ -16,9 +16,7 @@ local CMD_PATROL = 15
 AssistBehaviour = class(Behaviour)
 
 function AssistBehaviour:DoIAssist()
-	if advConList[self.name] then
-		return false
-	elseif (self.IDByType ~= 1 and self.IDByType ~= 3) or buildAssistList[self.name] then
+	if (self.IDByType ~= 1 and self.IDByType ~= 3) or self.isNanoTurret then
 		return true
 	else
 		return false
@@ -37,6 +35,8 @@ function AssistBehaviour:Init()
 	else
 		ai.totalCons[uname] = ai.totalCons[uname] + 1
 	end
+	if nanoTurretList[uname] then self.isNanoTurret = true end
+	if commanderList[uname] then self.isCommander = true end
 	self:AssignIDByType()
 	EchoDebug(uname .. " " .. self.IDByType)
 	EchoDebug("AssistBehaviour: added to unit "..uname)
@@ -44,7 +44,7 @@ end
 
 function AssistBehaviour:UnitBuilt(unit)
 	if unit.engineID == self.unit.engineID then
-		if self.name == "cornanotc" or self.name == "armnanotc" then
+		if self.isNanoTurret then
 			-- set nano turrets to patrol
 			local upos = RandomAway(self.unit:Internal():GetPosition(), 50)
 			local floats = api.vectorFloat()
@@ -70,10 +70,10 @@ function AssistBehaviour:Update()
 	if math.mod(f,180) == 0 then
 		local unit = self.unit:Internal()
 		local uname = self.name
-		if uname == "cornanotc" or uname == "armnanotc" then
+		if self.isNanoTurret then
 			-- self.unit:Internal():MoveAndFire(self.unit:Internal():GetPosition())
 		else
-			if uname == "corcom" or uname == "armcom" then
+			if self.isCommander then
 				-- turn commander into build assister if you control more than half the mexes or if it's damaged
 				if self.IDByType == 1 then
 					if IsSiegeEquipmentNeeded() or unit:GetHealth() < unit:GetMaxHealth() * 0.9 then
@@ -81,6 +81,7 @@ function AssistBehaviour:Update()
 						self.unit:ElectBehaviour()
 					end
 				else
+					-- switch commander back to building
 					if not IsSiegeEquipmentNeeded() and unit:GetHealth() >= unit:GetMaxHealth() * 0.9 then
 						self.IDByType = 1
 						self.unit:ElectBehaviour()
@@ -88,7 +89,7 @@ function AssistBehaviour:Update()
 				end
 			else
 				-- fill empty spots after con units die
-				EchoDebug(uname .. " " .. self.IDByType .. " / " .. tostring(ai.totalCons[uname]))
+				-- EchoDebug(uname .. " " .. self.IDByType .. " / " .. tostring(ai.totalCons[uname]))
 				if self.IDByType > ai.totalCons[uname] then
 					EchoDebug("filling empty spots with " .. uname .. " " .. self.IDByType)
 					self:AssignIDByType()
@@ -100,7 +101,7 @@ function AssistBehaviour:Update()
 	end
 
 	if math.mod(f,60) == 0 then
-		if self.active and self.name ~= "cornanotc" and self.name ~= "armnanotc" then
+		if self.active and not self.isNanoTurret then
 			if self.target ~= nil then
 				if self.assisting ~= self.target:ID() then
 					local floats = api.vectorFloat()
@@ -144,14 +145,7 @@ function AssistBehaviour:Deactivate()
 end
 
 function AssistBehaviour:Priority()
-	if self.IDByType ~= nil then
-		if self:DoIAssist() then
-			return 100
-		else
-			return 0
-		end
-	elseif buildAssistList[self.name] then
-		-- game:SendToConsole("nano")
+	if self:DoIAssist() then
 		return 100
 	else
 		return 0

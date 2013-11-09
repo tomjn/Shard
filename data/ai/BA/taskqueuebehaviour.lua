@@ -95,9 +95,9 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 	EchoDebug(value .. " (before econ filter)")
 	-- EchoDebug("Energy: " .. Energy.reserves .. " " .. Energy.capacity .. " " .. Energy.income .. " " .. Energy.usage)
 	-- EchoDebug("Metal: " .. Metal.reserves .. " " .. Metal.capacity .. " " .. Metal.income .. " " .. Metal.usage)
-	if buildAssistList[value] then
-		-- build assist
-		EchoDebug(" build assist")
+	if nanoTurretList[value] then
+		-- nano turrets
+		EchoDebug(" nano turret")
 		if metalBelowHalf or energyTooLow or farTooFewCombats then
 			value = DummyUnitName
 		end
@@ -251,10 +251,6 @@ function TaskQueueBehaviour:Init()
 		end
 	end
 
-	if unitTable[self.name].isBuilding then
-		if not self.outmodedFactory then ai.assisthandler:Magnetize(u) end
-	end
-
 	self.countdown = 0
 	if self:HasQueues() then
 		self.queue = self:GetQueue()
@@ -324,11 +320,14 @@ function TaskQueueBehaviour:GetHelp(value)
 	EchoDebug(value .. " before getting help")
 	local builder = self.unit:Internal()
 	if helpList[value] then
-		ai.assisthandler:Summon(builder, helpList[value], true)
-		ai.assisthandler:Magnetize(builder, helpList[value])
-		return value
+		local hashelp = ai.assisthandler:PersistantSummon(builder, helpList[value], 1)
+		if hashelp then
+			return value
+		end
 	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
 		if ai.factories == 0 then
+			ai.assisthandler:Summon(builder)
+			ai.assisthandler:Magnetize(builder)
 			return value
 		else
 			local hashelp = ai.assisthandler:Summon(builder, ai.factories)
@@ -338,7 +337,13 @@ function TaskQueueBehaviour:GetHelp(value)
 			end
 		end
 	else
-		local number = math.floor((unitTable[value].metalCost + 750) / 1000)
+		local number
+		if unitTable[self.name].isBuilding then
+			-- factories have more nano output
+			number = math.floor((unitTable[value].metalCost + 1000) / 1500)
+		else
+			number = math.floor((unitTable[value].metalCost + 750) / 1000)
+		end
 		if number == 0 then return value end
 		local hashelp = ai.assisthandler:Summon(builder, number)
 		if hashelp then return value end
@@ -356,11 +361,12 @@ function TaskQueueBehaviour:GetQueue()
 			got = true
 		end
 	end
+	self.outmodedTechLevel = false
 	if outmodedTaskqueues[self.name] ~= nil and not got then
 		if unitTable[self.name].isBuilding and unitTable[self.name].techLevel < ai.maxFactoryLevel then
 			q = outmodedTaskqueues[self.name]
 			got = true
-			ai.assisthandler:Release(nil, self.id)
+			self.outmodedTechLevel = true
 		elseif self.outmodedFactory then
 			q = outmodedTaskqueues[self.name]
 			got = true
@@ -489,11 +495,9 @@ function TaskQueueBehaviour:ProgressQueue()
 			end
 		else
 			local builder = self.unit:Internal()
-			if unitTable[self.name].isBuilding then
-				-- don't release factory magnets
-				ai.assisthandler:Release(builder, nil, nil, true)
-			else
+			if not self.released then
 				ai.assisthandler:Release(builder)
+				self.released = true
 			end
 			if value ~= DummyUnitName then
 				EchoDebug(self.name .. " filtering...")
@@ -501,9 +505,14 @@ function TaskQueueBehaviour:ProgressQueue()
 				value = LandWaterFilter(builder, value)
 				value = self:CategoryEconFilter(value)
 				value = self:GetHelp(value)
+				self.released = false
 				EchoDebug(value .. " after all filters")
 			end
 			if value ~= DummyUnitName then
+				if unitTable[self.name].isBuilding and not self.outmodedTechLevel then
+					-- factories take up idle assistants
+					ai.assisthandler:TakeUpSlack(builder)
+				end
 				if value ~= nil then
 					utype = game:GetTypeByName(value)
 				else

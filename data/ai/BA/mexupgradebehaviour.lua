@@ -13,15 +13,23 @@ MexUpgradeBehaviour = class(Behaviour)
 function MexUpgradeBehaviour:Init()
 	self.active = false
 	self.mohoStarted = false
+	self.released = false
 	self.mexPos = nil
 	self.lastFrame = game:Frame()
-	EchoDebug("MexUpgradeBehaviour: added to unit "..self.unit:Internal():Name())
+	self.name = self.unit:Internal():Name()
+	EchoDebug("MexUpgradeBehaviour: added to unit "..self.name)
 end
 
 function MexUpgradeBehaviour:UnitIdle(unit)
 	if unit:Internal():ID() == self.unit:Internal():ID() then
 		if self:IsActive() then
-			EchoDebug("MexUpgradeBehaviour: unit "..self.unit:Internal():Name().." is idle")
+			local builder = self.unit:Internal()
+			EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." is idle")
+			-- release assistants
+			if not self.released then
+				ai.assisthandler:Release(builder)
+				self.released = true
+			end
 			-- maybe we've just finished a moho?
 			if self.mohoStarted then
 				self.mohoStarted = false
@@ -30,41 +38,44 @@ function MexUpgradeBehaviour:UnitIdle(unit)
 			-- maybe we've just finished reclaiming?
 			if self.mexPos ~= nil and not self.mohoStarted then
 				-- maybe we're ARM and not CORE?
-				mohoName = "cormoho"
+				local mohoName = "cormoho"
 				tmpType = game:GetTypeByName("armmoho")
-				if self.unit:Internal():CanBuild(tmpType) then
+				if builder:CanBuild(tmpType) then
 					mohoName = "armmoho"
 				end
 				-- maybe we're underwater?
 				tmpType = game:GetTypeByName("comuwmme")
-				if self.unit:Internal():CanBuild(tmpType) then
+				if builder:CanBuild(tmpType) then
 					mohoName = "coruwmme"
 				end
 				tmpType = game:GetTypeByName("armuwmme")
-				if self.unit:Internal():CanBuild(tmpType) then
+				if builder:CanBuild(tmpType) then
 					mohoName = "armuwmme"
 				end
 				tmpType = game:GetTypeByName(mohoName)
 				-- check if the moho can be built there at all
 				local s = map:CanBuildHere(tmpType, self.mexPos)
 				if s then
-					s = self.unit:Internal():Build(mohoName, self.mexPos)
+					s = builder:Build(mohoName, self.mexPos)
 				end
 				if s then
+					-- get assistance and magnetize
+					ai.assisthandler:PersistantSummon(builder, helpList[mohoName])
+					self.released = false
 					self.active = true
 					self.mohoStarted = true
 					self.mexPos = nil
-					EchoDebug("MexUpgradeBehaviour: unit "..self.unit:Internal():Name().." starts building a Moho")
+					EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." starts building a Moho")
 				else
 					self.mexPos = nil
 					self.mohoStarted = false
 					self.active = false
-					EchoDebug("MexUpgradeBehaviour: unit "..self.unit:Internal():Name().." failed to start building a Moho")
+					EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." failed to start building a Moho")
 				end
 			end
 
 			if not self.mohoStarted and (self.mexPos == nil) then
-				EchoDebug("MexUpgradeBehaviour: unit "..self.unit:Internal():Name().." restarts mex upgrade routine")
+				EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." restarts mex upgrade routine")
 				StartUpgradeProcess(self)
 			end
 		end
@@ -80,7 +91,7 @@ function MexUpgradeBehaviour:Update()
 end
 
 function MexUpgradeBehaviour:Activate()
-	EchoDebug("MexUpgradeBehaviour: active on unit "..self.unit:Internal():Name())
+	EchoDebug("MexUpgradeBehaviour: active on unit ".. self.name)
 	
 	StartUpgradeProcess(self)
 end
@@ -157,11 +168,11 @@ function StartUpgradeProcess(self)
 	
 	if s then
 		self.active = true
-		EchoDebug("MexUpgradeBehaviour: unit "..self.unit:Internal():Name().." goes to reclaim a mex")
+		EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." goes to reclaim a mex")
 	else
 		mexUnit = nil
 		self.active = false
 		self.lastFrame = game:Frame()
-		EchoDebug("MexUpgradeBehaviour: unit "..self.unit:Internal():Name().." failed to start reclaiming")
+		EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." failed to start reclaiming")
 	end
 end

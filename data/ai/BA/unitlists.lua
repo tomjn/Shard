@@ -189,6 +189,8 @@ hyperWatchdog = {
 helpList = {
 	corfus = 0,
 	armfus = 0,
+	coruwfus = 0,
+	armuwfus = 0,
 	aafus = 0,
 	cafus = 0,
 	corgeo = 2,
@@ -197,8 +199,8 @@ helpList = {
 	amgeo = 0,
 	cormoho = 2,
 	armmoho = 2,
-	cornanotc = 1,
-	armnanotc = 1,
+	coruwmme = 2,
+	armuwmme = 2,
 }
 
 -- things to defend other than factories and con units
@@ -319,13 +321,12 @@ scoutList = {
 	"armpt",
 }
 
--- don't build assist these
-dontAssistList = {
+commanderList = {
 	armcom = 1,
 	corcom = 1,
 }
 
-buildAssistList = {
+nanoTurretList = {
 	cornanotc = 1,
 	armnanotc = 1,
 }
