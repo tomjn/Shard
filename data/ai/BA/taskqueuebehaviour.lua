@@ -95,9 +95,9 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 	EchoDebug(value .. " (before econ filter)")
 	-- EchoDebug("Energy: " .. Energy.reserves .. " " .. Energy.capacity .. " " .. Energy.income .. " " .. Energy.usage)
 	-- EchoDebug("Metal: " .. Metal.reserves .. " " .. Metal.capacity .. " " .. Metal.income .. " " .. Metal.usage)
-	if buildAssistList[value] then
-		-- build assist
-		EchoDebug(" build assist")
+	if nanoTurretList[value] then
+		-- nano turrets
+		EchoDebug(" nano turret")
 		if metalBelowHalf or energyTooLow or farTooFewCombats then
 			value = DummyUnitName
 		end
@@ -505,6 +505,7 @@ function TaskQueueBehaviour:ProgressQueue()
 				value = LandWaterFilter(builder, value)
 				value = self:CategoryEconFilter(value)
 				value = self:GetHelp(value)
+				self.released = false
 				EchoDebug(value .. " after all filters")
 			end
 			if value ~= DummyUnitName then
@@ -512,7 +513,6 @@ function TaskQueueBehaviour:ProgressQueue()
 					-- factories take up idle assistants
 					ai.assisthandler:TakeUpSlack(builder)
 				end
-				self.released = false
 				if value ~= nil then
 					utype = game:GetTypeByName(value)
 				else

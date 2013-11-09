@@ -31,28 +31,22 @@ function AssistHandler:IsLocal(asstbehaviour, builder)
 	local aunit = asstbehaviour.unit:Internal()
 	local apos = aunit:GetPosition()
 	local dist = distance(bpos, apos)
-	local okay = true
-	if not ai.maphandler:UnitCanGoHere(aunit, bpos) then
-		okay = false
-	end
-	local uname = aunit:Name()
-	if okay and (uname == "cornanotc" or uname == "armnanotc") then
+	if asstbehaviour.isNanoTurret then
 		if dist > 390 then
-			okay = false
+			return false
+		end
+	else
+		if not ai.maphandler:UnitCanGoHere(aunit, bpos) then
+			return false
 		end
 	end
-	if okay then
-		return dist
-	else
-		return false
-	end
+	return dist
 end
 
 -- tries to get a certain number of assistants to help a builder
 -- if there aren't enough available, returns false
 function AssistHandler:Summon(builder, number, force, gentle)
 	if number == nil or number == 0 then number = #self.free end
-	if not force then EchoDebug("not forced") end
 	EchoDebug(#self.free .. " assistants free")
 	if #self.free < number then 
 		-- EchoDebug("total assignments: " .. self.totalAssignments)
@@ -64,6 +58,7 @@ function AssistHandler:Summon(builder, number, force, gentle)
 		-- get the closest ones first
 		-- order by distance
 		local bydistance = {}
+		local returnToFree = {}
 		local count = 0
 		while #self.free > 0 do
 			local asstbehaviour = table.remove(self.free)
@@ -78,34 +73,42 @@ function AssistHandler:Summon(builder, number, force, gentle)
 				if dist then
 					bydistance[dist] = asstbehaviour
 					count = count + 1
+				else
+					table.insert(returnToFree, asstbehaviour)
 				end
 			end
 		end
-		if count < number and not force then return false end
-		if count == 0 and force then
-			return 0
+		-- return those that didn't make it to free
+		for i, asstbehaviour in pairs(returnToFree) do
+			table.insert(self.free, asstbehaviour)
 		end
-		-- summon in order of distance
-		local n = 0
-		if self.working[bid] == nil then
-			self.totalAssignments = self.totalAssignments + 1
-			self.working[bid] = {}
-		end
-		for dist, asstbehaviour in pairsByKeys(bydistance) do
-			if n >= number then
-				-- add any unused back into free
+		if count < number and not force then
+			-- return everything to free if there aren't enough
+			for dist, asstbehaviour in pairs(bydistance) do
 				table.insert(self.free, asstbehaviour)
-			else
-				table.insert(self.working[bid], asstbehaviour)
-				asstbehaviour:Assign(builder)
-				n = n + 1
 			end
-		end
-		EchoDebug(n .. " assistants summoned to " .. bid .. "now " .. #self.free .. " assistants free")
-		if n > 0 then
-			return n
-		elseif force then
+			return false
+		elseif count == 0 and force then
 			return 0
+		else
+			if self.working[bid] == nil then
+				self.totalAssignments = self.totalAssignments + 1
+				self.working[bid] = {}
+			end
+			-- summon in order of distance and return the rest to free
+			local n = 0
+			for dist, asstbehaviour in pairsByKeys(bydistance) do
+				if n == number then
+					-- add any unused back into free
+					table.insert(self.free, asstbehaviour)
+				else
+					table.insert(self.working[bid], asstbehaviour)
+					asstbehaviour:Assign(builder)
+					n = n + 1
+				end
+			end
+			EchoDebug(n .. " assistants summoned to " .. bid .. "now " .. #self.free .. " assistants free")
+			return n
 		end
 	end
 	if force then

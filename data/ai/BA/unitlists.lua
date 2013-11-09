@@ -321,13 +321,12 @@ scoutList = {
 	"armpt",
 }
 
--- don't build assist these
-dontAssistList = {
+commanderList = {
 	armcom = 1,
 	corcom = 1,
 }
 
-buildAssistList = {
+nanoTurretList = {
 	cornanotc = 1,
 	armnanotc = 1,
 }

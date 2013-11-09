@@ -587,7 +587,11 @@ function Lvl2VehBreakthrough(self)
 	else
 		unitName = "armmanni"
 	end
-	return BuildSiegeIfNeeded(unitName)
+	unitName = BuildSiegeIfNeeded(unitName)
+	if unitName == DummyUnitName then
+		unitName = BuildDefendIfNeeded(unitName)
+	end
+	return unitName
 end
 
 function Lvl2BotBreakthrough(self)
