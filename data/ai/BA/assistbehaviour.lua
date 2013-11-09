@@ -88,7 +88,7 @@ function AssistBehaviour:Update()
 				end
 			else
 				-- fill empty spots after con units die
-				EchoDebug(uname .. " " .. self.IDByType .. " / " .. tostring(ai.totalCons[uname]))
+				-- EchoDebug(uname .. " " .. self.IDByType .. " / " .. tostring(ai.totalCons[uname]))
 				if self.IDByType > ai.totalCons[uname] then
 					EchoDebug("filling empty spots with " .. uname .. " " .. self.IDByType)
 					self:AssignIDByType()
