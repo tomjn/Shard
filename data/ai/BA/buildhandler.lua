@@ -49,28 +49,22 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild)
 	return pos
 end
 
-function BuildSiteHandler:ClosestBuildSpot(builder, unitTypeToBuild, minimumDistance, attemptNumber)
-	if builder == nil then return end
+function BuildSiteHandler:ClosestBuildSpot(position, unitTypeToBuild, minimumDistance, attemptNumber)
 	local minDistance = minimumDistance or 1
-	local buildDistance = 0
-	local builderPos = builder:GetPosition()
-	local builderName = ""
+	local buildDistance = 2000
 	local tmpAttemptNumber = attemptNumber or 0
-	if builder:CanMove() then
-		buildDistance = 5000
-	end
-
 	local pos = nil
+
 	if tmpAttemptNumber > 0 then
 		local searchAngle = (tmpAttemptNumber - 1) / 3 * math.pi
 		local searchRadius = 2 * buildDistance / 3
 		local searchPos = api.Position()
-		searchPos.x = builderPos.x + searchRadius * math.sin(searchAngle)
-		searchPos.z = builderPos.z + searchRadius * math.cos(searchAngle)
-		searchPos.y = builderPos.y
+		searchPos.x = position.x + searchRadius * math.sin(searchAngle)
+		searchPos.z = position.z + searchRadius * math.cos(searchAngle)
+		searchPos.y = position.y
 		pos = map:FindClosestBuildSite(unitTypeToBuild, searchPos, searchRadius / 2, minDistance)
 	else
-		pos = map:FindClosestBuildSite(unitTypeToBuild, builderPos, buildDistance, minDistance)
+		pos = map:FindClosestBuildSite(unitTypeToBuild, position, buildDistance, minDistance)
 	end
 
 	-- check that we haven't got an offmap order, and that it's possible to build the unit there (just in case)
@@ -82,18 +76,18 @@ function BuildSiteHandler:ClosestBuildSpot(builder, unitTypeToBuild, minimumDist
 		local tmpName = unitTypeToBuild:Name()
 		local dontTryAlternatives = (dontTryAlternativePoints[tmpName] or 0) > 0
 		if tmpAttemptNumber < 7 and not dontTryAlternatives then
-			pos = BuildSiteHandler:ClosestBuildSpot(builder, unitTypeToBuild, minimumDistance, tmpAttemptNumber + 1)
+			pos = BuildSiteHandler:ClosestBuildSpot(position, unitTypeToBuild, minimumDistance, tmpAttemptNumber + 1)
 		else
 			-- attempt 1 retry with reduced spacing, if allowed, and only use the 'central' position
 			local reducedSpacing = unitsForNewPlacingLowOnSpace[unitTypeToBuild:Name()] or 0
 			if reducedSpacing > 0 and reducedSpacing < minimumDistance and not dontTryAlternatives then
-				pos = BuildSiteHandler:ClosestBuildSpot(builder, unitTypeToBuild, reducedSpacing)
+				pos = BuildSiteHandler:ClosestBuildSpot(position, unitTypeToBuild, reducedSpacing, nil)
 			else
-				game:SendToConsole("ClosestBuildSpot: "..builder:Name().." can't find a position for "..unitTypeToBuild:Name())
+				game:SendToConsole("ClosestBuildSpot: can't find a position for "..unitTypeToBuild:Name())
 			end
 		end
 	end
-	
+
 	return pos
 end
 
@@ -197,7 +191,8 @@ function BuildSiteHandler:ClosestDefenseBuildSpot(builder, maxDist, utype, forSh
 	end
 	local position
 	if defendThis ~= nil then
-		position = self:ClosestBuildSpot(defendThis, utype, 10)
+		local defendPos = defendThis:GetPosition()
+		position = self:ClosestBuildSpot(defendPos, utype, 10)
 	end
 	return position
 end

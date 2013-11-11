@@ -212,6 +212,8 @@ defendList = {
 	cafus = 3,
 	cmgeo = 2,
 	amgeo = 2,
+	cormoho = 1,
+	armmoho = 1,
 }
 
 -- factories that can build advanced construction units (i.e. moho mines)
@@ -319,6 +321,16 @@ scoutList = {
 	"armawac",
 	"corpt",
 	"armpt",
+}
+
+antinukeList = {
+	corfmd = 1,
+	armamd = 1,
+}
+
+shieldList = {
+	corgate = 1,
+	armgate = 1,
 }
 
 commanderList = {
