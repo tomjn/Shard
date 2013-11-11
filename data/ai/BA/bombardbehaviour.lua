@@ -2,7 +2,7 @@ require "unitlists"
 
 BombardBehaviour = class(Behaviour)
 
-local DebugEnabled = false
+local DebugEnabled = true
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -12,36 +12,54 @@ end
 
 local CMD_ATTACK = 20
 
+local valueThreatThreshold = 2000 -- anything above this level of value+threat will be shot at even if the cannon isn't idle
+
 function BombardBehaviour:Init()
-    self.lastShootFrame = 0
+    self.lastFireFrame = 0
 end
 
 function BombardBehaviour:UnitCreated(unit)
 
 end
 
+function BombardBehaviour:Fire()
+	if self.target ~= nil then
+		EchoDebug("fire")
+		local floats = api.vectorFloat()
+		-- populate with x, y, z of the position
+		floats:push_back(self.target.x)
+		floats:push_back(self.target.y)
+		floats:push_back(self.target.z)
+		self.unit:Internal():ExecuteCustomCommand(CMD_ATTACK, floats)
+		self.lastFireFrame = game:Frame()
+	end
+end
+
 function BombardBehaviour:UnitIdle(unit)
 	if self.active then
 		local f = game:Frame()
-		if self.lastShootFrame == 0 or f > self.lastShootFrame + 350 then
-			EchoDebug("cannon idle")
-			local bestCell = ai.targethandler:GetBestNukeCell()
-			if bestCell ~= nil then
-				local position = bestCell.pos
-				local floats = api.vectorFloat()
-				-- populate with x, y, z of the position
-				floats:push_back(position.x)
-				floats:push_back(position.y)
-				floats:push_back(position.z)
-				self.unit:Internal():ExecuteCustomCommand(CMD_ATTACK, floats)
-			end
-			self.lastShootFrame = f
+		if self.lastFireFrame == 0 or f > self.lastFireFrame + 300 then
+			EchoDebug("idle")
+			self:Fire()
 		end
 	end
 end
 
 function BombardBehaviour:Update()
-
+	if self.active then
+		local f = game:Frame()
+		if self.lastFireFrame == 0 or f > self.lastFireFrame + 900 then
+			EchoDebug("retarget")
+			local bestCell, valueThreat = ai.targethandler:GetBestNukeCell()
+			if bestCell ~= nil then
+				self.target = bestCell.pos
+				if valueThreat > valueThreatThreshold then
+					EchoDebug("high priority target: " .. valueThreat)
+					self:Fire()
+				end
+			end
+		end
+	end
 end
 
 function BombardBehaviour:Activate()

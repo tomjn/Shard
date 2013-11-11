@@ -53,16 +53,18 @@ function ReclaimBehaviour:Update()
 		if reclaimerList[self.name] then
 			doreclaim = true
 		elseif ai.conCount > 2 and ai.needToReclaim then
-			if ai.extraReclaimerCount == 0 then
-				ai.extraReclaimerCount = 1
+			if not ai.haveExtraReclaimer then
+				ai.haveExtraReclaimer = true
 				self.extraReclaimer = true
 				doreclaim = true
 			elseif self.extraReclaimer then
 				doreclaim = true
 			end
-		elseif ai.extraReclaimerCount == 1 and self.extraReclaimer and not ai.needToReclaim then
-			ai.extraReclaimerCount = 0
-			self.extraReclaimer = false
+		else
+			if self.extraReclaimer then
+				ai.haveExtraReclaimer = false
+				self.extraReclaimer = false
+			end
 		end
 		if doreclaim then
 			self:Retarget()

@@ -66,6 +66,8 @@ local vulnerableHealth = 200
 local wreckMult = 100
 local badCellThreat = 300
 
+local feintRepeatMod = 10
+
 local cellElmosX
 local cellElmosZ
 local cells = {}
@@ -571,6 +573,7 @@ function TargetHandler:Init()
 	currentEnemyThreatCount = 0
 	enemyAlreadyCounted = {}
 	ai.totalEnemyThreat = 10000
+	self.feints = {}
 end
 
 function TargetHandler:Update()
@@ -730,7 +733,7 @@ function TargetHandler:GetBestNukeCell()
 			end
 		end
 	end
-	return best
+	return best, bestValueThreat
 end
 
 function TargetHandler:GetBestBomberTarget()
@@ -825,6 +828,7 @@ function TargetHandler:BestAdjacentPosition(unit, targetPosition)
 	local best
 	local notsafe = false
 	local uname = unit:Name()
+	local f = game:Frame()
 	local maxThreat = baseUnitThreat
 	local uthreat, urange = ThreatRange(uname)
 	EchoDebug(uname .. ": " .. uthreat .. " " .. urange)
@@ -846,6 +850,15 @@ function TargetHandler:BestAdjacentPosition(unit, targetPosition)
 					end
 				end
 			end
+			-- if we just went to the same place, probably not a great place
+			for i, feint in pairs(self.feints) do
+				if f > feint.frame + 900 then
+					-- expire stored after 30 seconds
+					table.remove(self.feints, i)
+				elseif feint.x == x and feint.z == z and feint.px == px and feint.pz == pz and feint.tx == tx and feint.tz == tz then
+					dist = dist + feintRepeatMod
+				end
+			end
 			if dist < bestDist then
 				bestDist = dist
 				if cells[x] == nil then cells[x] = {} end
@@ -865,6 +878,7 @@ function TargetHandler:BestAdjacentPosition(unit, targetPosition)
 		end
 	end
 	if best and notsafe then
+		table.insert(self.feints, {x = best.x, z = best.z, px = px, pz = pz, tx = tx, tz = tz, frame = f})
 		return best.pos
 	end
 end

@@ -40,7 +40,7 @@ function RunFromAttackBehaviour:Update()
 		end
 	else
 		if f % 30 == 0 then
-			-- run away preemptively from positions within range of enemy weapons
+			-- run away preemptively from positions within range of enemy weapons, and notify defenders that the unit is in danger
 			local unit = self.unit:Internal()
 			if not ai.targethandler:IsSafePosition(unit:GetPosition(), unit) then
 				self.underfire = true

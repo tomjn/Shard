@@ -29,11 +29,8 @@ function FactoryRegisterBehaviour:Init()
 		-- so that it will start producing combat units
 		ai.attackhandler:NeedLess()
 		ai.attackhandler:NeedLess()
-		ai.attackhandler:NeedLess()
 		ai.bomberhandler:NeedLess()
 		ai.bomberhandler:NeedLess()
-		ai.bomberhandler:NeedLess()
-		ai.raidhandler:NeedMore()
 		ai.raidhandler:NeedMore()
 		ai.raidhandler:NeedMore()
 		-- set the current maximum factory level

@@ -65,7 +65,7 @@ local function CheckMySide(self)
 	-- fix: moved here so map object is present when it's accessed
 	ConUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)
 	ConUnitAdvPerTypeLimit = math.max(ConUnitPerTypeLimit / 2, 2)
-	game:SendToConsole("per-type construction unit limit: " .. ConUnitPerTypeLimit)
+	EchoDebug("per-type construction unit limit: " .. ConUnitPerTypeLimit)
 	minDefenseNetworkSize = ai.mobilityGridArea / 4 
 	-- set the averageWind
 	if averageWind == 0 then
@@ -390,7 +390,7 @@ function DoSomethingForTheEconomy(self)
 	-- maybe we need storage?
 	if unitName == DummyUnitName then
 		-- energy storage
-		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 0 then
+		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 100 then
 			if isWater then
 				if ai.mySide == CORESideName then
 					unitName = BuildWithLimitedNumber("coruwes", 3)
@@ -408,7 +408,7 @@ function DoSomethingForTheEconomy(self)
 	end
 	if unitName == DummyUnitName then
 		-- metal storage
-		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 0 then
+		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 3 then
 			if isWater then
 				if ai.mySide == CORESideName then
 					unitName = BuildWithLimitedNumber("coruwms", 3)
@@ -428,7 +428,7 @@ function DoSomethingForTheEconomy(self)
 	return unitName
 end
 
---[[
+
 -- build advanced conversion or storage
 function DoSomethingAdvancedForTheEconomy(self)
 	local Energy = game:GetResourceByName("Energy")
@@ -441,9 +441,9 @@ function DoSomethingAdvancedForTheEconomy(self)
 	if extraE > 600 and extraM < 0 and Energy.income > 2000 then
 		if isWater then
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("coruwmm", 8)
+				unitName = BuildWithLimitedNumber("armuwmmm", 8)
 			else
-				unitName = BuildWithLimitedNumber("armuwmm", 8)
+				unitName = BuildWithLimitedNumber("armuwmmm", 8)
 			end		
 		else
 			if ai.mySide == CORESideName then
@@ -456,44 +456,27 @@ function DoSomethingAdvancedForTheEconomy(self)
 	-- maybe we need storage?
 	if unitName == DummyUnitName then
 		-- energy storage
-		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 0 then
-			if isWater then
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("coruwadves", 3)
-				else
-					unitName = BuildWithLimitedNumber("armuwadves", 3)
-				end	
+		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 1000 then
+			if ai.mySide == CORESideName then
+				unitName = BuildWithLimitedNumber("coruwadves", 3)
 			else
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("corestor", 3)
-				else
-					unitName = BuildWithLimitedNumber("armestor", 3)
-				end
-			end
+				unitName = BuildWithLimitedNumber("armuwadves", 3)
+			end	
 		end
 	end
 	if unitName == DummyUnitName then
 		-- metal storage
-		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 0 then
-			if isWater then
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("coruwadvms", 3)
-				else
-					unitName = BuildWithLimitedNumber("armuwadvms", 3)
-				end	
+		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 10 then
+			if ai.mySide == CORESideName then
+				unitName = BuildWithLimitedNumber("coruwadvms", 3)
 			else
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("cormstor", 3)
-				else
-					unitName = BuildWithLimitedNumber("armmstor", 3)
-				end
-			end
+				unitName = BuildWithLimitedNumber("armuwadvms", 3)
+			end	
 		end
 	end
 
 	return unitName
 end
-]]--
 
 function BuildAAIfNeeded(unitName)
 	if IsAANeeded() then
@@ -550,7 +533,7 @@ end
 function Lvl1BotBreakthrough(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
-		return DummyUnitName
+		unitName = "corthud"
 	else
 		unitName = "armwar"
 	end
@@ -584,14 +567,19 @@ function Lvl2VehBreakthrough(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corgol"
+		unitName = BuildSiegeIfNeeded(unitName)
+		if unitName == DummyUnitName then
+			unitName = BuildDefendIfNeeded(unitName)
+		end
+		return unitName
 	else
 		unitName = "armmanni"
+		unitName = BuildSiegeIfNeeded(unitName)
+		if unitName == DummyUnitName then
+			unitName = BuildDefendIfNeeded("armbull")
+		end
+		return unitName
 	end
-	unitName = BuildSiegeIfNeeded(unitName)
-	if unitName == DummyUnitName then
-		unitName = BuildDefendIfNeeded(unitName)
-	end
-	return unitName
 end
 
 function Lvl2BotBreakthrough(self)
@@ -875,7 +863,7 @@ function BuildBattleIfNeeded(unitName)
 	EchoDebug(ai.raiderCount[mtype])
 	if ai.raiderCount[mtype] == nil then
 		return unitName
-	elseif ai.raiderCount[mtype] < raidCounter then
+	elseif ai.raiderCount[mtype] < raidCounter / 2 then
 		return DummyUnitName
 	else
 		return BuildWithLimitedNumber(unitName, attackCounter*3)
@@ -2764,8 +2752,6 @@ local anyConShip = {
 }
 
 local anyAdvConUnit = {
-	BuildMohoGeo,
-	BuildMohoMex,
 	AreaLimit_Lvl2PopUp,
 	AreaLimit_HeavyAA,
 	BuildAntinuke,
@@ -2777,6 +2763,9 @@ local anyAdvConUnit = {
 	BuildAppropriateFactory,
 	BuildNukeIfNeeded,
 	AreaLimit_ExtraHeavyAA,
+	BuildMohoGeo,
+	BuildMohoMex,
+	DoSomethingAdvancedForTheEconomy,
 }
 
 local anyAdvConSub = {
