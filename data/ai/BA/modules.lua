@@ -10,5 +10,6 @@ require "targethandler"
 require "scouthandler"
 require "assisthandler"
 require "defendhandler"
+require "turtlehandler"
 
-modules = { Sleep, MapHandler, AttackHandler, BomberHandler, RaidHandler, BuildSiteHandler, LosHandler, TargetHandler, ScoutHandler, AssistHandler, DefendHandler, UnitHandler }
+modules = { Sleep, MapHandler, AttackHandler, BomberHandler, RaidHandler, BuildSiteHandler, LosHandler, TargetHandler, ScoutHandler, AssistHandler, DefendHandler, TurtleHandler, UnitHandler }

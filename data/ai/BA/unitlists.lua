@@ -206,14 +206,18 @@ helpList = {
 -- things to defend other than factories and con units
 -- value is priority
 defendList = {
-	corfus = 2,
-	armfus = 2,
-	aafus = 3,
-	cafus = 3,
-	cmgeo = 2,
-	amgeo = 2,
-	cormoho = 1,
-	armmoho = 1,
+	aafus = 5,
+	cafus = 5,
+	corfus = 4,
+	armfus = 4,
+	cmgeo = 3,
+	amgeo = 3,
+	corgeo = 2,
+	armgeo = 2,
+	cormoho = 2,
+	armmoho = 2,
+	cormex = 1,
+	armmex = 1,
 }
 
 -- factories that can build advanced construction units (i.e. moho mines)

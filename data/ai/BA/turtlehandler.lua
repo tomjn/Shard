@@ -13,6 +13,8 @@ local antinukeMod = 2000
 local shieldMod = 1000
 local jamMod = 500
 
+local factoryPriority = 3 -- multiplied by tech level
+
 TurtleHandler = class(Module)
 
 function TurtleHandler:Name()
@@ -20,7 +22,7 @@ function TurtleHandler:Name()
 end
 
 function TurtleHandler:internalName()
-	return "TurtleHandler"
+	return "turtlehandler"
 end
 
 function TurtleHandler:Init()
@@ -38,13 +40,15 @@ function TurtleHandler:UnitBuilt(unit)
 		if ut.isWeapon and not antinukeList[un] then
 			self:AddDefense(upos, uid, un)
 		elseif antinukeList[un] then
-			self:AddAntinuke(upos, uid, 72000)
+			self:AddShell(upos, uid, 1, "antinuke", 72000)
 		elseif shieldList[un] then
-			self:AddShield(upos, uid, 500)
+			self:AddShell(upos, uid, 1, "shield", 450)
 		elseif ut.jammerRadius ~= 0 then
-			self:AddJammer(upos, uid, ut.jammerRadius)
-		elseif defendList[un] or ut.buildOptions then
-			self:AddTurtle(upos, uid, priority)
+			self:AddShell(upos, uid, 1, "jam", ut.jammerRadius)
+		elseif defendList[un] then
+			self:AddTurtle(upos, uid, defendList[un])
+		elseif ut.buildOptions then
+			self:AddTurtle(upos, uid, factoryPriority * ut.techLevel)
 		end
 	end
 end
@@ -63,7 +67,15 @@ end
 
 
 function TurtleHandler:AddTurtle(position, uid, priority)
-	table.insert(self.turtles, {position = position, uid = uid, priority = priority, groundDefended = 0, airDefended = 0, submergedDefended = 0, antinuked = 0, shielded = 0, jammed = 0})
+	local turtle = {position = position, uid = uid, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0}
+	for i, shell in pairs(self.shells) do
+		local dist = distance(position, shell.position)
+		if dist < shell.radius then
+			turtle[shell.layer] = turtle[shell.layer] + shell.value
+			table.insert(shell.attachments, turtle)
+		end
+	end
+	table.insert(self.turtles, turtle)
 	self.totalPriority = self.totalPriority + priority
 end
 
@@ -72,161 +84,117 @@ function TurtleHandler:RemoveTurtle(uid)
 		if turtle.uid == uid then
 			table.remove(self.turtles, i)
 			self.totalPriority = self.totalPriority - turtle.priority
-			break
 		end
 	end
-end
-
-function TurtleHandler:AddShield(position, uid, radius)
-	local effectiveRadius = radius * 0.9
-	local attachments = {}
-	for i, turtle in pairs(self.turtles) do
-		local dist = distance(position, turtle.position)
-		if dist < effectiveRadius then
-			turtle.shielded = turtle.shielded + 1
-			table.insert(attachments, turtle.uid)
+	for si, shell in pairs(self.shells) do
+		for ti, turtle in pairs(shell.attachments) do
+			if turtle.uid == uid then
+				table.remove(shell.attachments, ti)
+			end
 		end
 	end
-	table.insert(self.shells, {uid = uid, attachments = attachments, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 1, jam = 0})
-end
-
-function TurtleHandler:AddAntinuke(position, uid, radius)
-	local attachments = {}
-	for i, turtle in pairs(self.turtles) do
-		local dist = distance(position, turtle.position)
-		if dist < radius then
-			turtle. = turtle.antinuked + 1
-			table.insert(attachments, turtle.uid)
-		end
-	end
-	table.insert(self.shells, {uid = uid, attachments = attachments, ground = 0, air = 0, submerged = 0, antinuke = 1, shield = 0, jam = 0})
-end
-
-function TurtleHandler:AddJammer(position, uid, radius)
-	local attachments = {}
-	for i, turtle in pairs(self.turtles) do
-		local dist = distance(position, turtle.position)
-		if dist < radius then
-			turtle. = turtle.jammed + 1
-			table.insert(attachments, turtle.uid)
-		end
-	end
-	table.insert(self.shells, {uid = uid, attachments = attachments, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 1})
 end
 
 function TurtleHandler:AddDefense(position, uid, unitName)
 	local ut = unitTable[unitName]
 	-- effective defense ranges are less than actual ranges, because if a building is just inside a weapon range, it's not defended
-	local ground = 0
-	local air = 0
-	local submerged = 0
+	local defense = ut.metalCost
 	if ut.groundRange ~= 0 then
-		ground = ut.groundRange * 0.5
+		self:AddShell(position, uid, defense, "ground", ut.groundRange * 0.5)
 	end
 	if ut.airRange ~= 0 then
-		air = ut.airRange * 0.5
+		self:AddShell(position, uid, defense, "air", ut.airRange * 0.5)
 	end
 	if ut.submergedRange ~= 0 then
-		submerged = ut.submergedRange * 0.5
+		self:AddShell(position, uid, defense, "submerged", ut.submergedRange * 0.5)
 	end
-	local defense = ut.metalCost
+end
+
+function TurtleHandler:AddShell(position, uid, value, layer, radius)
 	local attachments = {}
 	for i, turtle in pairs(self.turtles) do
 		local dist = distance(position, turtle.position)
-		local attached = false
-		if ground ~= 0 then
-			if dist < ground then
-				turtle.groundDefended = turtle.groundDefended + defense
-				attached = true
-			end
-		end
-		if air ~= 0 then
-			if dist < air then
-				turtle.airDefended = turtle.airDefended + defense
-				attached = true
-			end
-		end
-		if submerged ~= 0 then
-			if dist < submerged then
-				turtle.submergedDefended = turtle.submergedDefended + defense
-				attached = true
-			end
-		end
-		if attached then
-			table.insert(attachments, turtle.uid)
+		if dist < radius then
+			turtle[layer] = turtle[layer] + value
+			table.insert(attachments, turtle)
 		end
 	end
-	table.insert(self.shells, {uid = uid, attachments = attachments, ground = ground, air = air, submerged = submerged, antinuke = 0, shield = 0, jam = 0})
+	table.insert(self.shells, {position = position, uid = uid, value = value, layer = layer, radius = radius, attachments = attachments})
 end
 
 function TurtleHandler:RemoveShell(uid)
 	for si, shell in pairs(self.shells) do
 		if shell.uid == uid then
-			while #shell.attachments > 0 do
-				local attachment = table.remove(shell.attachments)
-				for ti, turtle in pairs(self.turtles) do
-					if turtle.uid == attachment.uid then
-						turtle.groundDefended = turtle.groundDefended - shell.ground
-						turtle.airDefended = turtle.airDefended - shell.air
-						turtle.submergedDefended = turtle.submergedDefended - shell.submerged
-						turtle.antinuked = turtle.antinuked - shell.antinuke
-						turtle.shielded = turtle.shielded - shell.shield
-						turtle.jammed = turtle.jammed - shell.jam
-					end
-				end
+			for ti, turtle in pairs(shell.attachments) do
+				turtle[shell.layer] = turtle[shell.layer] - shell.value
 			end
-			break
+			table.remove(self.shells, si)
 		end
 	end
 end
 
-function TurtleHandler:BestTurtle(builder, unitName)
-	if builder == nil then return end
+function TurtleHandler:BestTurtle(position, unitName, most)
+	if position == nil then return end
 	if unitName == nil then return end
-	local bpos = builder:GetPosition()
 	local ut = unitTable[unitName]
-	local ground, air. submerged, shield, jam
-	if ut.isWeapon and not antinukeList[unitName] then
-		if ut.groundRange ~= 0 then
-			ground = true
-		end
-		if ut.airRange ~= 0 then
-			air = true
-		end
-		if ut.submergedRange ~= 0 then
-			submerged = true
-		end
-	elseif antinukeList[unitName] then
+	local ground, air, submerged, antinuke, shield, jam
+	if most then
+		-- if we're looking for the most turtled position, count everything
+		ground = true
+		air = true
+		submerged = true
 		antinuke = true
-	elseif shieldList[unitName] then
 		shield = true
-	elseif ut.jammerRadius ~= 0 then
 		jam = true
+	else
+		if ut.isWeapon and not antinukeList[unitName] then
+			if ut.groundRange ~= 0 then
+				ground = true
+			end
+			if ut.airRange ~= 0 then
+				air = true
+			end
+			if ut.submergedRange ~= 0 then
+				submerged = true
+			end
+		elseif antinukeList[unitName] then
+			antinuke = true
+		elseif shieldList[unitName] then
+			shield = true
+		elseif ut.jammerRadius ~= 0 then
+			jam = true
+		end
 	end
 	local bestDist = 10000
 	local best
 	for i, turtle in pairs(self.turtles) do
 		local mod = 0
 		if ground then
-			mod = mod + turtle.groundDefended
+			mod = mod + turtle.ground
 		end
 		if air then
-			mod = mod + turtle.airDefended
+			mod = mod + turtle.air
 		end
 		if submerged then
-			mod = mod + turtle.submergedDefended
+			mod = mod + turtle.submerged
 		end
 		if antinuke then
-			mod = mod + turtle.antinuked * antinukeMod
+			mod = mod + turtle.antinuke * antinukeMod
 		end
 		if shield then
-			mod = mod + turtle.shielded * shieldMod
+			mod = mod + turtle.shield * shieldMod
 		end
 		if jam then
-			mod = mod + turtle.jammed * jamMod
+			mod = mod + turtle.jam * jamMod
 		end
-		local dist = distance(bpos, turtle.position)
-		dist = dist + (mod / turtle.priority)
+		local dist = distance(position, turtle.position)
+		if most then
+			-- if we're finding the most turtled position
+			dist = dist - mod
+		else
+			-- if we're looking for a vulnerable spot to build up
+			dist = dist + (mod / turtle.priority)
+		end
 		if dist < bestDist then
 			bestDist = dist
 			best = turtle.position

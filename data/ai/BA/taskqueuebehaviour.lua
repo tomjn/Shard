@@ -151,7 +151,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 		elseif unitTable[value].isWeapon then
 			-- defense
 			EchoDebug("  defense")
-			if value == "corint" or value == "armbrtha" or value == "corsilo" or value == "armsilo" then
+			if bigPlasmaList[value] or nukeList[value] then
 				-- long-range plasma and nukes aren't really defense
 				if metalTooLow or energyTooLow or Metal.income < 35 or ai.factories == 0 or notEnoughCombats then
 					value = DummyUnitName
@@ -420,7 +420,8 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value]) then
 		-- shields, defense, antinukes, and jammer towers
 		EchoDebug("looking for turtle position")
-		local turtlePos = ai.turtlehandler:BestTurtle(builder, value)
+		local builderPos = builder:GetPosition()
+		local turtlePos = ai.turtlehandler:BestTurtle(builderPos, value)
 		if turtlePos then
 			p = ai.buildsitehandler:ClosestBuildSpot(turtlePos, utype, 10)
 			if p == nil then
@@ -597,12 +598,16 @@ function TaskQueueBehaviour:ProgressQueue()
 				end
 				local success = false
 				if utype ~= nil then
-					if unit:CanBuild(utype) then
+					if self.unit:Internal():CanBuild(utype) then
 						local p
 						utype, value, p = self:LocationFilter(utype, value)
 						if utype ~= nil then
 							self.target = p
-							success = self.unit:Internal():Build(utype, p)
+							if p == nil then
+								success = self.unit:Internal():Build(utype)
+							else
+								success = self.unit:Internal():Build(utype, p)
+							end
 							self.progress = not success
 						else
 							self.progress = true

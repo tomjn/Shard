@@ -1704,6 +1704,9 @@ local function CheckDefenseLocalization(unitName, builder)
 end
 
 local function CheckAreaLimitDefense(unitName, builder)
+	return unitName
+	--[[
+	if unitName == DummyUnitName then return DummyUnitName end
 	EchoDebug(unitName)
 	unitName = CheckDefenseLocalization(unitName, builder)
 	if unitName == DummyUnitName then return DummyUnitName end
@@ -1716,6 +1719,7 @@ local function CheckAreaLimitDefense(unitName, builder)
 		range = math.floor(range * 0.9)
 		return CheckAreaLimit(unitName, builder, 1, range)
 	end
+	]]--
 end
 
 local function CheckAreaLimitRadar(unitName, builder)
