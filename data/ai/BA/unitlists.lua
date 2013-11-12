@@ -148,6 +148,14 @@ end
 
 builderFactByMob = BuilderFactoriesByMobility()
 
+littlePlasmaList = {
+	corpun = 1,
+	armguard = 1,
+	cortoast = 1,
+	armamb = 1,
+	corbhmth = 1,
+}
+
 -- these big energy plants will be shielded in addition to factories
 bigEnergyPlant = {
 	cmgeo = 1,

@@ -17,6 +17,8 @@ mobUnitType = {}
 local mobMap = {}
 local savepositions = {}
 
+local minDefenseNetworkSize = 100000
+
 local function serialize (o, keylist)
   if keylist == nil then keylist = "" end
   if type(o) == "number" then
@@ -706,29 +708,29 @@ function MapHandler:Init()
 
 end
  
-function MapHandler:ClosestFreeSpot(unittype, builder)
+function MapHandler:ClosestFreeSpot(unittype, builder, position)
 
 	-- local kbytes, threshold = gcinfo()
 	-- game:SendToConsole("maphandler gcinfo: " .. kbytes .. " (before ClosestFreeSpot)")
 
-	local position = builder:GetPosition()
+	if position == nil then position = builder:GetPosition() end
 	local spots = {}
 	local bname = builder:Name()
-	if bname == "armcom" or bname == "corcom" then
-		-- give the commander both shp and bot spots
+	if commanderList[bname] then
+		-- give the commander both hov and bot spots
 		local pos = builder:GetPosition()
 		local network = self:MobilityNetworkHere("bot", pos)
 		if network ~= nil then
 			-- EchoDebug("found bot metal spot network for commander")
 			spots = ai.mobNetworkMetals["bot"][network]
 		end
-		network = self:MobilityNetworkHere("shp", pos)
+		network = self:MobilityNetworkHere("hov", pos)
 		if network ~= nil then
-			-- EchoDebug("found underwater metal spot network for commander")
+			-- EchoDebug("found hover metal spot network for commander")
 			if #spots == 0 then
-				spots = ai.mobNetworkMetals["shp"][network]
+				spots = ai.mobNetworkMetals["hov"][network]
 			else
-				for i, p in pairs(ai.mobNetworkMetals["shp"][network]) do
+				for i, p in pairs(ai.mobNetworkMetals["hov"][network]) do
 					table.insert(spots, p)
 				end
 			end
@@ -807,7 +809,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder)
 	-- game:SendToConsole("maphandler gcinfo: " .. kbytes .. " (after ClosestFreeSpot)")
 
 	-- if uw then EchoDebug("uw mex is final best distance") end
-	return pos, uw
+	return pos, uw, bestDistance
 end
 
 function MapHandler:MobilityNetworkHere(mtype, position)
@@ -894,6 +896,28 @@ function MapHandler:OutmodedFactoryHere(mtype, position, network)
  		return true
 	else
 		return false
+	end
+end
+
+function MapHandler:CheckDefenseLocalization(unitName, position)
+	local size = 0
+	if unitTable[unitName].groundRange > 0 then
+		local vehsize = self:MobilityNetworkSizeHere("veh", position)
+		local botsize = self:MobilityNetworkSizeHere("bot", position)
+		size = math.max(vehsize, botsize)
+	elseif unitTable[unitName].airRange > 0 then
+		return true
+	elseif  unitTable[unitName].submergedRange > 0 then
+		size = self:MobilityNetworkSizeHere("sub", position)
+	else
+		return true
+	end
+	local minimumSize = ai.mobilityGridArea / 4
+	EchoDebug("network size here: " .. size .. ", minimum: " .. minimumSize)
+	if size < minimumSize then
+		return false
+	else
+		return true
 	end
 end
 

@@ -95,7 +95,7 @@ local function ThreatRange(unitName, groundAirSubmerged)
 	end
 	local threat = 0
 	local range = 0
-	if groundAirSubmerged == "ground" then
+	if groundAirSubmerged == "ground" and utable.mtype ~= "air" then -- air units ignored because they move too fast for their position to matter for ground threat calculations
 		range = utable.groundRange
 	elseif groundAirSubmerged == "air" then
 		range = utable.airRange

@@ -352,6 +352,7 @@ function TaskQueueBehaviour:GetHelp(value)
 end
 
 function TaskQueueBehaviour:LocationFilter(utype, value)
+	if unitTable[self.name].isBuilding then return utype, value end -- factories don't need to look for build locations
 	local p
 	local builder = self.unit:Internal()
 	if unitTable[value].extractsMetal > 0 then
@@ -376,7 +377,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 			if ai.maphandler:UnitCanGoHere(builder, p) then
 				if value == "cmgeo" or value == "amgeo" then
 					-- don't build moho geos next to factories
-					if BuildSiteHandler:ClosestHighestLevelFactory(builder, 500) ~= nil then
+					if ai.buildsitehandler:ClosestHighestLevelFactory(builder, 500) ~= nil then
 						if value == "cmgeo" then
 							if ai.targethandler:IsBombardPosition(p, "corbhmth") then
 								-- instead build geothermal plasma battery if it's a good spot for it
@@ -401,7 +402,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		if factory ~= nil then
 			EchoDebug("found factory")
 			local factoryPos = factory:GetPosition()
-			p = ai.buildsitehandler:ClosestBuildSpot(factoryPos, utype, 10)
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype, 10)
 			if p ~= nil then
 				local fpos = factory:GetPosition()
 				local fdist = distance(fpos, p)
@@ -417,37 +418,64 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 			EchoDebug("no factory found")
 			utype = nil
 		end
-	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value]) then
-		-- shields, defense, antinukes, and jammer towers
-		EchoDebug("looking for turtle position")
-		local builderPos = builder:GetPosition()
-		local turtlePos = ai.turtlehandler:BestTurtle(builderPos, value)
-		if turtlePos then
-			p = ai.buildsitehandler:ClosestBuildSpot(turtlePos, utype, 10)
-			if p == nil then
-				utype = nil
-			end
-		else
-			utype = nil
-		end
 	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
 		-- build factories next to a nano turret near you
 		EchoDebug("looking for nano for factory to build next to")
 		local nano = ai.buildsitehandler:ClosestNanoTurret(builder, 3000)
 		if nano ~= nil then
 			local nanoPos = nano:GetPosition()
-			p = ai.buildsitehandler:ClosestBuildSpot(nanoPos, utype, 15)
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, nanoPos, utype, 15)
 		else
-			EchoDebug("no nano found for factory, building wherever")
-			local builderPos = builder:GetPosition()
-			p = ai.buildsitehandler:ClosestBuildSpot(builderPos, utype, 15)
+			EchoDebug("no nano found for factory, trying a turtle position")
+			local turtlePos = ai.turtlehandler:BestTurtle(builder, nil, true)
+			if turtlePos then
+				p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 15)
+			else
+				EchoDebug("no turtle position found, building wherever")
+				local builderPos = builder:GetPosition()
+				p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype, 15)
+			end
+		end
+	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or unitTable[value].radarRadius ~= 0 or unitTable[value].sonarRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value]) then
+		-- shields, defense, antinukes, jammer towers, radar, and sonar
+		EchoDebug("looking for turtle position")
+		local turtlePos = ai.turtlehandler:BestTurtle(builder, value)
+		if turtlePos then
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 10)
+			if p == nil then
+				utype = nil
+			end
+		else
+			utype = nil
+		end
+	elseif unitTable[value].isBuilding then
+		-- buildings in defended positions
+		local bombard = false
+		if nukeList[value] or bigPlasmaList[value] or littlePlasmaList[value] then
+			bombard = true
+		end
+		local turtlePos = ai.turtlehandler:BestTurtle(builder, nil, true, bombard)
+		if turtlePos then
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 10)
+		end
+		if p == nil then
+			if bombard then
+				utype = nil
+			else
+				-- shall new placing be used?
+				if unitsForNewPlacing[value] then
+					-- game:SendToConsole(utype:Name() .. " new placing")
+					local builderPos = builder:GetPosition()
+					p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype, unitsForNewPlacing[value])
+				end
+			end
 		end
 	else
 		-- shall new placing be used?
 		if unitsForNewPlacing[value] then
 			-- game:SendToConsole(utype:Name() .. " new placing")
 			local builderPos = builder:GetPosition()
-			p = ai.buildsitehandler:ClosestBuildSpot(builderPos, utype, unitsForNewPlacing[value])
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype, unitsForNewPlacing[value])
 		end
 	end
 	return utype, value, p

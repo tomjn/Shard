@@ -441,15 +441,15 @@ function DoSomethingAdvancedForTheEconomy(self)
 	if extraE > 600 and extraM < 0 and Energy.income > 2000 then
 		if isWater then
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("armuwmmm", 8)
+				unitName = BuildWithLimitedNumber("armuwmmm", Energy.income / 1000)
 			else
-				unitName = BuildWithLimitedNumber("armuwmmm", 8)
+				unitName = BuildWithLimitedNumber("armuwmmm", Energy.income / 1000)
 			end		
 		else
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("cormmkr", 8)
+				unitName = BuildWithLimitedNumber("cormmkr", Energy.income / 1000)
 			else
-				unitName = BuildWithLimitedNumber("armmmkr", 8)
+				unitName = BuildWithLimitedNumber("armmmkr", Energy.income / 1000)
 			end
 		end
 	end
@@ -458,9 +458,9 @@ function DoSomethingAdvancedForTheEconomy(self)
 		-- energy storage
 		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 1000 then
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("coruwadves", 3)
+				unitName = BuildWithLimitedNumber("coruwadves", 1)
 			else
-				unitName = BuildWithLimitedNumber("armuwadves", 3)
+				unitName = BuildWithLimitedNumber("armuwadves", 1)
 			end	
 		end
 	end
@@ -468,9 +468,9 @@ function DoSomethingAdvancedForTheEconomy(self)
 		-- metal storage
 		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 10 then
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("coruwadvms", 3)
+				unitName = BuildWithLimitedNumber("coruwadvms", 1)
 			else
-				unitName = BuildWithLimitedNumber("armuwadvms", 3)
+				unitName = BuildWithLimitedNumber("armuwadvms", 1)
 			end	
 		end
 	end
@@ -1684,6 +1684,8 @@ local function CheckAreaLimit(unitName, builder, unitLimit, range)
 end
 
 local function CheckDefenseLocalization(unitName, builder)
+	return unitName
+	--[[
 	local pos = builder:GetPosition()
 	local size = 0
 	if unitTable[unitName].groundRange > 0 then
@@ -1701,6 +1703,7 @@ local function CheckDefenseLocalization(unitName, builder)
 	else
 		return unitName
 	end
+	]]--
 end
 
 local function CheckAreaLimitDefense(unitName, builder)
@@ -1723,6 +1726,8 @@ local function CheckAreaLimitDefense(unitName, builder)
 end
 
 local function CheckAreaLimitRadar(unitName, builder)
+	return unitName
+	--[[
 	if unitName == DummyUnitName then return DummyUnitName end
 	local rad = unitTable[unitName].radarRadius
 	if rad == 0 then
@@ -1743,9 +1748,12 @@ local function CheckAreaLimitRadar(unitName, builder)
 		end
 		return unitName
 	end
+	]]--
 end
 
 local function CheckAreaLimitSonar(unitName, builder)
+	return unitName
+	--[[
 	if unitName == DummyUnitName then return DummyUnitName end
 	local rad = unitTable[unitName].sonarRadius
 	if rad == 0 then
@@ -1766,36 +1774,20 @@ local function CheckAreaLimitSonar(unitName, builder)
 		end
 		return unitName
 	end
+	]]--
 end
 
 -- build if in weapon range of an enemy factory, 10 enemy buildings, or 25 enemies
 local function CheckBombard(unitName, builder)
+	return unitName
+	--[[
 	local pos = builder:GetPosition()
 	if ai.targethandler:IsBombardPosition(pos, unitName) then
 		return unitName
 	else
 		return DummyUnitName
 	end
-end
-
-local function BuildWithNearbyFactory(unitName, builder)
-	-- this is special case, it means the unit will not be built anyway
-	if unitName == DummyUnitName then
-		return unitName
-	end
-	local pos = builder:GetPosition()
-	local ownUnits = game:GetFriendlies()
-	local unitCount = 0
-	for _, u in pairs(ownUnits) do
-		local ut = unitTable[u:Name()]
-		if ut.buildOptions ~= nil and ut.isBuilding then
-			local upos = u:GetPosition()
-			if distance(pos, upos) < 390 then
-				return unitName
-			end
-		end
-	end
-	return DummyUnitName
+	]]--
 end
 
 function BuildShield(self)
@@ -2307,17 +2299,6 @@ local function NanoTurret()
 		unitName = "armnanotc"
 	end
 	return BuildWithLimitedNumber(unitName, ai.factories * 12)
-end
-
-local function NanoTurretNearFactory(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = NanoTurret()
-
-	local unit = self.unit:Internal()
-	-- check that we have at least a bit of free metal to use on expansion, and build next to factory
-	return BuildWithNearbyFactory(unitName, unit)
 end
 
 local function AirRepairPadIfNeeded()
