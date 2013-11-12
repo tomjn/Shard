@@ -28,6 +28,7 @@ function BuildSiteHandler:Init()
 	ai.factories = 0
 	ai.maxFactoryLevel = 1
 	ai.factoriesAtLevel = {}
+	ai.factoryLocationsAtLevel = {}
 	ai.outmodedFactoryID = {}
 	local mapSize = map:MapDimensions()
 	ai.maxElmosX = mapSize.x * 8
@@ -73,6 +74,7 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 	-- check that we haven't got an offmap order, and that it's possible to build the unit there (just in case)
 	pos = self:CheckBuildPos(pos, unitTypeToBuild)
 
+	--[[
 	if pos ~= nil then
 		-- don't build on top of free metal spots
 		local spot, uw, dist = ai.maphandler:ClosestFreeSpot(mexUnitType, builder, position)
@@ -82,13 +84,17 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 			end
 		end
 	end
+	]]--
 
+	--[[
 	if pos ~= nil then
 		-- don't build where the builder can't go
 		if not ai.maphandler:UnitCanGoHere(builder, pos) then
+			EchoDebug("builder can't go there: " .. pos.x .. "," .. pos.z)
 			pos = nil
 		end
 	end
+	]]--
 
 	if pos == nil then
 		-- first try increasing tmpAttemptNumber, up to 7
@@ -114,29 +120,20 @@ end
 
 function BuildSiteHandler:ClosestHighestLevelFactory(builder, maxDist)
 	local bpos = builder:GetPosition()
-	local ownUnits = game:GetFriendlies()
 	local minDist = maxDist
 	local maxLevel = ai.maxFactoryLevel
 	EchoDebug(maxLevel .. " max factory level")
-	local factory = nil
-	for i, unit in pairs(ownUnits) do
-		if not unit:IsBeingBuilt() then
-			local un = unit:Name()
-			local uid = unit:ID()
-			if unitTable[un].isBuilding and unitTable[un].buildOptions ~= nil and not ai.outmodedFactoryID[uid] then
-				local level = unitTable[un].techLevel
-				if level == maxLevel then
-					local upos = unit:GetPosition()
-					local dist = distance(bpos, upos)
-					if dist < minDist then
-						minDist = dist
-						factory = unit
-					end
-				end
+	local factoryPos = nil
+	for i, location in pairs(ai.factoryLocationsAtLevel[maxLevel]) do
+		if not ai.outmodedFactoryID[location.uid] then
+			local dist = distance(bpos, location.position)
+			if dist < minDist then
+				minDist = dist
+				factoryPos = location.position
 			end
 		end
 	end
-	return factory
+	return factoryPos
 end
 
 function BuildSiteHandler:ClosestNanoTurret(builder, maxDist)
@@ -156,4 +153,8 @@ function BuildSiteHandler:ClosestNanoTurret(builder, maxDist)
 		end
 	end
 	return nano
+end
+
+function BuildSiteHandler:DontBuildHere(position, range)
+	table.insert(self.seriouslyDont, {position = position, range = range})
 end

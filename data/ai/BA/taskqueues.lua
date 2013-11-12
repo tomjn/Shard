@@ -1544,7 +1544,7 @@ local function CheckDefenseLocalization(unitName, builder)
 	]]--
 end
 
-local function CheckAreaLimitDefense(unitName, builder)
+local function CheckDefense(unitName, builder)
 	return unitName
 	--[[
 	if unitName == DummyUnitName then return DummyUnitName end
@@ -1554,7 +1554,7 @@ local function CheckAreaLimitDefense(unitName, builder)
 	EchoDebug("area checking " .. unitName .. " for defense")
 	local range = math.max(unitTable[unitName].groundRange, unitTable[unitName].airRange, unitTable[unitName].submergedRange)
 	if range == 0 then
-		EchoDebug(unitName .. " is not a weapon, cannot CheckAreaLimitDefense")
+		EchoDebug(unitName .. " is not a weapon, cannot CheckDefense")
 		return DummyUnitName
 	else
 		range = math.floor(range * 0.9)
@@ -1628,10 +1628,7 @@ local function CheckBombard(unitName, builder)
 	]]--
 end
 
-function BuildShield(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+function BuildShield()
 	if IsShieldNeeded() then
 		local unitName = ""
 		if ai.mySide == CORESideName then
@@ -1639,15 +1636,12 @@ function BuildShield(self)
 		else
 			unitName = "armgate"
 		end
-		return DummyUnitName
+		return unitName
 	end
 	return DummyUnitName
 end
 
-function BuildAntinuke(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+function BuildAntinuke()
 	if IsAntinukeNeeded() then
 		local unitName = ""
 		if ai.mySide == CORESideName then
@@ -1655,83 +1649,58 @@ function BuildAntinuke(self)
 		else
 			unitName = "armamd"
 		end
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return unitName
 	end
 	return DummyUnitName
 end
 
-function BuildNuke(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+function BuildNuke()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corsilo"
 	else
 		unitName = "armsilo"
 	end
-	local unit = self.unit:Internal()
-	return CheckBombard(unitName, unit)
+	return unitName
 end
 
-function BuildNukeIfNeeded(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+function BuildNukeIfNeeded()
 	if IsNukeNeeded() then
-		return BuildNuke(self)
+		return BuildNuke()
 	end
 end
 
-local function AreaLimit_Lvl1Plasma(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildLvl1Plasma()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corpun"
 	else
 		unitName = "armguard"
 	end
-	local unit = self.unit:Internal()
-	return CheckBombard(unitName, unit)
+	return unitName
 end
 
-local function AreaLimit_Lvl2Plasma(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildLvl2Plasma()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "cortoast"
 	else
 		unitName = "armamb"
 	end
-	local unit = self.unit:Internal()
-	return CheckBombard(unitName, unit)
+	return unitName
 end
 
-local function AreaLimit_HeavyPlasma(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildHeavyPlasma()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corint"
 	else
 		unitName = "armbrtha"
 	end
-	unitName = BuildWithLimitedNumber(unitName, heavyPlasmaLimit)
-	if unitName ~= DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckBombard(unitName, unit)
-	else
-		return DummyUnitName
-	end
+	return BuildWithLimitedNumber(unitName, heavyPlasmaLimit)
 end
 
-local function AreaLimit_LLT(self)
+local function BuildLLT(self)
 	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
@@ -1743,10 +1712,10 @@ local function AreaLimit_LLT(self)
 		unitName = "armllt"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return CheckDefense(unitName, unit)
 end
 
-local function AreaLimit_SpecialLT(self)
+local function BuildSpecialLT(self)
 	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
@@ -1767,10 +1736,10 @@ local function AreaLimit_SpecialLT(self)
 		end
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return CheckDefense(unitName, unit)
 end
 
-local function AreaLimit_SpecialLTOnly(self)
+local function BuildSpecialLTOnly(self)
 	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
@@ -1782,10 +1751,10 @@ local function AreaLimit_SpecialLTOnly(self)
 		unitName = "tawf001"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return CheckDefense(unitName, unit)
 end
 
-local function AreaLimit_FloatHLT(self)
+local function BuildFloatHLT(self)
 	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
@@ -1797,10 +1766,10 @@ local function AreaLimit_FloatHLT(self)
 		unitName = "armfhlt"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return CheckDefense(unitName, unit)
 end
 
-local function AreaLimit_HLT(self)
+local function BuildHLT(self)
 	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
@@ -1812,10 +1781,10 @@ local function AreaLimit_HLT(self)
 		unitName = "armhlt"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return CheckDefense(unitName, unit)
 end
 
-local function AreaLimit_Lvl2PopUp(self)
+local function BuildLvl2PopUp(self)
 	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
@@ -1827,10 +1796,10 @@ local function AreaLimit_Lvl2PopUp(self)
 		unitName = "armpb"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return CheckDefense(unitName, unit)
 end
 
-local function AreaLimit_Tachyon(self)
+local function BuildTachyon(self)
 	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
@@ -1842,10 +1811,10 @@ local function AreaLimit_Tachyon(self)
 		unitName = "armanni"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return CheckDefense(unitName, unit)
 end
 
-local function AreaLimit_DepthCharge(self)
+local function BuildDepthCharge(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1858,14 +1827,14 @@ local function AreaLimit_DepthCharge(self)
 	unitName = BuildTorpedoIfNeeded(unitName)
 	if unitName ~= DummyUnitName then
 		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return CheckDefense(unitName, unit)
 	else
 		return DummyUnitName
 	end
 end
 
 
-local function AreaLimit_LightTorpedo(self)
+local function BuildLightTorpedo(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1878,13 +1847,13 @@ local function AreaLimit_LightTorpedo(self)
 	unitName = BuildTorpedoIfNeeded(unitName)
 	if unitName ~= DummyUnitName then
 		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return CheckDefense(unitName, unit)
 	else
 		return DummyUnitName
 	end
 end
 
-local function AreaLimit_HeavyTorpedo(self)
+local function BuildHeavyTorpedo(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1897,7 +1866,7 @@ local function AreaLimit_HeavyTorpedo(self)
 	unitName = BuildTorpedoIfNeeded(unitName)
 	if unitName ~= DummyUnitName then
 		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return CheckDefense(unitName, unit)
 	else
 		return DummyUnitName
 	end
@@ -1905,7 +1874,7 @@ end
 
 
 -- build AA in area only if there's not enough of it there already
-local function AreaLimit_LightAA(self)
+local function BuildLightAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1920,11 +1889,11 @@ local function AreaLimit_LightAA(self)
 		return unitName
 	else
 		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return CheckDefense(unitName, unit)
 	end
 end
 
-local function AreaLimit_FloatLightAA(self)
+local function BuildFloatLightAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1939,11 +1908,11 @@ local function AreaLimit_FloatLightAA(self)
 		return unitName
 	else
 		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return CheckDefense(unitName, unit)
 	end
 end
 
-local function AreaLimit_MediumAA(self)
+local function BuildMediumAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1958,11 +1927,11 @@ local function AreaLimit_MediumAA(self)
 		return unitName
 	else
 		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return CheckDefense(unitName, unit)
 	end
 end
 
-local function AreaLimit_HeavyishAA(self)
+local function BuildHeavyishAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1977,11 +1946,11 @@ local function AreaLimit_HeavyishAA(self)
 		return unitName
 	else
 		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return CheckDefense(unitName, unit)
 	end
 end
 
-local function AreaLimit_HeavyAA(self)
+local function BuildHeavyAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1996,11 +1965,11 @@ local function AreaLimit_HeavyAA(self)
 		return unitName
 	else
 		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return CheckDefense(unitName, unit)
 	end
 end
 
-local function AreaLimit_FloatHeavyAA(self)
+local function BuildFloatHeavyAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2015,11 +1984,11 @@ local function AreaLimit_FloatHeavyAA(self)
 		return unitName
 	else
 		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return CheckDefense(unitName, unit)
 	end
 end
 
-local function AreaLimit_ExtraHeavyAA(self)
+local function BuildExtraHeavyAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2034,11 +2003,11 @@ local function AreaLimit_ExtraHeavyAA(self)
 		return unitName
 	else
 		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return CheckDefense(unitName, unit)
 	end
 end
 
-local function AreaLimit_Sonar(self)
+local function BuildSonar(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2058,7 +2027,7 @@ local function AreaLimit_Sonar(self)
 	end
 end
 
-local function AreaLimit_AdvancedSonar(self)
+local function BuildAdvancedSonar(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2079,61 +2048,34 @@ local function AreaLimit_AdvancedSonar(self)
 end
 
 
-local function AreaLimit_Radar(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildRadar()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corrad"
 	else
 		unitName = "armrad"
 	end
-	unitName = BuildWithLimitedNumber(unitName, 1)
-	if unitName == DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitRadar(unitName, unit)
-	else
-		return unitName
-	end
+	return unitName
 end
 
-local function AreaLimit_FloatRadar(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildFloatRadar()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corfrad"
 	else
 		unitName = "armfrad"
 	end
-	unitName = BuildWithLimitedNumber(unitName, 1)
-	if unitName == DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitRadar(unitName, unit)
-	else
-		return unitName
-	end
+	return unitName
 end
 
-local function AreaLimit_AdvancedRadar(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildAdvancedRadar()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corarad"
 	else
 		unitName = "armarad"
 	end
-	unitName = BuildWithLimitedNumber(unitName, 1)
-	if unitName == DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitRadar(unitName, unit)
-	else
-		return unitName
-	end
+	return unitName
 end
 
 local function NanoTurret()
@@ -2519,80 +2461,80 @@ local anyCommander = {
 	BuildAppropriateFactory,
 	WindSolar,
 	TidalIfTidal,
-	AreaLimit_LLT,
-	AreaLimit_Radar,
-	AreaLimit_Sonar,
-	AreaLimit_LightAA,
-	AreaLimit_DepthCharge,
+	BuildLLT,
+	BuildRadar,
+	BuildSonar,
+	BuildLightAA,
+	BuildDepthCharge,
 	DoSomethingForTheEconomy,
 }
 
 local anyConUnit = {
 	BuildAppropriateFactory,
 	NanoTurret,
-	AreaLimit_LLT,
-	AreaLimit_SpecialLT,
-	AreaLimit_MediumAA,
-	AreaLimit_Radar,
+	BuildLLT,
+	BuildSpecialLT,
+	BuildMediumAA,
+	BuildRadar,
 	WindSolar,
 	SolarAdv,
 	BuildGeo,
-	AreaLimit_HLT,
-	AreaLimit_Lvl1Plasma,
+	BuildHLT,
+	BuildLvl1Plasma,
 	DoSomethingForTheEconomy,
-	AreaLimit_HeavyishAA,
+	BuildHeavyishAA,
 	BuildMex,
 }
 
 local anyConAmphibious = {
 	BuildGeo,
-	AreaLimit_SpecialLT,
-	AreaLimit_MediumAA,
-	AreaLimit_Radar,
+	BuildSpecialLT,
+	BuildMediumAA,
+	BuildRadar,
 	WindSolar,
 	SolarAdv,
 	FactoryOrNano,
-	AreaLimit_HLT,
-	AreaLimit_Lvl1Plasma,
+	BuildHLT,
+	BuildLvl1Plasma,
 	DoSomethingForTheEconomy,
-	AreaLimit_HeavyishAA,
+	BuildHeavyishAA,
 	BuildMex,
-	AreaLimit_LightTorpedo,
-	AreaLimit_FloatLightAA,
-	AreaLimit_Sonar,
-	AreaLimit_LightTorpedo,
-	AreaLimit_FloatRadar,
+	BuildLightTorpedo,
+	BuildFloatLightAA,
+	BuildSonar,
+	BuildLightTorpedo,
+	BuildFloatRadar,
 	TidalIfTidal,
-	AreaLimit_FloatHLT,
+	BuildFloatHLT,
 	DoSomethingForTheEconomy,
-	AreaLimit_DepthCharge,
+	BuildDepthCharge,
 }
 
 local anyConShip = {
 	BuildUWMex,
-	AreaLimit_FloatLightAA,
-	AreaLimit_Sonar,
-	AreaLimit_LightTorpedo,
-	AreaLimit_FloatRadar,
+	BuildFloatLightAA,
+	BuildSonar,
+	BuildLightTorpedo,
+	BuildFloatRadar,
 	TidalIfTidal,
 	BuildAppropriateFactory,
-	AreaLimit_FloatHLT,
+	BuildFloatHLT,
 	DoSomethingForTheEconomy,
-	AreaLimit_DepthCharge,
+	BuildDepthCharge,
 }
 
 local anyAdvConUnit = {
-	AreaLimit_Lvl2PopUp,
-	AreaLimit_HeavyAA,
+	BuildLvl2PopUp,
+	BuildHeavyAA,
 	BuildAntinuke,
-	AreaLimit_Lvl2Plasma,
-	AreaLimit_Tachyon,
-	AreaLimit_HeavyPlasma,
+	BuildLvl2Plasma,
+	BuildTachyon,
+	BuildHeavyPlasma,
 	BuildFusion,
-	AreaLimit_AdvancedRadar,
+	BuildAdvancedRadar,
 	BuildAppropriateFactory,
 	BuildNukeIfNeeded,
-	AreaLimit_ExtraHeavyAA,
+	BuildExtraHeavyAA,
 	BuildMohoGeo,
 	BuildMohoMex,
 	DoSomethingAdvancedForTheEconomy,
@@ -2600,37 +2542,37 @@ local anyAdvConUnit = {
 
 local anyAdvConSub = {
 	BuildUWMohoMex,
-	AreaLimit_FloatHeavyAA,
+	BuildFloatHeavyAA,
 	BuildUWFusion,
-	AreaLimit_AdvancedSonar,
-	AreaLimit_HeavyTorpedo,
+	BuildAdvancedSonar,
+	BuildHeavyTorpedo,
 }
 
 local anyNavalEngineer = {
-	AreaLimit_FloatHLT,
-	AreaLimit_FloatLightAA,
+	BuildFloatHLT,
+	BuildFloatLightAA,
 	BuildAppropriateFactory,
 	Lvl1ShipBattle,
-	AreaLimit_FloatRadar,
+	BuildFloatRadar,
 	TidalIfTidal,
 	BuildUWMex,
-	AreaLimit_Sonar,
+	BuildSonar,
 	Lvl1ShipRaider,
 	Conship,
 	ScoutShip,
-	AreaLimit_LightTorpedo,
+	BuildLightTorpedo,
 }
 
 local anyCombatEngineer = {
 	BuildAppropriateFactory,
 	NanoTurret,
 	Solar,
-	AreaLimit_MediumAA,
-	AreaLimit_AdvancedRadar,
-	AreaLimit_Lvl2PopUp,
-	AreaLimit_HeavyAA,
-	AreaLimit_SpecialLTOnly,
-	AreaLimit_Lvl2Plasma,
+	BuildMediumAA,
+	BuildAdvancedRadar,
+	BuildLvl2PopUp,
+	BuildHeavyAA,
+	BuildSpecialLTOnly,
+	BuildLvl2Plasma,
 	ConCoreBotArmVehicle,
 	Lvl2BotCorRaiderArmBattle,
 	Lvl1AABot,

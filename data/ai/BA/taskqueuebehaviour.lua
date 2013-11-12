@@ -187,8 +187,6 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 			EchoDebug("  construction unit")
 			if (ai.totalCons[value] == nil or ai.totalCons[value] == 0) and metalOkay and energyOkay and (self.outmodedFactory or not farTooFewCombats) then
 				-- build at least one of each type
-			elseif advConList[value] and (ai.totalCons[value] == 0 or ai.totalCons[value] == 1) and metalOkay and energyOkay then
-				-- build at least two advanced cons
 			else
 				local airfactory = false
 				for i, name in pairs(airFacList) do
@@ -403,14 +401,12 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 	elseif nanoTurretList[value] then
 		-- build nano turrets next to a factory near you
 		EchoDebug("looking for factory for nano")
-		local factory = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 5000)
-		if factory ~= nil then
+		local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 5000)
+		if factoryPos ~= nil then
 			EchoDebug("found factory")
-			local factoryPos = factory:GetPosition()
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype, 10)
 			if p ~= nil then
-				local fpos = factory:GetPosition()
-				local fdist = distance(fpos, p)
+				local fdist = distance(factoryPos, p)
 				if fdist > 400 then
 					EchoDebug("build spot near factory not within build range")
 					utype = nil
@@ -444,13 +440,13 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		end
 	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or unitTable[value].radarRadius ~= 0 or unitTable[value].sonarRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value] and not littlePlasmaList[value]) then
 		-- shields, defense, antinukes, jammer towers, radar, and sonar
-		EchoDebug("looking for turtle position")
+		EchoDebug("looking for least turtled position")
 		local turtlePos = ai.turtlehandler:LeastTurtled(builder, value)
 		if turtlePos then
 			EchoDebug("found turtle position")
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 10)
 			if p == nil then
-				EchoDebug("found build spot near turtle position")
+				EchoDebug("did NOT find build spot near turtle position")
 				utype = nil
 			end
 		else

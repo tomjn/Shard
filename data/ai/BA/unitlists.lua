@@ -148,6 +148,33 @@ end
 
 builderFactByMob = BuilderFactoriesByMobility()
 
+factoryExitSides = {
+	corap = 0,
+	armap = 0,
+	corlab = 2,
+	armlab = 2,
+	corvp = 1,
+	armvp = 1,
+	coralab = 3,
+	coravp = 1,
+	corhp = 4,
+	armhp = 4,
+	corfhp = 4,
+	armfhp = 4,
+	armalab = 2,
+	armavp = 2,
+	coraap = 0,
+	armaap = 0,
+	corsy = 4,
+	armsy = 4,
+	corasy = 4,
+	armasy = 4,
+	csubpen = 4,
+	csubpen = 4,
+	corgant = 1,
+	armshltx = 1,
+}
+
 littlePlasmaList = {
 	corpun = 1,
 	armguard = 1,

@@ -839,6 +839,7 @@ function MapHandler:UnitCanGoHere(unit, position)
 	if unet == pnet then
 		return true
 	else
+		EchoDebug(mtype .. " " .. tostring(unet) .. " " .. tostring(pnet))
 		return false
 	end
 end

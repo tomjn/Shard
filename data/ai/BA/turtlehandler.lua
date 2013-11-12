@@ -14,7 +14,7 @@ local shieldMod = 1000
 local jamMod = 1000
 local radarMod = 1000
 local sonarMod = 1000
-local distanceMod = 200
+local distanceMod = 75
 
 local factoryPriority = 4 -- added to tech level
 
@@ -191,10 +191,14 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 				if jam then mod = mod + turtle.jam * jamMod end
 				if radar then mod = mod + turtle.radar * radarMod end
 				if sonar then mod = mod + turtle.sonar * sonarMod end
-				local modLimit = (turtle.priority / self.totalPriority) * Metal.income * 80
-				modLimit = math.floor(modLimit)
+				local modLimit = 10000
+				if ground or air or submerged then
+					modLimit = (turtle.priority / self.totalPriority) * Metal.income * 80
+					modLimit = math.floor(modLimit)
+				end
+				local modDefecit = modLimit - mod
 				EchoDebug("turtled: " .. mod .. ", limit: " .. tostring(modLimit) .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
-				if mod < modLimit then
+				if mod == 0 or mod < ut.metalCost or (mod < modLimit and modDefecit < ut.metalCost * 3) then
 					local dist = distance(position, turtle.position)
 					dist = dist - (modLimit * distanceMod)
 					EchoDebug("distance: " .. dist)
