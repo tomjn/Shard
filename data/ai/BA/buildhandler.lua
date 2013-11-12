@@ -84,7 +84,7 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 	end
 
 	if pos ~= nil then
-		-- don't build where the builder can go
+		-- don't build where the builder can't go
 		if not ai.maphandler:UnitCanGoHere(builder, pos) then
 			pos = nil
 		end

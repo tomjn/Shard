@@ -21,6 +21,9 @@ function ReclaimBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
+	if reclaimerList[self.name] then
+		ai.haveReclaimer = true
+	end
 	self.reclaiming = false
 end
 
@@ -42,7 +45,8 @@ end
 
 function ReclaimBehaviour:UnitIdle(unit)
 	if unit.engineID == self.unit.engineID then
-
+		self.targetcell = nil
+		self.unit:ElectBehaviour()
 	end
 end
 
@@ -53,8 +57,8 @@ function ReclaimBehaviour:Update()
 		if reclaimerList[self.name] then
 			doreclaim = true
 		elseif ai.conCount > 2 and ai.needToReclaim then
-			if not ai.haveExtraReclaimer then
-				ai.haveExtraReclaimer = true
+			if not ai.haveReclaimer then
+				ai.haveReclaimer = true
 				self.extraReclaimer = true
 				doreclaim = true
 			elseif self.extraReclaimer then
@@ -62,13 +66,16 @@ function ReclaimBehaviour:Update()
 			end
 		else
 			if self.extraReclaimer then
-				ai.haveExtraReclaimer = false
+				ai.haveReclaimer = false
 				self.extraReclaimer = false
+				self.targetcell = nil
+				self.unit:ElectBehaviour()
 			end
 		end
 		if doreclaim then
 			self:Retarget()
 			self:Reclaim()
+			self.unit:ElectBehaviour()
 		end
 	end
 end

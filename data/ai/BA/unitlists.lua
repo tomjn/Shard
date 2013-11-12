@@ -214,14 +214,14 @@ helpList = {
 -- things to defend other than factories and con units
 -- value is priority
 defendList = {
-	aafus = 5,
-	cafus = 5,
-	corfus = 4,
-	armfus = 4,
-	cmgeo = 3,
-	amgeo = 3,
-	corgeo = 2,
-	armgeo = 2,
+	aafus = 8,
+	cafus = 8,
+	corfus = 5,
+	armfus = 5,
+	cmgeo = 4,
+	amgeo = 4,
+	corgeo = 3,
+	armgeo = 3,
 	cormoho = 2,
 	armmoho = 2,
 	cormex = 1,

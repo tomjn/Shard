@@ -22,6 +22,7 @@ local needShields = false
 local needAntinuke = false
 local needtorpedo = false
 local needNukes = false
+local needGroundDefense = true
 
 -- do we need siege equipment such as artillery and merl?
 local needSiege = false
@@ -123,12 +124,17 @@ function CheckForDangers()
 		needShields = false
 		needAntinuke = false
 		needTorpedo = false
+		needGroundDefense = true
+		seenGroundThreats = false
 		lastCheckFrame = game:Frame()
 		local enemies = game:GetEnemies()
 		if enemies ~= nil then
 			for _, enemyUnit in pairs(enemies) do
 				if ai.loshandler:IsKnownEnemy(enemyUnit) > 1 then
 					local un = enemyUnit:Name()
+					if not seenGroundThreats and not unitTable[un].isBuilding and not commanderList[un] and unitTable[un].mtype ~= "air" and unitTable[un].mtype ~= "sub" and unitTable[un].groundRange > 0 then
+						seenGroundThreats = true
+					end
 					if unitTable[un].mtype == "air" and unitTable[un].groundRange > 0 then
 						needAA = true
 						EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
@@ -173,10 +179,14 @@ function CheckForDangers()
 				end
 			end
 		end
+		if (needAA or needTorpedo) and not seenGroundThreats then
+			needGroundDefense = false
+		end
 		ai.needAA = needAA
 		ai.needShields = needShields
 		ai.needAntinuke = needAntinuke
 		ai.needTorpedo = needTorpedo
+		ai.needGroundDefense = needGroundDefense
 	end
 end
 
@@ -537,29 +547,29 @@ function Lvl1BotBreakthrough(self)
 	else
 		unitName = "armwar"
 	end
-	unitName = BuildSiegeIfNeeded(unitName)
-	if unitName == DummyUnitName then
-		unitName = BuildDefendIfNeeded(unitName)
+	local output = BuildSiegeIfNeeded(unitName)
+	if output == DummyUnitName then
+		output = BuildDefendIfNeeded(unitName)
 	end
-	return unitName
+	return output
 end
 
 function Lvl1VehBreakthrough(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corlevlr"
-		unitName = BuildSiegeIfNeeded(unitName)
-		if unitName == DummyUnitName then
-			unitName = BuildDefendIfNeeded(unitName)
+		local output = BuildSiegeIfNeeded(unitName)
+		if output == DummyUnitName then
+			output = BuildDefendIfNeeded(unitName)
 		end
-		return unitName
+		return output
 	else
 		unitName = "armjanus"
-		unitName = BuildSiegeIfNeeded(unitName)
-		if unitName == DummyUnitName then
-			unitName = BuildDefendIfNeeded("armstump")
+		local output = BuildSiegeIfNeeded(unitName)
+		if output == DummyUnitName then
+			output = BuildDefendIfNeeded("armstump")
 		end
-		return unitName
+		return output
 	end
 end
 
@@ -567,18 +577,18 @@ function Lvl2VehBreakthrough(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corgol"
-		unitName = BuildSiegeIfNeeded(unitName)
-		if unitName == DummyUnitName then
-			unitName = BuildDefendIfNeeded(unitName)
+		local output = BuildSiegeIfNeeded(unitName)
+		if output == DummyUnitName then
+			output = BuildDefendIfNeeded(unitName)
 		end
-		return unitName
+		return output
 	else
 		unitName = "armmanni"
-		unitName = BuildSiegeIfNeeded(unitName)
-		if unitName == DummyUnitName then
-			unitName = BuildDefendIfNeeded("armbull")
+		local output = BuildSiegeIfNeeded(unitName)
+		if output == DummyUnitName then
+			output = BuildDefendIfNeeded("armbull")
 		end
-		return unitName
+		return output
 	end
 end
 
@@ -589,11 +599,11 @@ function Lvl2BotBreakthrough(self)
 	else
 		unitName = "armfboy"
 	end
-	unitName = BuildSiegeIfNeeded(unitName)
-	if unitName == DummyUnitName then
-		unitName = BuildDefendIfNeeded(unitName)
+	local output = BuildSiegeIfNeeded(unitName)
+	if output == DummyUnitName then
+		output = BuildDefendIfNeeded(unitName)
 	end
-	return unitName
+	return output
 end
 
 function Lvl2BotArty(self)
@@ -653,11 +663,11 @@ function Lvl2ShipBreakthrough(self)
 	else
 		unitName = "armbats"
 	end
-	unitName = BuildSiegeIfNeeded(unitName)
-	if unitName == DummyUnitName then
-		unitName = BuildDefendIfNeeded(unitName)
+	local output = BuildSiegeIfNeeded(unitName)
+	if output == DummyUnitName then
+		output = BuildDefendIfNeeded(unitName)
 	end
-	return unitName
+	return output
 end
 
 function Lvl2ShipMerl(self)
@@ -721,11 +731,11 @@ function Lvl3Breakthrough(self)
 	else
 		unitName = BuildWithLimitedNumber("armbanth", 3)
 	end
-	unitName = BuildSiegeIfNeeded(unitName)
-	if unitName == DummyUnitName then
-		unitName = BuildDefendIfNeeded(unitName)
+	local output = BuildSiegeIfNeeded(unitName)
+	if output == DummyUnitName then
+		output = BuildDefendIfNeeded(unitName)
 	end
-	return unitName
+	return output
 end
 
 function BuildRaiderIfNeeded(unitName)
@@ -1114,178 +1124,6 @@ function BuildWithLimitedNumber(tmpUnitName, minNumber)
 		return DummyUnitName
 	else
 		return tmpUnitName
-	end
-end
-
-
--- build if no energy stall
-local function MexEcon(unitName)
-	if unitName == DummyUnitName then return DummyUnitName end
-	return BuildWithNoEnergyStall(unitName)
-end
-
--- build only if energy is low
-local function EnergyPlantEcon(unitName)
-	if unitName == DummyUnitName then return DummyUnitName end
-	local res = game:GetResourceByName("Energy")
-	if res.reserves < 0.25 * res.capacity or res.income < 50 then
-		return unitName
-	else
-		return DummyUnitName
-	end
-end
-
--- build only if plenty of metal reserves and no energy stall
-local function FactoryEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	if unitName == DummyUnitName then return DummyUnitName end
-	local Energy = game:GetResourceByName("Energy")
-	local Metal = game:GetResourceByName("Metal")
-	EchoDebug(unitName)
-	EchoDebug(unitTable[unitName])
-	if Metal.reserves < unitTable[unitName].metalCost / 1.5 or Metal.income < unitTable[unitName].metalCost / 160 or Energy.income < 50  then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(unitName)
-	end
-end
-
--- build only if a bit of metal reserves and income proportional to cost and no energy stall
-local function CombatEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	if unitName == DummyUnitName then return DummyUnitName end
-	local res = game:GetResourceByName("Metal")
-	if res.reserves < unitTable[unitName].metalCost / 10 or res.income < math.sqrt(unitTable[unitName].metalCost) * 1.25 - 10 then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(unitName)
-	end
-end
-
--- build only if some metal reserves and no energy stall
-local function ConstructionEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	if unitName == DummyUnitName then return DummyUnitName end
-	local res = game:GetResourceByName("Metal")
-	if res.reserves < unitTable[unitName].metalCost / 4 then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(unitName)
-	end
-end
-
--- build only if a bit of metal reserves and income and energy extra proportional to cost and no energy stall
-local function DefenseEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	local res = game:GetResourceByName("Metal")
-	if res.reserves < unitTable[unitName].metalCost / 8 or res.income < math.sqrt(unitTable[unitName].metalCost) * 1.5 - 12 then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(BuildWithExtraEnergyIncome(unitName, unitTable[unitName].metalCost * 0.1))
-	end
-end
-
--- build only if some metal reserves and no energy stall
-local function BuildingEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	if unitName == DummyUnitName then return DummyUnitName end
-	local res = game:GetResourceByName("Metal")
-	if res.reserves < unitTable[unitName].metalCost / 8 then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(unitName)
-	end
-end
-
--- build only if some metal reserves and no energy stall
-local function OtherEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	if unitName == DummyUnitName then return DummyUnitName end
-	local res = game:GetResourceByName("Metal")
-	if res.reserves < unitTable[unitName].metalCost / 6 then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(unitName)
-	end
-end
-
-
-
-function BuildWithMinimalMetalIncome(unitName, minNumber)
-	local res = game:GetResourceByName("Metal")
-	if res.income < minNumber then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
--- build something only if we produce at least this much energy, and our e-storage is at least 1/4 full (so probably no estall)
-function BuildWithMinimalEnergyIncome(unitName, minNumber)
-	local res = game:GetResourceByName("Energy")
-	if (res.income < minNumber) or (res.reserves < 0.25 * res.capacity) then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
--- build something only if e-storage is at least 1/4 full (so probably no estall)
-function BuildWithNoEnergyStall(unitName)
-	local res = game:GetResourceByName("Energy")
-	if res.reserves < 0.25 * res.capacity then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
-function BuildWithExtraEnergyIncome(unitName, minNumber)
-	local res = game:GetResourceByName("Energy")
-	if res.income - res.usage < minNumber then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
-function BuildWithExtraMetalIncome(unitName, minNumber)
-	local res = game:GetResourceByName("Metal")
-	EchoDebug("BuildWithExtraMetalIncome: income "..res.income..", usage "..res.usage..", threshold "..minNumber)
-	if res.income - res.usage < minNumber then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
-function BuildWithNoExtraMetal(unitName)
-	local res = game:GetResourceByName("Metal")
-	if res.income - res.usage < 1 then
-		return unitName
-	else
-		return DummyUnitName
-	end
-end
-
-function CoreMetalMaker()
-	-- check that we have energy surplus and not a metal surplus
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber(BuildWithExtraEnergyIncome(BuildWithNoExtraMetal("cormakr"), 75), 10)
-	else
-		return BuildWithLimitedNumber(BuildWithExtraEnergyIncome(BuildWithNoExtraMetal("armmakr"), 75), 10)
 	end
 end
 
@@ -1894,6 +1732,7 @@ local function AreaLimit_HeavyPlasma(self)
 end
 
 local function AreaLimit_LLT(self)
+	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1908,6 +1747,7 @@ local function AreaLimit_LLT(self)
 end
 
 local function AreaLimit_SpecialLT(self)
+	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1931,6 +1771,7 @@ local function AreaLimit_SpecialLT(self)
 end
 
 local function AreaLimit_SpecialLTOnly(self)
+	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1945,6 +1786,7 @@ local function AreaLimit_SpecialLTOnly(self)
 end
 
 local function AreaLimit_FloatHLT(self)
+	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1959,6 +1801,7 @@ local function AreaLimit_FloatHLT(self)
 end
 
 local function AreaLimit_HLT(self)
+	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1973,6 +1816,7 @@ local function AreaLimit_HLT(self)
 end
 
 local function AreaLimit_Lvl2PopUp(self)
+	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1987,6 +1831,7 @@ local function AreaLimit_Lvl2PopUp(self)
 end
 
 local function AreaLimit_Tachyon(self)
+	if not needGroundDefense then return DummyUnitName end
 	if self.unit == nil then
 		return DummyUnitName
 	end

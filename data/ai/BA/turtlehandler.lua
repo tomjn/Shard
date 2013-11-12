@@ -9,13 +9,14 @@ local function EchoDebug(inStr)
 	end
 end
 
-local antinukeMod = 5000
+local antinukeMod = 1000
 local shieldMod = 1000
-local jamMod = 3000
-local radarMod = 3000
-local sonarMod = 3000
+local jamMod = 1000
+local radarMod = 1000
+local sonarMod = 1000
+local distanceMod = 100
 
-local factoryPriority = 3 -- multiplied by tech level
+local factoryPriority = 4 -- added to tech level
 
 TurtleHandler = class(Module)
 
@@ -39,7 +40,11 @@ function TurtleHandler:UnitBuilt(unit)
 	if ut.isBuilding then
 		local upos = unit:GetPosition()
 		local uid = unit:ID()
-		if ut.isWeapon and not antinukeList[un] then
+		if defendList[un] then
+			self:AddTurtle(upos, uid, defendList[un])
+		elseif ut.buildOptions then
+			self:AddTurtle(upos, uid, factoryPriority + ut.techLevel)
+		elseif ut.isWeapon and not antinukeList[un] and not nukeList[un] and not bigPlasmaList[un] then
 			self:AddDefense(upos, uid, un)
 		elseif antinukeList[un] then
 			self:AddShell(upos, uid, 1, "antinuke", 72000)
@@ -51,10 +56,6 @@ function TurtleHandler:UnitBuilt(unit)
 			self:AddShell(upos, uid, 1, "radar", ut.radarRadius * 0.5)
 		elseif ut.sonarRadius ~= 0 then
 			self:AddShell(upos, uid, 1, "sonar", ut.sonarRadius * 0.5)
-		elseif defendList[un] then
-			self:AddTurtle(upos, uid, defendList[un])
-		elseif ut.buildOptions then
-			self:AddTurtle(upos, uid, factoryPriority * ut.techLevel)
 		end
 	end
 end
@@ -180,7 +181,23 @@ function TurtleHandler:BestTurtle(builder, unitName, most, bombard)
 		end
 		Metal = game:GetResourceByName("Metal")
 	end
-	local bestDist = 10000
+	--[[
+	local distanceLimit = 1000
+	local mtype = unitTable[builder:Name()].mtype
+	if mtype == "bot" then
+		distanceLimit = 1000
+	elseif mtype == "veh" or mtype == "amp" then
+		distanceLimit = 2000
+	elseif mtype == "hov" then
+		distanceLimit = 3000
+	elseif mtype == "shp" or mtype == "sub" then
+		distanceLimit = 1500
+	elseif mtype == "air" then
+		distanceLimit = 100000
+	end
+	local bestMod = 0
+	]]--
+	local bestDist = 100000
 	local best
 	for i, turtle in pairs(self.turtles) do
 		local isLocal = true
@@ -190,14 +207,12 @@ function TurtleHandler:BestTurtle(builder, unitName, most, bombard)
 		if ai.maphandler:UnitCanGoHere(builder, turtle.position) and isLocal then
 			local okay = true
 			if bombard then 
-				if not ai.targethandler:IsBombardPosition(turtle.position, unitName) then
-					okay = false
-				end
+				okay = ai.targethandler:IsBombardPosition(turtle.position, unitName)
 			end
 			if okay then
 				local mod = 0
 				if ground then
-					mod = mod + turtle.ground
+					mod = mod + turtle.ground 
 				end
 				if air then
 					mod = mod + turtle.air
@@ -220,19 +235,33 @@ function TurtleHandler:BestTurtle(builder, unitName, most, bombard)
 				if sonar then
 					mod = mod + turtle.sonar * sonarMod
 				end
-				if most or mod < (turtle.priority / self.totalPriority) * Metal.income * 80 then
+				local modLimit = (turtle.priority / self.totalPriority) * Metal.income * 80
+				modLimit = math.max(100, modLimit)
+				if (mod ~= 0 and most) or (mod < modLimit and not most) then
 					local dist = distance(position, turtle.position)
-					if most then
-						-- if we're finding the most turtled position
-						dist = dist - mod
-					else
-						-- if we're looking for a vulnerable spot to build up
-						dist = dist + (mod * (turtle.priority / self.totalPriority))
-					end
+					if not most then mod = modLimit - mod end
+					mod = mod * distanceMod
+					dist = dist - mod
 					if dist < bestDist then
 						bestDist = dist
 						best = turtle.position
 					end
+					--[[
+					if dist < distanceLimit then
+						if most then
+							if mod > bestMod then
+								bestMod = mod
+								best = turtle.position
+							end
+						else
+							mod = modLimit - mod
+							if mod > bestMod then
+								bestMod = mod
+								best = turtle.position
+							end
+						end
+					end
+					]]--
 				end
 			end
 		end

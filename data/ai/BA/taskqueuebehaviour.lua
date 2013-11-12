@@ -58,7 +58,7 @@ local function LandWaterFilter(builder, value)
 	if value == DummyUnitName then return DummyUnitName end
 	EchoDebug(value .. " (before landwater filter)")
 	if value == "armmex" or value == "cormex" or value == "armmohomex" or value == "cormohomex" or value == "armsy" or value == "corsy" then
-		-- leave mexes alone, these are dealt with at the time of finding a spot for them
+		-- leave these alone, these are dealt with at the time of finding a spot for them
 		return value
 	end
 	local bmtype = ai.maphandler:MobilityOfUnit(builder)
@@ -156,8 +156,13 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 				if metalTooLow or energyTooLow or Metal.income < 35 or ai.factories == 0 or notEnoughCombats then
 					value = DummyUnitName
 				end
+			elseif littlePlasmaList[value] then
+				-- plasma turrets need units to back them up
+				if metalTooLow or energyTooLow or Metal.income < 12 or ai.factories == 0 or notEnoughCombats then
+					value = DummyUnitName
+				end
 			else
-				if Metal.income > (unitTable[value].metalCost / 12) + 13 or metalTooLow or Metal.income < (unitTable[value].metalCost / 38) + 2 or energyTooLow or ai.factories == 0 then
+				if metalTooLow or Metal.income < (unitTable[value].metalCost / 35) + 2 or energyTooLow or ai.factories == 0 then
 					value = DummyUnitName
 				end
 			end
@@ -420,12 +425,13 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		end
 	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
 		-- build factories next to a nano turret near you
-		EchoDebug("looking for nano for factory to build next to")
+		EchoDebug("looking for nano to build factory next to")
 		local nano = ai.buildsitehandler:ClosestNanoTurret(builder, 3000)
 		if nano ~= nil then
 			local nanoPos = nano:GetPosition()
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, nanoPos, utype, 15)
-		else
+		end
+		if p == nil then
 			EchoDebug("no nano found for factory, trying a turtle position")
 			local turtlePos = ai.turtlehandler:BestTurtle(builder, nil, true)
 			if turtlePos then
@@ -436,13 +442,15 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 				p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype, 15)
 			end
 		end
-	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or unitTable[value].radarRadius ~= 0 or unitTable[value].sonarRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value]) then
+	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or unitTable[value].radarRadius ~= 0 or unitTable[value].sonarRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value] and not littlePlasmaList[value]) then
 		-- shields, defense, antinukes, jammer towers, radar, and sonar
 		EchoDebug("looking for turtle position")
 		local turtlePos = ai.turtlehandler:BestTurtle(builder, value)
 		if turtlePos then
+			EchoDebug("found turtle position")
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 10)
 			if p == nil then
+				EchoDebug("found build spot near turtle position")
 				utype = nil
 			end
 		else
