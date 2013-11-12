@@ -433,7 +433,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		end
 		if p == nil then
 			EchoDebug("no nano found for factory, trying a turtle position")
-			local turtlePos = ai.turtlehandler:BestTurtle(builder, nil, true)
+			local turtlePos = ai.turtlehandler:MostTurtled(builder)
 			if turtlePos then
 				p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 15)
 			else
@@ -445,7 +445,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or unitTable[value].radarRadius ~= 0 or unitTable[value].sonarRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value] and not littlePlasmaList[value]) then
 		-- shields, defense, antinukes, jammer towers, radar, and sonar
 		EchoDebug("looking for turtle position")
-		local turtlePos = ai.turtlehandler:BestTurtle(builder, value)
+		local turtlePos = ai.turtlehandler:LeastTurtled(builder, value)
 		if turtlePos then
 			EchoDebug("found turtle position")
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 10)
@@ -460,9 +460,9 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		-- buildings in defended positions
 		local bombard = false
 		if nukeList[value] or bigPlasmaList[value] or littlePlasmaList[value] then
-			bombard = true
+			bombard = value
 		end
-		local turtlePos = ai.turtlehandler:BestTurtle(builder, nil, true, bombard)
+		local turtlePos = ai.turtlehandler:MostTurtled(builder, bombard)
 		if turtlePos then
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 10)
 		end

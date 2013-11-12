@@ -14,7 +14,7 @@ local shieldMod = 1000
 local jamMod = 1000
 local radarMod = 1000
 local sonarMod = 1000
-local distanceMod = 100
+local distanceMod = 200
 
 local factoryPriority = 4 -- added to tech level
 
@@ -140,63 +140,35 @@ function TurtleHandler:RemoveShell(uid)
 	end
 end
 
-function TurtleHandler:BestTurtle(builder, unitName, most, bombard)
+function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 	if builder == nil then return end
+	EchoDebug("checking for least turtled from " .. builder:Name() .. " for " .. tostring(unitName) .. " bombard: " .. tostring(bombard))
 	if unitName == nil then return end
 	local position = builder:GetPosition()
 	local ut = unitTable[unitName]
-	local Metal
-	local ground, air, submerged, antinuke, shield, jam
-	if most then
-		-- if we're looking for the most turtled position, count everything
-		ground = true
-		air = true
-		submerged = true
-		antinuke = true
-		shield = true
-		jam = true
-		radar = true
-		sonar = true
-	else
-		if ut.isWeapon and not antinukeList[unitName] then
-			if ut.groundRange ~= 0 then
-				ground = true
-			end
-			if ut.airRange ~= 0 then
-				air = true
-			end
-			if ut.submergedRange ~= 0 then
-				submerged = true
-			end
-		elseif antinukeList[unitName] then
-			antinuke = true
-		elseif shieldList[unitName] then
-			shield = true
-		elseif ut.jammerRadius ~= 0 then
-			jam = true
-		elseif ut.radarRadius ~= 0 then
-			radar = true
-		elseif ut.sonarRadius ~= 0 then
-			sonar = true
+	local Metal = game:GetResourceByName("Metal")
+	local ground, air, submerged, antinuke, shield, jam, radar, sonar
+	if ut.isWeapon and not antinukeList[unitName] then
+		if ut.groundRange ~= 0 then
+			ground = true
 		end
-		Metal = game:GetResourceByName("Metal")
+		if ut.airRange ~= 0 then
+			air = true
+		end
+		if ut.submergedRange ~= 0 then
+			submerged = true
+		end
+	elseif antinukeList[unitName] then
+		antinuke = true
+	elseif shieldList[unitName] then
+		shield = true
+	elseif ut.jammerRadius ~= 0 then
+		jam = true
+	elseif ut.radarRadius ~= 0 then
+		radar = true
+	elseif ut.sonarRadius ~= 0 then
+		sonar = true
 	end
-	--[[
-	local distanceLimit = 1000
-	local mtype = unitTable[builder:Name()].mtype
-	if mtype == "bot" then
-		distanceLimit = 1000
-	elseif mtype == "veh" or mtype == "amp" then
-		distanceLimit = 2000
-	elseif mtype == "hov" then
-		distanceLimit = 3000
-	elseif mtype == "shp" or mtype == "sub" then
-		distanceLimit = 1500
-	elseif mtype == "air" then
-		distanceLimit = 100000
-	end
-	local bestMod = 0
-	]]--
 	local bestDist = 100000
 	local best
 	for i, turtle in pairs(self.turtles) do
@@ -206,62 +178,62 @@ function TurtleHandler:BestTurtle(builder, unitName, most, bombard)
 		end
 		if ai.maphandler:UnitCanGoHere(builder, turtle.position) and isLocal then
 			local okay = true
-			if bombard then 
+			if bombard and unitName ~= nil then 
 				okay = ai.targethandler:IsBombardPosition(turtle.position, unitName)
 			end
 			if okay then
 				local mod = 0
-				if ground then
-					mod = mod + turtle.ground 
-				end
-				if air then
-					mod = mod + turtle.air
-				end
-				if submerged then
-					mod = mod + turtle.submerged
-				end
-				if antinuke then
-					mod = mod + turtle.antinuke * antinukeMod
-				end
-				if shield then
-					mod = mod + turtle.shield * shieldMod
-				end
-				if jam then
-					mod = mod + turtle.jam * jamMod
-				end
-				if radar then
-					mod = mod + turtle.radar * radarMod
-				end
-				if sonar then
-					mod = mod + turtle.sonar * sonarMod
-				end
+				if ground then mod = mod + turtle.ground end
+				if air then mod = mod + turtle.air end
+				if submerged then mod = mod + turtle.submerged end
+				if antinuke then mod = mod + turtle.antinuke * antinukeMod end
+				if shield then mod = mod + turtle.shield * shieldMod end
+				if jam then mod = mod + turtle.jam * jamMod end
+				if radar then mod = mod + turtle.radar * radarMod end
+				if sonar then mod = mod + turtle.sonar * sonarMod end
 				local modLimit = (turtle.priority / self.totalPriority) * Metal.income * 80
-				modLimit = math.max(100, modLimit)
-				if (mod ~= 0 and most) or (mod < modLimit and not most) then
+				modLimit = math.floor(modLimit)
+				EchoDebug("turtled: " .. mod .. ", limit: " .. tostring(modLimit) .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
+				if mod < modLimit then
 					local dist = distance(position, turtle.position)
-					if not most then mod = modLimit - mod end
-					mod = mod * distanceMod
-					dist = dist - mod
+					dist = dist - (modLimit * distanceMod)
+					EchoDebug("distance: " .. dist)
 					if dist < bestDist then
+						EchoDebug("best distance")
 						bestDist = dist
 						best = turtle.position
 					end
-					--[[
-					if dist < distanceLimit then
-						if most then
-							if mod > bestMod then
-								bestMod = mod
-								best = turtle.position
-							end
-						else
-							mod = modLimit - mod
-							if mod > bestMod then
-								bestMod = mod
-								best = turtle.position
-							end
-						end
+				end
+			end
+		end
+	end
+	return best
+end
+
+function TurtleHandler:MostTurtled(builder, bombard)
+	if builder == nil then return end
+	EchoDebug("checking for most turtled from " .. builder:Name() .. ", bombard: " .. tostring(bombard))
+	local position = builder:GetPosition()
+	local bestDist = 100000
+	local best
+	for i, turtle in pairs(self.turtles) do
+		if ai.maphandler:UnitCanGoHere(builder, turtle.position) then
+			local okay = true
+			if bombard then 
+				okay = ai.targethandler:IsBombardPosition(turtle.position, bombard)
+			end
+			if okay then
+				local mod = turtle.ground + turtle.air + turtle.submerged
+				EchoDebug("turtled: " .. mod .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
+				if mod ~= 0 then
+					local dist = distance(position, turtle.position)
+					dist = dist - (mod * distanceMod)
+					EchoDebug("distance: " .. dist)
+					if dist < bestDist then
+						EchoDebug("best distance")
+						bestDist = dist
+						best = turtle.position
 					end
-					]]--
 				end
 			end
 		end

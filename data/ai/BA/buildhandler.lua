@@ -77,7 +77,7 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 		-- don't build on top of free metal spots
 		local spot, uw, dist = ai.maphandler:ClosestFreeSpot(mexUnitType, builder, position)
 		if spot ~= nil and dist ~= nil then
-			if dist < 85 then
+			if dist < 100 then
 				pos = nil
 			end
 		end
