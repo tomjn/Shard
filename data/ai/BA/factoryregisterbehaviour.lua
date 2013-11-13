@@ -47,6 +47,7 @@ function FactoryRegisterBehaviour:Init()
     self.id = self.unit:Internal():ID()
     self.position = self.unit:Internal():GetPosition() -- factories don't move
     self.level = unitTable[self.name].techLevel
+    --[[
     if factoryExitSides[self.name] ~= nil and factoryExitSides[self.name] ~= 0 then
 	    -- inform the build handler not to build where the units exit
 	    local nobuild = api.Position()
@@ -70,7 +71,7 @@ function FactoryRegisterBehaviour:Init()
 	    	end
 	    end
 	end
-	-- self.unit:ElectBehaviour()
+	]]--
 end
 
 function FactoryRegisterBehaviour:UnitCreated(unit)
