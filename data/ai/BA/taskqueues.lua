@@ -22,6 +22,7 @@ local needShields = false
 local needAntinuke = false
 local needtorpedo = false
 local needNukes = false
+local needGroundDefense = true
 
 -- do we need siege equipment such as artillery and merl?
 local needSiege = false
@@ -65,7 +66,7 @@ local function CheckMySide(self)
 	-- fix: moved here so map object is present when it's accessed
 	ConUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)
 	ConUnitAdvPerTypeLimit = math.max(ConUnitPerTypeLimit / 2, 2)
-	game:SendToConsole("per-type construction unit limit: " .. ConUnitPerTypeLimit)
+	EchoDebug("per-type construction unit limit: " .. ConUnitPerTypeLimit)
 	minDefenseNetworkSize = ai.mobilityGridArea / 4 
 	-- set the averageWind
 	if averageWind == 0 then
@@ -123,12 +124,17 @@ function CheckForDangers()
 		needShields = false
 		needAntinuke = false
 		needTorpedo = false
+		needGroundDefense = true
+		seenGroundThreats = false
 		lastCheckFrame = game:Frame()
 		local enemies = game:GetEnemies()
 		if enemies ~= nil then
 			for _, enemyUnit in pairs(enemies) do
 				if ai.loshandler:IsKnownEnemy(enemyUnit) > 1 then
 					local un = enemyUnit:Name()
+					if not seenGroundThreats and not unitTable[un].isBuilding and not commanderList[un] and unitTable[un].mtype ~= "air" and unitTable[un].mtype ~= "sub" and unitTable[un].groundRange > 0 then
+						seenGroundThreats = true
+					end
 					if unitTable[un].mtype == "air" and unitTable[un].groundRange > 0 then
 						needAA = true
 						EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
@@ -173,10 +179,14 @@ function CheckForDangers()
 				end
 			end
 		end
+		if (needAA or needTorpedo) and not seenGroundThreats then
+			needGroundDefense = false
+		end
 		ai.needAA = needAA
 		ai.needShields = needShields
 		ai.needAntinuke = needAntinuke
 		ai.needTorpedo = needTorpedo
+		ai.needGroundDefense = needGroundDefense
 	end
 end
 
@@ -280,23 +290,6 @@ function IsNukeNeeded()
 	return needNukes
 end
 
-function CheckNearWater(builder, range)
-	-- this is special case, it means the unit will not be built anyway
-	if unitName == DummyUnitName then
-		return unitName
-	end
-	local pos = builder:GetPosition()
-	if range == nil then range = AreaCheckRange end
-	-- now check how many of the wanted unit is nearby
-
-	EchoDebug(""..unitName.." wanted, with range limit of "..unitLimit..", with "..NumberOfUnits.." already there. The check is: "..tostring(AllowBuilding))
-	if AllowBuilding then
-		return unitName
-	else
-		return DummyUnitName
-	end
-end
-
 function BuildMex()
 	local unitName
 	if ai.mySide == CORESideName then
@@ -390,7 +383,7 @@ function DoSomethingForTheEconomy(self)
 	-- maybe we need storage?
 	if unitName == DummyUnitName then
 		-- energy storage
-		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 0 then
+		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 100 then
 			if isWater then
 				if ai.mySide == CORESideName then
 					unitName = BuildWithLimitedNumber("coruwes", 3)
@@ -408,7 +401,7 @@ function DoSomethingForTheEconomy(self)
 	end
 	if unitName == DummyUnitName then
 		-- metal storage
-		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 0 then
+		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 3 then
 			if isWater then
 				if ai.mySide == CORESideName then
 					unitName = BuildWithLimitedNumber("coruwms", 3)
@@ -428,7 +421,7 @@ function DoSomethingForTheEconomy(self)
 	return unitName
 end
 
---[[
+
 -- build advanced conversion or storage
 function DoSomethingAdvancedForTheEconomy(self)
 	local Energy = game:GetResourceByName("Energy")
@@ -441,59 +434,42 @@ function DoSomethingAdvancedForTheEconomy(self)
 	if extraE > 600 and extraM < 0 and Energy.income > 2000 then
 		if isWater then
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("coruwmm", 8)
+				unitName = BuildWithLimitedNumber("armuwmmm", Energy.income / 1000)
 			else
-				unitName = BuildWithLimitedNumber("armuwmm", 8)
+				unitName = BuildWithLimitedNumber("armuwmmm", Energy.income / 1000)
 			end		
 		else
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("cormmkr", 8)
+				unitName = BuildWithLimitedNumber("cormmkr", Energy.income / 1000)
 			else
-				unitName = BuildWithLimitedNumber("armmmkr", 8)
+				unitName = BuildWithLimitedNumber("armmmkr", Energy.income / 1000)
 			end
 		end
 	end
 	-- maybe we need storage?
 	if unitName == DummyUnitName then
 		-- energy storage
-		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 0 then
-			if isWater then
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("coruwadves", 3)
-				else
-					unitName = BuildWithLimitedNumber("armuwadves", 3)
-				end	
+		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 1000 then
+			if ai.mySide == CORESideName then
+				unitName = BuildWithLimitedNumber("coruwadves", 1)
 			else
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("corestor", 3)
-				else
-					unitName = BuildWithLimitedNumber("armestor", 3)
-				end
-			end
+				unitName = BuildWithLimitedNumber("armuwadves", 1)
+			end	
 		end
 	end
 	if unitName == DummyUnitName then
 		-- metal storage
-		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 0 then
-			if isWater then
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("coruwadvms", 3)
-				else
-					unitName = BuildWithLimitedNumber("armuwadvms", 3)
-				end	
+		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 10 then
+			if ai.mySide == CORESideName then
+				unitName = BuildWithLimitedNumber("coruwadvms", 1)
 			else
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("cormstor", 3)
-				else
-					unitName = BuildWithLimitedNumber("armmstor", 3)
-				end
-			end
+				unitName = BuildWithLimitedNumber("armuwadvms", 1)
+			end	
 		end
 	end
 
 	return unitName
 end
-]]--
 
 function BuildAAIfNeeded(unitName)
 	if IsAANeeded() then
@@ -550,33 +526,33 @@ end
 function Lvl1BotBreakthrough(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
-		return DummyUnitName
+		unitName = "corthud"
 	else
 		unitName = "armwar"
 	end
-	unitName = BuildSiegeIfNeeded(unitName)
-	if unitName == DummyUnitName then
-		unitName = BuildDefendIfNeeded(unitName)
+	local output = BuildSiegeIfNeeded(unitName)
+	if output == DummyUnitName then
+		output = BuildDefendIfNeeded(unitName)
 	end
-	return unitName
+	return output
 end
 
 function Lvl1VehBreakthrough(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corlevlr"
-		unitName = BuildSiegeIfNeeded(unitName)
-		if unitName == DummyUnitName then
-			unitName = BuildDefendIfNeeded(unitName)
+		local output = BuildSiegeIfNeeded(unitName)
+		if output == DummyUnitName then
+			output = BuildDefendIfNeeded(unitName)
 		end
-		return unitName
+		return output
 	else
 		unitName = "armjanus"
-		unitName = BuildSiegeIfNeeded(unitName)
-		if unitName == DummyUnitName then
-			unitName = BuildDefendIfNeeded("armstump")
+		local output = BuildSiegeIfNeeded(unitName)
+		if output == DummyUnitName then
+			output = BuildDefendIfNeeded("armstump")
 		end
-		return unitName
+		return output
 	end
 end
 
@@ -584,14 +560,19 @@ function Lvl2VehBreakthrough(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corgol"
+		local output = BuildSiegeIfNeeded(unitName)
+		if output == DummyUnitName then
+			output = BuildDefendIfNeeded(unitName)
+		end
+		return output
 	else
 		unitName = "armmanni"
+		local output = BuildSiegeIfNeeded(unitName)
+		if output == DummyUnitName then
+			output = BuildDefendIfNeeded("armbull")
+		end
+		return output
 	end
-	unitName = BuildSiegeIfNeeded(unitName)
-	if unitName == DummyUnitName then
-		unitName = BuildDefendIfNeeded(unitName)
-	end
-	return unitName
 end
 
 function Lvl2BotBreakthrough(self)
@@ -601,11 +582,11 @@ function Lvl2BotBreakthrough(self)
 	else
 		unitName = "armfboy"
 	end
-	unitName = BuildSiegeIfNeeded(unitName)
-	if unitName == DummyUnitName then
-		unitName = BuildDefendIfNeeded(unitName)
+	local output = BuildSiegeIfNeeded(unitName)
+	if output == DummyUnitName then
+		output = BuildDefendIfNeeded(unitName)
 	end
-	return unitName
+	return output
 end
 
 function Lvl2BotArty(self)
@@ -665,11 +646,11 @@ function Lvl2ShipBreakthrough(self)
 	else
 		unitName = "armbats"
 	end
-	unitName = BuildSiegeIfNeeded(unitName)
-	if unitName == DummyUnitName then
-		unitName = BuildDefendIfNeeded(unitName)
+	local output = BuildSiegeIfNeeded(unitName)
+	if output == DummyUnitName then
+		output = BuildDefendIfNeeded(unitName)
 	end
-	return unitName
+	return output
 end
 
 function Lvl2ShipMerl(self)
@@ -733,11 +714,11 @@ function Lvl3Breakthrough(self)
 	else
 		unitName = BuildWithLimitedNumber("armbanth", 3)
 	end
-	unitName = BuildSiegeIfNeeded(unitName)
-	if unitName == DummyUnitName then
-		unitName = BuildDefendIfNeeded(unitName)
+	local output = BuildSiegeIfNeeded(unitName)
+	if output == DummyUnitName then
+		output = BuildDefendIfNeeded(unitName)
 	end
-	return unitName
+	return output
 end
 
 function BuildRaiderIfNeeded(unitName)
@@ -875,7 +856,7 @@ function BuildBattleIfNeeded(unitName)
 	EchoDebug(ai.raiderCount[mtype])
 	if ai.raiderCount[mtype] == nil then
 		return unitName
-	elseif ai.raiderCount[mtype] < raidCounter then
+	elseif ai.raiderCount[mtype] < raidCounter / 2 then
 		return DummyUnitName
 	else
 		return BuildWithLimitedNumber(unitName, attackCounter*3)
@@ -1129,178 +1110,6 @@ function BuildWithLimitedNumber(tmpUnitName, minNumber)
 	end
 end
 
-
--- build if no energy stall
-local function MexEcon(unitName)
-	if unitName == DummyUnitName then return DummyUnitName end
-	return BuildWithNoEnergyStall(unitName)
-end
-
--- build only if energy is low
-local function EnergyPlantEcon(unitName)
-	if unitName == DummyUnitName then return DummyUnitName end
-	local res = game:GetResourceByName("Energy")
-	if res.reserves < 0.25 * res.capacity or res.income < 50 then
-		return unitName
-	else
-		return DummyUnitName
-	end
-end
-
--- build only if plenty of metal reserves and no energy stall
-local function FactoryEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	if unitName == DummyUnitName then return DummyUnitName end
-	local Energy = game:GetResourceByName("Energy")
-	local Metal = game:GetResourceByName("Metal")
-	EchoDebug(unitName)
-	EchoDebug(unitTable[unitName])
-	if Metal.reserves < unitTable[unitName].metalCost / 1.5 or Metal.income < unitTable[unitName].metalCost / 160 or Energy.income < 50  then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(unitName)
-	end
-end
-
--- build only if a bit of metal reserves and income proportional to cost and no energy stall
-local function CombatEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	if unitName == DummyUnitName then return DummyUnitName end
-	local res = game:GetResourceByName("Metal")
-	if res.reserves < unitTable[unitName].metalCost / 10 or res.income < math.sqrt(unitTable[unitName].metalCost) * 1.25 - 10 then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(unitName)
-	end
-end
-
--- build only if some metal reserves and no energy stall
-local function ConstructionEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	if unitName == DummyUnitName then return DummyUnitName end
-	local res = game:GetResourceByName("Metal")
-	if res.reserves < unitTable[unitName].metalCost / 4 then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(unitName)
-	end
-end
-
--- build only if a bit of metal reserves and income and energy extra proportional to cost and no energy stall
-local function DefenseEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	local res = game:GetResourceByName("Metal")
-	if res.reserves < unitTable[unitName].metalCost / 8 or res.income < math.sqrt(unitTable[unitName].metalCost) * 1.5 - 12 then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(BuildWithExtraEnergyIncome(unitName, unitTable[unitName].metalCost * 0.1))
-	end
-end
-
--- build only if some metal reserves and no energy stall
-local function BuildingEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	if unitName == DummyUnitName then return DummyUnitName end
-	local res = game:GetResourceByName("Metal")
-	if res.reserves < unitTable[unitName].metalCost / 8 then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(unitName)
-	end
-end
-
--- build only if some metal reserves and no energy stall
-local function OtherEcon(unitName)
-	while type(unitName) == "function" do
-		unitName = unitName(self)
-	end
-	if unitName == DummyUnitName then return DummyUnitName end
-	local res = game:GetResourceByName("Metal")
-	if res.reserves < unitTable[unitName].metalCost / 6 then
-		return DummyUnitName
-	else
-		return BuildWithNoEnergyStall(unitName)
-	end
-end
-
-
-
-function BuildWithMinimalMetalIncome(unitName, minNumber)
-	local res = game:GetResourceByName("Metal")
-	if res.income < minNumber then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
--- build something only if we produce at least this much energy, and our e-storage is at least 1/4 full (so probably no estall)
-function BuildWithMinimalEnergyIncome(unitName, minNumber)
-	local res = game:GetResourceByName("Energy")
-	if (res.income < minNumber) or (res.reserves < 0.25 * res.capacity) then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
--- build something only if e-storage is at least 1/4 full (so probably no estall)
-function BuildWithNoEnergyStall(unitName)
-	local res = game:GetResourceByName("Energy")
-	if res.reserves < 0.25 * res.capacity then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
-function BuildWithExtraEnergyIncome(unitName, minNumber)
-	local res = game:GetResourceByName("Energy")
-	if res.income - res.usage < minNumber then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
-function BuildWithExtraMetalIncome(unitName, minNumber)
-	local res = game:GetResourceByName("Metal")
-	EchoDebug("BuildWithExtraMetalIncome: income "..res.income..", usage "..res.usage..", threshold "..minNumber)
-	if res.income - res.usage < minNumber then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
-function BuildWithNoExtraMetal(unitName)
-	local res = game:GetResourceByName("Metal")
-	if res.income - res.usage < 1 then
-		return unitName
-	else
-		return DummyUnitName
-	end
-end
-
-function CoreMetalMaker()
-	-- check that we have energy surplus and not a metal surplus
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber(BuildWithExtraEnergyIncome(BuildWithNoExtraMetal("cormakr"), 75), 10)
-	else
-		return BuildWithLimitedNumber(BuildWithExtraEnergyIncome(BuildWithNoExtraMetal("armmakr"), 75), 10)
-	end
-end
-
 local function SolarAdv()
 	if ai.mySide == CORESideName then
 		return "coradvsol"
@@ -1399,111 +1208,6 @@ local function AAHover()
 	end
 end
 
-local function AdvFactory1(self)
-	local botName
-	local vehName
-	local shpName
-	local airName
-	local whatToBuild = DummyUnitName
-	local thisUnit = self.unit:Internal()
-	
-	if ai.mySide == CORESideName then
-		botName = "coralab"
-		vehName = "coravp"
-		shpName = "corasy"
-		airName = "coraap"
-	else
-		botName = "armalab"
-		vehName = "armavp"
-		shpName = "armasy"
-		airName = "armaap"
-	end
-
-	local botType = game:GetTypeByName(botName)
-	local vehType = game:GetTypeByName(vehName)
-	local shpType = game:GetTypeByName(shpName)
-	local airType = game:GetTypeByName(airName)
-
-	if thisUnit:CanBuild(vehType) and BuildWithLimitedNumber(vehName, 1) == vehName then
-		whatToBuild = vehName
-	elseif thisUnit:CanBuild(botType) and BuildWithLimitedNumber(botName, 1) == botName then
-		whatToBuild = botName
-	elseif thisUnit:CanBuild(shpType) and BuildWithLimitedNumber(shpName, 1) == shpName then
-		whatToBuild = shpName
-	elseif thisUnit:CanBuild(airType) and BuildWithLimitedNumber(airName, 1) == airName then
-		whatToBuild = airName
-	end
-
-	return whatToBuild
-end
-
-local function SecondaryFactory1(self)
-	local botName
-	local vehName
-	local shpName
-	local airName
-	local ampName
-	local hovName
-	local whatToBuild = DummyUnitName
-	local thisUnit = self.unit:Internal()
-	if ai.mySide == CORESideName then
-		botName = "coralab"
-		vehName = "coravp"
-		shpName = "corasy"
-		airName = "coraap"
-		ampName = "csubpen"
-		hovName = "corhp"
-	else
-		botName = "armalab"
-		vehName = "armavp"
-		shpName = "armasy"
-		airName = "armaap"
-		ampName = "asubpen"
-		hovName = "armhp"
-	end
-
-	local botType = game:GetTypeByName(botName)
-	local vehType = game:GetTypeByName(vehName)
-	local shpType = game:GetTypeByName(shpName)
-	local airType = game:GetTypeByName(airName)
-	local ampType = game:GetTypeByName(ampName)
-	local hovType = game:GetTypeByName(hovName)
-
-	local maptype = MapLandType()
-
-	if thisUnit:CanBuild(ampType) and maptype == "amp" and BuildWithLimitedNumber(ampName, 1) == ampName then
-		whatToBuild = ampName
-	elseif thisUnit:CanBuild(hovType) and maptype == "hov" and BuildWithLimitedNumber(hovName, 1) == hovName then
-		whatToBuild = hovName
-	elseif thisUnit:CanBuild(vehType) and BuildWithLimitedNumber(vehName, 1) == vehName then
-		whatToBuild = vehName
-	elseif thisUnit:CanBuild(botType) and BuildWithLimitedNumber(botName, 1) == botName then
-		whatToBuild = botName
-	elseif thisUnit:CanBuild(shpType) and BuildWithLimitedNumber(shpName, 1) == shpName then
-		whatToBuild = shpName
-	elseif thisUnit:CanBuild(airType) and BuildWithLimitedNumber(airName, 1) == airName then
-		whatToBuild = airName
-	end
-
-	return whatToBuild
-end
-
-local function BuildExperimentalFactory1(self)
-	local expName
-	if ai.mySide == CORESideName then
-		expName = "corgant"
-	else
-		expName = "armshltx"
-	end
-	local expType = game:GetTypeByName(expName)
-	local thisUnit = self.unit:Internal()
-	if thisUnit:CanBuild(expType) then
-		return BuildWithLimitedNumber(expName, 1)
-	else
-		return DummyUnitName
-	end
-end
-
 local function ConVehicle()
 	local unitName
 	if needAmphibiousCons then
@@ -1528,7 +1232,7 @@ local function ConVehicleAmphibious()
 	else
 		unitName = "armbeaver"
 	end
-	return unitName
+	return BuildWithLimitedNumber(unitName, ConUnitAdvPerTypeLimit)
 end
 
 local function ConAdvVehicle()
@@ -1626,29 +1330,6 @@ function CountOwnUnitsInRadius(unitName, pos, radius, maxCount)
 	return unitCount
 end
 
--- how many of our own unitName there are in a radius around a position
-function CheckForOwnRadar(unitName, pos)
-	local ownUnits = game:GetFriendlies()
-	local unitCount = 0
-	-- optimisation: there is always 0 null units on map
-	if unitName == DummyUnitName then
-		return 0
-	end
-	for _, u in pairs(ownUnits) do
-		if u:Name() == unitName then
-			local upos = u:GetPosition()
-			if distance(pos, upos) < radius then
-				unitCount = unitCount + 1
-			end
-			-- optimisation: if the limit is already exceeded, don't count further
-			if unitCount >= maxCount then
-				break
-			end
-		end
-	end
-	return unitCount
-end
-
 -- how many enemies are there in a radius around a position, also returns buildings and factories
 function CountEnemiesInRadius(pos, radius, maxCount)
 	local buildingCount = 0
@@ -1695,121 +1376,15 @@ local function CheckAreaLimit(unitName, builder, unitLimit, range)
 	end
 end
 
-local function CheckDefenseLocalization(unitName, builder)
-	local pos = builder:GetPosition()
-	local size = 0
-	if unitTable[unitName].groundRange > 0 then
-		local vehsize = ai.maphandler:MobilityNetworkSizeHere("veh", pos)
-		local botsize = ai.maphandler:MobilityNetworkSizeHere("bot", pos)
-		size = math.max(vehsize, botsize)
-	elseif unitTable[unitName].airRange > 0 then
-		return unitName
-	elseif  unitTable[unitName].submergedRange > 0 then
-		size = ai.maphandler:MobilityNetworkSizeHere("sub", pos)
-	end
-	EchoDebug("network size here" .. size .. " minimum " .. minDefenseNetworkSize)
-	if size < minDefenseNetworkSize then
+local function GroundDefenseIfNeeded(unitName, builder)
+	if not needGroundDefense then
 		return DummyUnitName
 	else
 		return unitName
 	end
 end
 
-local function CheckAreaLimitDefense(unitName, builder)
-	EchoDebug(unitName)
-	unitName = CheckDefenseLocalization(unitName, builder)
-	if unitName == DummyUnitName then return DummyUnitName end
-	EchoDebug("area checking " .. unitName .. " for defense")
-	local range = math.max(unitTable[unitName].groundRange, unitTable[unitName].airRange, unitTable[unitName].submergedRange)
-	if range == 0 then
-		EchoDebug(unitName .. " is not a weapon, cannot CheckAreaLimitDefense")
-		return DummyUnitName
-	else
-		range = math.floor(range * 0.9)
-		return CheckAreaLimit(unitName, builder, 1, range)
-	end
-end
-
-local function CheckAreaLimitRadar(unitName, builder)
-	if unitName == DummyUnitName then return DummyUnitName end
-	local rad = unitTable[unitName].radarRadius
-	if rad == 0 then
-		EchoDebug(unitName .. " is not radar, cannot CheckAreaLimitRadar")
-		return DummyUnitName
-	else
-		-- look for radar ranges and don't build this radar if it's too close to another
-		local pos = builder:GetPosition()
-		local ownUnits = game:GetFriendlies()
-		for _, u in pairs(ownUnits) do
-			local urad = unitTable[u:Name()].radarRadius
-			if urad > 0 and u:Name() ~= "armcom" and u:Name() ~= "corcom" then
-				local upos = u:GetPosition()
-				if distance(pos, upos) < (urad + rad) * 0.67 then
-					return DummyUnitName
-				end
-			end
-		end
-		return unitName
-	end
-end
-
-local function CheckAreaLimitSonar(unitName, builder)
-	if unitName == DummyUnitName then return DummyUnitName end
-	local rad = unitTable[unitName].sonarRadius
-	if rad == 0 then
-		EchoDebug(unitName .. " is not sonar, cannot CheckAreaLimitSonar")
-		return DummyUnitName
-	else
-		-- look for radar ranges and don't build this radar if it's too close to another
-		local pos = builder:GetPosition()
-		local ownUnits = game:GetFriendlies()
-		for _, u in pairs(ownUnits) do
-			local urad = unitTable[u:Name()].sonarRadius
-			if urad > 0 then
-				local upos = u:GetPosition()
-				if distance(pos, upos) < (urad + rad) * 0.67 then
-					return DummyUnitName
-				end
-			end
-		end
-		return unitName
-	end
-end
-
--- build if in weapon range of an enemy factory, 10 enemy buildings, or 25 enemies
-local function CheckBombard(unitName, builder)
-	local pos = builder:GetPosition()
-	if ai.targethandler:IsBombardPosition(pos, unitName) then
-		return unitName
-	else
-		return DummyUnitName
-	end
-end
-
-local function BuildWithNearbyFactory(unitName, builder)
-	-- this is special case, it means the unit will not be built anyway
-	if unitName == DummyUnitName then
-		return unitName
-	end
-	local pos = builder:GetPosition()
-	local ownUnits = game:GetFriendlies()
-	local unitCount = 0
-	for _, u in pairs(ownUnits) do
-		local ut = unitTable[u:Name()]
-		if ut.buildOptions ~= nil and ut.isBuilding then
-			local upos = u:GetPosition()
-			if distance(pos, upos) < 390 then
-				return unitName
-			end
-		end
-	end
-	return DummyUnitName
-end
-
-function BuildShield(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+function BuildShield()
 	if IsShieldNeeded() then
 		local unitName = ""
 		if ai.mySide == CORESideName then
@@ -1817,15 +1392,12 @@ function BuildShield(self)
 		else
 			unitName = "armgate"
 		end
-		return DummyUnitName
+		return unitName
 	end
 	return DummyUnitName
 end
 
-function BuildAntinuke(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+function BuildAntinuke()
 	if IsAntinukeNeeded() then
 		local unitName = ""
 		if ai.mySide == CORESideName then
@@ -1833,83 +1405,58 @@ function BuildAntinuke(self)
 		else
 			unitName = "armamd"
 		end
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
+		return unitName
 	end
 	return DummyUnitName
 end
 
-function BuildNuke(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+function BuildNuke()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corsilo"
 	else
 		unitName = "armsilo"
 	end
-	local unit = self.unit:Internal()
-	return CheckBombard(unitName, unit)
+	return unitName
 end
 
-function BuildNukeIfNeeded(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+function BuildNukeIfNeeded()
 	if IsNukeNeeded() then
-		return BuildNuke(self)
+		return BuildNuke()
 	end
 end
 
-local function AreaLimit_Lvl1Plasma(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildLvl1Plasma()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corpun"
 	else
 		unitName = "armguard"
 	end
-	local unit = self.unit:Internal()
-	return CheckBombard(unitName, unit)
+	return unitName
 end
 
-local function AreaLimit_Lvl2Plasma(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildLvl2Plasma()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "cortoast"
 	else
 		unitName = "armamb"
 	end
-	local unit = self.unit:Internal()
-	return CheckBombard(unitName, unit)
+	return unitName
 end
 
-local function AreaLimit_HeavyPlasma(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildHeavyPlasma()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corint"
 	else
 		unitName = "armbrtha"
 	end
-	unitName = BuildWithLimitedNumber(unitName, heavyPlasmaLimit)
-	if unitName ~= DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckBombard(unitName, unit)
-	else
-		return DummyUnitName
-	end
+	return BuildWithLimitedNumber(unitName, heavyPlasmaLimit)
 end
 
-local function AreaLimit_LLT(self)
+local function BuildLLT(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1920,10 +1467,10 @@ local function AreaLimit_LLT(self)
 		unitName = "armllt"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return GroundDefenseIfNeeded(unitName, unit)
 end
 
-local function AreaLimit_SpecialLT(self)
+local function BuildSpecialLT(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1943,10 +1490,10 @@ local function AreaLimit_SpecialLT(self)
 		end
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return GroundDefenseIfNeeded(unitName, unit)
 end
 
-local function AreaLimit_SpecialLTOnly(self)
+local function BuildSpecialLTOnly(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1957,10 +1504,10 @@ local function AreaLimit_SpecialLTOnly(self)
 		unitName = "tawf001"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return GroundDefenseIfNeeded(unitName, unit)
 end
 
-local function AreaLimit_FloatHLT(self)
+local function BuildFloatHLT(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1971,10 +1518,10 @@ local function AreaLimit_FloatHLT(self)
 		unitName = "armfhlt"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return GroundDefenseIfNeeded(unitName, unit)
 end
 
-local function AreaLimit_HLT(self)
+local function BuildHLT(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1985,10 +1532,10 @@ local function AreaLimit_HLT(self)
 		unitName = "armhlt"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return GroundDefenseIfNeeded(unitName, unit)
 end
 
-local function AreaLimit_Lvl2PopUp(self)
+local function BuildLvl2PopUp(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -1999,10 +1546,10 @@ local function AreaLimit_Lvl2PopUp(self)
 		unitName = "armpb"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return GroundDefenseIfNeeded(unitName, unit)
 end
 
-local function AreaLimit_Tachyon(self)
+local function BuildTachyon(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2013,10 +1560,10 @@ local function AreaLimit_Tachyon(self)
 		unitName = "armanni"
 	end
 	local unit = self.unit:Internal()
-	return CheckAreaLimitDefense(unitName, unit)
+	return GroundDefenseIfNeeded(unitName, unit)
 end
 
-local function AreaLimit_DepthCharge(self)
+local function BuildDepthCharge(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2026,17 +1573,11 @@ local function AreaLimit_DepthCharge(self)
 	else
 		unitName = "armdl"
 	end
-	unitName = BuildTorpedoIfNeeded(unitName)
-	if unitName ~= DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
-	else
-		return DummyUnitName
-	end
+	return BuildTorpedoIfNeeded(unitName)
 end
 
 
-local function AreaLimit_LightTorpedo(self)
+local function BuildLightTorpedo(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2046,16 +1587,10 @@ local function AreaLimit_LightTorpedo(self)
 	else
 		unitName = "armtl"
 	end
-	unitName = BuildTorpedoIfNeeded(unitName)
-	if unitName ~= DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
-	else
-		return DummyUnitName
-	end
+	return BuildTorpedoIfNeeded(unitName)
 end
 
-local function AreaLimit_HeavyTorpedo(self)
+local function BuildHeavyTorpedo(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2065,18 +1600,12 @@ local function AreaLimit_HeavyTorpedo(self)
 	else
 		unitName = "armatl"
 	end
-	unitName = BuildTorpedoIfNeeded(unitName)
-	if unitName ~= DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
-	else
-		return DummyUnitName
-	end
+	return BuildTorpedoIfNeeded(unitName)
 end
 
 
 -- build AA in area only if there's not enough of it there already
-local function AreaLimit_LightAA(self)
+local function BuildLightAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2086,16 +1615,10 @@ local function AreaLimit_LightAA(self)
 	else
 		unitName = BuildAAIfNeeded("armrl")
 	end
-	-- our unit type and coords
-	if unitName == DummyUnitName then
-		return unitName
-	else
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
-	end
+	return unitName
 end
 
-local function AreaLimit_FloatLightAA(self)
+local function BuildFloatLightAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2105,16 +1628,10 @@ local function AreaLimit_FloatLightAA(self)
 	else
 		unitName = BuildAAIfNeeded("armfrt")
 	end
-	-- our unit type and coords
-	if unitName == DummyUnitName then
-		return unitName
-	else
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
-	end
+	return unitName
 end
 
-local function AreaLimit_MediumAA(self)
+local function BuildMediumAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2124,16 +1641,10 @@ local function AreaLimit_MediumAA(self)
 	else
 		unitName = BuildAAIfNeeded("packo")
 	end
-	-- our unit type and coords
-	if unitName == DummyUnitName then
-		return unitName
-	else
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
-	end
+	return unitName
 end
 
-local function AreaLimit_HeavyishAA(self)
+local function BuildHeavyishAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2143,16 +1654,10 @@ local function AreaLimit_HeavyishAA(self)
 	else
 		unitName = BuildAAIfNeeded("armcir")
 	end
-	-- our unit type and coords
-	if unitName == DummyUnitName then
-		return unitName
-	else
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
-	end
+	return unitName
 end
 
-local function AreaLimit_HeavyAA(self)
+local function BuildHeavyAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2162,16 +1667,10 @@ local function AreaLimit_HeavyAA(self)
 	else
 		unitName = BuildAAIfNeeded("armflak")
 	end
-	-- our unit type and coords
-	if unitName == DummyUnitName then
-		return unitName
-	else
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
-	end
+	return unitName
 end
 
-local function AreaLimit_FloatHeavyAA(self)
+local function BuildFloatHeavyAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2181,16 +1680,10 @@ local function AreaLimit_FloatHeavyAA(self)
 	else
 		unitName = BuildAAIfNeeded("armfflak")
 	end
-	-- our unit type and coords
-	if unitName == DummyUnitName then
-		return unitName
-	else
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
-	end
+	return unitName
 end
 
-local function AreaLimit_ExtraHeavyAA(self)
+local function BuildExtraHeavyAA(self)
 	if self.unit == nil then
 		return DummyUnitName
 	end
@@ -2200,19 +1693,10 @@ local function AreaLimit_ExtraHeavyAA(self)
 	else
 		unitName = BuildAAIfNeeded("mercury")
 	end
-	-- our unit type and coords
-	if unitName == DummyUnitName then
-		return unitName
-	else
-		local unit = self.unit:Internal()
-		return CheckAreaLimitDefense(unitName, unit)
-	end
+	return unitName
 end
 
-local function AreaLimit_Sonar(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildSonar()
 	if not IsTorpedoNeeded() then return DummyUnitName end
 	local unitName = ""
 	if ai.mySide == CORESideName then
@@ -2220,19 +1704,10 @@ local function AreaLimit_Sonar(self)
 	else
 		unitName = "armsonar"
 	end
-	unitName = BuildWithLimitedNumber(unitName, 1)
-	if unitName == DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitSonar(unitName, unit)
-	else
-		return unitName
-	end
+	return unitName
 end
 
-local function AreaLimit_AdvancedSonar(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildAdvancedSonar()
 	if not IsTorpedoNeeded() then return DummyUnitName end
 	local unitName = ""
 	if ai.mySide == CORESideName then
@@ -2240,71 +1715,38 @@ local function AreaLimit_AdvancedSonar(self)
 	else
 		unitName = "armason"
 	end
-	unitName = BuildWithLimitedNumber(unitName, 1)
-	if unitName == DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitSonar(unitName, unit)
-	else
-		return unitName
-	end
+	return unitName
 end
 
 
-local function AreaLimit_Radar(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildRadar()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corrad"
 	else
 		unitName = "armrad"
 	end
-	unitName = BuildWithLimitedNumber(unitName, 1)
-	if unitName == DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitRadar(unitName, unit)
-	else
-		return unitName
-	end
+	return unitName
 end
 
-local function AreaLimit_FloatRadar(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildFloatRadar()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corfrad"
 	else
 		unitName = "armfrad"
 	end
-	unitName = BuildWithLimitedNumber(unitName, 1)
-	if unitName == DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitRadar(unitName, unit)
-	else
-		return unitName
-	end
+	return unitName
 end
 
-local function AreaLimit_AdvancedRadar(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
+local function BuildAdvancedRadar()
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corarad"
 	else
 		unitName = "armarad"
 	end
-	unitName = BuildWithLimitedNumber(unitName, 1)
-	if unitName == DummyUnitName then
-		local unit = self.unit:Internal()
-		return CheckAreaLimitRadar(unitName, unit)
-	else
-		return unitName
-	end
+	return unitName
 end
 
 local function NanoTurret()
@@ -2315,17 +1757,6 @@ local function NanoTurret()
 		unitName = "armnanotc"
 	end
 	return BuildWithLimitedNumber(unitName, ai.factories * 12)
-end
-
-local function NanoTurretNearFactory(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = NanoTurret()
-
-	local unit = self.unit:Internal()
-	-- check that we have at least a bit of free metal to use on expansion, and build next to factory
-	return BuildWithNearbyFactory(unitName, unit)
 end
 
 local function AirRepairPadIfNeeded()
@@ -2406,72 +1837,6 @@ local function CheckMySideIfNeeded()
 	end
 end
 
-local function Lvl1AirPlant()
-	if ai.mySide == CORESideName then
-		return "corap"
-	else
-		return"armap"
-	end
-end
-
-local function Lvl1BotLab()
-	if ai.mySide == CORESideName then
-		return "corlab"
-	else
-		return"armlab"
-	end
-end
-
-local function Lvl1VehPlant()
-	if ai.mySide == CORESideName then
-		return "corvp"
-	else
-		return "armvp"
-	end
-end
-
-local function Lvl1ShipYard()
-	if ai.mySide == CORESideName then
-		return "corsy"
-	else
-		return "armsy"
-	end
-end
-
-local function AmphibiousComplex()
-	if ai.mySide == CORESideName then
-		return "csubpen"
-	else
-		return "asubpen"
-	end
-end
-
-local function HoverPlatformIfNeeded()
-	local maptype = MapLandType()
-	if maptype == "hov" or ai.mobRating["hov"] > ai.mobRating["veh"] or ai.mobRating["hov"] > ai.mobRating["bot"] or ai.mobRating["hov"] > ai.mobRating["amp"] then
-		if ai.mySide == CORESideName then
-			return "corhp"
-		else
-			return "armhp"
-		end
-	else
-		return DummyUnitName
-	end
-end
-
-local function FloatHoverPlatformIfNeeded()
-	local maptype = MapLandType()
-	if maptype == "hov" or ai.mobRating["hov"] > ai.mobRating["veh"] or ai.mobRating["hov"] > ai.mobRating["bot"] or ai.mobRating["hov"] > ai.mobRating["amp"] then
-		if ai.mySide == CORESideName then
-			return "corfhp"
-		else
-			return "armfhp"
-		end
-	else
-		return DummyUnitName
-	end
-end
-
 local function CheckForOwnUnit(name)
 	local ownUnits = game:GetFriendlies()
 	for _, u in pairs(ownUnits) do
@@ -2484,71 +1849,6 @@ local function CheckForOwnUnit(name)
 		end
 	end
 	return false
-end
-
-local function CommanderFactory1()
-	local r = 2
-	local maptype = MapLandType()
-	-- if it's a bot map, do not build vehicle factory
-	if maptype == "air" then
-		-- build only aircraft plant and then maybe shipyard
-		r = 0
-		if CheckForOwnUnit(Lvl1AirPlant()) then
-			if ai.mobRating["veh"] > mobilityRatingFloor or ai.mobRating["hov"] > mobilityRatingFloor or ai.mobRating["amp"] > mobilityRatingFloor then
-				r = 2
-			elseif ai.mobRating["bot"] > mobilityRatingFloor then
-				r = 1
-			elseif ai.mobRating["shp"] > mobilityRatingFloor or ai.mobRating["sub"] > mobilityRatingFloor then
-				r = 3
-			end
-		end
-	elseif maptype == "bot" then
-		-- build lab first, then maybe aircraft plant or shipyard
-		r = 1
-		if CheckForOwnUnit(Lvl1BotLab()) then
-			if ai.mobRating["veh"] > mobilityRatingFloor or ai.mobRating["hov"] > mobilityRatingFloor or ai.mobRating["amp"] > mobilityRatingFloor then
-				r = 2
-			elseif ai.mobRating["shp"] > mobilityRatingFloor or ai.mobRating["sub"] > mobilityRatingFloor then
-				r = 3
-			else
-				r = 0
-			end
-		end
-	elseif maptype == "veh" or maptype == "amp" or maptype == "hov" then
-		-- build vehicle plant first, then maybe lab or aircraft plant
-		r = 2
-		if CheckForOwnUnit(Lvl1VehPlant()) then
-			if ai.mobRating["bot"] > mobilityRatingFloor then
-				r = 1
-			elseif ai.mobRating["shp"] > mobilityRatingFloor or ai.mobRating["sub"] > mobilityRatingFloor then
-				r = 3
-			else
-				r = 0
-			end
-		end
-	elseif maptype == "shp" or maptype == "sub" then
-		-- build a shipyard
-		r = 3
-		if CheckForOwnUnit(Lvl1ShipYard()) then
-			if ai.mobRating["veh"] > mobilityRatingFloor or ai.mobRating["hov"] > mobilityRatingFloor or ai.mobRating["amp"] > mobilityRatingFloor then
-				r = 2
-			elseif ai.mobRating["bot"] > mobilityRatingFloor then
-				r = 1
-			else
-				r = 0
-			end
-		end
-	end
-	if r == 0 then
-		ret = Lvl1AirPlant()
-	elseif r == 1 then
-		ret = Lvl1BotLab()
-	elseif r == 2 then
-		ret = Lvl1VehPlant()
-	elseif r == 3 then
-		ret = Lvl1ShipYard()
-	end
-	return BuildWithLimitedNumber(ret, 1)
 end
 
 local function BuildAppropriateFactory(self)
@@ -2695,123 +1995,126 @@ end
 -- end of functions
 
 
+-- mobile construction units:
+
 local anyCommander = {
 	CheckMySideIfNeeded,
 	BuildMex,
 	BuildAppropriateFactory,
 	WindSolar,
 	TidalIfTidal,
-	AreaLimit_LLT,
-	AreaLimit_Radar,
-	AreaLimit_Sonar,
-	AreaLimit_LightAA,
-	AreaLimit_DepthCharge,
+	BuildLLT,
+	BuildRadar,
+	BuildSonar,
+	BuildLightAA,
+	BuildDepthCharge,
 	DoSomethingForTheEconomy,
 }
 
 local anyConUnit = {
 	BuildAppropriateFactory,
 	NanoTurret,
-	AreaLimit_LLT,
-	AreaLimit_SpecialLT,
-	AreaLimit_MediumAA,
-	AreaLimit_Radar,
+	BuildLLT,
+	BuildSpecialLT,
+	BuildMediumAA,
+	BuildRadar,
 	WindSolar,
 	SolarAdv,
 	BuildGeo,
-	AreaLimit_HLT,
-	AreaLimit_Lvl1Plasma,
+	BuildHLT,
+	BuildLvl1Plasma,
 	DoSomethingForTheEconomy,
-	AreaLimit_HeavyishAA,
+	BuildHeavyishAA,
 	BuildMex,
 }
 
 local anyConAmphibious = {
 	BuildGeo,
-	AreaLimit_SpecialLT,
-	AreaLimit_MediumAA,
-	AreaLimit_Radar,
+	BuildSpecialLT,
+	BuildMediumAA,
+	BuildRadar,
 	WindSolar,
 	SolarAdv,
 	FactoryOrNano,
-	AreaLimit_HLT,
-	AreaLimit_Lvl1Plasma,
+	BuildHLT,
+	BuildLvl1Plasma,
 	DoSomethingForTheEconomy,
-	AreaLimit_HeavyishAA,
+	BuildHeavyishAA,
 	BuildMex,
-	AreaLimit_LightTorpedo,
-	AreaLimit_FloatLightAA,
-	AreaLimit_Sonar,
-	AreaLimit_LightTorpedo,
-	AreaLimit_FloatRadar,
+	BuildLightTorpedo,
+	BuildFloatLightAA,
+	BuildSonar,
+	BuildLightTorpedo,
+	BuildFloatRadar,
 	TidalIfTidal,
-	AreaLimit_FloatHLT,
+	BuildFloatHLT,
 	DoSomethingForTheEconomy,
-	AreaLimit_DepthCharge,
+	BuildDepthCharge,
 }
 
 local anyConShip = {
 	BuildUWMex,
-	AreaLimit_FloatLightAA,
-	AreaLimit_Sonar,
-	AreaLimit_LightTorpedo,
-	AreaLimit_FloatRadar,
+	BuildFloatLightAA,
+	BuildSonar,
+	BuildLightTorpedo,
+	BuildFloatRadar,
 	TidalIfTidal,
 	BuildAppropriateFactory,
-	AreaLimit_FloatHLT,
+	BuildFloatHLT,
 	DoSomethingForTheEconomy,
-	AreaLimit_DepthCharge,
+	BuildDepthCharge,
 }
 
 local anyAdvConUnit = {
-	BuildMohoGeo,
-	BuildMohoMex,
-	AreaLimit_Lvl2PopUp,
-	AreaLimit_HeavyAA,
+	BuildLvl2PopUp,
+	BuildHeavyAA,
 	BuildAntinuke,
-	AreaLimit_Lvl2Plasma,
-	AreaLimit_Tachyon,
-	AreaLimit_HeavyPlasma,
+	BuildLvl2Plasma,
+	BuildTachyon,
+	BuildHeavyPlasma,
 	BuildFusion,
-	AreaLimit_AdvancedRadar,
+	BuildAdvancedRadar,
 	BuildAppropriateFactory,
 	BuildNukeIfNeeded,
-	AreaLimit_ExtraHeavyAA,
+	BuildExtraHeavyAA,
+	BuildMohoGeo,
+	BuildMohoMex,
+	DoSomethingAdvancedForTheEconomy,
 }
 
 local anyAdvConSub = {
 	BuildUWMohoMex,
-	AreaLimit_FloatHeavyAA,
+	BuildFloatHeavyAA,
 	BuildUWFusion,
-	AreaLimit_AdvancedSonar,
-	AreaLimit_HeavyTorpedo,
+	BuildAdvancedSonar,
+	BuildHeavyTorpedo,
 }
 
 local anyNavalEngineer = {
-	AreaLimit_FloatHLT,
-	AreaLimit_FloatLightAA,
+	BuildFloatHLT,
+	BuildFloatLightAA,
 	BuildAppropriateFactory,
 	Lvl1ShipBattle,
-	AreaLimit_FloatRadar,
+	BuildFloatRadar,
 	TidalIfTidal,
 	BuildUWMex,
-	AreaLimit_Sonar,
+	BuildSonar,
 	Lvl1ShipRaider,
 	Conship,
 	ScoutShip,
-	AreaLimit_LightTorpedo,
+	BuildLightTorpedo,
 }
 
 local anyCombatEngineer = {
 	BuildAppropriateFactory,
 	NanoTurret,
 	Solar,
-	AreaLimit_MediumAA,
-	AreaLimit_AdvancedRadar,
-	AreaLimit_Lvl2PopUp,
-	AreaLimit_HeavyAA,
-	AreaLimit_SpecialLTOnly,
-	AreaLimit_Lvl2Plasma,
+	BuildMediumAA,
+	BuildAdvancedRadar,
+	BuildLvl2PopUp,
+	BuildHeavyAA,
+	BuildSpecialLTOnly,
+	BuildLvl2Plasma,
 	ConCoreBotArmVehicle,
 	Lvl2BotCorRaiderArmBattle,
 	Lvl1AABot,
@@ -2819,6 +2122,9 @@ local anyCombatEngineer = {
 	Lvl1ShipDestroyerOnly,
 	BuildMex,
 }
+
+
+-- factories:
 
 local anyLvl1AirPlant = {
 	ScoutAir,
@@ -2989,6 +2295,7 @@ outmodedTaskqueues = {
 	armavp = anyOutmodedLvl2VehPlant,
 }
 
+-- finally, the taskqueue definitions
 taskqueues = {
 	corcom = anyCommander,
 	armcom = anyCommander,

@@ -58,7 +58,7 @@ local function LandWaterFilter(builder, value)
 	if value == DummyUnitName then return DummyUnitName end
 	EchoDebug(value .. " (before landwater filter)")
 	if value == "armmex" or value == "cormex" or value == "armmohomex" or value == "cormohomex" or value == "armsy" or value == "corsy" then
-		-- leave mexes alone, these are dealt with at the time of finding a spot for them
+		-- leave these alone, these are dealt with at the time of finding a spot for them
 		return value
 	end
 	local bmtype = ai.maphandler:MobilityOfUnit(builder)
@@ -151,13 +151,18 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 		elseif unitTable[value].isWeapon then
 			-- defense
 			EchoDebug("  defense")
-			if value == "corint" or value == "armbrtha" or value == "corsilo" or value == "armsilo" then
+			if bigPlasmaList[value] or nukeList[value] then
 				-- long-range plasma and nukes aren't really defense
 				if metalTooLow or energyTooLow or Metal.income < 35 or ai.factories == 0 or notEnoughCombats then
 					value = DummyUnitName
 				end
+			elseif littlePlasmaList[value] then
+				-- plasma turrets need units to back them up
+				if metalTooLow or energyTooLow or Metal.income < 12 or ai.factories == 0 or notEnoughCombats then
+					value = DummyUnitName
+				end
 			else
-				if Metal.income > (unitTable[value].metalCost / 12) + 13 or metalTooLow or Metal.income < (unitTable[value].metalCost / 38) + 2 or energyTooLow or ai.factories == 0 then
+				if metalTooLow or Metal.income < (unitTable[value].metalCost / 35) + 2 or energyTooLow or ai.factories == 0 then
 					value = DummyUnitName
 				end
 			end
@@ -182,8 +187,6 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 			EchoDebug("  construction unit")
 			if (ai.totalCons[value] == nil or ai.totalCons[value] == 0) and metalOkay and energyOkay and (self.outmodedFactory or not farTooFewCombats) then
 				-- build at least one of each type
-			elseif advConList[value] and (ai.totalCons[value] == 0 or ai.totalCons[value] == 1) and metalOkay and energyOkay then
-				-- build at least two advanced cons
 			else
 				local airfactory = false
 				for i, name in pairs(airFacList) do
@@ -351,6 +354,137 @@ function TaskQueueBehaviour:GetHelp(value)
 	return DummyUnitName
 end
 
+function TaskQueueBehaviour:LocationFilter(utype, value)
+	if unitTable[self.name].isBuilding then return utype, value end -- factories don't need to look for build locations
+	local p
+	local builder = self.unit:Internal()
+	if unitTable[value].extractsMetal > 0 then
+		-- metal extractor
+		local uw
+		p, uw = ai.maphandler:ClosestFreeSpot(utype, builder)
+		if p ~= nil then
+			EchoDebug("extractor spot: " .. p.x .. ", " .. p.z)
+			if uw then
+				EchoDebug("underwater extractor " .. uw:Name())
+				utype = uw
+			end
+		else
+			utype = nil
+		end
+	elseif geothermalPlant[value] then
+		-- geothermal
+		local builderPos = builder:GetPosition()
+		p = map:FindClosestBuildSite(utype, builderPos, 5000, 0)
+		if p ~= nil then
+			-- don't build on geo spots that units can't get to
+			if ai.maphandler:UnitCanGoHere(builder, p) then
+				if value == "cmgeo" or value == "amgeo" then
+					-- don't build moho geos next to factories
+					if ai.buildsitehandler:ClosestHighestLevelFactory(builder, 500) ~= nil then
+						if value == "cmgeo" then
+							if ai.targethandler:IsBombardPosition(p, "corbhmth") then
+								-- instead build geothermal plasma battery if it's a good spot for it
+								value = "corbhmth"
+								utype = game:GetTypeByName(value)
+							end
+						else
+							-- instead build a safe geothermal
+							value = "armgmm"
+							utype = game:GetTypeByName(value)
+						end
+					end
+				end
+			else
+				utype = nil
+			end
+		end
+	elseif nanoTurretList[value] then
+		-- build nano turrets next to a factory near you
+		EchoDebug("looking for factory for nano")
+		local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 5000)
+		if factoryPos ~= nil then
+			EchoDebug("found factory")
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype, 10)
+			if p ~= nil then
+				local fdist = distance(factoryPos, p)
+				if fdist > 400 then
+					EchoDebug("build spot near factory not within build range")
+					utype = nil
+				end
+			else
+				EchoDebug("no spot near factory found")
+				utype = nil
+			end
+		else
+			EchoDebug("no factory found")
+			utype = nil
+		end
+	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
+		-- build factories next to a nano turret near you
+		EchoDebug("looking for nano to build factory next to")
+		local nano = ai.buildsitehandler:ClosestNanoTurret(builder, 3000)
+		if nano ~= nil then
+			local nanoPos = nano:GetPosition()
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, nanoPos, utype, 15)
+		end
+		if p == nil then
+			EchoDebug("no nano found for factory, trying a turtle position")
+			local turtlePos = ai.turtlehandler:MostTurtled(builder)
+			if turtlePos then
+				p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 15)
+			else
+				EchoDebug("no turtle position found, building wherever")
+				local builderPos = builder:GetPosition()
+				p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype, 15)
+			end
+		end
+	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or unitTable[value].radarRadius ~= 0 or unitTable[value].sonarRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value] and not littlePlasmaList[value]) then
+		-- shields, defense, antinukes, jammer towers, radar, and sonar
+		EchoDebug("looking for least turtled position")
+		local turtlePos = ai.turtlehandler:LeastTurtled(builder, value)
+		if turtlePos then
+			EchoDebug("found turtle position")
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 10)
+			if p == nil then
+				EchoDebug("did NOT find build spot near turtle position")
+				utype = nil
+			end
+		else
+			utype = nil
+		end
+	elseif unitTable[value].isBuilding then
+		-- buildings in defended positions
+		local bombard = false
+		if nukeList[value] or bigPlasmaList[value] or littlePlasmaList[value] then
+			bombard = value
+		end
+		local turtlePos = ai.turtlehandler:MostTurtled(builder, bombard)
+		if turtlePos then
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 10)
+		end
+		if p == nil then
+			if bombard then
+				utype = nil
+			else
+				-- shall new placing be used?
+				if unitsForNewPlacing[value] then
+					-- game:SendToConsole(utype:Name() .. " new placing")
+					local builderPos = builder:GetPosition()
+					p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype, unitsForNewPlacing[value])
+				end
+			end
+		end
+	else
+		-- shall new placing be used?
+		if unitsForNewPlacing[value] then
+			-- game:SendToConsole(utype:Name() .. " new placing")
+			local builderPos = builder:GetPosition()
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype, unitsForNewPlacing[value])
+		end
+	end
+	return utype, value, p
+end
+
 function TaskQueueBehaviour:GetQueue()
 	self.unit:ElectBehaviour()
 	-- fall back to only making enough construction units if a level 2 factory exists
@@ -444,12 +578,11 @@ function TaskQueueWakeup:wakeup()
 	game:sendtoconsole("advancing queue from sleep1")
 	self.tqb:ProgressQueue()
 end
+
 function TaskQueueBehaviour:ProgressQueue()
 	self.lastWatchdogCheck = game:Frame()
 	self.progress = false
 	self.reclaiming = false
-	local success = false
-	local p = false
 	if self.queue ~= nil then
 		local idx, val = next(self.queue,self.idx)
 		self.idx = idx
@@ -462,37 +595,13 @@ function TaskQueueBehaviour:ProgressQueue()
 		local utype = nil
 		local value = val
 
-
 		-- evaluate any functions here, they may return tables
 		while type(value) == "function" do
 			value = value(self)
 		end
 
 		if type(value) == "table" then
-			local action = value.action
-			if action == "wait" then
-				t = TaskQueueWakeup(self)
-				tqb = self
-				ai.sleep:Wait({ wakeup = function() tqb:ProgressQueue() end, },value.frames)
-				self.currentProject = "paused"
-				return
-			end
-			-- reclaim 1 wreck - the one which happens to be the first
-			if action == "cleanup" then
-				wrecks = map:GetMapFeaturesAt(self.unit:Internal():GetPosition(), 900)
-				-- we only want to reclaim the first one
-				self.reclaimLeft = value.frames
-				for _, wreck in pairs(wrecks) do
-					self.unit:Internal():Reclaim(wreck)
-					self.reclaiming = true
-					self.progress = true
-					break
-				end
-				self.currentProject = "reclaiming"
-				if not self.reclaiming then
-					self:ProgressQueue()
-				end
-			end
+			-- not using this
 		else
 			local builder = self.unit:Internal()
 			if not self.released then
@@ -506,7 +615,7 @@ function TaskQueueBehaviour:ProgressQueue()
 				value = self:CategoryEconFilter(value)
 				value = self:GetHelp(value)
 				self.released = false
-				EchoDebug(value .. " after all filters")
+				EchoDebug(value .. " after filters")
 			end
 			if value ~= DummyUnitName then
 				if unitTable[self.name].isBuilding and not self.outmodedTechLevel then
@@ -519,151 +628,29 @@ function TaskQueueBehaviour:ProgressQueue()
 					utype = nil
 					value = "nil"
 				end
-
-				success = false
+				local success = false
 				if utype ~= nil then
-					local unit = builder
-					if unit:CanBuild(utype) then
-						if unitTable[value].extractsMetal > 0 then
-							-- find a free spot!
-							local p, uw = ai.maphandler:ClosestFreeSpot(utype,unit)
-							if p ~= nil then
-								EchoDebug("extractor spot: " .. p.x .. ", " .. p.z)
-								if uw then
-									EchoDebug("underwater extractor " .. uw:Name())
-									utype = uw
-								end
-								self.target = p
-								success = self.unit:Internal():Build(utype,p)
-								self.progress = not success
-							else
-								self.progress = true
-							end
-						elseif geothermalPlant[value] then
-							-- geothermal
-							local builderPos = unit:GetPosition()
-							local p = map:FindClosestBuildSite(utype, builderPos, 5000, 0)
-							if p ~= nil then
-								-- don't build on geo spots that units can't get to
-								if ai.maphandler:UnitCanGoHere(unit, p) then
-									if value == "cmgeo" or value == "amgeo" then
-										-- don't build moho geos next to factories
-										if BuildSiteHandler:ClosestHighestLevelFactory(unit, 500) ~= nil then
-											if value == "cmgeo" then
-												if ai.targethandler:IsBombardPosition(p, "corbhmth") then
-													-- instead build geothermal plasma battery if it's a good spot for it
-													value = "corbhmth"
-													utype = game:GetTypeByName(value)
-												end
-											else
-												-- instead build a safe geothermal
-												value = "armgmm"
-												utype = game:GetTypeByName(value)
-											end
-										end
-									end
-									success = self.unit:Internal():Build(utype, p)
-									self.progress = not success
-								else
-									self.progress = true
-								end
-							end
-						elseif value == "cornanotc" or value == "armnanotc" then
-							-- build nano turrets next to a factory near you
-							EchoDebug("looking for factory for nano")
-							local factory = ai.buildsitehandler:ClosestHighestLevelFactory(unit, 5000)
-							if factory ~= nil then
-								EchoDebug("found factory")
-								local p = ai.buildsitehandler:ClosestBuildSpot(factory, utype, 10)
-								if p ~= nil then
-									local fpos = factory:GetPosition()
-									local fdist = distance(fpos, p)
-									if fdist < 400 then
-										EchoDebug("found spot near factory, building...")
-										success = self.unit:Internal():Build(utype, p)
-										self.progress = not success
-									else
-										EchoDebug("build spot near factory not within build range")
-									self.progress = true
-									end
-								else
-									EchoDebug("no spot near factory found")
-									self.progress = true
-								end
-							else
-								EchoDebug("no factory found")
-								self.progress = true
-							end
-						elseif value == "corgate" or value == "armgate" then
-							-- build plasma shields near factories or big energy plants
-							EchoDebug("looking for factory, fusion, or moho geo for shield")
-							local p = ai.buildsitehandler:ClosestDefenseBuildSpot(unit, 5000, utype, true)
-							if p ~= nil then
-								success = self.unit:Internal():Build(utype, p)
-								self.progress = not success
-							else
-								self.progress = true
-							end
-						elseif value == "corfmd" or value == "armamd" then
-							-- build nuke protection near factories or big energy plants
-							EchoDebug("looking for factory, fusion, or moho geo for antinuke")
-							local p = ai.buildsitehandler:ClosestDefenseBuildSpot(unit, 5000, utype, false)
-							if p ~= nil then
-								success = self.unit:Internal():Build(utype, p)
-								self.progress = not success
-							else
-								self.progress = true
-							end
-						elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
-							-- build factories next to a nano turret near you
-							EchoDebug("looking for nano for factory to build next to")
-							local nano = ai.buildsitehandler:ClosestNanoTurret(unit, 3000)
-							if nano ~= nil then
-								local p = ai.buildsitehandler:ClosestBuildSpot(factory, utype, 15)
-								-- local p = map:FindClosestBuildSite(utype, nano:GetPosition(), 40, 10)
-								if p ~= nil then
-									success = self.unit:Internal():Build(utype, p)
-									self.progress = not success
-								else
-									EchoDebug("no build site near nano found for factory, building wherever")
-									success = self.unit:Internal():Build(utype)
-									self.progress = not success
-								end
-							else
-								EchoDebug("no nano found for factory, building wherever")
-								local p = ai.buildsitehandler:ClosestBuildSpot(self.unit:Internal(), utype, 15)
-								if p ~= nil then
-									EchoDebug("building " .. value .. " with new placing")
-									success = self.unit:Internal():Build(utype, p)
-									self.progress = not success
-								else
-									success = self.unit:Internal():Build(utype)
-									self.progress = not success
-								end
-							end
-						else
-							EchoDebug("building...")
-							-- shall new placing be used?
-							if unitsForNewPlacing[utype:Name()] then
-								-- game:SendToConsole(utype:Name() .. " new placing")
-								local p = ai.buildsitehandler:ClosestBuildSpot(self.unit:Internal(), utype, unitsForNewPlacing[utype:Name()])
-								if p ~= nil then
-									EchoDebug("building " .. value .. " with new placing")
-									success = self.unit:Internal():Build(utype, p)
-									self.progress = not success
-								end
-							else
-								EchoDebug("building " .. value .. " with normal placing")
+					if self.unit:Internal():CanBuild(utype) then
+						local p
+						utype, value, p = self:LocationFilter(utype, value)
+						if utype ~= nil then
+							self.target = p
+							if p == nil then
 								success = self.unit:Internal():Build(utype)
-								self.progress = not success
+							else
+								success = self.unit:Internal():Build(utype, p)
 							end
+							self.progress = not success
+						else
+							self.progress = true
+							EchoDebug("location filter blocked " .. self.name .. " from building " .. value)
 						end
 					else
 						self.progress = true
-						game:SendToConsole("WARNING: bad taskque: "..self.unit:Internal():Name().." cannot build "..value)
+						game:SendToConsole("WARNING: bad taskque: "..self.name.." cannot build "..value)
 					end
 				else
-					game:SendToConsole(self.unit:Internal():Name() .. " cannot build:"..value..", couldnt grab the unit type from the engine")
+					game:SendToConsole(self.name .. " cannot build:"..value..", couldnt grab the unit type from the engine")
 					self.progress = true
 				end
 				if success then

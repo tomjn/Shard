@@ -148,6 +148,41 @@ end
 
 builderFactByMob = BuilderFactoriesByMobility()
 
+factoryExitSides = {
+	corap = 0,
+	armap = 0,
+	corlab = 2,
+	armlab = 2,
+	corvp = 1,
+	armvp = 1,
+	coralab = 3,
+	coravp = 1,
+	corhp = 4,
+	armhp = 4,
+	corfhp = 4,
+	armfhp = 4,
+	armalab = 2,
+	armavp = 2,
+	coraap = 0,
+	armaap = 0,
+	corsy = 4,
+	armsy = 4,
+	corasy = 4,
+	armasy = 4,
+	csubpen = 4,
+	csubpen = 4,
+	corgant = 1,
+	armshltx = 1,
+}
+
+littlePlasmaList = {
+	corpun = 1,
+	armguard = 1,
+	cortoast = 1,
+	armamb = 1,
+	corbhmth = 1,
+}
+
 -- these big energy plants will be shielded in addition to factories
 bigEnergyPlant = {
 	cmgeo = 1,
@@ -206,12 +241,18 @@ helpList = {
 -- things to defend other than factories and con units
 -- value is priority
 defendList = {
-	corfus = 2,
-	armfus = 2,
-	aafus = 3,
-	cafus = 3,
-	cmgeo = 2,
-	amgeo = 2,
+	aafus = 8,
+	cafus = 8,
+	corfus = 5,
+	armfus = 5,
+	cmgeo = 4,
+	amgeo = 4,
+	corgeo = 3,
+	armgeo = 3,
+	cormoho = 2,
+	armmoho = 2,
+	cormex = 1,
+	armmex = 1,
 }
 
 -- factories that can build advanced construction units (i.e. moho mines)
@@ -319,6 +360,16 @@ scoutList = {
 	"armawac",
 	"corpt",
 	"armpt",
+}
+
+antinukeList = {
+	corfmd = 1,
+	armamd = 1,
+}
+
+shieldList = {
+	corgate = 1,
+	armgate = 1,
 }
 
 commanderList = {
