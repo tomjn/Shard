@@ -41,8 +41,6 @@ function DefendHandler:UnitCreated(unit)
 		elseif un == "corcom" or un == "armcom" then
 			priority = priority + commanderPriority
 		end
-	elseif defendList[un] then
-		priority = priority + defendList[un]
 	end
 	if priority ~= 0 then
 		table.insert(self.defendees, {unit = unit, uid = unit:ID(), priority = priority, damaged = nil})
@@ -223,7 +221,8 @@ function DefendHandler:Danger(defendeeUnit)
 				defendee.priority = defendee.priority + damagedPriority
 				self.totalPriority = self.totalPriority + damagedPriority
 			end
-			break
+			return
 		end
 	end
+	-- self:AddDefendee()
 end

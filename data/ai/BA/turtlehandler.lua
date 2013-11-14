@@ -40,8 +40,8 @@ function TurtleHandler:UnitBuilt(unit)
 	if ut.isBuilding then
 		local upos = unit:GetPosition()
 		local uid = unit:ID()
-		if defendList[un] then
-			self:AddTurtle(upos, uid, defendList[un])
+		if turtleList[un] then
+			self:AddTurtle(upos, uid, turtleList[un])
 		elseif ut.buildOptions then
 			self:AddTurtle(upos, uid, factoryPriority + ut.techLevel)
 		elseif ut.isWeapon and not antinukeList[un] and not nukeList[un] and not bigPlasmaList[un] then
@@ -66,7 +66,7 @@ function TurtleHandler:UnitDead(unit)
 	if ut.isBuilding then
 		if ut.isWeapon or shieldList[un] then
 			self:RemoveShell(unit:ID())
-		elseif defendList[un] or ut.buildOptions then
+		elseif turtleList[un] or ut.buildOptions then
 			self:RemoveTurtle(unit:ID())
 		end
 	end

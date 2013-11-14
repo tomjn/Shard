@@ -238,9 +238,9 @@ helpList = {
 	armuwmme = 2,
 }
 
--- things to defend other than factories and con units
+-- things to defend with defense towers other than factories and con units
 -- value is priority
-defendList = {
+turtleList = {
 	aafus = 8,
 	cafus = 8,
 	corfus = 5,

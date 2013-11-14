@@ -47,31 +47,30 @@ function FactoryRegisterBehaviour:Init()
     self.id = self.unit:Internal():ID()
     self.position = self.unit:Internal():GetPosition() -- factories don't move
     self.level = unitTable[self.name].techLevel
-    --[[
+    ai.buildsitehandler:DontBuildHere(self.position, 100)
     if factoryExitSides[self.name] ~= nil and factoryExitSides[self.name] ~= 0 then
 	    -- inform the build handler not to build where the units exit
 	    local nobuild = api.Position()
 	    nobuild.x = self.position.x
 	    nobuild.z = self.position.z + 150
 	    nobuild.y = self.position.y
-	    ai.buildsitehandler:DontBuildHere(nobuild, 75)
+	    ai.buildsitehandler:DontBuildHere(nobuild, 150)
 	    if factoryExitSides[self.name] == 2 then
 	    	nobuild.z = self.position.z - 150
-	    	ai.buildsitehandler:DontBuildHere(nobuild, 75)
+	    	ai.buildsitehandler:DontBuildHere(nobuild, 150)
 	    elseif factoryExitSides[self.name] == 3 or factoryExitSides[self.name] == 4 then
 	    	nobuild.z = self.position.z
 	    	nobuild.x = self.position.x - 80
-	    	ai.buildsitehandler:DontBuildHere(nobuild, 40)
+	    	ai.buildsitehandler:DontBuildHere(nobuild, 80)
 	    	nobuild.x = self.position.x + 80
-	    	ai.buildsitehandler:DontBuildHere(nobuild, 40)
+	    	ai.buildsitehandler:DontBuildHere(nobuild, 80)
 	    	if factoryExitSides[self.name] == 4 then
 	    		nobuild.x = self.position.x
 	    		nobuild.z = self.position.z - 80
-	    		ai.buildsitehandler:DontBuildHere(nobuild, 40)
+	    		ai.buildsitehandler:DontBuildHere(nobuild, 80)
 	    	end
 	    end
 	end
-	]]--
 end
 
 function FactoryRegisterBehaviour:UnitCreated(unit)

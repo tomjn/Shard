@@ -18,10 +18,11 @@ local function GetEcon()
 	Metal = game:GetResourceByName("Metal")
 	extraEnergy = Energy.income - Energy.usage
 	extraMetal = Metal.income - Metal.usage
-	enoughMetalReserves = math.min(Metal.income * 2, Metal.capacity * 0.1)
-	lotsMetalReserves = math.min(Metal.income * 10, Metal.capacity * 0.5)
-	energyTooLow = Energy.reserves < Energy.income or Energy.income < 40
-	energyOkay = Energy.reserves >= Energy.income and Energy.income >= 40
+	local enoughMetalReserves = math.min(Metal.income * 2, Metal.capacity * 0.1)
+	local lotsMetalReserves = math.min(Metal.income * 10, Metal.capacity * 0.5)
+	local enoughEnergyReserves = math.min(Energy.income * 5, Energy.capacity * 0.5)
+	energyTooLow = Energy.reserves < enoughEnergyReserves or Energy.income < 40
+	energyOkay = Energy.reserves >= enoughEnergyReserves and Energy.income >= 40
 	metalTooLow = Metal.reserves < enoughMetalReserves
 	metalOkay = Metal.reserves >= enoughMetalReserves
 	metalBelowHalf = Metal.reserves < lotsMetalReserves
@@ -397,6 +398,8 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 			else
 				utype = nil
 			end
+		else
+			utype = nil
 		end
 	elseif nanoTurretList[value] then
 		-- build nano turrets next to a factory near you
@@ -404,7 +407,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 5000)
 		if factoryPos ~= nil then
 			EchoDebug("found factory")
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype, 10)
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
 			if p ~= nil then
 				local fdist = distance(factoryPos, p)
 				if fdist > 400 then
@@ -425,17 +428,17 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		local nano = ai.buildsitehandler:ClosestNanoTurret(builder, 3000)
 		if nano ~= nil then
 			local nanoPos = nano:GetPosition()
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, nanoPos, utype, 15)
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, nanoPos, utype)
 		end
 		if p == nil then
 			EchoDebug("no nano found for factory, trying a turtle position")
 			local turtlePos = ai.turtlehandler:MostTurtled(builder)
 			if turtlePos then
-				p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 15)
+				p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
 			else
 				EchoDebug("no turtle position found, building wherever")
 				local builderPos = builder:GetPosition()
-				p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype, 15)
+				p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 			end
 		end
 	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or unitTable[value].radarRadius ~= 0 or unitTable[value].sonarRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value] and not littlePlasmaList[value]) then
@@ -444,7 +447,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		local turtlePos = ai.turtlehandler:LeastTurtled(builder, value)
 		if turtlePos then
 			EchoDebug("found turtle position")
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 10)
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
 			if p == nil then
 				EchoDebug("did NOT find build spot near turtle position")
 				utype = nil
@@ -460,27 +463,19 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		end
 		local turtlePos = ai.turtlehandler:MostTurtled(builder, bombard)
 		if turtlePos then
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype, 10)
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
 		end
 		if p == nil then
 			if bombard then
 				utype = nil
 			else
-				-- shall new placing be used?
-				if unitsForNewPlacing[value] then
-					-- game:SendToConsole(utype:Name() .. " new placing")
-					local builderPos = builder:GetPosition()
-					p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype, unitsForNewPlacing[value])
-				end
+				local builderPos = builder:GetPosition()
+				p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 			end
 		end
 	else
-		-- shall new placing be used?
-		if unitsForNewPlacing[value] then
-			-- game:SendToConsole(utype:Name() .. " new placing")
-			local builderPos = builder:GetPosition()
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype, unitsForNewPlacing[value])
-		end
+		local builderPos = builder:GetPosition()
+		p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 	end
 	return utype, value, p
 end
