@@ -41,8 +41,6 @@ function DefendHandler:UnitCreated(unit)
 		elseif un == "corcom" or un == "armcom" then
 			priority = priority + commanderPriority
 		end
-	elseif defendList[un] then
-		priority = priority + defendList[un]
 	end
 	if priority ~= 0 then
 		table.insert(self.defendees, {unit = unit, uid = unit:ID(), priority = priority, damaged = nil})
@@ -52,7 +50,7 @@ function DefendHandler:UnitCreated(unit)
 end
 
 function DefendHandler:UnitDamaged(unit)
-	self:Danger(unit)
+
 end
 
 function DefendHandler:UnitDead(unit)
@@ -92,6 +90,9 @@ function DefendHandler:Update()
 					defendee.priority = defendee.priority - damagedPriority
 					self.totalPriority = self.totalPriority - damagedPriority
 					defendee.damaged = nil
+					if defendee.priority == 0 then
+						table.remove(self.defendees, i)
+					end
 				end
 			end
 		end
@@ -223,7 +224,11 @@ function DefendHandler:Danger(defendeeUnit)
 				defendee.priority = defendee.priority + damagedPriority
 				self.totalPriority = self.totalPriority + damagedPriority
 			end
-			break
+			return
 		end
 	end
+	-- if it's not a defendee, make it one
+	local defendee = {unit = defendeeUnit, uid = defendeeUnit:ID(), priority = damagedPriority, damaged = game:Frame()}
+	table.insert(self.defendees, defendee)
+	self.totalPriority = self.totalPriority + damagedPriority
 end

@@ -55,6 +55,10 @@ function defaultBehaviours(unit)
 		table.insert(b, ExitFactoryBehaviour)
 	end
 
+	if unitTable[un].isBuilding then
+		table.insert(b, RunFromAttackBehaviour)
+	end
+
 	if u:CanBuild() then
 		-- game:SendToConsole(u:Name() .. " can build")
 		-- moho engineer doesn't need the queue!

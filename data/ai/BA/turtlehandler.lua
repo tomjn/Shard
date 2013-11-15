@@ -40,8 +40,8 @@ function TurtleHandler:UnitBuilt(unit)
 	if ut.isBuilding then
 		local upos = unit:GetPosition()
 		local uid = unit:ID()
-		if defendList[un] then
-			self:AddTurtle(upos, uid, defendList[un])
+		if turtleList[un] then
+			self:AddTurtle(upos, uid, turtleList[un])
 		elseif ut.buildOptions then
 			self:AddTurtle(upos, uid, factoryPriority + ut.techLevel)
 		elseif ut.isWeapon and not antinukeList[un] and not nukeList[un] and not bigPlasmaList[un] then
@@ -53,9 +53,9 @@ function TurtleHandler:UnitBuilt(unit)
 		elseif ut.jammerRadius ~= 0 then
 			self:AddShell(upos, uid, 1, "jam", ut.jammerRadius)
 		elseif ut.radarRadius ~= 0 then
-			self:AddShell(upos, uid, 1, "radar", ut.radarRadius * 0.5)
+			self:AddShell(upos, uid, 1, "radar", ut.radarRadius * 0.67)
 		elseif ut.sonarRadius ~= 0 then
-			self:AddShell(upos, uid, 1, "sonar", ut.sonarRadius * 0.5)
+			self:AddShell(upos, uid, 1, "sonar", ut.sonarRadius * 0.67)
 		end
 	end
 end
@@ -66,7 +66,7 @@ function TurtleHandler:UnitDead(unit)
 	if ut.isBuilding then
 		if ut.isWeapon or shieldList[un] then
 			self:RemoveShell(unit:ID())
-		elseif defendList[un] or ut.buildOptions then
+		elseif turtleList[un] or ut.buildOptions then
 			self:RemoveTurtle(unit:ID())
 		end
 	end
