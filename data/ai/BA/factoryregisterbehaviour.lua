@@ -137,6 +137,7 @@ function FactoryRegisterBehaviour:UnitDead(unit)
 			local un = self.name
 		    local level = self.level
 		   	EchoDebug("factory " .. un .. " level " .. level .. " died")
+		   	ai.buildsitehandler:DoBuildHereNow(self.id)
 		   	if ai.factoryLocationsAtLevel[level] ~= nil then
 			   	for i, location in pairs(ai.factoryLocationsAtLevel[level]) do
 			   		if location.uid == self.id then
