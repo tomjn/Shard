@@ -81,7 +81,7 @@ function ScoutBehaviour:Update()
 			-- attack small targets along the way if the scout is armed
 			local attackTarget
 			if unit:WeaponCount() > 0 then
-				if ai.targethandler:IsSafePosition(unit:GetPosition(), unit) then
+				if ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 1) then
 					attackTarget = ai.targethandler:NearbyVulnerable(unit)
 				end
 			end

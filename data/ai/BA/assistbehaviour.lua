@@ -37,6 +37,7 @@ function AssistBehaviour:Init()
 	end
 	if nanoTurretList[uname] then self.isNanoTurret = true end
 	if commanderList[uname] then self.isCommander = true end
+	self.id = self.unit:Internal():ID()
 	self:AssignIDByType()
 	EchoDebug(uname .. " " .. self.IDByType)
 	EchoDebug("AssistBehaviour: added to unit "..uname)
@@ -78,12 +79,14 @@ function AssistBehaviour:Update()
 				if self.IDByType == 1 then
 					if IsSiegeEquipmentNeeded() or unit:GetHealth() < unit:GetMaxHealth() * 0.9 then
 						self.IDByType = 2
+						ai.IDByType[self.id] = 2
 						self.unit:ElectBehaviour()
 					end
 				else
 					-- switch commander back to building
 					if not IsSiegeEquipmentNeeded() and unit:GetHealth() >= unit:GetMaxHealth() * 0.9 then
 						self.IDByType = 1
+						ai.IDByType[self.id] = 1
 						self.unit:ElectBehaviour()
 					end
 				end
@@ -159,6 +162,7 @@ function AssistBehaviour:UnitDead(unit)
 		if IDByTypeTaken[uname] ~= nil then IDByTypeTaken[uname][self.IDByType] = nil end
 		if ai.totalCons[uname] ~= nil then ai.totalCons[uname] = ai.totalCons[uname] - 1 end
 		self.IDByType = nil
+		ai.IDByType[self.id] = nil
 		ai.assisthandler:RemoveWorking(self)
 		ai.assisthandler:RemoveFree(self)
 	end
@@ -166,12 +170,30 @@ end
 
 function AssistBehaviour:Assign(builder)
 	self.target = builder
+	self.lastAssignFrame = game:Frame()
+end
+
+-- assign if not busy (used by factories to occupy idle assistants)
+function AssistBehaviour:SoftAssign(builder)
+	if self.target == nil then
+		self.target = builder
+	else
+		if self.lastAssignFrame == nil then
+			self.target = builder
+		else
+			local f = game:Frame()
+			if f > self.lastAssignFrame + 900 then
+				self.target = builder
+			end
+		end
+	end
 end
 
 function AssistBehaviour:AssignIDByType()
 	local uname = self.name
 	if IDByTypeTaken[uname] == nil then
 		self.IDByType = 1
+		ai.IDByType[self.id] = 1
 		IDByTypeTaken[uname] = {}
 		IDByTypeTaken[uname][1] = true
 	else
@@ -184,6 +206,7 @@ function AssistBehaviour:AssignIDByType()
 			if not IDByTypeTaken[uname][id] then break end
 		end
 		self.IDByType = id
+		ai.IDByType[self.id] = id
 		IDByTypeTaken[uname][id] = true
 	end
 	if self.active then

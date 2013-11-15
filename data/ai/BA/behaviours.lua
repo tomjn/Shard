@@ -50,13 +50,11 @@ function defaultBehaviours(unit)
 	local u = unit:Internal()
 	local un = u:Name()
 
-	if not unitTable[un].isBuilding and unitTable[un].mtype ~= "air" and un ~= "corcom" and un ~= "armcom" then
-		-- non-air mobile units need to not get stuck in the factory
-		table.insert(b, ExitFactoryBehaviour)
-	end
-
 	if unitTable[un].isBuilding then
 		table.insert(b, RunFromAttackBehaviour)
+	elseif unitTable[un].mtype ~= "air" and not commanderList[un] then
+		-- non-air mobile units need to not get stuck in the factory
+		table.insert(b, ExitFactoryBehaviour)
 	end
 
 	if u:CanBuild() then

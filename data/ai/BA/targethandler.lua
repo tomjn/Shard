@@ -371,7 +371,8 @@ local function UpdateEnemies()
 		local los = ai.loshandler:IsKnownEnemy(e)
 		local ghost = ai.loshandler:GhostPosition(e)
 		local name = e:Name()
-		if los ~= 0 or ghost then
+		-- only count those we know about and that aren't being built
+		if (los ~= 0 or ghost) and not e:IsBeingBuilt() then
 			local pos
 			if ghost then
 				EchoDebug("using ghost position")
@@ -799,21 +800,21 @@ function TargetHandler:IsBombardPosition(position, unitName)
 	local px, pz = GetCellPosition(position)
 	local radius = unitTable[unitName].groundRange
 	local groundValue, groundThreat = CheckInRadius(px, pz, radius, "ground")
-	if groundValue + groundThreat > Value(unitName) * 4 then
+	if groundValue + groundThreat > Value(unitName) * 2 then
 		return true
 	else
 		return false
 	end
 end
 
-function TargetHandler:IsSafePosition(position, unit)
+function TargetHandler:IsSafePosition(position, unit, threshold)
 	self:UpdateMap()
 	local cell = GetCellHere(position)
 	local value, threat = CellValueThreat(unit, cell)
-	if threat == 0 then
-		return true
+	if threshold then
+		return threat < unitTable[unit:Name()].metalCost * threshold
 	else
-		return false
+		return threat == 0
 	end
 end
 

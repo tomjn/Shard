@@ -99,7 +99,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 			end
 		elseif bigPlasmaList[uname] or littlePlasmaList[uname] or nukeList[uname] then
 			-- don't build bombarding units outside of bombard positions
-			local b = ai.targethandler:IsBombardPosition(turtle.position, uname)
+			local b = ai.targethandler:IsBombardPosition(pos, uname)
 			if not b then
 				EchoDebug("bombard not in bombard position")
 				pos = nil

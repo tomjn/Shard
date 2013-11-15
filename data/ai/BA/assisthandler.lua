@@ -23,6 +23,7 @@ function AssistHandler:Init()
 	self.working = {}
 	self.totalAssignments = 0
 	self.magnets = {}
+	ai.IDByType = {}
 end
 
 -- checks whether the assistant can help the builder
@@ -163,7 +164,7 @@ function AssistHandler:TakeUpSlack(builder)
 		end
 		if not skip then
 			if self:IsLocal(asstbehaviour, builder) then
-				asstbehaviour:Assign(builder)
+				asstbehaviour:SoftAssign(builder)
 			end
 		end
 	end

@@ -34,7 +34,7 @@ end
 function ExitFactoryBehaviour:Update()
 	local f = game:Frame()
 	if self.fresh then
-		if f % 10 == 0 then
+		if f % 30 == 0 then
 			local u = self.unit:Internal()
 			if not u:IsBeingBuilt() then
 				local pos = u:GetPosition()
@@ -42,11 +42,24 @@ function ExitFactoryBehaviour:Update()
 				if dist >= 50 then
 					self.fresh = nil
 					self.unit:ElectBehaviour()
+				elseif self.lastOrderFrame ~= nil then
+					if f > self.lastOrderFrame + 300 then
+						-- can't get out by going south, try going north
+						local out = api.Position()
+						out.x = pos.x
+						out.y = pos.y
+						out.z = pos.z - 200
+						if out.z < 1 then
+							out.z = 1
+						end
+						u:Move(out)
+					end
 				end
 			end
 		end
 	else
 		if f % 150 == 0 then
+			-- units (especially construction units) can still get stuck in factories long after they're built
 			local u = self.unit:Internal()
 			if not u:IsBeingBuilt() then
 				local pos = u:GetPosition()
@@ -54,8 +67,6 @@ function ExitFactoryBehaviour:Update()
 				if dist < 50 then
 					self.fresh = true
 					self.unit:ElectBehaviour()
-				else
-					self.fresh = false
 				end
 			end
 		end
@@ -66,11 +77,15 @@ function ExitFactoryBehaviour:Activate()
 	self.active = true
 	local u = self.unit:Internal()
 	local pos = u:GetPosition()
-	pos.z = pos.z + 200
-	if pos.z > ai.maxElmosZ - 1 then
-		pos.z = ai.maxElmosZ - 1
+	local out = api.Position()
+	out.x = pos.x
+	out.y = pos.y
+	out.z = pos.z + 200
+	if out.z > ai.maxElmosZ - 1 then
+		out.z = ai.maxElmosZ - 1
 	end
-	u:Move(pos)
+	u:Move(out)
+	self.lastOrderFrame = game:Frame()
 end
 
 function ExitFactoryBehaviour:Deactivate()

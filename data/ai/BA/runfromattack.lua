@@ -18,6 +18,7 @@ function RunFromAttackBehaviour:Init()
 	-- this is where we will retreat
 	self.initialLocation = self.unit:Internal():GetPosition()
 	self.name = self.unit:Internal():Name()
+	self.mobile = not unitTable[self.name].isBuilding
 	EchoDebug("RunFromAttackBehaviour: added to unit "..self.name)
 end
 
@@ -42,7 +43,13 @@ function RunFromAttackBehaviour:Update()
 		if f % 30 == 0 then
 			-- run away preemptively from positions within range of enemy weapons, and notify defenders that the unit is in danger
 			local unit = self.unit:Internal()
-			if ai.targethandler:IsSafePosition(unit:GetPosition(), unit) then
+			local safe
+			if commanderList[self.name] then
+				safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 0.2)
+			else
+				safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 2)
+			end
+			if safe then
 				self.underfire = false
 				self.unit:ElectBehaviour()
 			else
@@ -56,10 +63,10 @@ function RunFromAttackBehaviour:Update()
 end
 
 function RunFromAttackBehaviour:Activate()
-	EchoDebug("RunFromAttackBehaviour: active on unit "..self.name)
+	EchoDebug("RunFromAttackBehaviour: activated on unit "..self.name)
 
 	-- can we move at all?
-	if self.unit:Internal():CanMove() then
+	if self.mobile then
 		-- try to find a friendly weapon and run there
 		local ownUnits = game:GetFriendlies()
 		local salvation = self.initialLocation -- fall back to where the fleeing unit was built if no saviour can be found
@@ -71,7 +78,7 @@ function RunFromAttackBehaviour:Activate()
 		for i,unit in pairs(ownUnits) do
 			local un = unit:Name()
 			if unit:ID() ~= fid and un ~= "corcom" and un ~= "armcom" and not ai.defendhandler:IsDefendingMe(unit, fleeing) then
-				if unitTable[un].isWeapon and (unitTable[un].isBuilding or unitTable[un].metalCost > unitTable[fn].metalCost) then
+				if unitTable[un].isWeapon and (unitTable[un].isBuilding or unitTable[un].metalCost > unitTable[fn].metalCost * 2) then
 					local upos = unit:GetPosition()
 					if ai.targethandler:IsSafePosition(upos, fleeing) and unit:GetHealth() > unit:GetMaxHealth() * 0.75 and ai.maphandler:UnitCanGetToUnit(fleeing, unit) and not unit:IsBeingBuilt() then
 						local dist = distance(fpos, upos) - unitTable[un].metalCost
@@ -97,15 +104,16 @@ function RunFromAttackBehaviour:Deactivate()
 end
 
 function RunFromAttackBehaviour:Priority()
-	if self.underfire then
+	if self.underfire and self.mobile then
 		return 110
+	else
+		return 0
 	end
-	return 0
 end
 
 function RunFromAttackBehaviour:UnitDamaged(unit,attacker)
 	if unit:Internal():ID() == self.unit:Internal():ID() then
-		if not self:IsActive() then
+		if not self.underfire then
 			self.underfire = true
 			self.lastAttackedFrame = game:Frame()
 			ai.defendhandler:Danger(unit:Internal())
