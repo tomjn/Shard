@@ -20,7 +20,8 @@ local function GetEcon()
 	extraMetal = Metal.income - Metal.usage
 	local enoughMetalReserves = math.min(Metal.income * 2, Metal.capacity * 0.1)
 	local lotsMetalReserves = math.min(Metal.income * 10, Metal.capacity * 0.5)
-	local enoughEnergyReserves = math.min(Energy.income * 5, Energy.capacity * 0.5)
+	local enoughEnergyReserves = math.min(Energy.income * 2, Energy.capacity * 0.25)
+	-- local lotsEnergyReserves = math.min(Energy.income * 3, Energy.capacity * 0.5)
 	energyTooLow = Energy.reserves < enoughEnergyReserves or Energy.income < 40
 	energyOkay = Energy.reserves >= enoughEnergyReserves and Energy.income >= 40
 	metalTooLow = Metal.reserves < enoughMetalReserves
@@ -408,13 +409,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		if factoryPos ~= nil then
 			EchoDebug("found factory")
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
-			if p ~= nil then
-				local fdist = distance(factoryPos, p)
-				if fdist > 400 then
-					EchoDebug("build spot near factory not within build range")
-					utype = nil
-				end
-			else
+			if p == nil then
 				EchoDebug("no spot near factory found")
 				utype = nil
 			end
@@ -464,8 +459,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		local turtlePos = ai.turtlehandler:MostTurtled(builder, bombard)
 		if turtlePos then
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
-		end
-		if p == nil then
+		else
 			if bombard then
 				utype = nil
 			else

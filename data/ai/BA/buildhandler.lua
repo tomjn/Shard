@@ -1,11 +1,26 @@
 require "unitlists"
 require "unittable"
 
-local DebugEnabled = true
+local DebugEnabled = false
+local debugPlotBuildFile
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
 		game:SendToConsole("BuildSiteHandler: " .. inStr)
+	end
+end
+
+local function PlotSquareDebug(x, z, size, label)
+	if DebugEnabled then
+		x = math.ceil(x)
+		z = math.ceil(z)
+		size = math.ceil(size)
+		-- if debugSquares[x .. "  " .. z .. " " .. size] == nil then
+			if label == nil then label = "nil" end
+			local string = x .. " " .. z .. " " .. size .. " " .. label .. "\n"
+			debugPlotBuildFile:write(string)
+			-- debugSquares[x .. "  " .. z .. " " .. size] = true
+		-- end
 	end
 end
 
@@ -26,7 +41,7 @@ end
 function BuildSiteHandler:Init()
 	-- a convenient place for some other inits
 	ai.factories = 0
-	ai.maxFactoryLevel = 1
+	ai.maxFactoryLevel = 0
 	ai.factoriesAtLevel = {}
 	ai.factoryLocationsAtLevel = {}
 	ai.outmodedFactoryID = {}
@@ -39,11 +54,11 @@ function BuildSiteHandler:Init()
 	self:DontBuildOnMetalOrGeoSpots()
 end
 
-function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder)
+function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalPosition)
 	-- make sure it's on the map
 	if pos ~= nil then
 		if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ) then
-			EchoDebug("bad position: " .. pos.x .. "," .. pos.z)
+			EchoDebug("bad position: " .. pos.x .. ", " .. pos.z)
 			pos = nil
 		end
 	end
@@ -51,17 +66,17 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder)
 	if pos ~= nil then
 		local s = map:CanBuildHere(unitTypeToBuild, pos)
 		if not s then
-			EchoDebug("cannot build " .. unitTypeToBuild:Name() .. " here: " .. pos.x .. "," .. pos.z)
+			EchoDebug("cannot build " .. unitTypeToBuild:Name() .. " here: " .. pos.x .. ", " .. pos.z)
 			pos = nil
 		end
 	end
 	-- don't build where you shouldn't (metal spots, factory lanes)
 	if pos ~= nil then
 		for i, square in pairs(self.seriouslyDont) do
-			local dist = quickdistance(square.position, pos)
+			local dist = distance(square.position, pos)
 			if dist <= square.size then
+				EchoDebug("build position " .. pos.x .. ", " .. pos.z .. " is " .. dist .. " away, zone is " .. square.size)
 				pos = nil
-				EchoDebug("build position inside no-build zone")
 				break
 			end
 		end
@@ -73,14 +88,33 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder)
 			pos = nil
 		end
 	end
+	if pos ~= nil then
+		local uname = unitTypeToBuild:Name()
+		if nanoTurretList[uname] then
+			-- don't build nanos too far away from factory
+			local dist = distance(originalPosition, pos)
+			if dist > 400 then
+				EchoDebug("nano too far from factory")
+				pos = nil
+			end
+		elseif bigPlasmaList[uname] or littlePlasmaList[uname] or nukeList[uname] then
+			-- don't build bombarding units outside of bombard positions
+			local b = ai.targethandler:IsBombardPosition(turtle.position, uname)
+			if not b then
+				EchoDebug("bombard not in bombard position")
+				pos = nil
+			end
+		end
+	end
 	return pos
 end
 
 function BuildSiteHandler:GetBuildSpacing(unitTypeToBuild)
 	local spacing = 1
 	local name = unitTypeToBuild:Name()
+	if unitTable[name].isWeapon then spacing = 10 end
 	if unitTable[name].bigExplosion then spacing = 20 end
-	if unitTable[name].buildOptions then spacing = 15 end
+	if unitTable[name].buildOptions then spacing = 21 end
 	return spacing
 end
 
@@ -93,11 +127,6 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 	local pos = nil
 
 	if tmpAttemptNumber > 0 then
-		if tmpAttemptNumber > 13 then
-			buildDistance = 300
-		elseif tmpAttemptNumber > 7 then
-			buildDistance = 200
-		end
 		local searchAngle = (tmpAttemptNumber - 1) / 3 * math.pi
 		local searchRadius = 2 * buildDistance / 3
 		local searchPos = api.Position()
@@ -110,20 +139,28 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 		pos = map:FindClosestBuildSite(unitTypeToBuild, position, buildDistance, minDistance)
 	end
 
-	if pos == nil then EchoDebug("pos is nil before check") end
+	-- if pos == nil then EchoDebug("pos is nil before check") end
 
 	-- check that we haven't got an offmap order, that it's possible to build the unit there, that it's not in front of a factory or on top of a metal spot, and that the builder can actually move there
-	pos = self:CheckBuildPos(pos, unitTypeToBuild, builder)
+	pos = self:CheckBuildPos(pos, unitTypeToBuild, builder, position)
 
 	if pos == nil then
-		EchoDebug("attempt number " .. tmpAttemptNumber .. " nil")
+		-- EchoDebug("attempt number " .. tmpAttemptNumber .. " nil")
 		-- first try increasing tmpAttemptNumber, up to 7
 		if tmpAttemptNumber < 19 then
+			if tmpAttemptNumber == 7 or tmpAttemptNumber == 13 then
+				buildDistance = buildDistance + 100
+				if minDistance < 5 then
+					minDistance = minDistance + 2
+				elseif minDistance < 21 then
+					minDistance = minDistance - 4
+				end
+			end
 			pos = self:ClosestBuildSpot(builder, position, unitTypeToBuild, minDistance, tmpAttemptNumber + 1, buildDistance)
 		else
 			-- check manually check in a spiral
 			EchoDebug("trying spiral check")
-			pos = self:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, position)
+			pos = self:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, position, minDistance * 16)
 		end
 	end
 
@@ -136,7 +173,7 @@ function BuildSiteHandler:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, pos
 	if segmentSize == nil then segmentSize = 1 end
 	if direction == nil then direction = 1 end
 	if i == nil then i = 0 end
-	local minDistance = self:GetBuildSpacing(unitTypeToBuild)
+	local originalPosition = position
 
 	EchoDebug("new spiral search")
 	while segmentSize < 8 do
@@ -150,12 +187,7 @@ function BuildSiteHandler:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, pos
 		elseif direction == 4 then
 			position.z = position.z - dist
 		end
-		pos = map:FindClosestBuildSite(unitTypeToBuild, position, 48, minDistance)
-		if pos ~= nil then
-			pos = self:CheckBuildPos(pos, unitTypeToBuild, builder)
-		else
-			pos = self:CheckBuildPos(position, unitTypeToBuild, builder)
-		end
+		pos = self:CheckBuildPos(position, unitTypeToBuild, builder, originalPosition)
 		if pos ~= nil then break end
 		i = i + 1
 		if i == segmentSize then
@@ -212,7 +244,9 @@ end
 
 function BuildSiteHandler:DontBuildHere(position, size, uid)
 	EchoDebug("new no build zone: " .. position.x .. ", " .. position.z .. "  " .. size)
+	size = size * 1.33
 	table.insert(self.seriouslyDont, {position = position, size = size, uid = uid})
+	self:PlotAllDebug()
 end
 
 -- to handle factory deaths
@@ -222,11 +256,21 @@ function BuildSiteHandler:DoBuildHereNow(uid)
 			table.remove(self.seriouslyDont, i)
 		end
 	end
+	self:PlotAllDebug()
 end
 
 function BuildSiteHandler:DontBuildOnMetalOrGeoSpots()
 	local spots = ai.scoutSpots["air"][1]
 	for i, p in pairs(spots) do
-		self:DontBuildHere(p, 85)
+		self:DontBuildHere(p, 60)
 	end
+end
+
+function BuildSiteHandler:PlotAllDebug()
+	if not DebugEnabled then return end
+	debugPlotBuildFile = assert(io.open("debugbuildplot",'w'), "Unable to write debugbuildplot")
+	for i, square in pairs(self.seriouslyDont) do
+		PlotSquareDebug(square.position.x, square.position.z, square.size*2/1.33, "NOBUILD")
+	end
+	debugPlotBuildFile:close()
 end

@@ -53,9 +53,9 @@ function TurtleHandler:UnitBuilt(unit)
 		elseif ut.jammerRadius ~= 0 then
 			self:AddShell(upos, uid, 1, "jam", ut.jammerRadius)
 		elseif ut.radarRadius ~= 0 then
-			self:AddShell(upos, uid, 1, "radar", ut.radarRadius * 0.5)
+			self:AddShell(upos, uid, 1, "radar", ut.radarRadius * 0.67)
 		elseif ut.sonarRadius ~= 0 then
-			self:AddShell(upos, uid, 1, "sonar", ut.sonarRadius * 0.5)
+			self:AddShell(upos, uid, 1, "sonar", ut.sonarRadius * 0.67)
 		end
 	end
 end

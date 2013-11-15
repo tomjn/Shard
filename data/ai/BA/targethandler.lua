@@ -83,6 +83,9 @@ local function NewCell(px, pz)
 end
 
 local function ThreatRange(unitName, groundAirSubmerged)
+	if antinukeList[unitName] or nukeList[unitName] or bigPlasmaList[unitName] or shieldList[unitName] then
+		return 0, 0
+	end
 	local utable = unitTable[unitName]
 	if groundAirSubmerged == nil then
 		if utable.groundRange > utable.airRange and utable.groundRange > utable.submergedRange then
@@ -102,7 +105,7 @@ local function ThreatRange(unitName, groundAirSubmerged)
 		if range == 0 then
 			-- ground weapons can hurt air units sometimes
 			if utable.groundRange > 0 then
-				return math.ceil(utable.metalCost * 0.33), utable.groundRange
+				return math.ceil(utable.metalCost * 0.1), utable.groundRange
 			end
 		end
 	elseif groundAirSubmerged == "submerged" then

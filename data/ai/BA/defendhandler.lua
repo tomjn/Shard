@@ -50,7 +50,7 @@ function DefendHandler:UnitCreated(unit)
 end
 
 function DefendHandler:UnitDamaged(unit)
-	self:Danger(unit)
+
 end
 
 function DefendHandler:UnitDead(unit)
@@ -90,6 +90,9 @@ function DefendHandler:Update()
 					defendee.priority = defendee.priority - damagedPriority
 					self.totalPriority = self.totalPriority - damagedPriority
 					defendee.damaged = nil
+					if defendee.priority == 0 then
+						table.remove(self.defendees, i)
+					end
 				end
 			end
 		end
@@ -224,5 +227,8 @@ function DefendHandler:Danger(defendeeUnit)
 			return
 		end
 	end
-	-- self:AddDefendee()
+	-- if it's not a defendee, make it one
+	local defendee = {unit = defendeeUnit, uid = defendeeUnit:ID(), priority = damagedPriority, damaged = game:Frame()}
+	table.insert(self.defendees, defendee)
+	self.totalPriority = self.totalPriority + damagedPriority
 end

@@ -47,27 +47,46 @@ function FactoryRegisterBehaviour:Init()
     self.id = self.unit:Internal():ID()
     self.position = self.unit:Internal():GetPosition() -- factories don't move
     self.level = unitTable[self.name].techLevel
-    ai.buildsitehandler:DontBuildHere(self.position, 100)
     if factoryExitSides[self.name] ~= nil and factoryExitSides[self.name] ~= 0 then
 	    -- inform the build handler not to build where the units exit
-	    local nobuild = api.Position()
-	    nobuild.x = self.position.x
-	    nobuild.z = self.position.z + 150
-	    nobuild.y = self.position.y
-	    ai.buildsitehandler:DontBuildHere(nobuild, 150)
+	    local noBottom = api.Position()
+	    noBottom.x = self.position.x
+	    noBottom.z = self.position.z + 80
+	    noBottom.y = self.position.y
+	    ai.buildsitehandler:DontBuildHere(noBottom, 80, self.id)
+	    local noBottom2 = api.Position()
+	    noBottom2.x = self.position.x
+	    noBottom2.z = self.position.z + 240
+	    noBottom2.y = self.position.y
+	    ai.buildsitehandler:DontBuildHere(noBottom2, 80, self.id)
 	    if factoryExitSides[self.name] == 2 then
-	    	nobuild.z = self.position.z - 150
-	    	ai.buildsitehandler:DontBuildHere(nobuild, 150)
+	    	local noTop = api.Position()
+		    noTop.x = self.position.x
+		    noTop.z = self.position.z - 80
+		    noTop.y = self.position.y
+	    	ai.buildsitehandler:DontBuildHere(noTop, 80, self.id)
+	    	local noTop2 = api.Position()
+		    noTop2.x = self.position.x
+		    noTop2.z = self.position.z - 240
+		    noTop2.y = self.position.y
+	    	ai.buildsitehandler:DontBuildHere(noTop2, 80, self.id)
 	    elseif factoryExitSides[self.name] == 3 or factoryExitSides[self.name] == 4 then
-	    	nobuild.z = self.position.z
-	    	nobuild.x = self.position.x - 80
-	    	ai.buildsitehandler:DontBuildHere(nobuild, 80)
-	    	nobuild.x = self.position.x + 80
-	    	ai.buildsitehandler:DontBuildHere(nobuild, 80)
+	    	local noLeft = api.Position()
+	    	noLeft.x = self.position.x - 80
+	    	noLeft.z = self.position.z
+	    	noLeft.y = self.position.y
+	    	ai.buildsitehandler:DontBuildHere(noLeft, 80, self.id)
+	    	local noRight = api.Position()
+	    	noRight.x = self.position.x + 80
+	    	noRight.z = self.position.z
+	    	noRight.y = self.position.y
+	    	ai.buildsitehandler:DontBuildHere(noRight, 80, self.id)
 	    	if factoryExitSides[self.name] == 4 then
-	    		nobuild.x = self.position.x
-	    		nobuild.z = self.position.z - 80
-	    		ai.buildsitehandler:DontBuildHere(nobuild, 80)
+	    		local noTop = api.Position()
+			    noTop.x = self.position.x
+			    noTop.z = self.position.z - 80
+			    noTop.y = self.position.y
+		    	ai.buildsitehandler:DontBuildHere(noTop, 80, self.id)
 	    	end
 	    end
 	end

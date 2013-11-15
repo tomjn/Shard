@@ -32,15 +32,30 @@ function ExitFactoryBehaviour:UnitDead(unit)
 end
 
 function ExitFactoryBehaviour:Update()
+	local f = game:Frame()
 	if self.fresh then
-		local f = game:Frame()
 		if f % 10 == 0 then
 			local u = self.unit:Internal()
 			if not u:IsBeingBuilt() then
 				local pos = u:GetPosition()
-				if pos.z > self.initialPosition.z + 100 then
+				local dist = distance(pos, self.initialPosition)
+				if dist >= 50 then
 					self.fresh = nil
 					self.unit:ElectBehaviour()
+				end
+			end
+		end
+	else
+		if f % 150 == 0 then
+			local u = self.unit:Internal()
+			if not u:IsBeingBuilt() then
+				local pos = u:GetPosition()
+				local dist = distance(pos, self.initialPosition)
+				if dist < 50 then
+					self.fresh = true
+					self.unit:ElectBehaviour()
+				else
+					self.fresh = false
 				end
 			end
 		end

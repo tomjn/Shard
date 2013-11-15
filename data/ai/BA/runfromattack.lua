@@ -108,6 +108,7 @@ function RunFromAttackBehaviour:UnitDamaged(unit,attacker)
 		if not self:IsActive() then
 			self.underfire = true
 			self.lastAttackedFrame = game:Frame()
+			ai.defendhandler:Danger(unit:Internal())
 			self.unit:ElectBehaviour()
 		end
 	end

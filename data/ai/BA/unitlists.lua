@@ -365,6 +365,10 @@ scoutList = {
 antinukeList = {
 	corfmd = 1,
 	armamd = 1,
+	corcarry = 1,
+	armcarry = 1,
+	cormabm = 1,
+	armscab = 1,
 }
 
 shieldList = {
