@@ -21,7 +21,6 @@ local needAA = false
 local needShields = false
 local needAntinuke = false
 local needtorpedo = false
-local needNukes = false
 local needGroundDefense = true
 
 -- do we need siege equipment such as artillery and merl?
@@ -229,31 +228,28 @@ function CheckForMapControl()
 		-- game:SendToConsole("bomber counter: " .. ai.bomberhandler:GetCounter() .. "/" .. maxBomberCounter .. "  attack counter: " .. ai.attackhandler:GetCounter() .. "/" .. maxAttackCounter)
 		ai.needAdvanced = false
 		local attackCounter = ai.attackhandler:GetCounter()
-		local couldAttack = ai.couldAttack - ai.factories >= 1 or ai.couldBomb > 1
-		if Metal.income > 12 and ai.factories > 0 then
-			if couldAttack or ai.bomberhandler:GetCounter() == maxBomberCounter or attackCounter == maxAttackCounter then
-				ai.needAdvanced = true
-			end
+		local couldAttack = ai.couldAttack - ai.factories >= 2 or ai.couldBomb > 2
+		local bombingTooExpensive = ai.bomberhandler:GetCounter() == maxBomberCounter
+		local attackTooExpensive = attackCounter == maxAttackCounter
+		local plentyOfCombatUnits = ai.combatCount > attackCounter * 2.5
+		local needUpgrade = plentyOfCombatUnits or couldAttack or bombingTooExpensive or attackTooExpensive
+		if Metal.income > 12 and ai.factories > 0 and needUpgrade then
+			ai.needAdvanced = true
 		end
 		ai.needExperimental = false
 		ai.needNukes = false
-		if Metal.income > 50 and ai.haveAdvFactory  then
-			if ai.combatCount >= attackCounter or couldAttack or ai.bomberhandler:GetCounter() == maxBomberCounter or attackCounter == maxAttackCounter then
-			-- game:SendToConsole("checking for experimental...")
-				if ai.enemyBasePosition and not ai.haveExpFactory then
-					-- game:SendToConsole("has enemy base position")
-					if ai.maphandler:MobilityNetworkSizeHere("bot", ai.enemyBasePosition) > ai.mobilityGridArea / 4 then
-						ai.needExperimental = true
-					else
-						ai.needNukes = true
-					end
+		if Metal.income > 50 and ai.haveAdvFactory and needUpgrade and ai.enemyBasePosition then
+			local canGetThere = false
+			for i, factory in pairs(ai.factoriesAtLevel[ai.maxLevel]) do
+				if ai.maphandler:MobilityNetworkHere("bot", factory.position) == ai.maphandler:MobilityNetworkHere("bot", ai.enemyBasePosition) then
+					canGetThere = true
+					break
 				end
 			end
-		end
-		if not ai.needNukes and Metal.income >= 35 and ai.haveAdvFactory then
-			if ai.combatCount >= attackCounter or couldAttack or ai.bomberhandler:GetCounter() == maxBomberCounter or attackCounter == maxAttackCounter then
-				ai.needNukes = true
+			if not ai.haveExpFactory and canGetThere then
+				ai.needExperimental = true
 			end
+			ai.needNukes = true
 		end
 		EchoDebug("metal income: " .. Metal.income .. "  combat units: " .. ai.combatCount)
 		EchoDebug("need advanced? " .. tostring(ai.needAdvanced) .. "  need experimental? " .. tostring(ai.needExperimental))
@@ -287,7 +283,7 @@ end
 
 function IsNukeNeeded()
 	CheckForDangers()
-	return needNukes
+	return ai.needNukes
 end
 
 function BuildMex()
@@ -859,7 +855,7 @@ function BuildBattleIfNeeded(unitName)
 	elseif ai.raiderCount[mtype] < raidCounter / 2 then
 		return DummyUnitName
 	else
-		return BuildWithLimitedNumber(unitName, attackCounter*3)
+		return unitName
 	end
 end
 
@@ -1858,15 +1854,7 @@ local function BuildAppropriateFactory(self)
 	EchoDebug("building appropriate factory..")
 	local factories, advanced, experimental = ai.maphandler:WhatFactories(builder)
 	if experimental ~= nil and ai.needExperimental then
-		local position = builder:GetPosition()
-		EchoDebug(tostring(ai.enemyBasePosition))
-		if ai.enemyBasePosition then
-			if ai.maphandler:MobilityNetworkHere("bot", position) == ai.maphandler:MobilityNetworkHere("bot", ai.enemyBasePosition) then
-				return BuildWithLimitedNumber(experimental, 1)
-			else
-				return BuildNuke(self)
-			end
-		end
+		return BuildWithLimitedNumber(experimental, 1)
 	end
 	if advanced ~= nil and ai.needAdvanced then
 		return BuildWithLimitedNumber(advanced, 1)

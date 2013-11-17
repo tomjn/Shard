@@ -66,6 +66,9 @@ local vulnerableHealth = 200
 local wreckMult = 100
 local badCellThreat = 300
 
+local factoryValue = 1000
+local conValue = 300
+
 local feintRepeatMod = 10
 
 local cellElmosX
@@ -126,10 +129,10 @@ local function Value(unitName)
 	if utable.buildOptions ~= nil then
 		if utable.isBuilding then
 			-- factory
-			val = val + 1000
+			val = val + factoryValue
 		else
 			-- construction unit
-			val = val + 300
+			val = val + conValue
 		end
 	end
 	if utable.extractsMetal > 0 then
@@ -365,7 +368,7 @@ local function UpdateEnemies()
 	if #enemies == 0 then return end
 
 	-- figure out where all the enemies are!
-	local highestValue = 0
+	local highestValue = factoryValue
 	local highestValueCell
 	for i, e in pairs(enemies) do
 		local los = ai.loshandler:IsKnownEnemy(e)
