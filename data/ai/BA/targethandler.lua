@@ -68,8 +68,14 @@ local badCellThreat = 300
 
 local factoryValue = 1000
 local conValue = 300
+local techValue = 100
+local minNukeValue = factoryValue + techValue + 500
 
 local feintRepeatMod = 10
+
+local currentEnemyThreatCount = 0
+local currentEnemyImmobileThreatCount = 0
+local currentEnemyMobileThreatCount = 0
 
 local cellElmosX
 local cellElmosZ
@@ -125,7 +131,7 @@ end
 local function Value(unitName)
 	local utable = unitTable[unitName]
 	if not utable then return 0 end
-	local val = utable.metalCost
+	local val = utable.metalCost + (utable.techLevel * techValue)
 	if utable.buildOptions ~= nil then
 		if utable.isBuilding then
 			-- factory
@@ -136,7 +142,7 @@ local function Value(unitName)
 		end
 	end
 	if utable.extractsMetal > 0 then
-		val = val + 1000000 * utable.extractsMetal
+		val = val + 800000 * utable.extractsMetal
 	end
 	if utable.totalEnergyOut > 0 then
 		val = val + utable.totalEnergyOut
@@ -358,6 +364,11 @@ end
 local function CountEnemyThreat(e, threat)
 	if not enemyAlreadyCounted[e] then
 		currentEnemyThreatCount = currentEnemyThreatCount + threat
+		if unitTable[e:Name()].isBuilding then
+			currentEnemyImmobileThreatCount = currentEnemyImmobileThreatCount + threat
+		else
+			currentEnemyMobileThreatCount = currentEnemyMobileThreatCount + threat
+		end
 		enemyAlreadyCounted[e] = true
 	end
 end
@@ -578,20 +589,30 @@ end
 
 function TargetHandler:Init()
 	currentEnemyThreatCount = 0
+	currentEnemyImmobileThreatCount = 0
+	currentEnemyMobileThreatCount = 0
 	enemyAlreadyCounted = {}
 	ai.totalEnemyThreat = 10000
+	ai.totalEnemyImmobileThreat = 5000
+	ai.totalEnemyMobileThreat = 5000
+	self.lastEnemyThreatUpdateFrame = 0
 	self.feints = {}
 end
 
 function TargetHandler:Update()
 	local f = game:Frame()
-	if f % 1800 == 0 then
+	if f > self.lastEnemyThreatUpdateFrame + 1800 or self.lastEnemyThreatUpdateFrame == 0 then
 		-- store and reset the threat count
 		-- EchoDebug(currentEnemyThreatCount .. " enemy threat last 2000 frames")
 		EchoDebug(currentEnemyThreatCount)
 		ai.totalEnemyThreat = currentEnemyThreatCount
+		ai.totalEnemyImmobileThreat = currentEnemyImmobileThreatCount
+		ai.totalEnemyMobileThreat = currentEnemyMobileThreatCount
 		currentEnemyThreatCount = 0
+		currentEnemyImmobileThreatCount = 0
+		currentEnemyMobileThreatCount = 0
 		enemyAlreadyCounted = {}
+		self.lastEnemyThreatUpdateFrame = f
 	end
 end
 
@@ -729,14 +750,16 @@ end
 function TargetHandler:GetBestNukeCell()
 	self:UpdateMap()
 	local best
-	local bestValueThreat = factoryValue
+	local bestValueThreat = 0
 	for i, cell in pairs(cellList) do
 		if cell.pos then
 			local value, threat = CellValueThreat("ALL", cell)
-			local valuethreat = value + threat
-			if valuethreat > bestValueThreat then
-				best = cell
-				bestValueThreat = valuethreat
+			if value > minNukeValue then
+				local valuethreat = value + threat
+				if valuethreat > bestValueThreat then
+					best = cell
+					bestValueThreat = valuethreat
+				end
 			end
 		end
 	end

@@ -18,7 +18,7 @@ local distanceMod = 20
 
 local factoryPriority = 4 -- added to tech level. above this priority allows two of the same type of defense tower.
 
--- this is added to the turtle's priority if a layer of this shell is added to it
+-- this is added to the turtle's priority if a shell of this layer is added to it
 local layerPriority = {}
 layerPriority["radar"] = 1
 layerPriority["sonar"] = 1
@@ -90,6 +90,7 @@ function TurtleHandler:Attach(turtle, shell)
 	end
 	local priorityAddition = layerPriority[shell.layer] or 0
 	turtle.priority = turtle.priority + priorityAddition
+	self.totalPriority = self.totalPriority + priorityAddition
 	table.insert(shell.attachments, turtle)
 end
 
@@ -98,6 +99,7 @@ function TurtleHandler:Detach(turtle, shell)
 	turtle.nameCounts[shell.uname] = turtle.nameCounts[shell.uname] - 1
 	local priorityAddition = layerPriority[shell.layer] or 0
 	turtle.priority = turtle.priority - priorityAddition
+	self.totalPriority = self.totalPriority - priorityAddition
 end
 
 function TurtleHandler:AddTurtle(position, uid, priority)

@@ -27,8 +27,8 @@ local needGroundDefense = true
 local needSiege = false
 
 local heavyPlasmaLimit = 3 -- changes with CheckForMapControl
-
 local AAUnitPerTypeLimit = 3 -- changes with CheckForMapControl
+local nukeLimit = 1 -- changes with CheckForMapControl
 
 local lastCheckFrame = 0
 local lastSiegeCheckFrame = 0
@@ -170,33 +170,22 @@ function CheckForDangers()
 	end
 end
 
--- check how much of the map our alliance controls
--- (in terms of mex spots)
--- if we have half or more, it's time to make siege units - base assault time
+-- check if siege units are needed
+-- check if advanced and experimental factories are needed
+-- check if nukes are needed
+-- check if reclaiming is needed
 function CheckForMapControl()
 	local f = game:Frame()
 	if (lastSiegeCheckFrame + 240) < f then
-		local friends = game:GetFriendlies()
-		local totalExtractors = map:SpotCount()
-		local friendlyExtractors = 0
 		ai.haveAdvFactory = false
+		if ai.factoriesAtLevel[3] ~= nil then
+			ai.haveAdvFactory = #ai.factoriesAtLevel[3] ~= 0
+		end
 		ai.haveExpFactory = false
-		for _, u in pairs(friends) do
-			if u ~= nil then
-				local un = u:Name()
-				local ut = game:GetTypeByName(un)
-				if ut:Extractor() then
-					friendlyExtractors = friendlyExtractors + 1
-				end
-				if advFactories[un] then ai.haveAdvFactory = true end
-				if expFactories[un] then ai.haveExpFactory = true end
-			end
+		if ai.factoriesAtLevel[5] ~= nil then
+			ai.haveExpFactory = #ai.factoriesAtLevel[5] ~= 0
 		end
-		if totalExtractors == 0 then
-			needSiege = true
-		else
-			needSiege = (friendlyExtractors / totalExtractors >= 0.5)
-		end
+		
 		lastSiegeCheckFrame = f
 		local Metal = game:GetResourceByName("Metal")
 		if Metal.reserves < 0.5 * Metal.capacity and ai.wreckCount > 0 then
@@ -205,15 +194,19 @@ function CheckForMapControl()
 			ai.needToReclaim = false
 		end
 		AAUnitPerTypeLimit = math.ceil(Metal.income / 12)
-		heavyPlasmaLimit = math.ceil(ai.combatCount / 6)
-		-- game:SendToConsole("bomber counter: " .. ai.bomberhandler:GetCounter() .. "/" .. maxBomberCounter .. "  attack counter: " .. ai.attackhandler:GetCounter() .. "/" .. maxAttackCounter)
-		ai.needAdvanced = false
+		heavyPlasmaLimit = math.ceil(ai.combatCount / 7)
+		nukeLimit = math.ceil(ai.combatCount / 20)
+
 		local attackCounter = ai.attackhandler:GetCounter()
 		local couldAttack = ai.couldAttack - ai.factories >= 2 or ai.couldBomb > 2
 		local bombingTooExpensive = ai.bomberhandler:GetCounter() == maxBomberCounter
 		local attackTooExpensive = attackCounter == maxAttackCounter
 		local plentyOfCombatUnits = ai.combatCount > attackCounter * 2.5
 		local needUpgrade = plentyOfCombatUnits or couldAttack or bombingTooExpensive or attackTooExpensive
+
+		EchoDebug(ai.totalEnemyThreat .. " " .. ai.totalEnemyImmobileThreat .. " " .. ai.totalEnemyMobileThreat)
+		needSiege = (ai.totalEnemyImmobileThreat > ai.totalEnemyMobileThreat * 2 and ai.totalEnemyImmobileThreat > 50000) or (attackCounter > maxAttackCounter * 0.8)
+		ai.needAdvanced = false
 		if Metal.income > 12 and ai.factories > 0 and needUpgrade then
 			ai.needAdvanced = true
 		end
@@ -473,10 +466,12 @@ function BuildSiegeIfNeeded(unitName)
 	if IsSiegeEquipmentNeeded() then
 		local mtype = unitTable[unitName].mtype
 		local attackCounter = ai.attackhandler:GetCounter(mtype)
-		return BuildWithLimitedNumber(unitName, attackCounter*3)
-	else
-		return DummyUnitName
+		local halfAttackCounter = attackCounter * 0.5
+		if ai.combatCount > halfAttackCounter then
+			return BuildWithLimitedNumber(unitName, halfAttackCounter)
+		end
 	end
+	return DummyUnitName
 end
 
 -- uses this on breakthrough units
@@ -1394,7 +1389,7 @@ function BuildNuke()
 	else
 		unitName = "armsilo"
 	end
-	return unitName
+	return BuildWithLimitedNumber(unitName, nukeLimit)
 end
 
 function BuildNukeIfNeeded()
