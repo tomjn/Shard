@@ -137,40 +137,21 @@ function CheckForDangers()
 					if unitTable[un].mtype == "air" and unitTable[un].groundRange > 0 then
 						needAA = true
 						EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
-					else
-						for _, ut in pairs(airFacList) do
-							if un == ut then
-								needAA = true
-								EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
-								break
-							end
-						end
+					elseif airFacList[un] then
+						needAA = true
+						EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
 					end
-					for _, ut in pairs(bigPlasmaList) do
-						if un == ut then
-							needShields = true
-							EchoDebug("Spotted "..un.." enemy unit, now I need plasma shields!")
-							break
-						end
+					if bigPlasmaList[un] then
+						needShields = true
+						EchoDebug("Spotted "..un.." enemy unit, now I need plasma shields!")
 					end
-					for _, ut in pairs(nukeList) do
-						if un == ut then
-							needAntinuke = true
-							EchoDebug("Spotted "..un.." enemy unit, now I need antinukes!")
-							break
-						end
+					if nukeList[un] then
+						needAntinuke = true
+						EchoDebug("Spotted "..un.." enemy unit, now I need antinukes!")
 					end
-					if unitTable[un].needsWater and enemyUnit:WeaponCount() > 0 then
+					if subFacList[un] or ((unitTable[un].mtype == "sub" or unitTable[un].mtype == "shp") and unitTable[un].isWeapon) then
 						needTorpedo = true
 						EchoDebug("Spotted "..un.." enemy unit, now I need torpedos!")
-					else
-						for _, ut in pairs(subFacList) do
-							if un == ut then
-								needTorpedo = true
-								EchoDebug("Spotted "..un.." enemy unit, now I need torpedos!")
-								break
-							end
-						end
 					end
 					if needAA and needShields and needAntinuke and needTorpedo then
 						break
@@ -240,7 +221,7 @@ function CheckForMapControl()
 		ai.needNukes = false
 		if Metal.income > 50 and ai.haveAdvFactory and needUpgrade and ai.enemyBasePosition then
 			local canGetThere = false
-			for i, factory in pairs(ai.factoriesAtLevel[ai.maxLevel]) do
+			for i, factory in pairs(ai.factoriesAtLevel[ai.maxFactoryLevel]) do
 				if ai.maphandler:MobilityNetworkHere("bot", factory.position) == ai.maphandler:MobilityNetworkHere("bot", ai.enemyBasePosition) then
 					canGetThere = true
 					break
@@ -2007,8 +1988,8 @@ local anyConUnit = {
 	BuildMediumAA,
 	BuildRadar,
 	WindSolar,
-	SolarAdv,
 	BuildGeo,
+	SolarAdv,
 	BuildHLT,
 	BuildLvl1Plasma,
 	DoSomethingForTheEconomy,

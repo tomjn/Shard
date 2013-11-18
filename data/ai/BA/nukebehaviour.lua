@@ -16,6 +16,8 @@ local CMD_ATTACK = 20
 function NukeBehaviour:Init()
     self.lastStockpileFrame = 0
     self.lastLaunchFrame = 0
+    self.gotTarget = false
+    self.finished = false
 end
 
 function NukeBehaviour:UnitCreated(unit)
@@ -27,15 +29,12 @@ function NukeBehaviour:UnitIdle(unit)
 end
 
 function NukeBehaviour:Update()
-	if self.active then
-		local f = game:Frame()
-		if self.lastStockpileFrame == 0 or f > self.lastStockpileFrame + 1500 then
-			local floats = api.vectorFloat()
-			floats:push_back(1)
-			self.unit:Internal():ExecuteCustomCommand(CMD_STOCKPILE, floats)
-			self.lastStockpileFrame = f
-		end
-		if f > self.lastLaunchFrame + 100 then
+	if not self.active then return end
+
+	local f = game:Frame()
+
+	if self.finished then
+		if ai.needNukes and f > self.lastLaunchFrame + 100 then
 			local bestCell = ai.targethandler:GetBestNukeCell()
 			if bestCell ~= nil then
 				local position = bestCell.pos
@@ -45,8 +44,27 @@ function NukeBehaviour:Update()
 				floats:push_back(position.y)
 				floats:push_back(position.z)
 				self.unit:Internal():ExecuteCustomCommand(CMD_ATTACK, floats)
+				self.gotTarget = true
+				EchoDebug("got target")
+			else
+				self.gotTarget = false
 			end
 			self.lastLaunchFrame = f
+			self.unit:ElectBehaviour()
+		end
+		if self.gotTarget then
+			if self.lastStockpileFrame == 0 or f > self.lastStockpileFrame + 2500 then
+				local floats = api.vectorFloat()
+				floats:push_back(1)
+				self.unit:Internal():ExecuteCustomCommand(CMD_STOCKPILE, floats)
+				self.lastStockpileFrame = f
+			end
+		end
+	else
+		if f % 60 == 0 then
+			if not self.unit:Internal():IsBeingBuilt() then
+				self.finished = true
+			end
 		end
 	end
 end

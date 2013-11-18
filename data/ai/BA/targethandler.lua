@@ -729,7 +729,7 @@ end
 function TargetHandler:GetBestNukeCell()
 	self:UpdateMap()
 	local best
-	local bestValueThreat = 0
+	local bestValueThreat = factoryValue
 	for i, cell in pairs(cellList) do
 		if cell.pos then
 			local value, threat = CellValueThreat("ALL", cell)

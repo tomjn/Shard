@@ -115,7 +115,7 @@ factoryMobilities = {
 	corasy = {"shp", "sub"},
 	armasy = {"shp", "sub"},
 	csubpen = {"sub", "amp"},
-	csubpen = {"sub", "amp"},
+	asubpen = {"sub", "amp"},
 	corgant = {"bot"},
 	armshltx = {"bot"},
 }
@@ -170,7 +170,7 @@ factoryExitSides = {
 	corasy = 4,
 	armasy = 4,
 	csubpen = 4,
-	csubpen = 4,
+	asubpen = 4,
 	corgant = 1,
 	armshltx = 1,
 }
@@ -184,7 +184,7 @@ littlePlasmaList = {
 }
 
 -- these big energy plants will be shielded in addition to factories
-bigEnergyPlant = {
+bigEnergyList = {
 	cmgeo = 1,
 	amgeo = 1,
 	corfus = 1,
@@ -465,36 +465,36 @@ dontInterruptList = {
 
 -- if any of these is found among enemy units, AA units and fighters will be built
 airFacList = {
-	"armap",
-	"corap",
-	"armaap",
-	"coraap",
-	"armplat",
-	"corplat",
+	corap = 1,
+	armap = 1,
+	coraap = 1,
+	armaap = 1,
+	corplat = 1,
+	armplat = 1,
 }
 
 -- if any of these is found among enemy units, torpedo launchers and sonar will be built
 subFacList = {
-	"corsy",
-	"armsy",
-	"corasy",
-	"armasy",
-	"csubpen",
-	"asubpen",
+	corsy = 1,
+	carmsy = 1,
+	corasy = 1,
+	armasy = 1,
+	csubpen = 1,
+	asubpen = 1,
 }
 
 -- if any of these is found among enemy units, plasma shields will be built
 bigPlasmaList = {
-	"corint",
-	"armbrtha",
+	corint = 1,
+	armbrtha = 1,
 }
 
 -- if any of these is found among enemy units, antinukes will be built
 nukeList = {
-	"armsilo",
-	"corsilo",
-	"armemp",
-	"cortron",
+	armsilo = 1,
+	corsilo = 1,
+	armemp = 1,
+	cortron = 1,
 }	
 
 -- these units will be used to raid weakly defended spots

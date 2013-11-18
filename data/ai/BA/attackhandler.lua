@@ -325,13 +325,13 @@ function AttackHandler:NeedLess(mtype)
 	if mtype == nil then
 		for mtype, count in pairs(self.counter) do
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-			self.counter[mtype] = self.counter[mtype] - 0.5
+			self.counter[mtype] = self.counter[mtype] - 0.25
 			self.counter[mtype] = math.max(self.counter[mtype], minAttackCounter)
 			EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 		end
 	else
 		if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-		self.counter[mtype] = self.counter[mtype] - 0.5
+		self.counter[mtype] = self.counter[mtype] - 0.25
 		self.counter[mtype] = math.max(self.counter[mtype], minAttackCounter)
 		EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 	end

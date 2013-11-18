@@ -14,6 +14,7 @@ local CMD_STOCKPILE = 100
 
 function AntinukeBehaviour:Init()
     self.lastStockpileFrame = 0
+    self.finished = false
 end
 
 function AntinukeBehaviour:UnitCreated(unit)
@@ -25,13 +26,24 @@ function AntinukeBehaviour:UnitIdle(unit)
 end
 
 function AntinukeBehaviour:Update()
-	if self.active then
+	if not self.active then return end
+
+	if self.finished and ai.needAntinuke then
 		local f = game:Frame()
 		if self.lastStockpileFrame == 0 or f > self.lastStockpileFrame + 1000 then
 			local floats = api.vectorFloat()
 			floats:push_back(1)
 			self.unit:Internal():ExecuteCustomCommand(CMD_STOCKPILE, floats)
 			self.lastStockpileFrame = f
+		end
+	end
+
+	if not self.finished then
+		local f = game:Frame()
+		if f % 60 == 0 then
+			if not self.unit:Internal():IsBeingBuilt() then
+				self.finished = true
+			end
 		end
 	end
 end
@@ -45,11 +57,7 @@ function AntinukeBehaviour:Deactivate()
 end
 
 function AntinukeBehaviour:Priority()
-	if ai.needAntinuke then
-		return 100
-	else
-		return 0
-	end
+	return 100
 end
 
 function AntinukeBehaviour:UnitDead(unit)
