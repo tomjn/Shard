@@ -43,7 +43,6 @@ function BuildSiteHandler:Init()
 	ai.factories = 0
 	ai.maxFactoryLevel = 0
 	ai.factoriesAtLevel = {}
-	ai.factoryLocationsAtLevel = {}
 	ai.outmodedFactoryID = {}
 	local mapSize = map:MapDimensions()
 	ai.maxElmosX = mapSize.x * 8
@@ -57,9 +56,17 @@ end
 function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalPosition)
 	-- make sure it's on the map
 	if pos ~= nil then
-		if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ) then
-			EchoDebug("bad position: " .. pos.x .. ", " .. pos.z)
-			pos = nil
+		if unitTable[unitTypeToBuild:Name()].buildOptions then
+			-- don't build factories too close to south map edge because they face south
+			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ - 50) then
+				EchoDebug("bad position: " .. pos.x .. ", " .. pos.z)
+				pos = nil
+			end
+		else
+			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ) then
+				EchoDebug("bad position: " .. pos.x .. ", " .. pos.z)
+				pos = nil
+			end
 		end
 	end
 	-- sanity check: is it REALLY possible to build here?
@@ -99,7 +106,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 			end
 		elseif bigPlasmaList[uname] or littlePlasmaList[uname] or nukeList[uname] then
 			-- don't build bombarding units outside of bombard positions
-			local b = ai.targethandler:IsBombardPosition(turtle.position, uname)
+			local b = ai.targethandler:IsBombardPosition(pos, uname)
 			if not b then
 				EchoDebug("bombard not in bombard position")
 				pos = nil
@@ -211,12 +218,12 @@ function BuildSiteHandler:ClosestHighestLevelFactory(builder, maxDist)
 	local maxLevel = ai.maxFactoryLevel
 	EchoDebug(maxLevel .. " max factory level")
 	local factoryPos = nil
-	for i, location in pairs(ai.factoryLocationsAtLevel[maxLevel]) do
-		if not ai.outmodedFactoryID[location.uid] then
-			local dist = distance(bpos, location.position)
+	for i, factory in pairs(ai.factoriesAtLevel[maxLevel]) do
+		if not ai.outmodedFactoryID[factory.id] then
+			local dist = distance(bpos, factory.position)
 			if dist < minDist then
 				minDist = dist
-				factoryPos = location.position
+				factoryPos = factory.position
 			end
 		end
 	end

@@ -426,7 +426,14 @@ function MapHandler:AppropriateFactories(bname, gx, gz)
 										expFactoryToBuild = fname
 									end
 								else
-									table.insert(factoriesToBuild, fname)
+									local okay = true
+									if mtype == "veh" then
+										-- it's really inefficient to build a vehicle factory just to build vehicle cons in a place where a bot factory would work fully
+										if self:OutmodedFactoryHere("veh", nil, network) and not self:OutmodedFactoryHere("bot", nil, network) then
+											okay = false
+										end
+									end
+									if okay then table.insert(factoriesToBuild, fname) end
 								end
 								if mtype == "shp" then noship = false end
 							end

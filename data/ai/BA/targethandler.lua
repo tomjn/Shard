@@ -66,6 +66,9 @@ local vulnerableHealth = 200
 local wreckMult = 100
 local badCellThreat = 300
 
+local factoryValue = 1000
+local conValue = 300
+
 local feintRepeatMod = 10
 
 local cellElmosX
@@ -126,10 +129,10 @@ local function Value(unitName)
 	if utable.buildOptions ~= nil then
 		if utable.isBuilding then
 			-- factory
-			val = val + 1000
+			val = val + factoryValue
 		else
 			-- construction unit
-			val = val + 300
+			val = val + conValue
 		end
 	end
 	if utable.extractsMetal > 0 then
@@ -365,13 +368,14 @@ local function UpdateEnemies()
 	if #enemies == 0 then return end
 
 	-- figure out where all the enemies are!
-	local highestValue = 0
+	local highestValue = factoryValue
 	local highestValueCell
 	for i, e in pairs(enemies) do
 		local los = ai.loshandler:IsKnownEnemy(e)
 		local ghost = ai.loshandler:GhostPosition(e)
 		local name = e:Name()
-		if los ~= 0 or ghost then
+		-- only count those we know about and that aren't being built
+		if (los ~= 0 or ghost) and not e:IsBeingBuilt() then
 			local pos
 			if ghost then
 				EchoDebug("using ghost position")
@@ -799,21 +803,21 @@ function TargetHandler:IsBombardPosition(position, unitName)
 	local px, pz = GetCellPosition(position)
 	local radius = unitTable[unitName].groundRange
 	local groundValue, groundThreat = CheckInRadius(px, pz, radius, "ground")
-	if groundValue + groundThreat > Value(unitName) * 4 then
+	if groundValue + groundThreat > Value(unitName) * 2 then
 		return true
 	else
 		return false
 	end
 end
 
-function TargetHandler:IsSafePosition(position, unit)
+function TargetHandler:IsSafePosition(position, unit, threshold)
 	self:UpdateMap()
 	local cell = GetCellHere(position)
 	local value, threat = CellValueThreat(unit, cell)
-	if threat == 0 then
-		return true
+	if threshold then
+		return threat < unitTable[unit:Name()].metalCost * threshold
 	else
-		return false
+		return threat == 0
 	end
 end
 

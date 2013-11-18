@@ -21,6 +21,7 @@ function ReclaimBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
+	self.id = self.unit:Internal():ID()
 	if reclaimerList[self.name] then
 		ai.haveReclaimer = true
 	end
@@ -58,9 +59,11 @@ function ReclaimBehaviour:Update()
 			doreclaim = true
 		elseif ai.conCount > 2 and ai.needToReclaim then
 			if not ai.haveReclaimer then
-				ai.haveReclaimer = true
-				self.extraReclaimer = true
-				doreclaim = true
+				if ai.IDByType[self.id] ~= 1 and ai.IDByType[self.id] ~= 3 then
+					ai.haveReclaimer = true
+					self.extraReclaimer = true
+					doreclaim = true
+				end
 			elseif self.extraReclaimer then
 				doreclaim = true
 			end
