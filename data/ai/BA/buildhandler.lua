@@ -57,8 +57,8 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	-- make sure it's on the map
 	if pos ~= nil then
 		if unitTable[unitTypeToBuild:Name()].buildOptions then
-			-- don't build factories too close to map edges
-			if (pos.x <= 50) or (pos.x > ai.maxElmosX - 50) or (pos.z <= 50) or (pos.z > ai.maxElmosZ - 50) then
+			-- don't build factories too close to south map edge because they face south
+			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ - 50) then
 				EchoDebug("bad position: " .. pos.x .. ", " .. pos.z)
 				pos = nil
 			end
