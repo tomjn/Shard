@@ -14,33 +14,42 @@ require "antinukebehaviour"
 require "nukebehaviour"
 require "bombardbehaviour"
 require "exitfactorybehaviour"
+require "countbehaviour"
 require "unitlists"
 require "unittable"
 
 behaviours = {
 	cornanotc = {
 		AssistBehaviour,
+		CountBehaviour,
 	},
 	armnanotc = {
 		AssistBehaviour,
+		CountBehaviour,
 	},
 	corfmd = {
 		AntinukeBehaviour,
+		CountBehaviour,
 	},
 	armamd = {
 		AntinukeBehaviour,
+		CountBehaviour,
 	},
 	corsilo = {
 		NukeBehaviour,
+		CountBehaviour,
 	},
 	armsilo = {
 		NukeBehaviour,
+		CountBehaviour,
 	},
 	corint = {
 		BombardBehaviour,
+		CountBehaviour,
 	},
 	armbrtha = {
 		BombardBehaviour,
+		CountBehaviour,
 	},
 }
 
@@ -49,6 +58,9 @@ function defaultBehaviours(unit)
 	local b = {}
 	local u = unit:Internal()
 	local un = u:Name()
+
+	-- keep track of how many of each kind of unit we have
+	table.insert(b, CountBehaviour)
 
 	if unitTable[un].isBuilding then
 		table.insert(b, RunFromAttackBehaviour)

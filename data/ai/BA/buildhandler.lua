@@ -28,7 +28,6 @@ BuildSiteHandler = class(Module)
 
 local sqrt = math.sqrt
 
-local mexUnitType
 
 function BuildSiteHandler:Name()
 	return "BuildSiteHandler"
@@ -47,8 +46,13 @@ function BuildSiteHandler:Init()
 	local mapSize = map:MapDimensions()
 	ai.maxElmosX = mapSize.x * 8
 	ai.maxElmosZ = mapSize.z * 8
+	ai.nameCount = {}
+	ai.nameCountFinished = {}
+	ai.lastNameCreated = {}
+	ai.lastNameFinished = {}
+	ai.lastNameDead = {}
+	ai.mexCount = 0
 	ai.lvl1Mexes = 1 -- this way mexupgrading doesn't revert to taskqueuing before it has a chance to find mexes to upgrade
-	mexUnitType = game:GetTypeByName("cormex")
 	self.seriouslyDont = {}
 	self:DontBuildOnMetalOrGeoSpots()
 end
@@ -100,6 +104,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 		if nanoTurretList[uname] then
 			-- don't build nanos too far away from factory
 			local dist = distance(originalPosition, pos)
+			EchoDebug("nano distance: " .. dist)
 			if dist > 400 then
 				EchoDebug("nano too far from factory")
 				pos = nil
@@ -180,7 +185,11 @@ function BuildSiteHandler:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, pos
 	if segmentSize == nil then segmentSize = 1 end
 	if direction == nil then direction = 1 end
 	if i == nil then i = 0 end
-	local originalPosition = position
+	-- have to set it this way, otherwise both just point to the same set of data, and originalPosition doesn't stay the same
+	local originalPosition = api.Position()
+	originalPosition.x = position.x
+	originalPosition.y = position.y
+	originalPosition.z = position.z
 
 	EchoDebug("new spiral search")
 	while segmentSize < 8 do

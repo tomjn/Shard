@@ -27,8 +27,8 @@ local needGroundDefense = true
 local needSiege = false
 
 local heavyPlasmaLimit = 3 -- changes with CheckForMapControl
-
 local AAUnitPerTypeLimit = 3 -- changes with CheckForMapControl
+local nukeLimit = 1 -- changes with CheckForMapControl
 
 local lastCheckFrame = 0
 local lastSiegeCheckFrame = 0
@@ -116,106 +116,22 @@ local function MapHasUnderwaterMetal()
 	return ai.hasUWSpots or false
 end
 
-function CheckForDangers()
-	-- don't check too soon after previous check
-	if (lastCheckFrame + 300) < game:Frame() then
-		needAA = false
-		needShields = false
-		needAntinuke = false
-		needTorpedo = false
-		needGroundDefense = true
-		seenGroundThreats = false
-		lastCheckFrame = game:Frame()
-		local enemies = game:GetEnemies()
-		if enemies ~= nil then
-			for _, enemyUnit in pairs(enemies) do
-				if ai.loshandler:IsKnownEnemy(enemyUnit) > 1 then
-					local un = enemyUnit:Name()
-					if not seenGroundThreats and not unitTable[un].isBuilding and not commanderList[un] and unitTable[un].mtype ~= "air" and unitTable[un].mtype ~= "sub" and unitTable[un].groundRange > 0 then
-						seenGroundThreats = true
-					end
-					if unitTable[un].mtype == "air" and unitTable[un].groundRange > 0 then
-						needAA = true
-						EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
-					else
-						for _, ut in pairs(airFacList) do
-							if un == ut then
-								needAA = true
-								EchoDebug("Spotted "..un.." enemy unit, now I need AA!")
-								break
-							end
-						end
-					end
-					for _, ut in pairs(bigPlasmaList) do
-						if un == ut then
-							needShields = true
-							EchoDebug("Spotted "..un.." enemy unit, now I need plasma shields!")
-							break
-						end
-					end
-					for _, ut in pairs(nukeList) do
-						if un == ut then
-							needAntinuke = true
-							EchoDebug("Spotted "..un.." enemy unit, now I need antinukes!")
-							break
-						end
-					end
-					if unitTable[un].needsWater and enemyUnit:WeaponCount() > 0 then
-						needTorpedo = true
-						EchoDebug("Spotted "..un.." enemy unit, now I need torpedos!")
-					else
-						for _, ut in pairs(subFacList) do
-							if un == ut then
-								needTorpedo = true
-								EchoDebug("Spotted "..un.." enemy unit, now I need torpedos!")
-								break
-							end
-						end
-					end
-					if needAA and needShields and needAntinuke and needTorpedo then
-						break
-					end
-				end
-			end
-		end
-		if (needAA or needTorpedo) and not seenGroundThreats then
-			needGroundDefense = false
-		end
-		ai.needAA = needAA
-		ai.needShields = needShields
-		ai.needAntinuke = needAntinuke
-		ai.needTorpedo = needTorpedo
-		ai.needGroundDefense = needGroundDefense
-	end
-end
-
--- check how much of the map our alliance controls
--- (in terms of mex spots)
--- if we have half or more, it's time to make siege units - base assault time
+-- check if siege units are needed
+-- check if advanced and experimental factories are needed
+-- check if nukes are needed
+-- check if reclaiming is needed
 function CheckForMapControl()
 	local f = game:Frame()
 	if (lastSiegeCheckFrame + 240) < f then
-		local friends = game:GetFriendlies()
-		local totalExtractors = map:SpotCount()
-		local friendlyExtractors = 0
 		ai.haveAdvFactory = false
+		if ai.factoriesAtLevel[3] ~= nil then
+			ai.haveAdvFactory = #ai.factoriesAtLevel[3] ~= 0
+		end
 		ai.haveExpFactory = false
-		for _, u in pairs(friends) do
-			if u ~= nil then
-				local un = u:Name()
-				local ut = game:GetTypeByName(un)
-				if ut:Extractor() then
-					friendlyExtractors = friendlyExtractors + 1
-				end
-				if advFactories[un] then ai.haveAdvFactory = true end
-				if expFactories[un] then ai.haveExpFactory = true end
-			end
+		if ai.factoriesAtLevel[5] ~= nil then
+			ai.haveExpFactory = #ai.factoriesAtLevel[5] ~= 0
 		end
-		if totalExtractors == 0 then
-			needSiege = true
-		else
-			needSiege = (friendlyExtractors / totalExtractors >= 0.5)
-		end
+		
 		lastSiegeCheckFrame = f
 		local Metal = game:GetResourceByName("Metal")
 		if Metal.reserves < 0.5 * Metal.capacity and ai.wreckCount > 0 then
@@ -224,15 +140,19 @@ function CheckForMapControl()
 			ai.needToReclaim = false
 		end
 		AAUnitPerTypeLimit = math.ceil(Metal.income / 12)
-		heavyPlasmaLimit = math.ceil(ai.combatCount / 6)
-		-- game:SendToConsole("bomber counter: " .. ai.bomberhandler:GetCounter() .. "/" .. maxBomberCounter .. "  attack counter: " .. ai.attackhandler:GetCounter() .. "/" .. maxAttackCounter)
-		ai.needAdvanced = false
+		heavyPlasmaLimit = math.ceil(ai.combatCount / 7)
+		nukeLimit = math.ceil(ai.combatCount / 20)
+
 		local attackCounter = ai.attackhandler:GetCounter()
 		local couldAttack = ai.couldAttack - ai.factories >= 2 or ai.couldBomb > 2
 		local bombingTooExpensive = ai.bomberhandler:GetCounter() == maxBomberCounter
 		local attackTooExpensive = attackCounter == maxAttackCounter
 		local plentyOfCombatUnits = ai.combatCount > attackCounter * 2.5
 		local needUpgrade = plentyOfCombatUnits or couldAttack or bombingTooExpensive or attackTooExpensive
+
+		EchoDebug(ai.totalEnemyThreat .. " " .. ai.totalEnemyImmobileThreat .. " " .. ai.totalEnemyMobileThreat)
+		needSiege = (ai.totalEnemyImmobileThreat > ai.totalEnemyMobileThreat * 3 and ai.totalEnemyImmobileThreat > 50000) or (attackCounter > maxAttackCounter * 0.85) or (ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.5)
+		ai.needAdvanced = false
 		if Metal.income > 12 and ai.factories > 0 and needUpgrade then
 			ai.needAdvanced = true
 		end
@@ -240,7 +160,7 @@ function CheckForMapControl()
 		ai.needNukes = false
 		if Metal.income > 50 and ai.haveAdvFactory and needUpgrade and ai.enemyBasePosition then
 			local canGetThere = false
-			for i, factory in pairs(ai.factoriesAtLevel[ai.maxLevel]) do
+			for i, factory in pairs(ai.factoriesAtLevel[ai.maxFactoryLevel]) do
 				if ai.maphandler:MobilityNetworkHere("bot", factory.position) == ai.maphandler:MobilityNetworkHere("bot", ai.enemyBasePosition) then
 					canGetThere = true
 					break
@@ -262,28 +182,24 @@ function IsSiegeEquipmentNeeded()
 end
 
 function IsAANeeded()
-	CheckForDangers()
-	return needAA
+	return ai.needAirDefense
 end
 
 function IsShieldNeeded()
-	CheckForDangers()
-	return needShields
+	return ai.needShields
 end
 
 function IsTorpedoNeeded()
-	CheckForDangers()
-	return needTorpedo
+	return ai.needSubmergedDefense
 end
 
 function IsAntinukeNeeded()
-	CheckForDangers()
-	return needAntinuke
+	return ai.needAntinuke
 end
 
 function IsNukeNeeded()
-	CheckForDangers()
-	return ai.needNukes
+	local nuke = ai.needNukes and ai.canNuke
+	return nuke
 end
 
 function BuildMex()
@@ -492,10 +408,11 @@ function BuildSiegeIfNeeded(unitName)
 	if IsSiegeEquipmentNeeded() then
 		local mtype = unitTable[unitName].mtype
 		local attackCounter = ai.attackhandler:GetCounter(mtype)
-		return BuildWithLimitedNumber(unitName, attackCounter*3)
-	else
-		return DummyUnitName
+		if ai.combatCount > attackCounter * 0.75 then
+			return BuildWithLimitedNumber(unitName, math.ceil(attackCounter * 0.5))
+		end
 	end
+	return DummyUnitName
 end
 
 -- uses this on breakthrough units
@@ -1037,72 +954,23 @@ local function WindSolarTidal(self)
 	LandOrWater(self, WindSolar(), TidalIfTidal())
 end
 
--- cound how many of the specified unit we own
 function CountOwnUnits(tmpUnitName)
-	-- don't count no-units
-	if tmpUnitName == DummyUnitName then
-		return 0
-	end
-	local ownUnits = game:GetFriendlies()
-	local unitCount = 0
-	local ownTeamID = game:GetTeamID()
-	for _, u in pairs(ownUnits) do
-		local un = u:Name()
-		if un == tmpUnitName then
-			local ut = u:Team()
-			if ut == ownTeamID then
-				unitCount = unitCount + 1
-			end
-		end
-	end
-	return unitCount
+	if tmpUnitName == DummyUnitName then return 0 end -- don't count no-units
+	if ai.nameCount[tmpUnitName] == nil then return 0 end
+	return ai.nameCount[tmpUnitName]
 end
 
--- count how many of the unit the entire team owns
-function CountFriendlyUnits(tmpUnitName)
-	-- don't count no-units
-	if tmpUnitName == DummyUnitName then
-		return 0
-	end
-	local ownUnits = game:GetFriendlies()
-	local unitCount = 0
-	local ownTeamID = game:GetTeamID()
-	for _, u in pairs(ownUnits) do
-		local un = u:Name()
-		if un == tmpUnitName then
-			unitCount = unitCount + 1
-		end
-	end
-	return unitCount
-end
-
-
--- this function also checks for unit's team
--- so that allied factories don't prevent AI from making its own
 function BuildWithLimitedNumber(tmpUnitName, minNumber)
-	local ownUnits = game:GetFriendlies()
-	local unitCount = 0
-	local ownTeamID = game:GetTeamID()
-	-- optimisation: don't check if it's already a null unit
-	if tmpUnitName == DummyUnitName then
+	if tmpUnitName == DummyUnitName then return DummyUnitName end
+	if minNumber == 0 then return DummyUnitName end
+	if ai.nameCount[tmpUnitName] == nil then
 		return tmpUnitName
-	end
-	for _, u in pairs(ownUnits) do
-		local un = u:Name()
-		if un == tmpUnitName then
-			local ut = u:Team()
-			if ut == ownTeamID then
-				unitCount = unitCount + 1
-			end
-		end
-		if unitCount >= minNumber then
-			break
-		end
-	end
-	if unitCount >= minNumber then
-		return DummyUnitName
 	else
-		return tmpUnitName
+		if ai.nameCount[tmpUnitName] == 0 or ai.nameCount[tmpUnitName] < minNumber then
+			return tmpUnitName
+		else
+			return DummyUnitName
+		end
 	end
 end
 
@@ -1326,34 +1194,6 @@ function CountOwnUnitsInRadius(unitName, pos, radius, maxCount)
 	return unitCount
 end
 
--- how many enemies are there in a radius around a position, also returns buildings and factories
-function CountEnemiesInRadius(pos, radius, maxCount)
-	local buildingCount = 0
-	local factoryCount = 0
-	local enemyCount = 0
-	local enemies = game:GetEnemies()
-	if enemies ~= nil then
-		for _, e in pairs(enemies) do
-			local epos = e:GetPosition()
-			if distance(pos, epos) < radius then
-				if unitTable[e:Name()].isBuilding then
-					buildingCount = buildingCount + 1
-					if unitTable[e:Name()].buildOptions ~= nil then
-						factoryCount = factoryCount + 1
-					end
-				else
-					enemyCount = enemyCount + 1
-				end
-				-- optimisation: if the limit is already exceeded, don't count further
-				if enemyCount >= maxCount then
-					break
-				end
-			end
-		end
-	end
-	return enemyCount, buildingCount, factoryCount
-end
-
 local function CheckAreaLimit(unitName, builder, unitLimit, range)
 	-- this is special case, it means the unit will not be built anyway
 	if unitName == DummyUnitName then
@@ -1373,7 +1213,7 @@ local function CheckAreaLimit(unitName, builder, unitLimit, range)
 end
 
 local function GroundDefenseIfNeeded(unitName, builder)
-	if not needGroundDefense then
+	if not ai.needGroundDefense then
 		return DummyUnitName
 	else
 		return unitName
@@ -1413,7 +1253,7 @@ function BuildNuke()
 	else
 		unitName = "armsilo"
 	end
-	return unitName
+	return BuildWithLimitedNumber(unitName, nukeLimit)
 end
 
 function BuildNukeIfNeeded()
@@ -1759,7 +1599,7 @@ local function AirRepairPadIfNeeded()
 	local tmpUnitName = DummyUnitName
 
 	-- only make air pads if the team has at least 1 air fac
-	if CountFriendlyUnits("corap") > 0 or CountFriendlyUnits("armap") > 0 or CountFriendlyUnits("coraap") > 0 or CountFriendlyUnits("armaap") > 0 then
+	if CountOwnUnits("corap") > 0 or CountOwnUnits("armap") > 0 or CountOwnUnits("coraap") > 0 or CountOwnUnits("armaap") > 0 then
 		if ai.mySide == CORESideName then
 			tmpUnitName = "corasp"
 		else
@@ -2007,8 +1847,8 @@ local anyConUnit = {
 	BuildMediumAA,
 	BuildRadar,
 	WindSolar,
-	SolarAdv,
 	BuildGeo,
+	SolarAdv,
 	BuildHLT,
 	BuildLvl1Plasma,
 	DoSomethingForTheEconomy,

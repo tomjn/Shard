@@ -66,45 +66,44 @@ function AssistBehaviour:UnitIdle(unit)
 end
 
 function AssistBehaviour:Update()
+	-- nano turrets don't need updating, they already have a patrol order
+	if self.isNanoTurret then return end
+
 	local f = game:Frame()
 
 	if math.mod(f,180) == 0 then
 		local unit = self.unit:Internal()
 		local uname = self.name
-		if self.isNanoTurret then
-			-- self.unit:Internal():MoveAndFire(self.unit:Internal():GetPosition())
-		else
-			if self.isCommander then
-				-- turn commander into build assister if you control more than half the mexes or if it's damaged
-				if self.IDByType == 1 then
-					if IsSiegeEquipmentNeeded() or unit:GetHealth() < unit:GetMaxHealth() * 0.9 then
-						self.IDByType = 2
-						ai.IDByType[self.id] = 2
-						self.unit:ElectBehaviour()
-					end
-				else
-					-- switch commander back to building
-					if not IsSiegeEquipmentNeeded() and unit:GetHealth() >= unit:GetMaxHealth() * 0.9 then
-						self.IDByType = 1
-						ai.IDByType[self.id] = 1
-						self.unit:ElectBehaviour()
-					end
-				end
-			else
-				-- fill empty spots after con units die
-				-- EchoDebug(uname .. " " .. self.IDByType .. " / " .. tostring(ai.totalCons[uname]))
-				if self.IDByType > ai.totalCons[uname] then
-					EchoDebug("filling empty spots with " .. uname .. " " .. self.IDByType)
-					self:AssignIDByType()
-					EchoDebug("ID now: " .. self.IDByType)
+		if self.isCommander then
+			-- turn commander into build assister if you control more than half the mexes or if it's damaged
+			if self.IDByType == 1 then
+				if IsSiegeEquipmentNeeded() or unit:GetHealth() < unit:GetMaxHealth() * 0.9 then
+					self.IDByType = 2
+					ai.IDByType[self.id] = 2
 					self.unit:ElectBehaviour()
 				end
+			else
+				-- switch commander back to building
+				if not IsSiegeEquipmentNeeded() and unit:GetHealth() >= unit:GetMaxHealth() * 0.9 then
+					self.IDByType = 1
+					ai.IDByType[self.id] = 1
+					self.unit:ElectBehaviour()
+				end
+			end
+		else
+			-- fill empty spots after con units die
+			-- EchoDebug(uname .. " " .. self.IDByType .. " / " .. tostring(ai.totalCons[uname]))
+			if self.IDByType > ai.totalCons[uname] then
+				EchoDebug("filling empty spots with " .. uname .. " " .. self.IDByType)
+				self:AssignIDByType()
+				EchoDebug("ID now: " .. self.IDByType)
+				self.unit:ElectBehaviour()
 			end
 		end
 	end
 
 	if math.mod(f,60) == 0 then
-		if self.active and not self.isNanoTurret then
+		if self.active then
 			if self.target ~= nil then
 				if self.assisting ~= self.target:ID() then
 					local floats = api.vectorFloat()

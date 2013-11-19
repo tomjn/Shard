@@ -68,8 +68,15 @@ local badCellThreat = 300
 
 local factoryValue = 1000
 local conValue = 300
+local techValue = 100
+local minNukeValue = factoryValue + techValue + 500
 
 local feintRepeatMod = 10
+
+local enemyAlreadyCounted = {}
+local currentEnemyThreatCount = 0
+local currentEnemyImmobileThreatCount = 0
+local currentEnemyMobileThreatCount = 0
 
 local cellElmosX
 local cellElmosZ
@@ -77,6 +84,8 @@ local cells = {}
 local cellList = {}
 local cell
 local badPositions = {}
+
+local dangers = {}
 
 local lastUpdateFrame = 0
 
@@ -125,7 +134,7 @@ end
 local function Value(unitName)
 	local utable = unitTable[unitName]
 	if not utable then return 0 end
-	local val = utable.metalCost
+	local val = utable.metalCost + (utable.techLevel * techValue)
 	if utable.buildOptions ~= nil then
 		if utable.isBuilding then
 			-- factory
@@ -136,7 +145,7 @@ local function Value(unitName)
 		end
 	end
 	if utable.extractsMetal > 0 then
-		val = val + 1000000 * utable.extractsMetal
+		val = val + 800000 * utable.extractsMetal
 	end
 	if utable.totalEnergyOut > 0 then
 		val = val + utable.totalEnergyOut
@@ -358,8 +367,92 @@ end
 local function CountEnemyThreat(e, threat)
 	if not enemyAlreadyCounted[e] then
 		currentEnemyThreatCount = currentEnemyThreatCount + threat
+		if unitTable[e:Name()].isBuilding then
+			currentEnemyImmobileThreatCount = currentEnemyImmobileThreatCount + threat
+		else
+			currentEnemyMobileThreatCount = currentEnemyMobileThreatCount + threat
+		end
 		enemyAlreadyCounted[e] = true
 	end
+end
+
+local function CountDanger(layer, id)
+	local danger = dangers[layer]
+	if not danger.alreadyCounted[id] then
+		danger.count = danger.count + 1
+		danger.alreadyCounted[id] = true
+		EchoDebug("spotted " .. layer .. " threat")
+	end
+end
+
+local function DangerCheck(unitName, unitID)
+	local un = unitName
+	local id = unitID
+	if not unitTable[un].isBuilding and not commanderList[un] and unitTable[un].mtype ~= "air" and unitTable[un].mtype ~= "sub" and unitTable[un].groundRange > 0 then
+		CountDanger("ground", id)
+	elseif groundFacList[un] then
+		CountDanger("ground", id)
+	end
+	if unitTable[un].mtype == "air" and unitTable[un].groundRange > 0 then
+		CountDanger("air", id)
+	elseif airFacList[un] then
+		CountDanger("air", id)
+	end
+	if (unitTable[un].mtype == "sub" or unitTable[un].mtype == "shp") and unitTable[un].isWeapon and not unitTable[un].isBuilding then
+		CountDanger("submerged", id)
+	elseif subFacList[un] then
+		CountDanger("submerged", id)
+	end
+	if bigPlasmaList[un] then
+		CountDanger("plasma", id)
+	end
+	if nukeList[un] then
+		CountDanger("nuke", id)
+	end
+	if antinukeList[un] then
+		CountDanger("antinuke", id)
+	end
+end
+
+local function NewDangerLayer()
+	return { count = 0, alreadyCounted = {}, present = false, obsolesce = 0, threshold = 1, duration = 1800, }
+end
+
+local function InitializeDangers()
+	dangers = {}
+	dangers["ground"] = NewDangerLayer()
+	dangers["ground"].duration = 2400 -- keep ground threat alive for one and a half minutes
+	-- assume there are ground threats for the first three minutes
+	dangers["ground"].present = true
+	dangers["ground"].obsolesce = game:Frame() + 5400
+	dangers["air"] = NewDangerLayer()
+	dangers["submerged"] = NewDangerLayer()
+	dangers["plasma"] = NewDangerLayer()
+	dangers["nuke"] = NewDangerLayer()
+	dangers["antinuke"] = NewDangerLayer()
+end
+
+local function UpdateDangers()
+	local f = game:Frame()
+
+	for layer, danger in pairs(dangers) do
+		if danger.count >= danger.threshold then
+			danger.present = true
+			danger.obsolesce = f + danger.duration
+			danger.count = 0
+			danger.alreadyCounted = {}
+		elseif danger.present and f >= danger.obsolesce then
+			EchoDebug(layer .. " obsolete")
+			danger.present = false
+		end
+	end
+
+	ai.needGroundDefense = dangers.ground.present
+	ai.needAirDefense = dangers.air.present
+	ai.needSubmergedDefense = dangers.submerged.present
+	ai.needShields = dangers.plasma.present
+	ai.needAntinuke = dangers.nuke.present
+	ai.canNuke = not dangers.antinuke.present
 end
 
 local function UpdateEnemies()
@@ -402,6 +495,7 @@ local function UpdateEnemies()
 					FillCircle(px, pz, baseUnitRange, "submerged", baseUnitThreat)
 				end
 			elseif los == 2 then
+				DangerCheck(name, e:ID())
 				local value = Value(name)
 				for i, groundAirSubmerged in pairs(threatTypes) do
 					local threat, range = ThreatRange(name, groundAirSubmerged)
@@ -578,20 +672,33 @@ end
 
 function TargetHandler:Init()
 	currentEnemyThreatCount = 0
+	currentEnemyImmobileThreatCount = 0
+	currentEnemyMobileThreatCount = 0
 	enemyAlreadyCounted = {}
 	ai.totalEnemyThreat = 10000
+	ai.totalEnemyImmobileThreat = 5000
+	ai.totalEnemyMobileThreat = 5000
+	ai.needGroundDefense = true
+	ai.canNuke = true
+	InitializeDangers()
+	self.lastEnemyThreatUpdateFrame = 0
 	self.feints = {}
 end
 
 function TargetHandler:Update()
 	local f = game:Frame()
-	if f % 1800 == 0 then
+	if f > self.lastEnemyThreatUpdateFrame + 1800 or self.lastEnemyThreatUpdateFrame == 0 then
 		-- store and reset the threat count
 		-- EchoDebug(currentEnemyThreatCount .. " enemy threat last 2000 frames")
 		EchoDebug(currentEnemyThreatCount)
 		ai.totalEnemyThreat = currentEnemyThreatCount
+		ai.totalEnemyImmobileThreat = currentEnemyImmobileThreatCount
+		ai.totalEnemyMobileThreat = currentEnemyMobileThreatCount
 		currentEnemyThreatCount = 0
+		currentEnemyImmobileThreatCount = 0
+		currentEnemyMobileThreatCount = 0
 		enemyAlreadyCounted = {}
+		self.lastEnemyThreatUpdateFrame = f
 	end
 end
 
@@ -619,6 +726,7 @@ function TargetHandler:UpdateMap()
 		cells = {}
 		cellList = {}
 		UpdateEnemies()
+		UpdateDangers()
 		-- UpdateFriendlies()
 		UpdateBadPositions()
 		UpdateWrecks()
@@ -733,10 +841,12 @@ function TargetHandler:GetBestNukeCell()
 	for i, cell in pairs(cellList) do
 		if cell.pos then
 			local value, threat = CellValueThreat("ALL", cell)
-			local valuethreat = value + threat
-			if valuethreat > bestValueThreat then
-				best = cell
-				bestValueThreat = valuethreat
+			if value > minNukeValue then
+				local valuethreat = value + threat
+				if valuethreat > bestValueThreat then
+					best = cell
+					bestValueThreat = valuethreat
+				end
 			end
 		end
 	end

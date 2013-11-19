@@ -177,22 +177,22 @@ function AttackHandler:DoMovement()
 					else
 						member.straggler = member.straggler + 1
 					end
-					if member.straggler > 22 then
-						-- remove from squad if the unit is taking longer than 45 seconds
+					if member.straggler > 20 then
+						-- remove from squad if the unit is taking longer than 40 seconds
 						EchoDebug("leaving slowpoke behind")
 						self:AddRecruit(member)
 						table.remove(squad.members, iu)
 					else
 						stragglers = stragglers + 1
 					end
-					if member.lastDist ~= nil then
-						if cdist > member.lastDist - 2 and cdist < member.lastDist + 2 then
+					if member.lastpos ~= nil and member.straggler ~= nil and member.straggler ~= 0 then
+						if math.abs(upos.x - member.lastpos.x) < 3 and math.abs(upos.z - member.lastpos.z) < 3 then
 							if member.stuck == nil then
 								member.stuck = 1
 							else
 								member.stuck = member.stuck + 1
 							end
-							if member.stuck > 3 then
+							if member.stuck > 5 then
 								-- remove from squad if the unit is pathfinder-stuck
 								EchoDebug("leaving stuck behind")
 								self:AddRecruit(member)
@@ -205,7 +205,12 @@ function AttackHandler:DoMovement()
 				else
 					member.straggler = 0
 				end
-				member.lastDist = cdist
+				if member.lastpos == nil then
+					member.lastpos = api.Position()
+					member.lastpos.y = 0
+				end
+				member.lastpos.x = upos.x
+				member.lastpos.z = upos.z
 			end
 			local congregate = false
 			EchoDebug("attack squad of " .. #squad.members .. " members, " .. stragglers .. " stragglers")
@@ -325,13 +330,13 @@ function AttackHandler:NeedLess(mtype)
 	if mtype == nil then
 		for mtype, count in pairs(self.counter) do
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-			self.counter[mtype] = self.counter[mtype] - 0.5
+			self.counter[mtype] = self.counter[mtype] - 0.25
 			self.counter[mtype] = math.max(self.counter[mtype], minAttackCounter)
 			EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 		end
 	else
 		if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-		self.counter[mtype] = self.counter[mtype] - 0.5
+		self.counter[mtype] = self.counter[mtype] - 0.25
 		self.counter[mtype] = math.max(self.counter[mtype], minAttackCounter)
 		EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 	end

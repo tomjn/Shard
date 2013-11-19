@@ -14,9 +14,17 @@ local shieldMod = 1000
 local jamMod = 1000
 local radarMod = 1000
 local sonarMod = 1000
-local distanceMod = 30
+local distanceMod = 20
 
-local factoryPriority = 4 -- added to tech level
+local factoryPriority = 4 -- added to tech level. above this priority allows two of the same type of defense tower.
+
+-- this is added to the turtle's priority if a shell of this layer is added to it
+local layerPriority = {}
+layerPriority["radar"] = 1
+layerPriority["sonar"] = 1
+layerPriority["jam"] = 1
+layerPriority["antinuke"] = 2
+layerPriority["shield"] = 2
 
 TurtleHandler = class(Module)
 
@@ -47,15 +55,15 @@ function TurtleHandler:UnitBuilt(unit)
 		elseif ut.isWeapon and not antinukeList[un] and not nukeList[un] and not bigPlasmaList[un] then
 			self:AddDefense(upos, uid, un)
 		elseif antinukeList[un] then
-			self:AddShell(upos, uid, 1, "antinuke", 72000)
+			self:AddShell(upos, uid, un, 1, "antinuke", 72000)
 		elseif shieldList[un] then
-			self:AddShell(upos, uid, 1, "shield", 450)
+			self:AddShell(upos, uid, un, 1, "shield", 450)
 		elseif ut.jammerRadius ~= 0 then
-			self:AddShell(upos, uid, 1, "jam", ut.jammerRadius)
+			self:AddShell(upos, uid, un, 1, "jam", ut.jammerRadius)
 		elseif ut.radarRadius ~= 0 then
-			self:AddShell(upos, uid, 1, "radar", ut.radarRadius * 0.67)
+			self:AddShell(upos, uid, un, 1, "radar", ut.radarRadius * 0.67)
 		elseif ut.sonarRadius ~= 0 then
-			self:AddShell(upos, uid, 1, "sonar", ut.sonarRadius * 0.67)
+			self:AddShell(upos, uid, un, 1, "sonar", ut.sonarRadius * 0.67)
 		end
 	end
 end
@@ -73,13 +81,35 @@ function TurtleHandler:UnitDead(unit)
 end
 
 
+function TurtleHandler:Attach(turtle, shell)
+	turtle[shell.layer] = turtle[shell.layer] + shell.value
+	if turtle.nameCounts[shell.uname] == nil then
+		turtle.nameCounts[shell.uname] = 1
+	else
+		turtle.nameCounts[shell.uname] = turtle.nameCounts[shell.uname] + 1
+	end
+	local priorityAddition = layerPriority[shell.layer] or 0
+	turtle.priority = turtle.priority + priorityAddition
+	self.totalPriority = self.totalPriority + priorityAddition
+	table.insert(shell.attachments, turtle)
+end
+
+function TurtleHandler:Detach(turtle, shell)
+	turtle[shell.layer] = turtle[shell.layer] - shell.value
+	turtle.nameCounts[shell.uname] = turtle.nameCounts[shell.uname] - 1
+	local priorityAddition = layerPriority[shell.layer] or 0
+	turtle.priority = turtle.priority - priorityAddition
+	self.totalPriority = self.totalPriority - priorityAddition
+end
+
 function TurtleHandler:AddTurtle(position, uid, priority)
-	local turtle = {position = position, uid = uid, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
+	local nameLimit = 1
+	if priority > factoryPriority then nameLimit = 2 end
+	local turtle = {position = position, uid = uid, nameCounts = {}, nameLimit = nameLimit, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
 	for i, shell in pairs(self.shells) do
 		local dist = distance(position, shell.position)
 		if dist < shell.radius then
-			turtle[shell.layer] = turtle[shell.layer] + shell.value
-			table.insert(shell.attachments, turtle)
+			self:Attach(turtle, shell)
 		end
 	end
 	table.insert(self.turtles, turtle)
@@ -107,33 +137,32 @@ function TurtleHandler:AddDefense(position, uid, unitName)
 	-- effective defense ranges are less than actual ranges, because if a building is just inside a weapon range, it's not defended
 	local defense = ut.metalCost
 	if ut.groundRange ~= 0 then
-		self:AddShell(position, uid, defense, "ground", ut.groundRange * 0.5)
+		self:AddShell(position, uid, unitName, defense, "ground", ut.groundRange * 0.5)
 	end
 	if ut.airRange ~= 0 then
-		self:AddShell(position, uid, defense, "air", ut.airRange * 0.5)
+		self:AddShell(position, uid, unitName, defense, "air", ut.airRange * 0.5)
 	end
 	if ut.submergedRange ~= 0 then
-		self:AddShell(position, uid, defense, "submerged", ut.submergedRange * 0.5)
+		self:AddShell(position, uid, unitName, defense, "submerged", ut.submergedRange * 0.5)
 	end
 end
 
-function TurtleHandler:AddShell(position, uid, value, layer, radius)
-	local attachments = {}
+function TurtleHandler:AddShell(position, uid, uname, value, layer, radius)
+	local shell = {position = position, uid = uid, uname = uname, value = value, layer = layer, radius = radius, attachments = {}}
 	for i, turtle in pairs(self.turtles) do
 		local dist = distance(position, turtle.position)
 		if dist < radius then
-			turtle[layer] = turtle[layer] + value
-			table.insert(attachments, turtle)
+			self:Attach(turtle, shell)
 		end
 	end
-	table.insert(self.shells, {position = position, uid = uid, value = value, layer = layer, radius = radius, attachments = attachments})
+	table.insert(self.shells, shell)
 end
 
 function TurtleHandler:RemoveShell(uid)
 	for si, shell in pairs(self.shells) do
 		if shell.uid == uid then
 			for ti, turtle in pairs(shell.attachments) do
-				turtle[shell.layer] = turtle[shell.layer] - shell.value
+				self:Detach(turtle, shell)
 			end
 			table.remove(self.shells, si)
 		end
@@ -172,13 +201,22 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 	local bestDist = 100000
 	local best
 	for i, turtle in pairs(self.turtles) do
+		local enough = false
 		local isLocal = true
-		if ground or air or submerged then
+		if unitName ~= nil then
+			if turtle.nameCounts[unitName] == nil or turtle.nameCounts[unitName] == 0 then
+				-- not enough
+			elseif turtle.nameCounts[unitName] >= turtle.nameLimit then
+				EchoDebug("too many " .. unitName .. " at turtle")
+				enough = true
+			end
+		end
+		if not enough and (ground or air or submerged) then
 			isLocal = ai.maphandler:CheckDefenseLocalization(unitName, turtle.position)
 		end
-		if ai.maphandler:UnitCanGoHere(builder, turtle.position) and isLocal then
-			local okay = true
-			if bombard and unitName ~= nil then 
+		if not enough and isLocal then
+			local okay = ai.maphandler:UnitCanGoHere(builder, turtle.position) 
+			if okay and bombard and unitName ~= nil then 
 				okay = ai.targethandler:IsBombardPosition(turtle.position, unitName)
 			end
 			if okay then
