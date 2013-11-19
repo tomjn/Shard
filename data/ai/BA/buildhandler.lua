@@ -28,7 +28,6 @@ BuildSiteHandler = class(Module)
 
 local sqrt = math.sqrt
 
-local mexUnitType
 
 function BuildSiteHandler:Name()
 	return "BuildSiteHandler"
@@ -47,8 +46,12 @@ function BuildSiteHandler:Init()
 	local mapSize = map:MapDimensions()
 	ai.maxElmosX = mapSize.x * 8
 	ai.maxElmosZ = mapSize.z * 8
+	ai.nameCount = {}
+	ai.nameCountFinished = {}
+	ai.lastNameCreated = {}
+	ai.lastNameFinished = {}
+	ai.lastNameDead = {}
 	ai.lvl1Mexes = 1 -- this way mexupgrading doesn't revert to taskqueuing before it has a chance to find mexes to upgrade
-	mexUnitType = game:GetTypeByName("cormex")
 	self.seriouslyDont = {}
 	self:DontBuildOnMetalOrGeoSpots()
 end

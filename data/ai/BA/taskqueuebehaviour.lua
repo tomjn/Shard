@@ -135,6 +135,12 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 					-- build advanced fusion
 					value = "aafus"
 				end
+				-- don't build big energy plants less than fifteen seconds from one another
+				if ai.lastNameFinished[value] ~= nil then
+					if game:Frame() < ai.lastNameFinished[value] + 450 then
+						value = DummyUnitName
+					end
+				end
 			else
 				if energyOkay or metalTooLow then
 					value = DummyUnitName
@@ -147,8 +153,10 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 			if ai.factories - ai.outmodedFactories <= 0 and metalOkay and energyOkay and Metal.income > 3 and Metal.reserves > unitTable[value].metalCost * 0.7 then
 				EchoDebug("   first factory")
 				-- build the first factory
-			elseif (advFactories[value] or expFactories[value]) and metalOkay and energyOkay then
-				-- build advanced or experimental factory
+			elseif advFactories[value] and (ai.factoriesAtLevel[3] == nil or ai.factoriesAtLevel[3] == {}) and metalOkay and energyOkay then
+				-- easily build advanced factory only if it's the first one
+			elseif expFactories[value] and metalOkay and energyOkay then
+				-- build experimental factory
 			elseif ai.couldAttack - ai.factories >= 1 or ai.couldBomb - ai.factories >= 1 then
 				-- other factory after attack
 				if metalTooLow or Metal.income < ai.factories * 10 or energyTooLow or Energy.income < 250 or (ai.needAdvanced and not ai.haveAdvFactory) then

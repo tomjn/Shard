@@ -463,6 +463,28 @@ dontInterruptList = {
 	"armshltx",
 }
 
+groundFacList = {
+	corvp = 1,
+	armvp = 1,
+	coravp = 1,
+	armavp = 1,
+	corlab = 1,
+	armlab = 1,
+	coralab = 1,
+	armalab = 1,
+	corhp = 1,
+	armhp = 1,
+	corfhp = 1,
+	armfhp = 1,
+	csubpen = 1,
+	asubpen = 1,
+	corgant = 1,
+	armshltx = 1,
+	corfast = 1,
+	consul = 1,
+	armfark = 1,
+}
+
 -- if any of these is found among enemy units, AA units and fighters will be built
 airFacList = {
 	corap = 1,

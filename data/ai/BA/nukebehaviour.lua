@@ -34,23 +34,23 @@ function NukeBehaviour:Update()
 	local f = game:Frame()
 
 	if self.finished then
-		if ai.needNukes and f > self.lastLaunchFrame + 100 then
-			local bestCell = ai.targethandler:GetBestNukeCell()
-			if bestCell ~= nil then
-				local position = bestCell.pos
-				local floats = api.vectorFloat()
-				-- populate with x, y, z of the position
-				floats:push_back(position.x)
-				floats:push_back(position.y)
-				floats:push_back(position.z)
-				self.unit:Internal():ExecuteCustomCommand(CMD_ATTACK, floats)
-				self.gotTarget = true
-				EchoDebug("got target")
-			else
-				self.gotTarget = false
+		if f > self.lastLaunchFrame + 100 then
+			self.gotTarget = false
+			if ai.needNukes and ai.canNuke then
+				local bestCell = ai.targethandler:GetBestNukeCell()
+				if bestCell ~= nil then
+					local position = bestCell.pos
+					local floats = api.vectorFloat()
+					-- populate with x, y, z of the position
+					floats:push_back(position.x)
+					floats:push_back(position.y)
+					floats:push_back(position.z)
+					self.unit:Internal():ExecuteCustomCommand(CMD_ATTACK, floats)
+					self.gotTarget = true
+					EchoDebug("got target")
+				end
 			end
 			self.lastLaunchFrame = f
-			self.unit:ElectBehaviour()
 		end
 		if self.gotTarget then
 			if self.lastStockpileFrame == 0 or f > self.lastStockpileFrame + 2500 then

@@ -26,6 +26,13 @@ function ScoutBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
+	self.armed = unitTable[self.name].isWeapon
+	self.keepYourDistance = unitTable[self.name].losRadius * 16
+	if mtype == "air" then
+		self.airDistance = unitTable[self.name].losRadius * 48
+		self.lastCircleFrame = game:Frame()
+	end
+	self.lastUpdateFrame = game:Frame()
 end
 
 function ScoutBehaviour:UnitBuilt(unit)
@@ -33,19 +40,7 @@ function ScoutBehaviour:UnitBuilt(unit)
 end
 
 function ScoutBehaviour:UnitIdle(unit)
-	if unit.engineID == self.unit.engineID then
-		if self.active then
-			if self.target then
-				self.unit:Internal():Move(self.target)
-			else
-				-- keep scout planes from landing
-				if self.mtype == "air" then
-					self.unit:Internal():Move(RandomAway(unit:Internal():GetPosition(), 500))
-				end
-			end
-		end
-		-- self.unit:ElectBehaviour()
-	end
+
 end
 
 function ScoutBehaviour:Priority()
@@ -62,13 +57,14 @@ function ScoutBehaviour:Deactivate()
 	self.active = false
 	self.target = nil
 	self.evading = false
+	self.attacking = false
 end
 
 
 function ScoutBehaviour:Update()
-	local f = game:Frame()
-	if math.mod(f,28) == 0 then
-		if self.active then
+	if self.active then
+		local f = game:Frame()
+		if f > self.lastUpdateFrame + 30 then
 			local unit = self.unit:Internal()
 			-- reset target if it's in sight
 			if self.target ~= nil then
@@ -80,19 +76,23 @@ function ScoutBehaviour:Update()
 			end
 			-- attack small targets along the way if the scout is armed
 			local attackTarget
-			if unit:WeaponCount() > 0 then
-				if ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 1) then
-					attackTarget = ai.targethandler:NearbyVulnerable(unit)
+			if not self.attacking then
+				if self.armed then
+					if ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 1) then
+						attackTarget = ai.targethandler:NearbyVulnerable(unit)
+					end
 				end
 			end
 			if attackTarget then
 				unit:Attack(attackTarget)
+				self.attacking = true
 			elseif self.target ~= nil then
 				-- evade enemies along the way if possible
 				local newPos, arrived = ai.targethandler:BestAdjacentPosition(unit, self.target)
 				if newPos then
 					unit:Move(newPos)
 					self.evading = true
+					self.attacking = false
 				elseif arrived then
 					-- if we're at the target, find a new target
 					self.target = nil
@@ -101,6 +101,7 @@ function ScoutBehaviour:Update()
 					-- return to course to target after evading
 					unit:Move(self.target)
 					self.evading = false
+					self.attacking = false
 				end
 			end
 			-- find new scout spot if none and not attacking
@@ -108,28 +109,32 @@ function ScoutBehaviour:Update()
 				local topos = ai.scouthandler:ClosestSpot(self) -- first look for closest metal/geo spot that hasn't been seen recently
 				if topos ~= nil then
 					EchoDebug("scouting spot at " .. topos.x .. "," .. topos.z)
-					local keepYourDistance = unitTable[self.name].losRadius * 16 -- don't move directly onto the spot
-					self.target = RandomAway(topos, keepYourDistance)
+					self.target = RandomAway(topos, self.keepYourDistance) -- don't move directly onto the spot
 					unit:Move(self.target)
+					self.attacking = false
 				else
 					EchoDebug("nothing to scout!")
 				end
 			end
-			-- self.unit:ElectBehaviour()
+			self.lastUpdateFrame = f
 		end
 	end
 	
 	-- keep air units circling
-	if math.mod(f, 59) == 0 then
-		if self.target then
+	if self.mtype == "air" and self.active then
+		local f = game:Frame()
+		if f > self.lastCircleFrame + 60 then
 			local unit = self.unit:Internal()
-			if self.mtype == "air" then
-				local upos = unit:GetPosition()
+			local upos = unit:GetPosition()
+			if self.target then
 				local dist = distance(upos, self.target)
-				if dist < unitTable[self.name].losRadius * 48 then
+				if dist < self.airDistance then
 					unit:Move(RandomAway(self.target, 100))
 				end
+			else
+				unit:Move(RandomAway(upos, 500))
 			end
+			self.lastCircleFrame = f
 		end
 	end
 end
