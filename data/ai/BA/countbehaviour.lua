@@ -18,6 +18,7 @@ function CountBehaviour:Init()
    		self.position = self.unit:Internal():GetPosition() -- buildings don't move
    	end
     self.level = unitTable[self.name].techLevel
+    if unitTable[self.name].extractsMetal > 0 then self.isMex = true end
 	if ai.nameCount[self.name] == nil then
 		ai.nameCount[self.name] = 1
 	else
@@ -50,6 +51,7 @@ function CountBehaviour:Update()
 						else
 							ai.nameCountFinished[self.name] = ai.nameCountFinished[self.name] + 1
 						end
+						if self.isMex then ai.mexCount = ai.mexCount + 1 end
 						ai.lastNameFinished[self.name] = f
 						EchoDebug(ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
 						self.finished = true
@@ -76,6 +78,7 @@ function CountBehaviour:UnitDead(unit)
 		ai.nameCount[self.name] = ai.nameCount[self.name] - 1
 		if self.finished then
 			ai.nameCountFinished[self.name] = ai.nameCountFinished[self.name] - 1
+			if self.isMex then ai.mexCount = ai.mexCount - 1 end
 		end
 	end
 end

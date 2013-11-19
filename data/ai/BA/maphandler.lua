@@ -290,11 +290,11 @@ local function MapSpotMobility(metals, geos)
 					end
 					table.insert(mobSpots[mtype], {x = x, z = z})
 					if metalOrGeo == 1 then table.insert(mobNetworkMetals[mtype][thisNetwork], spot) end
-					if metalOrGeo == 1 then table.insert(mobNetworkMetals["air"][1], spot) end
 					if ai.scoutSpots[mtype][thisNetwork] == nil then ai.scoutSpots[mtype][thisNetwork] = {} end
 					table.insert(ai.scoutSpots[mtype][thisNetwork], spot)
 				end
 			end
+			if metalOrGeo == 1 then table.insert(mobNetworkMetals["air"][1], spot) end
 			table.insert(ai.scoutSpots["air"][1], spot)
 		end
 	end
@@ -900,10 +900,14 @@ function MapHandler:OutmodedFactoryHere(mtype, position, network)
 	if position then
 		network = self:MobilityNetworkHere(mtype, position)
 	end
-	if ai.networkSize[mtype][network] < ai.mobCount[mtype] * 0.67 and ai.mobNetworks[mtype] > 1 then
- 		return true
+	if network == nil then
+		return true
 	else
-		return false
+		if ai.networkSize[mtype][network] < ai.mobCount[mtype] * 0.67 and ai.mobNetworks[mtype] > 1 then
+	 		return true
+		else
+			return false
+		end
 	end
 end
 
