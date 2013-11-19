@@ -76,17 +76,17 @@ function ScoutBehaviour:Update()
 			end
 			-- attack small targets along the way if the scout is armed
 			local attackTarget
-			if not self.attacking then
-				if self.armed then
-					if ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 1) then
-						attackTarget = ai.targethandler:NearbyVulnerable(unit)
-					end
+			if self.armed then
+				if ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 1) then
+					attackTarget = ai.targethandler:NearbyVulnerable(unit)
 				end
 			end
-			if attackTarget then
+			if attackTarget and not self.attacking then
 				unit:Attack(attackTarget)
+				self.target = nil
+				self.evading = false
 				self.attacking = true
-			elseif self.target ~= nil then
+			elseif self.target ~= nil then	
 				-- evade enemies along the way if possible
 				local newPos, arrived = ai.targethandler:BestAdjacentPosition(unit, self.target)
 				if newPos then
