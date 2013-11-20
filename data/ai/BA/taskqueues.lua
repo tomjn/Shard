@@ -151,6 +151,7 @@ function CheckForMapControl()
 		local needUpgrade = plentyOfCombatUnits or couldAttack or bombingTooExpensive or attackTooExpensive
 
 		EchoDebug(ai.totalEnemyThreat .. " " .. ai.totalEnemyImmobileThreat .. " " .. ai.totalEnemyMobileThreat)
+		-- build siege units if the enemy is turtling, if a lot of our attackers are getting destroyed, or if we control more than half the metal spots on the map
 		needSiege = (ai.totalEnemyImmobileThreat > ai.totalEnemyMobileThreat * 3 and ai.totalEnemyImmobileThreat > 50000) or (attackCounter > maxAttackCounter * 0.85) or (ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.5)
 		ai.needAdvanced = false
 		if Metal.income > 12 and ai.factories > 0 and needUpgrade then
@@ -159,15 +160,13 @@ function CheckForMapControl()
 		ai.needExperimental = false
 		ai.needNukes = false
 		if Metal.income > 50 and ai.haveAdvFactory and needUpgrade and ai.enemyBasePosition then
-			local canGetThere = false
-			for i, factory in pairs(ai.factoriesAtLevel[ai.maxFactoryLevel]) do
-				if ai.maphandler:MobilityNetworkHere("bot", factory.position) == ai.maphandler:MobilityNetworkHere("bot", ai.enemyBasePosition) then
-					canGetThere = true
-					break
+			if not ai.haveExpFactory then
+				for i, factory in pairs(ai.factoriesAtLevel[ai.maxFactoryLevel]) do
+					if ai.maphandler:MobilityNetworkHere("bot", factory.position) == ai.maphandler:MobilityNetworkHere("bot", ai.enemyBasePosition) then
+						ai.needExperimental = true
+						break
+					end
 				end
-			end
-			if not ai.haveExpFactory and canGetThere then
-				ai.needExperimental = true
 			end
 			ai.needNukes = true
 		end
@@ -406,23 +405,31 @@ end
 function BuildSiegeIfNeeded(unitName)
 	if unitName == DummyUnitName then return DummyUnitName end
 	if IsSiegeEquipmentNeeded() then
-		local mtype = unitTable[unitName].mtype
-		local attackCounter = ai.attackhandler:GetCounter(mtype)
-		if ai.combatCount > attackCounter * 0.75 then
-			return BuildWithLimitedNumber(unitName, math.ceil(attackCounter * 0.5))
-		end
+		return BuildWithLimitedNumber(unitName, math.ceil((ai.battleCount + ai.breakthroughCount) * 0.3))
 	end
 	return DummyUnitName
 end
 
--- uses this on breakthrough units
-function BuildDefendIfNeeded(unitName)
+function BuildBreakthroughIfNeeded(unitName)
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
+	if IsSiegeEquipmentNeeded() then return unitName end
 	local mtype = unitTable[unitName].mtype
-	if ai.attackhandler:GetCounter(mtype) == maxAttackCounter then
-		return unitName
+	if mtype == "air" then
+		local bomberCounter = ai.bomberhandler:GetCounter()
+		if bomberCounter >= breathroughBomberCounter and bomberCounter < maxBomberCounter then
+			return unitName
+		else
+			return DummyUnitName
+		end
 	else
-		return DummyUnitName
+		local attackCounter = ai.attackhandler:GetCounter(mtype)
+		if attackCounter == maxAttackCounter then
+			return unitName
+		elseif attackCounter >= breakthroughAttackCounter then
+			return unitName
+		else
+			return DummyUnitName
+		end
 	end
 end
 
@@ -443,27 +450,17 @@ function Lvl1BotBreakthrough(self)
 	else
 		unitName = "armwar"
 	end
-	local output = BuildSiegeIfNeeded(unitName)
-	if output == DummyUnitName then
-		output = BuildDefendIfNeeded(unitName)
-	end
-	return output
+	return BuildBreakthroughIfNeeded(unitName)
 end
 
 function Lvl1VehBreakthrough(self)
-	local unitName = ""
 	if ai.mySide == CORESideName then
-		unitName = "corlevlr"
-		local output = BuildSiegeIfNeeded(unitName)
-		if output == DummyUnitName then
-			output = BuildDefendIfNeeded(unitName)
-		end
-		return output
+		return BuildBreakthroughIfNeeded("corlevlr")
 	else
-		unitName = "armjanus"
-		local output = BuildSiegeIfNeeded(unitName)
+		-- armjanus isn't very a very good defense unit by itself
+		local output = BuildSiegeIfNeeded("armjanus")
 		if output == DummyUnitName then
-			output = BuildDefendIfNeeded("armstump")
+			output = BuildBreakthroughIfNeeded("armstump")
 		end
 		return output
 	end
@@ -472,17 +469,12 @@ end
 function Lvl2VehBreakthrough(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
-		unitName = "corgol"
-		local output = BuildSiegeIfNeeded(unitName)
-		if output == DummyUnitName then
-			output = BuildDefendIfNeeded(unitName)
-		end
-		return output
+		return BuildBreakthroughIfNeeded("corgol")
 	else
-		unitName = "armmanni"
-		local output = BuildSiegeIfNeeded(unitName)
+		-- armmanni isn't very a very good defense unit by itself
+		local output = BuildSiegeIfNeeded("armmanni")
 		if output == DummyUnitName then
-			output = BuildDefendIfNeeded("armbull")
+			output = BuildBreakthroughIfNeeded("armbull")
 		end
 		return output
 	end
@@ -495,11 +487,7 @@ function Lvl2BotBreakthrough(self)
 	else
 		unitName = "armfboy"
 	end
-	local output = BuildSiegeIfNeeded(unitName)
-	if output == DummyUnitName then
-		output = BuildDefendIfNeeded(unitName)
-	end
-	return output
+	return BuildBreakthroughIfNeeded(unitName)
 end
 
 function Lvl2BotArty(self)
@@ -559,11 +547,7 @@ function Lvl2ShipBreakthrough(self)
 	else
 		unitName = "armbats"
 	end
-	local output = BuildSiegeIfNeeded(unitName)
-	if output == DummyUnitName then
-		output = BuildDefendIfNeeded(unitName)
-	end
-	return output
+	return BuildBreakthroughIfNeeded(unitName)
 end
 
 function Lvl2ShipMerl(self)
@@ -577,23 +561,20 @@ function Lvl2ShipMerl(self)
 end
 
 function MegaShip()
+	local unitName = ""
 	if ai.mySide == CORESideName then
-		return BuildSiegeIfNeeded(BuildWithLimitedNumber("corblackhy", 1))
+		unitName = "corblackhy"
 	else
-		return BuildSiegeIfNeeded(BuildWithLimitedNumber("aseadragon", 1))
+		unitName = "aseadragon"
 	end
+	return BuildBreakthroughIfNeeded(BuildWithLimitedNumber(unitName, 1))
 end
 
 function MegaAircraft()
 	if ai.mySide == CORESideName then
-		return BuildSiegeIfNeeded(BuildWithLimitedNumber("corcrw", 3))
+		return BuildBreakthroughIfNeeded("corcrw")
 	else
-		local r = math.random(1, 2)
-		if r == 1 then
-			return BuildSiegeIfNeeded(BuildWithLimitedNumber("armcybr", 8))
-		else
-			return BuildSiegeIfNeeded(BuildRaiderIfNeeded("blade"))
-		end
+		return BuildBreakthroughIfNeeded("armcybr")
 	end
 end
 
@@ -624,14 +605,16 @@ function Lvl3Breakthrough(self)
 		if unitName == DummyUnitName then
 			unitName = BuildWithLimitedNumber("gorg", 2)
 		end
+		if unitName == DummyUnitName then
+			unitName = "corkarg"
+		end
 	else
-		unitName = BuildWithLimitedNumber("armbanth", 3)
+		unitName = BuildWithLimitedNumber("armbanth", 5)
+		if unitName == DummyUnitName then
+			unitName = "armraz"
+		end
 	end
-	local output = BuildSiegeIfNeeded(unitName)
-	if output == DummyUnitName then
-		output = BuildDefendIfNeeded(unitName)
-	end
-	return output
+	return BuildBreakthroughIfNeeded(unitName)
 end
 
 function BuildRaiderIfNeeded(unitName)
@@ -656,6 +639,16 @@ function Lvl1VehRaider(self)
 	end
 	return BuildRaiderIfNeeded(unitName)
 end
+
+-- because core doesn't have a lvl2 vehicle raider or a lvl3 raider
+function Lvl1VehRaiderOutmoded(self)
+	if ai.mySide == CORESideName then
+		return BuildRaiderIfNeeded("corgator")
+	else
+		return DummyUnitName
+	end
+end
+
 
 function Lvl1BotRaider(self)
 	local unitName = ""
@@ -688,13 +681,11 @@ function Lvl1AirRaider(self)
 end
 
 function Lvl2VehRaider(self)
-	local unitName = ""
 	if ai.mySide == CORESideName then
 		return DummyUnitName
 	else
-		unitName = "armlatnk"
+		return BuildRaiderIfNeeded("armlatnk")
 	end
-	return BuildRaiderIfNeeded(unitName)
 end
 
 function Lvl2BotRaider(self)
@@ -722,7 +713,13 @@ function Lvl2AirRaider(self)
 	if ai.mySide == CORESideName then
 		unitName = "corape"
 	else
-		unitName = "armbrawl"
+		-- spedical case: arm has an ubergunship
+		local raidCounter = ai.raidhandler:GetCounter("air")
+		if raidCounter < baseRaidCounter and raidCounter > minRaidCounter then
+			return "blade"
+		else
+			unitName = "armbrawl"
+		end
 	end
 	return BuildRaiderIfNeeded(unitName)
 end
@@ -763,6 +760,10 @@ function BuildBattleIfNeeded(unitName)
 	local attackCounter = ai.attackhandler:GetCounter(mtype)
 	EchoDebug(mtype .. " " .. attackCounter .. " " .. maxAttackCounter)
 	if attackCounter == maxAttackCounter then return DummyUnitName end
+	if mtype == "veh" and ai.mySide == CORESideName and (ai.factoriesAtLevel[1] == nil or ai.factoriesAtLevel[1] == {}) then
+		-- core only has a lvl1 vehicle raider, so this prevents getting stuck
+		return unitName
+	end
 	local raidCounter = ai.raidhandler:GetCounter(mtype)
 	EchoDebug(mtype .. " " .. raidCounter .. " " .. maxRaidCounter)
 	if raidCounter == minRaidCounter then return unitName end
@@ -823,6 +824,16 @@ function HoverBattle(self)
 	return BuildBattleIfNeeded(unitName)
 end
 
+function HoverBreakthrough(self)
+	local unitName = ""
+	if ai.mySide == CORESideName then
+		unitName = "nsaclash"
+	else
+		unitName = "armanac"
+	end
+	BuildBreakthroughIfNeeded(unitName)
+end
+
 function AmphibiousBattle(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
@@ -834,16 +845,13 @@ function AmphibiousBattle(self)
 end
 
 function AmphibiousBreakthrough(self)
+	local unitName = ""
 	if ai.mySide == CORESideName then
-		local unitName = "corparrow"
-		unitName = BuildSiegeIfNeeded(unitName)
-		if unitName == DummyUnitName then
-			unitName = BuildDefendIfNeeded(unitName)
-		end
-		return unitName
+		unitName = "corparrow"
 	else
-		return DummyUnitName
+		unitName = "armcroc"
 	end
+	BuildBreakthroughIfNeeded(unitName)
 end
 
 function Lvl1ShipDestroyerOnly(self)
@@ -1585,6 +1593,22 @@ local function BuildAdvancedRadar()
 	return unitName
 end
 
+local function BuildLvl1Jammer()
+	if ai.mySide == CORESideName then
+		return "corjamt"
+	else
+		return "armjamt"
+	end
+end
+
+local function BuildLvl2Jammer()
+	if ai.mySide == CORESideName then
+		return "corshroud"
+	else
+		return "armveil"
+	end
+end
+
 local function NanoTurret()
 	local unitName = ""
 	if ai.mySide == CORESideName then
@@ -1846,6 +1870,7 @@ local anyConUnit = {
 	BuildSpecialLT,
 	BuildMediumAA,
 	BuildRadar,
+	BuildLvl1Jammer,
 	WindSolar,
 	BuildGeo,
 	SolarAdv,
@@ -1861,6 +1886,7 @@ local anyConAmphibious = {
 	BuildSpecialLT,
 	BuildMediumAA,
 	BuildRadar,
+	BuildLvl1Jammer,
 	WindSolar,
 	SolarAdv,
 	FactoryOrNano,
@@ -1902,6 +1928,7 @@ local anyAdvConUnit = {
 	BuildHeavyPlasma,
 	BuildFusion,
 	BuildAdvancedRadar,
+	BuildLvl2Jammer,
 	BuildAppropriateFactory,
 	BuildNukeIfNeeded,
 	BuildExtraHeavyAA,
@@ -1939,6 +1966,7 @@ local anyCombatEngineer = {
 	Solar,
 	BuildMediumAA,
 	BuildAdvancedRadar,
+	BuildLvl2Jammer,
 	BuildLvl2PopUp,
 	BuildHeavyAA,
 	BuildSpecialLTOnly,
@@ -1993,6 +2021,7 @@ local anyHoverPlatform = {
 	HoverRaider,
 	ConHover,
 	HoverBattle,
+	HoverBreakthrough,
 	HoverMerl,
 	AAHover,
 }
@@ -2064,6 +2093,7 @@ local anyOutmodedLvl1BotLab = {
 }
 
 local anyOutmodedLvl1VehPlant = {
+	Lvl1VehRaiderOutmoded,
 	ConVehicle,
 	ScoutVeh,
 	Lvl1AAVeh,
@@ -2081,14 +2111,14 @@ local anyOutmodedLvl1ShipYard = {
 }
 
 local anyOutmodedLvl2BotLab = {
-	Lvl2BotRaider,
+	-- Lvl2BotRaider,
 	ConAdvBot,
 	Lvl2AABot,
 	Lvl2BotAssist,
 }
 
 local anyOutmodedLvl2VehPlant = {
-	Lvl2VehRaider,
+	-- Lvl2VehRaider,
 	Lvl2VehAssist,
 	ConAdvVehicle,
 	Lvl2AAVeh,

@@ -177,6 +177,7 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 	local ut = unitTable[unitName]
 	local Metal = game:GetResourceByName("Metal")
 	local ground, air, submerged, antinuke, shield, jam, radar, sonar
+	local priorityFloor = 1
 	if ut.isWeapon and not antinukeList[unitName] then
 		if ut.groundRange ~= 0 then
 			ground = true
@@ -189,10 +190,13 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 		end
 	elseif antinukeList[unitName] then
 		antinuke = true
+		priorityFloor = 5
 	elseif shieldList[unitName] then
 		shield = true
+		priorityFloor = 5
 	elseif ut.jammerRadius ~= 0 then
 		jam = true
+		priorityFloor = 5
 	elseif ut.radarRadius ~= 0 then
 		radar = true
 	elseif ut.sonarRadius ~= 0 then
@@ -201,9 +205,10 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 	local bestDist = 100000
 	local best
 	for i, turtle in pairs(self.turtles) do
+		local important = turtle.priority >= priorityFloor -- so that for example we don't build shields where there's just a mex
 		local enough = false
 		local isLocal = true
-		if unitName ~= nil then
+		if unitName ~= nil and important then
 			if turtle.nameCounts[unitName] == nil or turtle.nameCounts[unitName] == 0 then
 				-- not enough
 			elseif turtle.nameCounts[unitName] >= turtle.nameLimit then
@@ -211,10 +216,10 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 				enough = true
 			end
 		end
-		if not enough and (ground or air or submerged) then
+		if not enough and (ground or air or submerged) and important then
 			isLocal = ai.maphandler:CheckDefenseLocalization(unitName, turtle.position)
 		end
-		if not enough and isLocal then
+		if not enough and isLocal and important then
 			local okay = ai.maphandler:UnitCanGoHere(builder, turtle.position) 
 			if okay and bombard and unitName ~= nil then 
 				okay = ai.targethandler:IsBombardPosition(turtle.position, unitName)

@@ -60,7 +60,7 @@ function MexUpgradeBehaviour:UnitIdle(unit)
 				end
 				if s then
 					-- get assistance and magnetize
-					ai.assisthandler:PersistantSummon(builder, helpList[mohoName])
+					ai.assisthandler:PersistantSummon(builder, self.mexPos, helpList[mohoName])
 					self.released = false
 					self.active = true
 					self.mohoStarted = true

@@ -238,7 +238,7 @@ helpList = {
 	armuwmme = 2,
 }
 
--- things to defend with defense towers other than factories and con units
+-- things to defend with defense towers other than factories
 -- value is priority
 turtleList = {
 	aafus = 8,
@@ -271,6 +271,52 @@ advFactories = {
 expFactories = {
 	corgant = 1,
 	armshltx = 1,
+}
+
+-- sturdy, cheap units to be built in larger numbers than siege units
+battleList = {
+	corraid = 1,
+	armstump = 1,
+	corthud = 1,
+	armham = 1,
+	corstorm = 1,
+	armrock = 1,
+	coresupp = 1,
+	decade = 1,
+	corroy = 1,
+	armroy = 1,
+	corsnap = 1,
+	armanac = 1,
+	corseal = 1,
+	armcroc = 1,
+	correap = 2,
+	armbull = 2,
+	corcan = 2,
+	armzeus = 2,
+	corcrus = 2,
+	armcrus = 2,
+	corkarg = 3,
+	armraz = 3,
+}
+
+-- sturdier units to use when battle units get killed
+breakthroughList = {
+	corlevlr = 1,
+	armwar = 1,
+	corgol = 2,
+	corsumo = 2,
+	armfboy = 2,
+	corparrow = 2,
+	nsaclash = 2,
+	corbats = 2,
+	armbats = 2,
+	corkrog = 3,
+	gorg = 3,
+	armbanth = 3,
+	corblackhy = 3,
+	aseadragon = 3,
+	corcrw = 3,
+	armcybr = 3,
 }
 
 -- for milling about next to con units and factories only
@@ -330,11 +376,9 @@ attackerlist = {
 	"armmh",
 	"corwolv",
 	"cormist",
-	"coresupp",
-	"decade",
-	"corroy",
-	"armroy",
 	"armfboy",
+	"corcrw",
+	-- experimentals
 	"armraz",
 	"armshock",
 	"armbanth",
@@ -343,10 +387,23 @@ attackerlist = {
 	"corkarg",
 	"gorg",
 	"corkrog",
-	"corcrw",
+	-- ships
+	"coresupp",
+	"decade",
+	"corroy",
+	"armroy",
+	"corcrus",
+	"armcrus",
+	"corblackhy",
+	"aseadragon",
 	-- hover
 	"corsnap",
 	"armanac",
+	"nsaclash",
+	-- amphib
+	"corseal",
+	"armcroc",
+	"corparrow",
 }
 
 
@@ -384,6 +441,13 @@ commanderList = {
 nanoTurretList = {
 	cornanotc = 1,
 	armnanotc = 1,
+}
+
+-- cheap construction units that can be built in large numbers
+assistList = {
+	armfark = 1,
+	corfast = 1,
+	consul = 1,
 }
 
 reclaimerList = {
@@ -554,47 +618,6 @@ raiderDisarms = {
 	bladew = 1,
 }
 
--- these are placed using the alternate build location function
--- tends to find locations when standard one fails
-unitsForNewPlacing = {
-	corsolar = 6,
-	corestor = 6,
-	corlab = 10,
-	coralab = 10,
-	corvp = 10,
-	corhp = 10,
-	cormakr = 20,
-	corfus = 20,
-	armsolar = 6,
-	armestor = 6,
-	armlab = 10,
-	armvp = 10,
-	armavp = 10,
-	armhp = 10,
-	armmakr = 20,
-	armfus = 20,
-	corgeo = 20,
-	armgeo = 20,
-	cortide = 5, -- higher than 1 because otherwise tidals build inside shipyards
-	armtide = 5,
-	corfmd = 1,
-	armamd = 1,
-}
-
--- these will be placed closer together if first placement attempt fails
-unitsForNewPlacingLowOnSpace = {
-	corfus = 8,
-	armfus = 8,
-	coralab = 8,
-	armavp = 8,
-}
-
--- these will NOT cause alternative build spots to be evalueated
-dontTryAlternativePoints = {
-	cortide = 1,
-	armtide = 1,
-}
-
 -- these will be ignored when looking for an attack target
 unitsToIgnoreAsAttackTarget = {
 	-- no sense chasing after planes
@@ -620,65 +643,6 @@ unitsToIgnoreAsAttackTarget = {
 	armsehak = 1,
 }
 
--- units to consider as targets for air (bomber) attacks
--- values are priority. Negative values decrease target weight (AA units in the same sector)
-bomberAttackTargets =
-{
-	-- fusions = big BOOM
-	corfus = 150,
-	armfus = 150,
-	-- WMD silos have lower priority, won't do much without resources
-	armsilo = 60,
-	corsilo = 60,
-	armemp = 55,
-	cortron = 55,
-	-- moho mines
-	cormoho = 50,
-	armmoho = 50,
-	-- factories
-	coralab = 40,
-	armalab = 40,
-	coravp = 40,
-	armavp = 40,
-	coraap = 45,	-- those two produce stealth fighters
-	armaap = 45,
-	corasy = 40,
-	armasy = 40,
-	armap = 40,
-	corap = 40,
-	corsy = 35,
-	armsy = 35,
-	corlab = 35,
-	armlab = 35,
-	corvp = 35,
-	armvp = 35,
-	corap = 35,
-	armap = 35,
-	corhp = 35,
-	armhp = 35,
-	-- commanders = game end, but quite hard to kill
-	corcom = 30,
-	armcom = 30,
-	-- mexes
-	cormex = 5,
-	armmex = 5,
-	corfmex = 5,
-	armfmex = 5,
-	-- now the dangerous stuff
-	corflak = -40,
-	armflak = -40,
-	cortflak = -40,
-	armtflak = -40,
-	-- flak vehs are a bit less powerful than turrets
-	corsent = -32,
-	armyork = -32,
-	-- fighters and stealth fighters are really nasty
-	armfig = -60,
-	corveng = -60,
-	armhawk = -80,
-	corvamp = -80,
-}
-
 -- units in this list are bombers
 bomberList =
 {
@@ -693,13 +657,15 @@ bomberList =
 minAttackCounter = 5
 maxAttackCounter = 20
 baseAttackCounter = 10
-minBomberCounter = 1
-maxBomberCounter = 20
+breakthroughAttackCounter = 11 -- build heavier battle units
+minBomberCounter = 0
+maxBomberCounter = 16
 baseBomberCounter = 2
+breakthroughBomberCounter = 8 -- build atomic bombers or air fortresses
 
 -- raid counter works backwards: it determines the number of raiders to build
 -- if it reaches minRaidCounter, none are built
-minRaidCounter = 1
+minRaidCounter = 0
 maxRaidCounter = 6
 baseRaidCounter = 4
 

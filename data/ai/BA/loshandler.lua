@@ -86,9 +86,6 @@ function LosHandler:Init()
 	self.knownWrecks = {}
 	self.ghosts = {}
 	self.enemyNames = {}
-	ai.friendlyCount = 1
-	ai.combatCount = 1
-	ai.conCount = 1
 	ai.wreckCount = 0
 	self:Update()
 end
@@ -100,8 +97,6 @@ function LosHandler:Update()
 		if DebugEnabled then 
 			debugPlotLosFile = assert(io.open("debuglosplot",'w'), "Unable to write debuglosplot")
 		end 
-		ai.combatCount = 0
-		ai.conCount = 0
 		-- game:SendToConsole("updating los")
 		local ownUnits = game:GetFriendlies()
 		if ownUnits == nil then
@@ -116,8 +111,6 @@ function LosHandler:Update()
 			for _, unit in pairs(ownUnits) do
 				local uname = unit:Name()
 				local utable = unitTable[uname]
-				if utable.isWeapon and not utable.isBuilding then ai.combatCount = ai.combatCount + 1 end
-				if utable.buildOptions and not utable.isBuilding then ai.conCount = ai.conCount + 1 end
 				local upos = unit:GetPosition()
 				if utable.losRadius > 0 then
 					self:FillCircle(upos.x, upos.z, utable.losRadius * 32, 2)

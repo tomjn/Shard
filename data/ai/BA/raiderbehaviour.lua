@@ -136,7 +136,7 @@ function RaiderBehaviour:Update()
 			-- attack nearby vulnerables immediately
 			local unit = self.unit:Internal()
 			local attackTarget
-			if ai.targethandler:IsSafePosition(unit:GetPosition(), unit) then
+			if ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 1) then
 				attackTarget = ai.targethandler:NearbyVulnerable(unit)
 			end
 			if attackTarget then

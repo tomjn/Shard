@@ -29,12 +29,6 @@ function AssistBehaviour:Init()
 	-- keeping track of how many of each type of unit
 	local uname = self.unit:Internal():Name()
 	self.name = uname
-	if ai.totalCons == nil then ai.totalCons = {} end
-	if ai.totalCons[uname] == nil then
-		ai.totalCons[uname] = 1
-	else
-		ai.totalCons[uname] = ai.totalCons[uname] + 1
-	end
 	if nanoTurretList[uname] then self.isNanoTurret = true end
 	if commanderList[uname] then self.isCommander = true end
 	self.id = self.unit:Internal():ID()
@@ -92,8 +86,7 @@ function AssistBehaviour:Update()
 			end
 		else
 			-- fill empty spots after con units die
-			-- EchoDebug(uname .. " " .. self.IDByType .. " / " .. tostring(ai.totalCons[uname]))
-			if self.IDByType > ai.totalCons[uname] then
+			if self.IDByType > ai.nameCount[uname] then
 				EchoDebug("filling empty spots with " .. uname .. " " .. self.IDByType)
 				self:AssignIDByType()
 				EchoDebug("ID now: " .. self.IDByType)
@@ -113,12 +106,13 @@ function AssistBehaviour:Update()
 					self.patroling = false
 				end
 			elseif not self.patroling then
-				local upos = RandomAway(self.unit:Internal():GetPosition(), 400)
+				local patrolPos = self.fallbackPos or self.unit:Internal():GetPosition()
+				local pos = RandomAway(patrolPos, 200)
 				local floats = api.vectorFloat()
 				-- populate with x, y, z of the position
-				floats:push_back(upos.x)
-				floats:push_back(upos.y)
-				floats:push_back(upos.z)
+				floats:push_back(pos.x)
+				floats:push_back(pos.y)
+				floats:push_back(pos.z)
 				self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats)
 				ai.assisthandler:AddFree(self)
 				self.patroling = true
@@ -159,7 +153,6 @@ function AssistBehaviour:UnitDead(unit)
 		-- game:SendToConsole("assistant " .. self.name .. " died")
 		local uname = self.name
 		if IDByTypeTaken[uname] ~= nil then IDByTypeTaken[uname][self.IDByType] = nil end
-		if ai.totalCons[uname] ~= nil then ai.totalCons[uname] = ai.totalCons[uname] - 1 end
 		self.IDByType = nil
 		ai.IDByType[self.id] = nil
 		ai.assisthandler:RemoveWorking(self)
@@ -170,6 +163,10 @@ end
 function AssistBehaviour:Assign(builder)
 	self.target = builder
 	self.lastAssignFrame = game:Frame()
+end
+
+function AssistBehaviour:SetFallback(position)
+	self.fallbackPos = position
 end
 
 -- assign if not busy (used by factories to occupy idle assistants)
@@ -200,7 +197,7 @@ function AssistBehaviour:AssignIDByType()
 			IDByTypeTaken[uname][self.IDByType] = nil
 		end
 		local id = 1
-		while id <= ai.totalCons[uname] do
+		while id <= ai.nameCount[uname] do
 			id = id + 1
 			if not IDByTypeTaken[uname][id] then break end
 		end

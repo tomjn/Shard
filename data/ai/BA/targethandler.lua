@@ -71,12 +71,14 @@ local conValue = 300
 local techValue = 100
 local minNukeValue = factoryValue + techValue + 500
 
-local feintRepeatMod = 10
+local feintRepeatMod = 25
 
 local enemyAlreadyCounted = {}
 local currentEnemyThreatCount = 0
 local currentEnemyImmobileThreatCount = 0
 local currentEnemyMobileThreatCount = 0
+
+local enemyBaseCell
 
 local cellElmosX
 local cellElmosZ
@@ -387,18 +389,19 @@ end
 
 local function DangerCheck(unitName, unitID)
 	local un = unitName
+	local ut = unitTable[un]
 	local id = unitID
-	if not unitTable[un].isBuilding and not commanderList[un] and unitTable[un].mtype ~= "air" and unitTable[un].mtype ~= "sub" and unitTable[un].groundRange > 0 then
+	if not ut.isBuilding and not commanderList[un] and ut.mtype ~= "air" and ut.mtype ~= "sub" and ut.groundRange > 0 then
 		CountDanger("ground", id)
 	elseif groundFacList[un] then
 		CountDanger("ground", id)
 	end
-	if unitTable[un].mtype == "air" and unitTable[un].groundRange > 0 then
+	if ut.mtype == "air" and ut.groundRange > 0 then
 		CountDanger("air", id)
 	elseif airFacList[un] then
 		CountDanger("air", id)
 	end
-	if (unitTable[un].mtype == "sub" or unitTable[un].mtype == "shp") and unitTable[un].isWeapon and not unitTable[un].isBuilding then
+	if (ut.mtype == "sub" or ut.mtype == "shp") and ut.isWeapon and not ut.isBuilding then
 		CountDanger("submerged", id)
 	elseif subFacList[un] then
 		CountDanger("submerged", id)
@@ -411,6 +414,9 @@ local function DangerCheck(unitName, unitID)
 	end
 	if antinukeList[un] then
 		CountDanger("antinuke", id)
+	end
+	if ut.mtype ~= "air" and ut.mtype ~= "sub" and ut.groundRange > 1000 then
+		CountDanger("longrange", id)
 	end
 end
 
@@ -430,6 +436,7 @@ local function InitializeDangers()
 	dangers["plasma"] = NewDangerLayer()
 	dangers["nuke"] = NewDangerLayer()
 	dangers["antinuke"] = NewDangerLayer()
+	dangers["longrange"] = NewDangerLayer()
 end
 
 local function UpdateDangers()
@@ -447,12 +454,13 @@ local function UpdateDangers()
 		end
 	end
 
-	ai.needGroundDefense = dangers.ground.present
+	ai.needGroundDefense = dangers.ground.present or (not dangers.air.present and not dangers.submerged.present) -- don't turn off ground defense if there aren't air or submerged dangers
 	ai.needAirDefense = dangers.air.present
 	ai.needSubmergedDefense = dangers.submerged.present
 	ai.needShields = dangers.plasma.present
 	ai.needAntinuke = dangers.nuke.present
 	ai.canNuke = not dangers.antinuke.present
+	ai.needJammers = dangers.longrange.present or dangers.air.present or dangers.nuke.present or dangers.plasma.present
 end
 
 local function UpdateEnemies()
@@ -461,7 +469,7 @@ local function UpdateEnemies()
 	if #enemies == 0 then return end
 
 	-- figure out where all the enemies are!
-	local highestValue = factoryValue
+	local highestValue = minNukeValue
 	local highestValueCell
 	for i, e in pairs(enemies) do
 		local los = ai.loshandler:IsKnownEnemy(e)
@@ -550,7 +558,11 @@ local function UpdateEnemies()
 		end
 	end
 	if highestValueCell then
+		enemyBaseCell = highestValueCell
 		ai.enemyBasePosition = highestValueCell.pos
+	else
+		enemyBaseCell = nil
+		ai.enemyBasePosition = nil
 	end
 end
 
@@ -811,8 +823,11 @@ end
 function TargetHandler:GetBestAttackCell(representative)
 	if not representative then return end
 	self:UpdateMap()
-	local best
-	local bestValue = -999999
+	if enemyBaseCell then return enemyBasecell end
+	local bestValueCell
+	local bestValue = 0
+	local bestThreatCell
+	local bestThreat = 0
 	local name = representative:Name()
 	local longrange = unitTable[name].groundRange > 650
 	local mtype = unitTable[name].mtype
@@ -821,17 +836,25 @@ function TargetHandler:GetBestAttackCell(representative)
 		if cell.pos then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) or longrange then
 				local value, threat = CellValueThreat(representative, cell)
-				if value > 0 or threat > 0 then
-					value = value - threat
+				if value > 0 then
 					if value > bestValue then
-						best = cell
+						bestValueCell = cell
 						bestValue = value
+					end
+				elseif threat > 0 then
+					if threat > bestThreat then
+						bestThreatCell = cell
+						bestThreat = threat
 					end
 				end
 			end
 		end
 	end
-	return best
+	if bestValueCell then
+		return bestValueCell
+	else
+		return bestThreatCell
+	end
 end
 
 function TargetHandler:GetBestNukeCell()
@@ -936,8 +959,8 @@ function TargetHandler:BestAdjacentPosition(unit, targetPosition)
 	local position = unit:GetPosition()
 	local px, pz = GetCellPosition(position)
 	local tx, tz = GetCellPosition(targetPosition)
-	if px == tx and pz == tz then
-		-- if we're already in the target cell
+	if px >= tx - 1 and px <= tx + 1 and pz >= tz - 1 and pz <= tz + 1 then
+		-- if we're already in the target cell or adjacent to it, keep moving
 		return nil, true
 	end
 	self:UpdateMap()
@@ -950,46 +973,47 @@ function TargetHandler:BestAdjacentPosition(unit, targetPosition)
 	local uthreat, urange = ThreatRange(uname)
 	EchoDebug(uname .. ": " .. uthreat .. " " .. urange)
 	if uthreat > maxThreat then maxThreat = uthreat end
+	local doubleUnitRange = urange * 2
 	for x = px - 1, px + 1 do
 		for z = pz - 1, pz + 1 do
-			if px == tx and pz == tz then
-				-- if we're adjacent to the target cell
-				return nil, true
-			end
-			local dist = dist2d(tx, tz, x, z)
-			if cells[x] ~= nil then
-				if cells[x][z] ~= nil then
-					local value, threat = CellValueThreat(unit, cells[x][z])
-					if threat > maxThreat then
-						-- if it's below baseUnitThreat, it's probably a lone construction unit
-						dist = dist + threat
-						notsafe = true
+			if x == px and z == pz then
+				-- don't move to the cell you're already in
+			else
+				local dist = dist2d(tx, tz, x, z) * cellElmos
+				if cells[x] ~= nil then
+					if cells[x][z] ~= nil then
+						local value, threat = CellValueThreat(unit, cells[x][z])
+						if threat > maxThreat then
+							-- if it's below baseUnitThreat, it's probably a lone construction unit
+							dist = dist + threat
+							notsafe = true
+						end
 					end
 				end
-			end
-			-- if we just went to the same place, probably not a great place
-			for i, feint in pairs(self.feints) do
-				if f > feint.frame + 900 then
-					-- expire stored after 30 seconds
-					table.remove(self.feints, i)
-				elseif feint.x == x and feint.z == z and feint.px == px and feint.pz == pz and feint.tx == tx and feint.tz == tz then
-					dist = dist + feintRepeatMod
+				-- if we just went to the same place, probably not a great place
+				for i, feint in pairs(self.feints) do
+					if f > feint.frame + 900 then
+						-- expire stored after 30 seconds
+						table.remove(self.feints, i)
+					elseif feint.x == x and feint.z == z and feint.px == px and feint.pz == pz and feint.tx == tx and feint.tz == tz then
+						dist = dist + feintRepeatMod
+					end
 				end
-			end
-			if dist < bestDist then
-				bestDist = dist
-				if cells[x] == nil then cells[x] = {} end
-				if cells[x][z] == nil then
-					cells[x][z] = NewCell(x, z)
-				end
-				if cells[x][z].pos == nil then
-					cells[x][z].pos = api.Position()
-					cells[x][z].pos.x = x * cellElmos - cellElmosHalf
-					cells[x][z].pos.z = z * cellElmos - cellElmosHalf
-					cells[x][z].pos.y = 0
-				end
-				if ai.maphandler:UnitCanGoHere(unit, cells[x][z].pos) then
-					best = cells[x][z]
+				if dist < bestDist then
+					bestDist = dist
+					if cells[x] == nil then cells[x] = {} end
+					if cells[x][z] == nil then
+						cells[x][z] = NewCell(x, z)
+					end
+					if cells[x][z].pos == nil then
+						cells[x][z].pos = api.Position()
+						cells[x][z].pos.x = x * cellElmos - cellElmosHalf
+						cells[x][z].pos.z = z * cellElmos - cellElmosHalf
+						cells[x][z].pos.y = 0
+					end
+					if ai.maphandler:UnitCanGoHere(unit, cells[x][z].pos) then
+						best = cells[x][z]
+					end
 				end
 			end
 		end
