@@ -27,6 +27,7 @@ function CountBehaviour:Init()
     if unitTable[self.name].extractsMetal > 0 then self.isMex = true end
     if battleList[self.name] then self.isBattle = true end
     if breakthroughList[self.name] then self.isBreakthrough = true end
+    if reclaimerList[self.name] then self.isReclaimer = true end
 	if ai.nameCount[self.name] == nil then
 		ai.nameCount[self.name] = 1
 	else
@@ -60,10 +61,11 @@ function CountBehaviour:Update()
 							ai.nameCountFinished[self.name] = ai.nameCountFinished[self.name] + 1
 						end
 						if self.isMex then ai.mexCount = ai.mexCount + 1 end
+						if self.isCon then ai.conCount = ai.conCount + 1 end
 						if self.isCombat then ai.combatCount = ai.combatCount + 1 end
 						if self.isBattle then ai.battleCount = ai.battleCount + 1 end
 						if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount + 1 end
-						if self.isCon then ai.conCount = ai.conCount + 1 end
+						if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount + 1 end
 						ai.lastNameFinished[self.name] = f
 						EchoDebug(ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
 						self.finished = true
@@ -91,10 +93,11 @@ function CountBehaviour:UnitDead(unit)
 		if self.finished then
 			ai.nameCountFinished[self.name] = ai.nameCountFinished[self.name] - 1
 			if self.isMex then ai.mexCount = ai.mexCount - 1 end
+			if self.isCon then ai.conCount = ai.conCount - 1 end
 			if self.isCombat then ai.combatCount = ai.combatCount - 1 end
 			if self.isBattle then ai.battleCount = ai.battleCount - 1 end
 			if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount - 1 end
-			if self.isCon then ai.conCount = ai.conCount - 1 end
+			if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount - 1 end
 		end
 	end
 end

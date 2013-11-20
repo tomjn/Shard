@@ -104,7 +104,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 			value = DummyUnitName
 		end
 	elseif reclaimerList[value] then
-		-- dedicated relcimaer
+		-- dedicated reclaimer
 		EchoDebug(" dedicated reclaimer")
 		if metalAboveHalf or energyTooLow or farTooFewCombats then
 			value = DummyUnitName
@@ -205,7 +205,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 		if unitTable[value].buildOptions ~= nil then
 			-- construction unit
 			EchoDebug("  construction unit")
-			if (ai.totalCons[value] == nil or ai.totalCons[value] == 0) and metalOkay and energyOkay and (self.outmodedFactory or not farTooFewCombats) then
+			if (ai.nameCount[value] == nil or ai.nameCount[value] == 0) and metalOkay and energyOkay and (self.outmodedFactory or not farTooFewCombats) then
 				-- build at least one of each type
 			else
 				EchoDebug(ai.combatCount .. " " .. ai.conCount .. " " .. tostring(metalBelowHalf) .. " " .. tostring(energyTooLow))
@@ -236,7 +236,6 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 end
 
 function TaskQueueBehaviour:Init()
-	if ai.totalCons == nil then ai.totalCons = {} end
 	if ai.outmodedFactories == nil then ai.outmodedFactories = 0 end
 
 	GetEcon()
@@ -253,6 +252,7 @@ function TaskQueueBehaviour:Init()
 
 	-- register if factory is going to use outmoded queue
 	if factoryMobilities[self.name] ~= nil then
+		self.isFactory = true
 		local upos = u:GetPosition()
 		for i, mtype in pairs(factoryMobilities[self.name]) do
 			if mtype ~= nil then
@@ -330,45 +330,45 @@ function TaskQueueBehaviour:UnitDead(unit)
 	end
 end
 
-function TaskQueueBehaviour:GetHelp(value)
+function TaskQueueBehaviour:GetHelp(value, position)
 	if value == nil then return DummyUnitName end
 	if value == DummyUnitName then return DummyUnitName end
 	EchoDebug(value .. " before getting help")
 	local builder = self.unit:Internal()
 	if helpList[value] then
-		local hashelp = ai.assisthandler:PersistantSummon(builder, helpList[value], 1)
+		local hashelp = ai.assisthandler:PersistantSummon(builder, position, helpList[value], 1)
 		if hashelp then
 			return value
 		end
 	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
 		if ai.factories == 0 then
-			ai.assisthandler:Summon(builder)
-			ai.assisthandler:Magnetize(builder)
+			ai.assisthandler:Summon(builder, position)
+			ai.assisthandler:Magnetize(builder, position)
 			return value
 		else
-			local hashelp = ai.assisthandler:Summon(builder, ai.factories)
+			local hashelp = ai.assisthandler:Summon(builder, position, ai.factories)
 			if hashelp then
-				ai.assisthandler:Magnetize(builder)
+				ai.assisthandler:Magnetize(builder, position)
 				return value
 			end
 		end
 	else
 		local number
-		if unitTable[self.name].isBuilding then
+		if self.isFactory then
 			-- factories have more nano output
 			number = math.floor((unitTable[value].metalCost + 1000) / 1500)
 		else
 			number = math.floor((unitTable[value].metalCost + 750) / 1000)
 		end
 		if number == 0 then return value end
-		local hashelp = ai.assisthandler:Summon(builder, number)
+		local hashelp = ai.assisthandler:Summon(builder, position, number)
 		if hashelp then return value end
 	end
 	return DummyUnitName
 end
 
 function TaskQueueBehaviour:LocationFilter(utype, value)
-	if unitTable[self.name].isBuilding then return utype, value end -- factories don't need to look for build locations
+	if self.isFactory then return utype, value end -- factories don't need to look for build locations
 	local p
 	local builder = self.unit:Internal()
 	if unitTable[value].extractsMetal > 0 then
@@ -496,7 +496,7 @@ function TaskQueueBehaviour:GetQueue()
 	end
 	self.outmodedTechLevel = false
 	if outmodedTaskqueues[self.name] ~= nil and not got then
-		if unitTable[self.name].isBuilding and unitTable[self.name].techLevel < ai.maxFactoryLevel then
+		if self.isFactory and unitTable[self.name].techLevel < ai.maxFactoryLevel then
 			q = outmodedTaskqueues[self.name]
 			got = true
 			self.outmodedTechLevel = true
@@ -612,15 +612,9 @@ function TaskQueueBehaviour:ProgressQueue()
 				value = DuplicateFilter(builder, value)
 				value = LandWaterFilter(builder, value)
 				value = self:CategoryEconFilter(value)
-				value = self:GetHelp(value)
-				self.released = false
 				EchoDebug(value .. " after filters")
 			end
 			if value ~= DummyUnitName then
-				if unitTable[self.name].isBuilding and not self.outmodedTechLevel then
-					-- factories take up idle assistants
-					ai.assisthandler:TakeUpSlack(builder)
-				end
 				if value ~= nil then
 					utype = game:GetTypeByName(value)
 				else
@@ -632,7 +626,21 @@ function TaskQueueBehaviour:ProgressQueue()
 					if self.unit:Internal():CanBuild(utype) then
 						local p
 						utype, value, p = self:LocationFilter(utype, value)
+						local helpValue
 						if utype ~= nil then
+							EchoDebug(value ..  " passed location filter of " .. self.name)
+							if p == nil then
+								helpValue = self:GetHelp(value, builder:GetPosition())
+							else
+								helpValue = self:GetHelp(value, p)
+							end
+						end
+						if helpValue ~= nil and helpValue ~= DummyUnitName then
+							if self.isFactory and not self.outmodedTechLevel then
+								-- factories take up idle assistants
+								ai.assisthandler:TakeUpSlack(builder)
+							end
+							self.released = false
 							self.target = p
 							if p == nil then
 								success = self.unit:Internal():Build(utype)
@@ -642,7 +650,7 @@ function TaskQueueBehaviour:ProgressQueue()
 							self.progress = not success
 						else
 							self.progress = true
-							EchoDebug("location filter blocked " .. self.name .. " from building " .. value)
+							EchoDebug("assistant filter blocked" .. self.name .. " from building " .. value)
 						end
 					else
 						self.progress = true

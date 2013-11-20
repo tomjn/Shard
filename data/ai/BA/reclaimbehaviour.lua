@@ -21,11 +21,8 @@ function ReclaimBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
+	if reclaimerList[self.name] then self.dedicated = true end
 	self.id = self.unit:Internal():ID()
-	if reclaimerList[self.name] then
-		ai.haveReclaimer = true
-	end
-	self.reclaiming = false
 end
 
 function ReclaimBehaviour:UnitBuilt(unit)
@@ -55,21 +52,19 @@ function ReclaimBehaviour:Update()
 	local f = game:Frame()
 	if f % 120 == 0 then
 		local doreclaim = false
-		if reclaimerList[self.name] then
+		if self.dedicated then
 			doreclaim = true
-		elseif ai.conCount > 2 and ai.needToReclaim then
-			if not ai.haveReclaimer then
-				if ai.IDByType[self.id] ~= 1 and ai.IDByType[self.id] ~= 3 then
-					ai.haveReclaimer = true
-					self.extraReclaimer = true
-					doreclaim = true
-				end
+		elseif ai.conCount > 2 and ai.needToReclaim and ai.reclaimerCount == 0 and ai.IDByType[self.id] ~= 1 and ai.IDByType[self.id] ~= 3 then
+			if not ai.haveExtraReclaimer then
+				ai.haveExtraReclaimer = true
+				self.extraReclaimer = true
+				doreclaim = true
 			elseif self.extraReclaimer then
 				doreclaim = true
 			end
 		else
 			if self.extraReclaimer then
-				ai.haveReclaimer = false
+				ai.haveExtraReclaimer = false
 				self.extraReclaimer = false
 				self.targetcell = nil
 				self.unit:ElectBehaviour()
@@ -126,7 +121,7 @@ function ReclaimBehaviour:Reclaim()
 		if vulnerable ~= nil then
 			EchoDebug("reclaiming enemy...")
 			self.unit:Internal():Reclaim(vulnerable)
-		elseif not ai.needToReclaim and reclaimerList[self.name] then
+		elseif not ai.needToReclaim and self.dedicated then
 			EchoDebug("resurrecting...")
 			local floats = api.vectorFloat()
 			floats:push_back(self.target.x)

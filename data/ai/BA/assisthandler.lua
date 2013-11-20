@@ -27,17 +27,16 @@ function AssistHandler:Init()
 end
 
 -- checks whether the assistant can help the builder
-function AssistHandler:IsLocal(asstbehaviour, builder)
-	local bpos = builder:GetPosition()
+function AssistHandler:IsLocal(asstbehaviour, position)
 	local aunit = asstbehaviour.unit:Internal()
 	local apos = aunit:GetPosition()
-	local dist = distance(bpos, apos)
+	local dist = distance(position, apos)
 	if asstbehaviour.isNanoTurret then
 		if dist > 390 then
 			return false
 		end
 	else
-		if not ai.maphandler:UnitCanGoHere(aunit, bpos) then
+		if not ai.maphandler:UnitCanGoHere(aunit, position) then
 			return false
 		end
 	end
@@ -46,7 +45,7 @@ end
 
 -- tries to get a certain number of assistants to help a builder
 -- if there aren't enough available, returns false
-function AssistHandler:Summon(builder, number, force, gentle)
+function AssistHandler:Summon(builder, position, number, force)
 	if number == nil or number == 0 then number = #self.free end
 	EchoDebug(#self.free .. " assistants free")
 	if #self.free < number then 
@@ -70,7 +69,7 @@ function AssistHandler:Summon(builder, number, force, gentle)
 				skip = true
 			end
 			if not skip then
-				local dist = self:IsLocal(asstbehaviour, builder)
+				local dist = self:IsLocal(asstbehaviour, position)
 				if dist then
 					bydistance[dist] = asstbehaviour
 					count = count + 1
@@ -120,27 +119,27 @@ function AssistHandler:Summon(builder, number, force, gentle)
 end
 
 -- assistants that become free before this magnet is released will get assigned to this builder
-function AssistHandler:Magnetize(builder, number)
+function AssistHandler:Magnetize(builder, position, number)
 	if number == nil or number == 0 then number = -1 end
-	table.insert(self.magnets, {bid = builder:ID(), builder = builder, pos = builder:GetPosition(), number = number})
+	table.insert(self.magnets, {bid = builder:ID(), builder = builder, pos = position, number = number})
 end
 
 -- summons and magnetizes until released
-function AssistHandler:PersistantSummon(builder, maxNumber, minNumber)
+function AssistHandler:PersistantSummon(builder, position, maxNumber, minNumber)
 	if minNumber == nil then minNumber = 0 end
 	if maxNumber == 0 then
 		-- get every free assistant until it's done building
-		local hashelp = self:Summon(builder, 0, true)
+		local hashelp = self:Summon(builder, position, 0, true)
 		if hashelp >= minNumber then
-			self:Magnetize(builder)
+			self:Magnetize(builder, position)
 			return hashelp
 		end
 	else
 		-- get enough assistants
-		local hashelp = self:Summon(builder, maxNumber, true)
+		local hashelp = self:Summon(builder, position, maxNumber, true)
 		if hashelp >= minNumber then
 			if hashelp < maxNumber then
-				self:Magnetize(builder, maxNumber - hashelp)
+				self:Magnetize(builder, position, maxNumber - hashelp)
 			end
 			return hashelp
 		end
@@ -153,6 +152,8 @@ function AssistHandler:TakeUpSlack(builder)
 	if #self.free == 0 then return end
 	self:DoMagnets()
 	if #self.free == 0 then return end
+	local builderPos = builder:GetPosition()
+	self.lastPullPosition = builderPos -- so that any newly free assistants can be sent to a non-dumb place
 	for i, asstbehaviour in pairs(self.free) do
 		local skip = false
 		if asstbehaviour.unit == nil then
@@ -163,7 +164,7 @@ function AssistHandler:TakeUpSlack(builder)
 			skip = true
 		end
 		if not skip then
-			if self:IsLocal(asstbehaviour, builder) then
+			if self:IsLocal(asstbehaviour, builderPos) then
 				asstbehaviour:SoftAssign(builder)
 			end
 		end
@@ -188,7 +189,7 @@ function AssistHandler:DoMagnets()
 			local bestDist = 10000
 			local best
 			for mi, magnet in pairs(self.magnets) do
-				local dist = self:IsLocal(asstbehaviour, magnet.builder)
+				local dist = self:IsLocal(asstbehaviour, magnet.pos)
 				if dist then
 					if dist < bestDist then
 						bestDist = dist
@@ -259,6 +260,9 @@ function AssistHandler:AddFree(asstbehaviour)
 	if not self:IsFree(asstbehaviour) then
 		table.insert(self.free, asstbehaviour)
 		EchoDebug(asstbehaviour.name .. " added to available assistants")
+	end
+	if self.lastPullPosition then
+		asstbehaviour:SetFallback(self.lastPullPosition)
 	end
 	self:DoMagnets()
 end

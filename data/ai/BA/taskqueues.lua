@@ -640,6 +640,16 @@ function Lvl1VehRaider(self)
 	return BuildRaiderIfNeeded(unitName)
 end
 
+-- because core doesn't have a lvl2 vehicle raider or a lvl3 raider
+function Lvl1VehRaiderOutmoded(self)
+	if ai.mySide == CORESideName then
+		return BuildRaiderIfNeeded("corgator")
+	else
+		return DummyUnitName
+	end
+end
+
+
 function Lvl1BotRaider(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
@@ -671,13 +681,11 @@ function Lvl1AirRaider(self)
 end
 
 function Lvl2VehRaider(self)
-	local unitName = ""
 	if ai.mySide == CORESideName then
 		return DummyUnitName
 	else
-		unitName = "armlatnk"
+		return BuildRaiderIfNeeded("armlatnk")
 	end
-	return BuildRaiderIfNeeded(unitName)
 end
 
 function Lvl2BotRaider(self)
@@ -752,6 +760,10 @@ function BuildBattleIfNeeded(unitName)
 	local attackCounter = ai.attackhandler:GetCounter(mtype)
 	EchoDebug(mtype .. " " .. attackCounter .. " " .. maxAttackCounter)
 	if attackCounter == maxAttackCounter then return DummyUnitName end
+	if mtype == "veh" and ai.mySide == CORESideName and (ai.factoriesAtLevel[1] == nil or ai.factoriesAtLevel[1] == {}) then
+		-- core only has a lvl1 vehicle raider, so this prevents getting stuck
+		return unitName
+	end
 	local raidCounter = ai.raidhandler:GetCounter(mtype)
 	EchoDebug(mtype .. " " .. raidCounter .. " " .. maxRaidCounter)
 	if raidCounter == minRaidCounter then return unitName end
@@ -2081,6 +2093,7 @@ local anyOutmodedLvl1BotLab = {
 }
 
 local anyOutmodedLvl1VehPlant = {
+	Lvl1VehRaiderOutmoded,
 	ConVehicle,
 	ScoutVeh,
 	Lvl1AAVeh,
