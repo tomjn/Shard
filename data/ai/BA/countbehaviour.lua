@@ -26,6 +26,7 @@ function CountBehaviour:Init()
     self.level = unitTable[self.name].techLevel
     if unitTable[self.name].extractsMetal > 0 then self.isMex = true end
     if battleList[self.name] then self.isBattle = true end
+    if breakthroughList[self.name] then self.isBreakthrough = true end
 	if ai.nameCount[self.name] == nil then
 		ai.nameCount[self.name] = 1
 	else
@@ -61,6 +62,7 @@ function CountBehaviour:Update()
 						if self.isMex then ai.mexCount = ai.mexCount + 1 end
 						if self.isCombat then ai.combatCount = ai.combatCount + 1 end
 						if self.isBattle then ai.battleCount = ai.battleCount + 1 end
+						if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount + 1 end
 						if self.isCon then ai.conCount = ai.conCount + 1 end
 						ai.lastNameFinished[self.name] = f
 						EchoDebug(ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
@@ -91,6 +93,7 @@ function CountBehaviour:UnitDead(unit)
 			if self.isMex then ai.mexCount = ai.mexCount - 1 end
 			if self.isCombat then ai.combatCount = ai.combatCount - 1 end
 			if self.isBattle then ai.battleCount = ai.battleCount - 1 end
+			if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount - 1 end
 			if self.isCon then ai.conCount = ai.conCount - 1 end
 		end
 	end

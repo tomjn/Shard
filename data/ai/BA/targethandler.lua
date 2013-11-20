@@ -387,18 +387,19 @@ end
 
 local function DangerCheck(unitName, unitID)
 	local un = unitName
+	local ut = unitTable[un]
 	local id = unitID
-	if not unitTable[un].isBuilding and not commanderList[un] and unitTable[un].mtype ~= "air" and unitTable[un].mtype ~= "sub" and unitTable[un].groundRange > 0 then
+	if not ut.isBuilding and not commanderList[un] and ut.mtype ~= "air" and ut.mtype ~= "sub" and ut.groundRange > 0 then
 		CountDanger("ground", id)
 	elseif groundFacList[un] then
 		CountDanger("ground", id)
 	end
-	if unitTable[un].mtype == "air" and unitTable[un].groundRange > 0 then
+	if ut.mtype == "air" and ut.groundRange > 0 then
 		CountDanger("air", id)
 	elseif airFacList[un] then
 		CountDanger("air", id)
 	end
-	if (unitTable[un].mtype == "sub" or unitTable[un].mtype == "shp") and unitTable[un].isWeapon and not unitTable[un].isBuilding then
+	if (ut.mtype == "sub" or ut.mtype == "shp") and ut.isWeapon and not ut.isBuilding then
 		CountDanger("submerged", id)
 	elseif subFacList[un] then
 		CountDanger("submerged", id)
@@ -411,6 +412,9 @@ local function DangerCheck(unitName, unitID)
 	end
 	if antinukeList[un] then
 		CountDanger("antinuke", id)
+	end
+	if ut.mtype ~= "air" and ut.mtype ~= "sub" and ut.groundRange > 1000 then
+		CountDanger("longrange", id)
 	end
 end
 
@@ -430,6 +434,7 @@ local function InitializeDangers()
 	dangers["plasma"] = NewDangerLayer()
 	dangers["nuke"] = NewDangerLayer()
 	dangers["antinuke"] = NewDangerLayer()
+	dangers["longrange"] = NewDangerLayer()
 end
 
 local function UpdateDangers()
@@ -447,12 +452,13 @@ local function UpdateDangers()
 		end
 	end
 
-	ai.needGroundDefense = dangers.ground.present
+	ai.needGroundDefense = dangers.ground.present or (not dangers.air.present and not dangers.submerged.present) -- don't turn off ground defense if there aren't air or submerged dangers
 	ai.needAirDefense = dangers.air.present
 	ai.needSubmergedDefense = dangers.submerged.present
 	ai.needShields = dangers.plasma.present
 	ai.needAntinuke = dangers.nuke.present
 	ai.canNuke = not dangers.antinuke.present
+	ai.needJammers = dangers.longrange.present or dangers.air.present or dangers.nuke.present or dangers.plasma.present
 end
 
 local function UpdateEnemies()

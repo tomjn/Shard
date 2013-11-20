@@ -299,6 +299,26 @@ battleList = {
 	armraz = 3,
 }
 
+-- sturdier units to use when battle units get killed
+breakthroughList = {
+	corlevlr = 1,
+	armwar = 1,
+	corgol = 2,
+	corsumo = 2,
+	armfboy = 2,
+	corparrow = 2,
+	nsaclash = 2,
+	corbats = 2,
+	armbats = 2,
+	corkrog = 3,
+	gorg = 3,
+	armbanth = 3,
+	corblackhy = 3,
+	aseadragon = 3,
+	corcrw = 3,
+	armcybr = 3,
+}
+
 -- for milling about next to con units and factories only
 defenderList = {
 	"armaak",
@@ -356,13 +376,9 @@ attackerlist = {
 	"armmh",
 	"corwolv",
 	"cormist",
-	"coresupp",
-	"decade",
-	"corroy",
-	"armroy",
-	"corcrus"
-	"armcrus"
 	"armfboy",
+	"corcrw",
+	-- experimentals
 	"armraz",
 	"armshock",
 	"armbanth",
@@ -371,10 +387,19 @@ attackerlist = {
 	"corkarg",
 	"gorg",
 	"corkrog",
-	"corcrw",
+	-- ships
+	"coresupp",
+	"decade",
+	"corroy",
+	"armroy",
+	"corcrus",
+	"armcrus",
+	"corblackhy",
+	"aseadragon",
 	-- hover
 	"corsnap",
 	"armanac",
+	"nsaclash",
 	-- amphib
 	"corseal",
 	"armcroc",
@@ -416,6 +441,13 @@ commanderList = {
 nanoTurretList = {
 	cornanotc = 1,
 	armnanotc = 1,
+}
+
+-- cheap construction units that can be built in large numbers
+assistList = {
+	armfark = 1,
+	corfast = 1,
+	consul = 1,
 }
 
 reclaimerList = {
@@ -625,13 +657,15 @@ bomberList =
 minAttackCounter = 5
 maxAttackCounter = 20
 baseAttackCounter = 10
-minBomberCounter = 1
-maxBomberCounter = 20
+breakthroughAttackCounter = 11 -- build heavier battle units
+minBomberCounter = 0
+maxBomberCounter = 16
 baseBomberCounter = 2
+breakthroughBomberCounter = 8 -- build atomic bombers or air fortresses
 
 -- raid counter works backwards: it determines the number of raiders to build
 -- if it reaches minRaidCounter, none are built
-minRaidCounter = 1
+minRaidCounter = 0
 maxRaidCounter = 6
 baseRaidCounter = 4
 

@@ -97,8 +97,8 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 	EchoDebug(value .. " (before econ filter)")
 	-- EchoDebug("Energy: " .. Energy.reserves .. " " .. Energy.capacity .. " " .. Energy.income .. " " .. Energy.usage)
 	-- EchoDebug("Metal: " .. Metal.reserves .. " " .. Metal.capacity .. " " .. Metal.income .. " " .. Metal.usage)
-	if nanoTurretList[value] then
-		-- nano turrets
+	if nanoTurretList[value] or assistList[value] then
+		-- build assistance
 		EchoDebug(" nano turret")
 		if metalBelowHalf or energyTooLow or farTooFewCombats then
 			value = DummyUnitName
