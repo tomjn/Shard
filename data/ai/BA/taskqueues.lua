@@ -151,6 +151,7 @@ function CheckForMapControl()
 		local needUpgrade = plentyOfCombatUnits or couldAttack or bombingTooExpensive or attackTooExpensive
 
 		EchoDebug(ai.totalEnemyThreat .. " " .. ai.totalEnemyImmobileThreat .. " " .. ai.totalEnemyMobileThreat)
+		-- build siege units if the enemy is turtling, if a lot of our attackers are getting destroyed, or if we control more than half the metal spots on the map
 		needSiege = (ai.totalEnemyImmobileThreat > ai.totalEnemyMobileThreat * 3 and ai.totalEnemyImmobileThreat > 50000) or (attackCounter > maxAttackCounter * 0.85) or (ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.5)
 		ai.needAdvanced = false
 		if Metal.income > 12 and ai.factories > 0 and needUpgrade then
@@ -406,11 +407,7 @@ end
 function BuildSiegeIfNeeded(unitName)
 	if unitName == DummyUnitName then return DummyUnitName end
 	if IsSiegeEquipmentNeeded() then
-		local mtype = unitTable[unitName].mtype
-		local attackCounter = ai.attackhandler:GetCounter(mtype)
-		if ai.combatCount > attackCounter * 0.75 then
-			return BuildWithLimitedNumber(unitName, math.ceil(attackCounter * 0.5))
-		end
+		return BuildWithLimitedNumber(unitName, math.ceil(ai.battleCount * 0.25))
 	end
 	return DummyUnitName
 end

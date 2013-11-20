@@ -52,6 +52,9 @@ function BuildSiteHandler:Init()
 	ai.lastNameFinished = {}
 	ai.lastNameDead = {}
 	ai.mexCount = 0
+	ai.combatCount = 0
+	ai.battleCount = 0
+	ai.conCount = 0
 	ai.lvl1Mexes = 1 -- this way mexupgrading doesn't revert to taskqueuing before it has a chance to find mexes to upgrade
 	self.seriouslyDont = {}
 	self:DontBuildOnMetalOrGeoSpots()
