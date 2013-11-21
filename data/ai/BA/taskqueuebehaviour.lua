@@ -97,8 +97,8 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 	EchoDebug(value .. " (before econ filter)")
 	-- EchoDebug("Energy: " .. Energy.reserves .. " " .. Energy.capacity .. " " .. Energy.income .. " " .. Energy.usage)
 	-- EchoDebug("Metal: " .. Metal.reserves .. " " .. Metal.capacity .. " " .. Metal.income .. " " .. Metal.usage)
-	if nanoTurretList[value] or assistList[value] then
-		-- build assistance
+	if nanoTurretList[value] then
+		-- nano turret
 		EchoDebug(" nano turret")
 		if metalBelowHalf or energyTooLow or farTooFewCombats then
 			value = DummyUnitName
@@ -205,8 +205,15 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 		if unitTable[value].buildOptions ~= nil then
 			-- construction unit
 			EchoDebug("  construction unit")
-			if (ai.nameCount[value] == nil or ai.nameCount[value] == 0) and metalOkay and energyOkay and (self.outmodedFactory or not farTooFewCombats) then
+			if advConList[value] and (ai.nameCount[value] == nil or ai.nameCount[value] == 0 or ai.nameCount[value] == 1) and metalOkay and energyOkay and (self.outmodedFactory or not farTooFewCombats) then
+				-- build at least two of each advanced con
+			elseif (ai.nameCount[value] == nil or ai.nameCount[value] == 0) and metalOkay and energyOkay and (self.outmodedFactory or not farTooFewCombats) then
 				-- build at least one of each type
+			elseif assistList[value] then
+				-- build enough assistants
+				if metalBelowHalf or energyTooLow or ai.assistCount > Metal.income * 0.125 then
+					value = DummyUnitName
+				end
 			else
 				EchoDebug(ai.combatCount .. " " .. ai.conCount .. " " .. tostring(metalBelowHalf) .. " " .. tostring(energyTooLow))
 				if metalBelowHalf or energyTooLow or (ai.combatCount < ai.conCount * 5 and not self.outmodedFactory and not airFacList[self.name]) then

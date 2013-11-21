@@ -682,6 +682,10 @@ local function UpdateDebug()
 	end
 end
 
+function TargetHandler:UnitDamaged()
+
+end
+
 function TargetHandler:Init()
 	currentEnemyThreatCount = 0
 	currentEnemyImmobileThreatCount = 0
@@ -823,7 +827,7 @@ end
 function TargetHandler:GetBestAttackCell(representative)
 	if not representative then return end
 	self:UpdateMap()
-	if enemyBaseCell then return enemyBasecell end
+	if enemyBaseCell then return enemyBaseCell end
 	local bestValueCell
 	local bestValue = 0
 	local bestThreatCell
@@ -859,6 +863,7 @@ end
 
 function TargetHandler:GetBestNukeCell()
 	self:UpdateMap()
+	if enemyBaseCell then return enemyBaseCell end
 	local best
 	local bestValueThreat = 0
 	for i, cell in pairs(cellList) do

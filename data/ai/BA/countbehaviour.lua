@@ -28,6 +28,7 @@ function CountBehaviour:Init()
     if battleList[self.name] then self.isBattle = true end
     if breakthroughList[self.name] then self.isBreakthrough = true end
     if reclaimerList[self.name] then self.isReclaimer = true end
+    if assistList[self.name] then self.isAssist = true end
 	if ai.nameCount[self.name] == nil then
 		ai.nameCount[self.name] = 1
 	else
@@ -66,6 +67,7 @@ function CountBehaviour:Update()
 						if self.isBattle then ai.battleCount = ai.battleCount + 1 end
 						if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount + 1 end
 						if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount + 1 end
+						if self.isAssist then ai.assistCount = ai.assistCount + 1 end
 						ai.lastNameFinished[self.name] = f
 						EchoDebug(ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
 						self.finished = true
@@ -98,6 +100,7 @@ function CountBehaviour:UnitDead(unit)
 			if self.isBattle then ai.battleCount = ai.battleCount - 1 end
 			if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount - 1 end
 			if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount - 1 end
+			if self.isAssist then ai.assistCount = ai.assistCount - 1 end
 		end
 	end
 end

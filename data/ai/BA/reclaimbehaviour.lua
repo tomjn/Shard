@@ -42,10 +42,12 @@ function ReclaimBehaviour:UnitDead(unit)
 end
 
 function ReclaimBehaviour:UnitIdle(unit)
+	--[[
 	if unit.engineID == self.unit.engineID then
 		self.targetcell = nil
 		self.unit:ElectBehaviour()
 	end
+	]]--
 end
 
 function ReclaimBehaviour:Update()
@@ -108,14 +110,13 @@ function ReclaimBehaviour:Reclaim()
 		EchoDebug("actually reclaiming cell at" .. self.target.x .. " " .. self.target.z)
 		-- find an enemy unit to reclaim if there is one
 		local vulnerable
-		local mtype = unitTable[self.name].mtype
-		if mtype == "veh" or mtype == "bot" or mtype == "amp" or mtype == "hov" then
+		if self.mtype == "veh" or self.mtype == "bot" or self.mtype == "amp" or self.mtype == "hov" then
 			vulnerable = cell.groundVulnerable
 		end
-		if not vulnerable and (mtype == "sub" or mtype == "amp" or mtype == "shp" or mtype == "hov") then
+		if not vulnerable and (self.mtype == "sub" or self.mtype == "amp" or self.mtype == "shp" or self.mtype == "hov") then
 			vulnerable = cell.submergedVulnerable
 		end
-		if not vulnerable and (mtype == "air") then
+		if not vulnerable and (self.mtype == "air") then
 			vulnerable = cell.airVulnerable
 		end
 		if vulnerable ~= nil then
