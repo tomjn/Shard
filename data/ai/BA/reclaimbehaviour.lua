@@ -82,8 +82,8 @@ end
 
 function ReclaimBehaviour:Retarget()
 	EchoDebug("needs target")
-	local u = self.unit:Internal()
-	local bestCell = ai.targethandler:GetBestReclaimCell(u)
+	local unit = self.unit:Internal()
+	local bestCell = ai.targethandler:GetBestReclaimCell(unit)
 	if bestCell then
 		EchoDebug("got reclaim cell")
 		self.targetcell = bestCell

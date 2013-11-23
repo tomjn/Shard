@@ -69,7 +69,7 @@ function FactoryRegisterBehaviour:Unregster()
 	local un = self.name
     local level = self.level
    	EchoDebug("factory " .. un .. " level " .. level .. " unregistering")
-   	ai.buildsitehandler:DoBuildHereNow(self.id)
+   	ai.buildsitehandler:DoBuildRectangleByUnitID(self.id)
    	for i, factory in pairs(ai.factoriesAtLevel[level]) do
    		if factory == self then
    			table.remove(ai.factoriesAtLevel[level], i)
@@ -115,47 +115,16 @@ function FactoryRegisterBehaviour:Register()
 end
 
 function FactoryRegisterBehaviour:KeepFactoryLanesClear()
- 	if factoryExitSides[self.name] ~= nil and factoryExitSides[self.name] ~= 0 then
-	    -- inform the build handler not to build where the units exit
-	    local noBottom = api.Position()
-	    noBottom.x = self.position.x
-	    noBottom.z = self.position.z + 80
-	    noBottom.y = self.position.y
-	    ai.buildsitehandler:DontBuildHere(noBottom, 80, self.id)
-	    local noBottom2 = api.Position()
-	    noBottom2.x = self.position.x
-	    noBottom2.z = self.position.z + 240
-	    noBottom2.y = self.position.y
-	    ai.buildsitehandler:DontBuildHere(noBottom2, 80, self.id)
-	    if factoryExitSides[self.name] == 2 then
-	    	local noTop = api.Position()
-		    noTop.x = self.position.x
-		    noTop.z = self.position.z - 80
-		    noTop.y = self.position.y
-	    	ai.buildsitehandler:DontBuildHere(noTop, 80, self.id)
-	    	local noTop2 = api.Position()
-		    noTop2.x = self.position.x
-		    noTop2.z = self.position.z - 240
-		    noTop2.y = self.position.y
-	    	ai.buildsitehandler:DontBuildHere(noTop2, 80, self.id)
-	    elseif factoryExitSides[self.name] == 3 or factoryExitSides[self.name] == 4 then
-	    	local noLeft = api.Position()
-	    	noLeft.x = self.position.x - 80
-	    	noLeft.z = self.position.z
-	    	noLeft.y = self.position.y
-	    	ai.buildsitehandler:DontBuildHere(noLeft, 80, self.id)
-	    	local noRight = api.Position()
-	    	noRight.x = self.position.x + 80
-	    	noRight.z = self.position.z
-	    	noRight.y = self.position.y
-	    	ai.buildsitehandler:DontBuildHere(noRight, 80, self.id)
-	    	if factoryExitSides[self.name] == 4 then
-	    		local noTop = api.Position()
-			    noTop.x = self.position.x
-			    noTop.z = self.position.z - 80
-			    noTop.y = self.position.y
-		    	ai.buildsitehandler:DontBuildHere(noTop, 80, self.id)
-	    	end
+	local sides = factoryExitSides[self.name]
+ 	if sides ~= nil and sides ~= 0 then
+	    -- tell the build handler not to build where the units exit
+	    if sides == 1 or sides == 3 then
+	    	ai.buildsitehandler:DontBuildRectangle(self.position.x-80, self.position.z, self.position.x+80, self.position.z+240, self.id)
+	   	elseif sides == 2 or sides == 4 then
+	    	ai.buildsitehandler:DontBuildRectangle(self.position.x-80, self.position.z-240, self.position.x+80, self.position.z+240, self.id)
 	    end
+	    if sides == 3 or sides == 4 then
+	    	ai.buildsitehandler:DontBuildRectangle(self.position.x-120, self.position.z-50, self.position.x+120, self.position.z+50, self.id)
+		end
 	end
 end

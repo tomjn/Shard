@@ -59,8 +59,20 @@ function BuildSiteHandler:Init()
 	ai.reclaimerCount = 0
 	ai.assistCount = 0
 	ai.lvl1Mexes = 1 -- this way mexupgrading doesn't revert to taskqueuing before it has a chance to find mexes to upgrade
-	self.seriouslyDont = {}
+	self.dontBuildRects = {}
+	self.plans = {}
 	self:DontBuildOnMetalOrGeoSpots()
+end
+
+function BuildSiteHandler:UnitCreated(unit)
+	local unitName = unit:Name()
+	local position = unit:GetPosition()
+	for i, plan in pairs(self.plans) do
+		if plan.unitName == unitName and plan.position.x == position.x and plan.position.z == position.z then
+			plan.tskqbehaviour:ConstructionBegun()
+			table.remove(self.plans, i)
+		end
+	end
 end
 
 function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalPosition)
@@ -87,12 +99,19 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 			pos = nil
 		end
 	end
-	-- don't build where you shouldn't (metal spots, factory lanes)
+	-- don't build where you shouldn't (metal spots, geo spots, factory lanes)
 	if pos ~= nil then
-		for i, square in pairs(self.seriouslyDont) do
-			local dist = distance(square.position, pos)
-			if dist <= square.size then
-				EchoDebug("build position " .. pos.x .. ", " .. pos.z .. " is " .. dist .. " away, zone is " .. square.size)
+		for i, rect in pairs(self.dontBuildRects) do
+			if pos.x >= rect.x1 and pos.x <= rect.x2 and pos.z >= rect.z1 and pos.z <= rect.z2 then
+				pos = nil
+				break
+			end
+		end
+	end
+	-- don't build on top of current build orders
+	if pos ~= nil then
+		for i, plan in pairs(self.plans) do
+			if pos.x >= plan.x1 and pos.x <= plan.x2 and pos.z >= plan.z1 and pos.z <= plan.z2 then
 				pos = nil
 				break
 			end
@@ -264,35 +283,45 @@ function BuildSiteHandler:ClosestNanoTurret(builder, maxDist)
 	return nano
 end
 
-function BuildSiteHandler:DontBuildHere(position, size, uid)
-	EchoDebug("new no build zone: " .. position.x .. ", " .. position.z .. "  " .. size)
-	size = size * 1.33
-	table.insert(self.seriouslyDont, {position = position, size = size, uid = uid})
-	self:PlotAllDebug()
+function BuildSiteHandler:DontBuildRectangle(x1, z1, x2, z2, unitID)
+	x1 = math.ceil(x1)
+	z1 = math.ceil(z1)
+	x2 = math.ceil(x2)
+	z2 = math.ceil(z2)
+	table.insert(self.dontBuildRects, {x1 = x1, z1 = z1, x2 = x2, z2 = z2, unitID = unitID})
 end
 
 -- to handle factory deaths
-function BuildSiteHandler:DoBuildHereNow(uid)
-	for i, square in pairs(self.seriouslyDont) do
-		if square.uid == uid then
-			table.remove(self.seriouslyDont, i)
+function BuildSiteHandler:DoBuildRectangleByUnitID(unitID)
+	for i, rect in pairs(self.dontBuildRects) do
+		if rect.unitID == unitID then
+			table.remove(self.dontBuildRects, i)
 		end
 	end
-	self:PlotAllDebug()
 end
 
 function BuildSiteHandler:DontBuildOnMetalOrGeoSpots()
 	local spots = ai.scoutSpots["air"][1]
 	for i, p in pairs(spots) do
-		self:DontBuildHere(p, 60)
+		self:DontBuildRectangle(p.x-30, p.z-30, p.x+30, p.z+30)
 	end
 end
 
-function BuildSiteHandler:PlotAllDebug()
-	if not DebugEnabled then return end
-	debugPlotBuildFile = assert(io.open("debugbuildplot",'w'), "Unable to write debugbuildplot")
-	for i, square in pairs(self.seriouslyDont) do
-		PlotSquareDebug(square.position.x, square.position.z, square.size*2/1.33, "NOBUILD")
+function BuildSiteHandler:NewPlan(unitName, position, builderID, tskqbehaviour)
+	local plan = {unitName = unitName, position = position, builderID = builderID, tskqbehaviour = tskqbehaviour}
+	-- positions are in the center of units, so outX and outZ are half the footprint size
+	local outX = unitTable[unitName].xsize * 8
+	local outZ = unitTable[unitName].zsize * 8
+	plan.x1 = position.x - outX
+	plan.z1 = position.z - outZ
+	plan.x2 = position.x + outX
+	plan.z2 = position.z + outZ
+end
+
+function BuildSiteHandler:ClearMyPlans(builderID)
+	for i, plan in pairs(self.plans) do
+		if plan.builderID == builderID then
+			table.remove(self.plans, i)
+		end
 	end
-	debugPlotBuildFile:close()
 end

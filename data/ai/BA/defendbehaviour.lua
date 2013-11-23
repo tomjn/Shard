@@ -65,25 +65,37 @@ function DefendBehaviour:Update()
 		local f = game:Frame()
 		if math.mod(f,60) == 0 then
 			if self.target ~= nil then
+				self.moving = nil
+				self.patroling = nil
 				local tid = self.target:ID()
-				if self.defending ~= tid then
+				if self.guarding ~= tid then
 					local floats = api.vectorFloat()
 	    			floats:push_back(tid)
 					self.unit:Internal():ExecuteCustomCommand(CMD_GUARD, floats)
-					self.defending = tid
+					self.guarding = tid
 				end
 			elseif self.targetPos ~= nil then
-				if self.defending ~= self.targetPos then
-					local point, patrolPoint = RandomAway(self.targetPos, 100, true)
-					EchoDebug(point.x .. ", " .. point.z .. "  " .. patrolPoint.x .. ", " .. patrolPoint.z)
-					self.unit:Internal():Move(point)
-					local floats = api.vectorFloat()
-					-- populate with x, y, z of the position
-					floats:push_back(patrolPoint.x)
-					floats:push_back(patrolPoint.y)
-					floats:push_back(patrolPoint.z)
-					self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats)
-					self.defending = self.targetPos
+				self.guarding = nil
+				if self.patroling == nil or self.patroling.x ~= self.targetPos.x or self.patroling.z ~= self.targetPos.z then
+					local right = api.Position()
+					right.x = self.targetPos.x + 100
+					right.y = self.targetPos.y
+					right.z = self.targetPos.z
+					if self.moving == nil or self.moving.x ~= right.x or self.moving.z ~= right.z then
+						self.unit:Internal():Move(right)
+						self.moving = right
+					else
+						local dist = distance(self.unit:Internal():GetPosition(), right)
+						game:SendToConsole(dist)
+						if dist < 100 then
+							local floats = api.vectorFloat()
+							floats:push_back(self.targetPos.x - 100)
+							floats:push_back(self.targetPos.y)
+							floats:push_back(self.targetPos.z)
+							self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats)
+							self.patroling = self.targetPos
+						end
+					end
 				end
 			end
 		end
@@ -118,7 +130,9 @@ function DefendBehaviour:Activate()
 	self.active = true
 	self.target = nil
 	self.targetPos = nil
-	self.defending = nil
+	self.guarding = nil
+	self.moving = nil
+	self.patroling = nil
 	ai.defendhandler:AddDefender(self)
 	self:SetMoveState()
 end
@@ -128,7 +142,9 @@ function DefendBehaviour:Deactivate()
 	self.active = false
 	self.target = nil
 	self.targetPos = nil
-	self.defending = nil
+	self.guarding = nil
+	self.moving = nil
+	self.patroling = nil
 	ai.defendhandler:RemoveDefender(self)
 end
 

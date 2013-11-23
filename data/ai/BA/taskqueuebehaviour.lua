@@ -253,8 +253,6 @@ function TaskQueueBehaviour:Init()
 	GetEcon()
 	self.active = false
 	self.currentProject = nil
-	self.reclaiming = false
-	self.reclaimStart = 0
 	self.lastWatchdogCheck = game:Frame()
 	local u = self.unit:Internal()
 	local mtype, network = ai.maphandler:MobilityOfUnit(u)
@@ -266,6 +264,7 @@ function TaskQueueBehaviour:Init()
 	if factoryMobilities[self.name] ~= nil then
 		self.isFactory = true
 		local upos = u:GetPosition()
+		self.position = upos
 		for i, mtype in pairs(factoryMobilities[self.name]) do
 			if mtype ~= nil then
 				if ai.maphandler:OutmodedFactoryHere(mtype, upos) then
@@ -279,12 +278,10 @@ function TaskQueueBehaviour:Init()
 		end
 	end
 
-	self.countdown = 0
 	if self:HasQueues() then
 		self.queue = self:GetQueue()
 	end
 	
-	self.waiting = {}
 end
 
 function TaskQueueBehaviour:HasQueues()
@@ -314,11 +311,8 @@ function TaskQueueBehaviour:UnitIdle(unit)
 	if self.unit == nil then return end
 	if unit.engineID == self.unit.engineID then
 		self.progress = true
-		self.countdown = 0
 		self.currentProject = nil
-		self.reclaiming = false
-		self.reclaimLeft = 0
-		currentProjects[self.unit:Internal():ID()] = nil
+		currentProjects[self.id] = nil
 		self.unit:ElectBehaviour()
 	end
 end
@@ -337,12 +331,7 @@ function TaskQueueBehaviour:UnitDead(unit)
 			if self.target then ai.targethandler:AddBadPosition(self.target, self.mtype) end
 			currentProjects[self.id] = nil
 			ai.assisthandler:Release(nil, self.id, true)
-			if self.waiting ~= nil then
-				for k,v in pairs(self.waiting) do
-					ai.modules.sleep.Kill(self.waiting[k])
-				end
-			end
-			self.waiting = nil
+			ai.buildsitehandler:ClearMyPlans(self.id)
 		end
 	end
 end
@@ -498,6 +487,13 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		local builderPos = builder:GetPosition()
 		p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 	end
+	if utype ~=nil and p == nil then
+		local builderPos = builder:GetPosition()
+		p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
+		if p == nil then
+			p = map:FindClosestBuildSite(utype, builderPos, 500, 15)
+		end
+	end
 	return utype, value, p
 end
 
@@ -532,6 +528,10 @@ function TaskQueueBehaviour:GetQueue()
 	return q
 end
 
+function TaskQueueBehaviour:ConstructionBegun()
+	self.constructing = true
+end
+
 function TaskQueueBehaviour:Update()
 	if not self:IsActive() then
 		return
@@ -542,16 +542,8 @@ function TaskQueueBehaviour:Update()
 		GetEcon()
 	end
 	-- watchdog check
-	if (self.lastWatchdogCheck + 8000 < f) or (self.currentProject == nil and (self.lastWatchdogCheck + 1 < f)) or (hyperWatchdog[self.currentProject] and self.lastWatchdogCheck + 3000 < f) then
-		-- maybe we're doing something important?
-		local dontInterrupt = false
-		for _, uname in pairs(dontInterruptList) do
-			if uname == self.currentProject then
-				dontInterrupt = true
-				break
-			end
-		end
-		if not dontInterrupt then
+	if not self.constructing and not self.isFactory then
+		if (self.lastWatchdogCheck + 2400 < f) or (self.currentProject == nil and (self.lastWatchdogCheck + 1 < f)) then
 			-- we're probably stuck doing nothing
 			local tmpOwnName = self.unit:Internal():Name() or "no-unit"
 			local tmpProjectName = self.currentProject or "empty project"
@@ -562,43 +554,20 @@ function TaskQueueBehaviour:Update()
 			return
 		end
 	end
-	local s = self.countdown
-	if self.reclaiming then
-		self.reclaimLeft = self.reclaimLeft - 1
-	end
 	if self.progress == true then
-		if (ai.tqblastframe ~= f) or (ai.tqblastframe == nil) or (self.countdown == 15) then
-			self.countdown = 0
-			ai.tqblastframe = f
-			self:ProgressQueue()
-			return
-		else
-			if self.countdown == nil then
-				self.countdown = 1
-			else
-				self.countdown = self.countdown + 1
-			end
-		end
-		if self.reclaiming and (self.reclaimLeft <= 0) then
-			self.reclaiming = false
-			self.reclaimLeft = 0
-			self:ProgressQueue()
-			return
-		end
+		self:ProgressQueue()
 	end
-end
-TaskQueueWakeup = class(function(a,tqb)
-	a.tqb = tqb
-end)
-function TaskQueueWakeup:wakeup()
-	game:sendtoconsole("advancing queue from sleep1")
-	self.tqb:ProgressQueue()
 end
 
 function TaskQueueBehaviour:ProgressQueue()
 	self.lastWatchdogCheck = game:Frame()
 	self.progress = false
-	self.reclaiming = false
+		local builder = self.unit:Internal()
+	if not self.released then
+		ai.assisthandler:Release(builder)
+		ai.buildsitehandler:ClearMyPlans(self.id)
+		self.released = true
+	end
 	if self.queue ~= nil then
 		local idx, val = next(self.queue,self.idx)
 		self.idx = idx
@@ -619,11 +588,8 @@ function TaskQueueBehaviour:ProgressQueue()
 		if type(value) == "table" then
 			-- not using this
 		else
-			local builder = self.unit:Internal()
-			if not self.released then
-				ai.assisthandler:Release(builder)
-				self.released = true
-			end
+			local success = false
+			local p
 			if value ~= DummyUnitName then
 				EchoDebug(self.name .. " filtering...")
 				value = DuplicateFilter(builder, value)
@@ -638,54 +604,49 @@ function TaskQueueBehaviour:ProgressQueue()
 					utype = nil
 					value = "nil"
 				end
-				local success = false
 				if utype ~= nil then
 					if self.unit:Internal():CanBuild(utype) then
-						local p
-						utype, value, p = self:LocationFilter(utype, value)
-						local helpValue
-						if utype ~= nil then
-							EchoDebug(value ..  " passed location filter of " .. self.name)
-							if p == nil then
-								helpValue = self:GetHelp(value, builder:GetPosition())
-							else
-								helpValue = self:GetHelp(value, p)
-							end
-						end
-						if helpValue ~= nil and helpValue ~= DummyUnitName then
-							if self.isFactory and not self.outmodedTechLevel then
-								-- factories take up idle assistants
-								ai.assisthandler:TakeUpSlack(builder)
-							end
-							self.released = false
-							self.target = p
-							if p == nil then
+						if self.isFactory then
+							local helpValue = self:GetHelp(value, self.position)
+							if helpValue ~= nil and helpValue ~= DummyUnitName then
 								success = self.unit:Internal():Build(utype)
-							else
-								success = self.unit:Internal():Build(utype, p)
 							end
-							self.progress = not success
 						else
-							self.progress = true
-							EchoDebug("assistant filter blocked" .. self.name .. " from building " .. value)
+							utype, value, p = self:LocationFilter(utype, value)
+							if utype ~= nil and p ~= nil then
+								EchoDebug(value ..  " passed location filter of " .. self.name)
+								local helpValue = self:GetHelp(value, p)
+								if helpValue ~= nil and helpValue ~= DummyUnitName then
+									success = self.unit:Internal():Build(utype, p)
+								end
+							end
 						end
 					else
-						self.progress = true
 						game:SendToConsole("WARNING: bad taskque: "..self.name.." cannot build "..value)
 					end
 				else
 					game:SendToConsole(self.name .. " cannot build:"..value..", couldnt grab the unit type from the engine")
-					self.progress = true
 				end
-				if success then
-					self.currentProject = value
-					currentProjects[self.unit:Internal():ID()] = value
+			end
+			if success then
+				if self.isFactory then
+					if not self.outmodedTechLevel then
+						-- factories take up idle assistants
+						ai.assisthandler:TakeUpSlack(builder)
+					end
 				else
-					self.currentProject = nil
+					ai.buildsitehandler:NewPlan(value, p, self.id)
+					self.target = p
+					self.currentProject = value
+					currentProjects[self.id] = value
 				end
+				self.released = false
+				self.progress = false
 			else
-				self.progress = true
+				self.target = nil
+				currentProjects[self.id] = nil
 				self.currentProject = nil
+				self.progress = true
 			end
 		end
 	end
