@@ -8,23 +8,43 @@ local function EchoDebug(inStr)
 	end
 end
 
-function RandomAway(pos, dist)
+function RandomAway(pos, dist, opposite)
 	local xdelta = math.random(0, dist*2) - dist
 	local zmult = math.random(0,1) == 1 and 1 or -1
 	local zdelta = (dist - math.abs(xdelta)) * zmult
-	pos.x = pos.x + xdelta
-	pos.z = pos.z + zdelta
-	if pos.x < 1 then
-		pos.x = 1
-	elseif pos.x > ai.maxElmosX - 1 then
-		pos.x = ai.maxElmosX - 1
+	local away = api.Position()
+	away.x = pos.x + xdelta
+	away.z = pos.z + zdelta
+	away.y = pos.y
+	if away.x < 1 then
+		away.x = 1
+	elseif away.x > ai.maxElmosX - 1 then
+		away.x = ai.maxElmosX - 1
 	end
-	if pos.z < 1 then
-		pos.z = 1
-	elseif pos.z > ai.maxElmosZ - 1 then
-		pos.z = ai.maxElmosZ - 1
+	if away.z < 1 then
+		away.z = 1
+	elseif away.z > ai.maxElmosZ - 1 then
+		away.z = ai.maxElmosZ - 1
 	end
-	return pos
+	if opposite then
+		local oppositeAway = api.Position()
+		oppositeAway.x = pos.x - xdelta
+		oppositeAway.z = pos.z - zdelta
+		oppositeAway.y = pos.y
+		if oppositeAway.x < 1 then
+			oppositeAway.x = 1
+		elseif oppositeAway.x > ai.maxElmosX - 1 then
+			oppositeAway.x = ai.maxElmosX - 1
+		end
+		if oppositeAway.z < 1 then
+			oppositeAway.z = 1
+		elseif oppositeAway.z > ai.maxElmosZ - 1 then
+			oppositeAway.z = ai.maxElmosZ - 1
+		end
+		return away, oppositeAway
+	else
+		return away
+	end
 end
 
 sqrt = math.sqrt

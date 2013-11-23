@@ -37,6 +37,11 @@ function AttackerBehaviour:UnitBuilt(unit)
 	end
 end
 
+function AttackerBehaviour:UnitDamaged(unit,attacker)
+	if unit.engineID == self.unit.engineID then
+		self.damaged = game:Frame()
+	end
+end
 
 function AttackerBehaviour:UnitDead(unit)
 	if unit.engineID == self.unit.engineID then
@@ -128,7 +133,12 @@ function AttackerBehaviour:Deactivate()
 end
 
 function AttackerBehaviour:Update()
-
+	if self.damaged then
+		local f = game:Frame()
+		if f > self.damaged + 450 then
+			self.damaged = nil
+		end
+	end
 end
 
 -- this will issue Hold Pos order to units that need it

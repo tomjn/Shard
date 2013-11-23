@@ -67,34 +67,47 @@ function RunFromAttackBehaviour:Activate()
 
 	-- can we move at all?
 	if self.mobile then
-		-- try to find a friendly weapon and run there
-		local ownUnits = game:GetFriendlies()
-		local salvation = self.initialLocation -- fall back to where the fleeing unit was built if no saviour can be found
-		local fleeing = self.unit:Internal()
-		local fn = fleeing:Name()
-		local fid = fleeing:ID()
-		local fpos = fleeing:GetPosition()
-		local bestDistance = 10000
-		for i,unit in pairs(ownUnits) do
-			local un = unit:Name()
-			if unit:ID() ~= fid and un ~= "corcom" and un ~= "armcom" and not ai.defendhandler:IsDefendingMe(unit, fleeing) then
-				if unitTable[un].isWeapon and (unitTable[un].isBuilding or unitTable[un].metalCost > unitTable[fn].metalCost * 2) then
-					local upos = unit:GetPosition()
-					if ai.targethandler:IsSafePosition(upos, fleeing) and unit:GetHealth() > unit:GetMaxHealth() * 0.75 and ai.maphandler:UnitCanGetToUnit(fleeing, unit) and not unit:IsBeingBuilt() then
-						local dist = distance(fpos, upos) - unitTable[un].metalCost
-						if dist < bestDistance then
-							bestDistance = dist
-							salvation = upos
-						end
-					end
-				end
-			end
+		-- run to the most defended base location
+		local salvation = ai.turtlehandler:MostTurtled(self.unit:Internal())
+		if salvation == nil then
+			-- if no turtle, find the nearest combat unit
+			salvation = self:NearestCombat()
 		end
-		self.unit:Internal():Move(RandomAway(salvation,100))
+		if salvation == nil then
+			-- if none found, just go to where we were built
+			salvation = self.initialLocation
+		end
+		self.unit:Internal():Move(RandomAway(salvation,150))
 
 		self.active = true
 		EchoDebug("RunFromAttackBehaviour: unit ".. self.name .." runs away from danger")
 	end
+end
+
+function RunFromAttackBehaviour:NearestCombat()
+	local best
+	local ownUnits = game:GetFriendlies()
+	local fleeing = self.unit:Internal()
+	local fn = fleeing:Name()
+	local fid = fleeing:ID()
+	local fpos = fleeing:GetPosition()
+	local bestDistance = 10000
+	for i,unit in pairs(ownUnits) do
+		local un = unit:Name()
+		if unit:ID() ~= fid and un ~= "corcom" and un ~= "armcom" and not ai.defendhandler:IsDefendingMe(unit, fleeing) then
+			if unitTable[un].isWeapon and (battleList[un] or breakthroughList[un]) and unitTable[un].metalCost > unitTable[fn].metalCost * 1.5 then
+				local upos = unit:GetPosition()
+				if ai.targethandler:IsSafePosition(upos, fleeing) and unit:GetHealth() > unit:GetMaxHealth() * 0.9 and ai.maphandler:UnitCanGetToUnit(fleeing, unit) and not unit:IsBeingBuilt() then
+					local dist = distance(fpos, upos) - unitTable[un].metalCost
+					if dist < bestDistance then
+						bestDistance = dist
+						best = upos
+					end
+				end
+			end
+		end
+	end
+	return best
 end
 
 function RunFromAttackBehaviour:Deactivate()

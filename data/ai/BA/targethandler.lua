@@ -898,7 +898,8 @@ function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignor
 		if dist < range then return enemyBaseCell end
 	end
 	local best
-	local bestValueThreat = minValueThreat
+	local bestValueThreat = 0
+	if minValueThreat then bestValueThreat = minValueThreat end
 	for i, cell in pairs(cellList) do
 		local dist = distance(position, cell.pos)
 		if dist < range then
