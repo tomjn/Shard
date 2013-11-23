@@ -86,7 +86,7 @@ function DefendBehaviour:Update()
 						self.moving = right
 					else
 						local dist = distance(self.unit:Internal():GetPosition(), right)
-						game:SendToConsole(dist)
+						EchoDebug(dist)
 						if dist < 100 then
 							local floats = api.vectorFloat()
 							floats:push_back(self.targetPos.x - 100)
