@@ -543,6 +543,8 @@ end
 
 function MapHandler:Init()
 
+	self.recentlyGivenSpots = {}
+
 	ai.activeMobTypes = {}
 	ai.factoryListMap = {}
 
@@ -784,27 +786,41 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 		end
 		-- if uwutype ~= nil then EchoDebug("builder can build uw mexes") end
 	end
+	local f = game:Frame()
 	for i,p in pairs(spots) do
-		local dist = distance(position, p)
-		-- don't add if it's already too high
-		if dist < bestDistance then
-			-- now check if we can build there
-			local uwcheck
-			if uwutype ~= nil then
-				 uwcheck = game.map:CanBuildHere(uwutype, p)
-				 -- EchoDebug("builder can build uw mex here? " .. tostring(uwcheck))
+		local justGaveThatOne = false
+		for gi, given in pairs(self.recentlyGivenSpots) do
+			if f > given.frame + 300 then
+				table.remove(self.recentlyGivenSpots, gi)
+			else
+				if given.spot.x == p.x and given.spot.z == p.z then
+					justGaveThatOne = true
+					break
+				end
 			end
-			if game.map:CanBuildHere(unittype, p) or uwcheck then
-				-- EchoDebug("can build mex at" .. p.x .. " " .. p.z)
-				if ai.targethandler:IsSafePosition(p, builder) then
-					if dist < bestDistance then
-						bestDistance = dist
-						pos = p
-						if uwcheck then
-							-- EchoDebug("uw mex is best distance")
-							uw = uwutype
-						else
-							uw = nil
+		end
+		if not justGaveThatOne then
+			local dist = distance(position, p)
+			-- don't add if it's already too high
+			if dist < bestDistance then
+				-- now check if we can build there
+				local uwcheck
+				if uwutype ~= nil then
+					 uwcheck = game.map:CanBuildHere(uwutype, p)
+					 -- EchoDebug("builder can build uw mex here? " .. tostring(uwcheck))
+				end
+				if game.map:CanBuildHere(unittype, p) or uwcheck then
+					-- EchoDebug("can build mex at" .. p.x .. " " .. p.z)
+					if ai.targethandler:IsSafePosition(p, builder) then
+						if dist < bestDistance then
+							bestDistance = dist
+							pos = p
+							if uwcheck then
+								-- EchoDebug("uw mex is best distance")
+								uw = uwutype
+							else
+								uw = nil
+							end
 						end
 					end
 				end
@@ -816,6 +832,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 	-- game:SendToConsole("maphandler gcinfo: " .. kbytes .. " (after ClosestFreeSpot)")
 
 	-- if uw then EchoDebug("uw mex is final best distance") end
+	if pos ~= nil then table.insert(self.recentlyGivenSpots, {spot = pos, frame = f}) end
 	return pos, uw, bestDistance
 end
 

@@ -1,4 +1,5 @@
 require "unitlists"
+require "unittable"
 
 BombardBehaviour = class(Behaviour)
 
@@ -12,10 +13,13 @@ end
 
 local CMD_ATTACK = 20
 
-local valueThreatThreshold = 2000 -- anything above this level of value+threat will be shot at even if the cannon isn't idle
+local valueThreatThreshold = 1600 -- anything above this level of value+threat will be shot at even if the cannon isn't idle
 
 function BombardBehaviour:Init()
     self.lastFireFrame = 0
+    local unit = self.unit:Internal()
+    self.position = unit:GetPosition()
+    self.range = unitTable[unit:Name()].groundRange
 end
 
 function BombardBehaviour:UnitCreated(unit)
@@ -50,7 +54,7 @@ function BombardBehaviour:Update()
 		local f = game:Frame()
 		if self.lastFireFrame == 0 or f > self.lastFireFrame + 900 then
 			EchoDebug("retarget")
-			local bestCell, valueThreat = ai.targethandler:GetBestNukeCell()
+			local bestCell, valueThreat = ai.targethandler:GetBestBombardCell(self.position, self.range)
 			if bestCell ~= nil then
 				self.target = bestCell.pos
 				if valueThreat > valueThreatThreshold then

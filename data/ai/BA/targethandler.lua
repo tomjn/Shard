@@ -64,6 +64,7 @@ local baseBuildingValue = 150
 local bomberExplosionValue = 2000
 local vulnerableHealth = 200
 local wreckMult = 100
+local vulnerableReclaimDistMod = 100
 local badCellThreat = 300
 
 local factoryValue = 1000
@@ -682,8 +683,13 @@ local function UpdateDebug()
 	end
 end
 
-function TargetHandler:UnitDamaged()
-
+function TargetHandler:UnitDamaged(unit, attacker)
+	-- even if the attacker can't be seen, human players know what weapons look like
+	if attacker ~= nil then
+		local attackerName = attacker:Name()
+		local attackerID = attacker:ID()
+		DangerCheck(attackerName, attackerID)
+	end
 end
 
 function TargetHandler:Init()
@@ -881,6 +887,34 @@ function TargetHandler:GetBestNukeCell()
 	return best, bestValueThreat
 end
 
+function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignoreValue, ignoreThreat)
+	if ignoreValue and ignoreThreat then
+		game:SendToConsole("trying to find a place to bombard but ignoring both value and threat doesn't work")
+		return
+	end
+	self:UpdateMap()
+	if enemyBaseCell and not ignoreValue then
+		local dist = distance(position, enemyBaseCell.pos)
+		if dist < range then return enemyBaseCell end
+	end
+	local best
+	local bestValueThreat = minValueThreat
+	for i, cell in pairs(cellList) do
+		local dist = distance(position, cell.pos)
+		if dist < range then
+			local value, threat = CellValueThreat("ALL", cell)
+			local valuethreat = 0
+			if not ignoreValue then valuethreat = valuethreat + value end
+			if not ignoreThreat then valuethreat = valuethreat + threat end
+			if valuethreat > bestValueThreat then
+				best = cell
+				bestValueThreat = valuethreat
+			end
+		end
+	end
+	return best, bestValueThreat
+end
+
 function TargetHandler:GetBestBomberTarget()
 	self:UpdateMap()
 	local best
@@ -926,6 +960,8 @@ function TargetHandler:GetBestReclaimCell(representative)
 		if threat == 0 and cell.pos then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) then
 				local dist = distance(rpos, cell.pos) - (cell.wrecks * wreckMult)
+				local vulnerable = CellVulnerable(cell, gas)
+				if vulnerable then dist = dist - vulnerableReclaimDistMod end
 				if dist < bestDist then
 					best = cell
 					bestDist = dist
@@ -950,6 +986,8 @@ end
 
 function TargetHandler:IsSafePosition(position, unit, threshold)
 	self:UpdateMap()
+	if unit == nil then game:SendToConsole("nil unit") end
+	if unit:Name() == nil then game:SendToConsole("nil unit name") end
 	local cell = GetCellHere(position)
 	local value, threat = CellValueThreat(unit, cell)
 	if threshold then

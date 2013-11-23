@@ -19,38 +19,11 @@ require "unitlists"
 require "unittable"
 
 behaviours = {
-	cornanotc = {
-		AssistBehaviour,
+	corcrw = {
+		RaiderBehaviour,
+		DefendBehaviour,
 		CountBehaviour,
-	},
-	armnanotc = {
-		AssistBehaviour,
-		CountBehaviour,
-	},
-	corfmd = {
-		AntinukeBehaviour,
-		CountBehaviour,
-	},
-	armamd = {
-		AntinukeBehaviour,
-		CountBehaviour,
-	},
-	corsilo = {
-		NukeBehaviour,
-		CountBehaviour,
-	},
-	armsilo = {
-		NukeBehaviour,
-		CountBehaviour,
-	},
-	corint = {
-		BombardBehaviour,
-		CountBehaviour,
-	},
-	armbrtha = {
-		BombardBehaviour,
-		CountBehaviour,
-	},
+	}
 }
 
 
@@ -62,8 +35,20 @@ function defaultBehaviours(unit)
 	-- keep track of how many of each kind of unit we have
 	table.insert(b, CountBehaviour)
 
-	if unitTable[un].isBuilding then
+	if nanoTurretList[un] then
+		table.insert(b, AssistBehaviour)
 		table.insert(b, RunFromAttackBehaviour)
+	end
+
+	if unitTable[un].isBuilding then
+		table.insert(b, RunFromAttackBehaviour) --tells defending units to rush to threatened buildings
+		if nukeList[un] then
+			table.insert(b, NukeBehaviour)
+		elseif antinukeList[un] then
+			table.insert(b, AntinukeBehaviour)
+		elseif bigPlasmaList[un] then
+			table.insert(b, BombardBehaviour)
+		end
 	elseif unitTable[un].mtype ~= "air" and not commanderList[un] then
 		-- non-air mobile units need to not get stuck in the factory
 		table.insert(b, ExitFactoryBehaviour)
@@ -104,7 +89,10 @@ function defaultBehaviours(unit)
 	else
 		if IsAttacker(unit) then
 			table.insert(b, AttackerBehaviour)
-			table.insert(b, DefendBehaviour)
+			if battleList[un] or breakthroughList[un] then
+				-- arty and merl don't make good defense
+				table.insert(b, DefendBehaviour)
+			end
 		end
 		if IsRaider(unit) then
 			table.insert(b, RaiderBehaviour)

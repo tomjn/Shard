@@ -214,6 +214,11 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 				if metalBelowHalf or energyTooLow or ai.assistCount > Metal.income * 0.125 then
 					value = DummyUnitName
 				end
+			elseif value == "corcv" and ai.nameCount["coracv"] ~= 0 and ai.nameCount["coracv"] ~= nil and (ai.nameCount["coralab"] == 0 or ai.nameCount["coralab"] == nil) then
+				-- core doesn't have consuls, so treat lvl1 con vehicles like assistants, if there are no other alternatives
+				if metalBelowHalf or energyTooLow or ai.conCount > Metal.income * 0.15 then
+					value = DummyUnitName
+				end
 			else
 				EchoDebug(ai.combatCount .. " " .. ai.conCount .. " " .. tostring(metalBelowHalf) .. " " .. tostring(energyTooLow))
 				if metalBelowHalf or energyTooLow or (ai.combatCount < ai.conCount * 5 and not self.outmodedFactory and not airFacList[self.name]) then
@@ -318,6 +323,11 @@ function TaskQueueBehaviour:UnitIdle(unit)
 	end
 end
 
+function TaskQueueBehaviour:UnitMoveFailed(unit)
+	-- sometimes builders get stuck
+	self:UnitIdle(unit)
+end
+
 function TaskQueueBehaviour:UnitDead(unit)
 	if self.unit ~= nil then
 		if unit.engineID == self.unit.engineID then
@@ -369,7 +379,7 @@ function TaskQueueBehaviour:GetHelp(value, position)
 		end
 		if number == 0 then return value end
 		local hashelp = ai.assisthandler:Summon(builder, position, number)
-		if hashelp then return value end
+		if hashelp or self.isFactory then return value end
 	end
 	return DummyUnitName
 end

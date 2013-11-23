@@ -576,11 +576,13 @@ bigPlasmaList = {
 }
 
 -- if any of these is found among enemy units, antinukes will be built
+-- also used to assign nuke behaviour to own units
+-- values are how many frames it takes to stockpile
 nukeList = {
-	armsilo = 1,
-	corsilo = 1,
-	armemp = 1,
-	cortron = 1,
+	armsilo = 3600,
+	corsilo = 5400,
+	armemp = 2700,
+	cortron = 2250,
 }	
 
 -- these units will be used to raid weakly defended spots
