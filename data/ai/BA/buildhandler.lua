@@ -38,26 +38,9 @@ function BuildSiteHandler:internalName()
 end
 
 function BuildSiteHandler:Init()
-	-- a convenient place for some other inits
-	ai.factories = 0
-	ai.maxFactoryLevel = 0
-	ai.factoriesAtLevel = {}
-	ai.outmodedFactoryID = {}
 	local mapSize = map:MapDimensions()
 	ai.maxElmosX = mapSize.x * 8
 	ai.maxElmosZ = mapSize.z * 8
-	ai.nameCount = {}
-	ai.nameCountFinished = {}
-	ai.lastNameCreated = {}
-	ai.lastNameFinished = {}
-	ai.lastNameDead = {}
-	ai.mexCount = 0
-	ai.conCount = 0
-	ai.combatCount = 0
-	ai.battleCount = 0
-	ai.breakthroughCount = 0
-	ai.reclaimerCount = 0
-	ai.assistCount = 0
 	ai.lvl1Mexes = 1 -- this way mexupgrading doesn't revert to taskqueuing before it has a chance to find mexes to upgrade
 	self.dontBuildRects = {}
 	self.plans = {}
@@ -80,7 +63,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	if pos ~= nil then
 		if unitTable[unitTypeToBuild:Name()].buildOptions then
 			-- don't build factories too close to south map edge because they face south
-			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ - 50) then
+			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ - 150) then
 				EchoDebug("bad position: " .. pos.x .. ", " .. pos.z)
 				pos = nil
 			end

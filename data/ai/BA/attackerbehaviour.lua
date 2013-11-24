@@ -28,6 +28,9 @@ function AttackerBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
+	self.size = unitTable[self.name].xsize * unitTable[self.name].zsize * 16
+	self.range = math.max(unitTable[self.name].groundRange, unitTable[self.name].airRange, unitTable[self.name].submergedRange)
+	self.awayDistance = self.range * 0.9
 end
 
 function AttackerBehaviour:UnitBuilt(unit)
@@ -53,31 +56,41 @@ function AttackerBehaviour:UnitDead(unit)
 end
 
 function AttackerBehaviour:UnitIdle(unit)
-	if unit.engineID == self.unit.engineID then
-		--[[
-		self.attacking = false
-		if not ai.attackhandler:IsRecruit(self) and not ai.attackhandler:IsMember(self) then
-			ai.attackhandler:AddRecruit(self)
-		end
-		self.unit:ElectBehaviour()
-		]]--
-	end
+
 end
 
-function AttackerBehaviour:Attack(pos)
+function AttackerBehaviour:Attack(pos, realClose)
 	if self.unit == nil then
 		-- wtf
 	elseif self.unit:Internal() == nil then
 		-- wwttff
 	else
-		self.target = RandomAway(pos, 75)
+		if realClose then
+			self.target = self:AwayFromTarget(pos, realClose)
+		else
+			self.target = RandomAway(pos, 150)
+		end
 		self.attacking = true
 		self.congregating = false
 		if self.active then
-			self.unit:Internal():MoveAndFire(self.target)
+			self.unit:Internal():Move(self.target)
 		end
 		self.unit:ElectBehaviour()
 	end
+end
+
+function AttackerBehaviour:AwayFromTarget(pos, halfCircle)
+	local upos = self.unit:Internal():GetPosition()
+	local dx = upos.x - pos.x
+	local dz = upos.z - pos.z
+	local angle = atan2(-dz, dx)
+	if halfCircle then angle = (angle - halfPi) + (random() * pi) end
+	if angle > twicePi then
+		angle = angle - twicePi
+	elseif angle < 0 then
+		angle = angle + twicePi
+	end
+	return RandomAway(pos, self.awayDistance, false, angle)
 end
 
 function AttackerBehaviour:Congregate(pos)

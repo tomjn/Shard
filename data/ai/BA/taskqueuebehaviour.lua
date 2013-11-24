@@ -561,6 +561,7 @@ end
 
 function TaskQueueBehaviour:ProgressQueue()
 	self.lastWatchdogCheck = game:Frame()
+	self.constructing = false
 	self.progress = false
 		local builder = self.unit:Internal()
 	if not self.released then

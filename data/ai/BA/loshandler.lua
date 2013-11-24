@@ -251,7 +251,8 @@ function LosHandler:UpdateWrecks()
 	if self.knownWrecks == nil then self.knownWrecks = {} end
 	for i, w  in pairs(wrecks) do
 		if w ~= nil then
-			if not string.find(w:Name(), "geo") then
+			local wname = w:Name()
+			if not string.find(wname, "geo") and (string.find(wname, "heap") or string.find(wname, "wreck") or string.find(wname, "rock")) then
 				-- don't get geo spots
 				local pos = w:GetPosition()
 				local los = self:GroundLos(pos)
