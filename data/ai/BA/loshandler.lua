@@ -252,7 +252,23 @@ function LosHandler:UpdateWrecks()
 	for i, w  in pairs(wrecks) do
 		if w ~= nil then
 			local wname = w:Name()
-			if not string.find(wname, "geo") and (string.find(wname, "heap") or string.find(wname, "wreck") or string.find(wname, "rock")) then
+			-- only count features that aren't geovents and that are known to be reclaimable or guessed to be so
+			local okay = false
+			if wname ~= "geovent" then
+				if featureTable[wname] then
+					if featureTable[wname].reclaimable then
+						okay = true
+					end
+				else
+					for findString, metalValue in pairs(baseFeatureMetal) do
+						if string.find(wname, findString) then
+							okay = true
+							break
+						end
+					end
+				end
+			end
+			if okay then
 				-- don't get geo spots
 				local pos = w:GetPosition()
 				local los = self:GroundLos(pos)

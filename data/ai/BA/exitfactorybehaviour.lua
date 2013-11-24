@@ -17,6 +17,8 @@ function ExitFactoryBehaviour:UnitCreated(unit)
 	if unit.engineID == self.unit.engineID then
 		self.fresh = true
 		self.initialPosition = self.unit:Internal():GetPosition()
+		self.id = self.unit:Internal():ID()
+		self.repairedBy = ai.buildsitehandler:ResurrectionRepairedBy(self.id)
 		self.unit:ElectBehaviour()
 	end
 end
@@ -33,6 +35,20 @@ end
 
 function ExitFactoryBehaviour:Update()
 	local f = game:Frame()
+
+	if self.repairedBy then
+		if self.fresh then
+			if f % 30 == 0 then
+				if self.unit:Internal():GetHealth() == self.unit:Internal():GetMaxHealth() then
+					self.fresh = nil
+					self.repairedBy:ResurrectionComplete()
+					self.unit:ElectBehaviour()
+				end
+			end
+		end
+		return
+	end
+
 	if self.fresh then
 		if f % 30 == 0 then
 			local u = self.unit:Internal()
@@ -43,21 +59,6 @@ function ExitFactoryBehaviour:Update()
 					self.fresh = nil
 					self.unit:ElectBehaviour()
 				end
-				--[[
-				elseif self.lastOrderFrame ~= nil then
-					if f > self.lastOrderFrame + 300 then
-						-- can't get out by going south, try going north
-						local out = api.Position()
-						out.x = pos.x
-						out.y = pos.y
-						out.z = pos.z - 200
-						if out.z < 1 then
-							out.z = 1
-						end
-						u:Move(out)
-					end
-				end
-				]]--
 			end
 		end
 	else
@@ -78,17 +79,21 @@ end
 
 function ExitFactoryBehaviour:Activate()
 	self.active = true
-	local u = self.unit:Internal()
-	local pos = u:GetPosition()
-	local out = api.Position()
-	out.x = pos.x
-	out.y = pos.y
-	out.z = pos.z + 200
-	if out.z > ai.maxElmosZ - 1 then
-		out.z = ai.maxElmosZ - 1
+	if self.repairedBy then
+		-- stay here
+	else
+		local u = self.unit:Internal()
+		local pos = u:GetPosition()
+		local out = api.Position()
+		out.x = pos.x
+		out.y = pos.y
+		out.z = pos.z + 200
+		if out.z > ai.maxElmosZ - 1 then
+			out.z = ai.maxElmosZ - 1
+		end
+		u:Move(out)
+		self.lastOrderFrame = game:Frame()
 	end
-	u:Move(out)
-	self.lastOrderFrame = game:Frame()
 end
 
 function ExitFactoryBehaviour:Deactivate()
@@ -104,5 +109,7 @@ function ExitFactoryBehaviour:Priority()
 end
 
 function ExitFactoryBehaviour:UnitDead(unit)
-
+	if unit.engineID == self.unit.engineID then
+		ai.buildsitehandler:RemoveResurrectionRepairedBy(self.id)
+	end
 end

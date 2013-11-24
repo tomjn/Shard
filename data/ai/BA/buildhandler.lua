@@ -42,20 +42,11 @@ function BuildSiteHandler:Init()
 	ai.maxElmosX = mapSize.x * 8
 	ai.maxElmosZ = mapSize.z * 8
 	ai.lvl1Mexes = 1 -- this way mexupgrading doesn't revert to taskqueuing before it has a chance to find mexes to upgrade
+	self.resurrectionRepair = {}
 	self.dontBuildRects = {}
 	self.plans = {}
+	self.resurrections = {}
 	self:DontBuildOnMetalOrGeoSpots()
-end
-
-function BuildSiteHandler:UnitCreated(unit)
-	local unitName = unit:Name()
-	local position = unit:GetPosition()
-	for i, plan in pairs(self.plans) do
-		if plan.unitName == unitName and plan.position.x == position.x and plan.position.z == position.z then
-			plan.tskqbehaviour:ConstructionBegun()
-			table.remove(self.plans, i)
-		end
-	end
 end
 
 function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalPosition)
@@ -290,6 +281,23 @@ function BuildSiteHandler:DontBuildOnMetalOrGeoSpots()
 	end
 end
 
+function BuildSiteHandler:UnitCreated(unit)
+	local unitName = unit:Name()
+	local position = unit:GetPosition()
+	for i, plan in pairs(self.plans) do
+		if plan.unitName == unitName and PositionWithinRect(position, plan.x1, plan.z1, plan.x2, plan.z2) then
+			plan.tskqbehaviour:ConstructionBegun()
+			table.remove(self.plans, i)
+		end
+	end
+	for i, resurrection in pairs(self.resurrections) do
+		if resurrection.unitName == unitName and PositionWithinRect(position, resurrection.x1, resurrection.z1, resurrection.x2, resurrection.z2) then
+			-- so that factoryExit will hold it in place while it gets repaired
+			self.resurrectionRepair[unit:ID()] = resurrection.rclmbehaviour
+		end
+	end
+end
+
 function BuildSiteHandler:NewPlan(unitName, position, builderID, tskqbehaviour)
 	local plan = {unitName = unitName, position = position, builderID = builderID, tskqbehaviour = tskqbehaviour}
 	-- positions are in the center of units, so outX and outZ are half the footprint size
@@ -299,6 +307,7 @@ function BuildSiteHandler:NewPlan(unitName, position, builderID, tskqbehaviour)
 	plan.z1 = position.z - outZ
 	plan.x2 = position.x + outX
 	plan.z2 = position.z + outZ
+	table.insert(self.plans, plan)
 end
 
 function BuildSiteHandler:ClearMyPlans(builderID)
@@ -307,4 +316,31 @@ function BuildSiteHandler:ClearMyPlans(builderID)
 			table.remove(self.plans, i)
 		end
 	end
+end
+
+function BuildSiteHandler:NewResurrection(unitName, position, rclmbehaviour)
+	local resurrection = {unitName = unitName, position = position, rclmbehaviour = rclmbehaviour}
+	local outX = unitTable[unitName].xsize * 8
+	local outZ = unitTable[unitName].zsize * 8
+	resurrection.x1 = position.x - outX
+	resurrection.z1 = position.z - outZ
+	resurrection.x2 = position.x + outX
+	resurrection.z2 = position.z + outZ
+	table.insert(self.resurrections, resurrection)
+end
+
+function BuildSiteHandler:ClearMyResurrections(rclmbehaviour)
+	for i, resurrection in pairs(self.resurrections) do
+		if resurrection.rclmbehaviour == rclmbehaviour then
+			table.remove(self.resurrections, i)
+		end
+	end
+end
+
+function BuildSiteHandler:RemoveResurrectionRepairedBy(unitID)
+	self.resurrectionRepair[unitID] = nil
+end
+
+function BuildSiteHandler:ResurrectionRepairedBy(unitID)
+	return self.resurrectionRepair[unitID]
 end

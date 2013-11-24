@@ -636,7 +636,7 @@ function TaskQueueBehaviour:ProgressQueue()
 						ai.assisthandler:TakeUpSlack(builder)
 					end
 				else
-					ai.buildsitehandler:NewPlan(value, p, self.id)
+					ai.buildsitehandler:NewPlan(value, p, self.id, self)
 					self.target = p
 					self.currentProject = value
 					currentProjects[self.id] = value
