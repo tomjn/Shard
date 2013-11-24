@@ -1,5 +1,5 @@
-require "unitlists"
-require "unittable"
+require "common"
+
 
 local DebugEnabled = false
 
@@ -98,7 +98,7 @@ function RunFromAttackBehaviour:NearestCombat()
 			if unitTable[un].isWeapon and (battleList[un] or breakthroughList[un]) and unitTable[un].metalCost > unitTable[fn].metalCost * 1.5 then
 				local upos = unit:GetPosition()
 				if ai.targethandler:IsSafePosition(upos, fleeing) and unit:GetHealth() > unit:GetMaxHealth() * 0.9 and ai.maphandler:UnitCanGetToUnit(fleeing, unit) and not unit:IsBeingBuilt() then
-					local dist = distance(fpos, upos) - unitTable[un].metalCost
+					local dist = Distance(fpos, upos) - unitTable[un].metalCost
 					if dist < bestDistance then
 						bestDistance = dist
 						best = upos

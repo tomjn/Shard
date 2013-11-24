@@ -1,5 +1,5 @@
-require "unitlists"
-require "unittable"
+require "common"
+
 
 local DebugEnabled = false
 
@@ -146,7 +146,7 @@ function DefendHandler:AssignAll()
 					local defender = dfndbehaviour.unit:Internal()
 					if ai.maphandler:UnitCanGoHere(defender, defendeePos) then
 						local defenderPos = defender:GetPosition()
-						local dist = distance(defenderPos, defendeePos)
+						local dist = Distance(defenderPos, defendeePos)
 						bydistance[dist] = dfndbehaviour -- the probability of the same distance is near zero
 					end
 				end

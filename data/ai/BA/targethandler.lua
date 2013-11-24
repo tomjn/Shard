@@ -1,5 +1,5 @@
-require "unittable"
-require "unitlists"
+
+require "common"
 
 local DebugEnabled = false
 local debugPlotTargetFile
@@ -819,7 +819,7 @@ function TargetHandler:GetBestRaidCell(representative)
 		if value > 0 and threat <= maxThreat then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) then
 				local mod = value - (threat * 3)
-				local dist = distance(rpos, cell.pos) - mod
+				local dist = Distance(rpos, cell.pos) - mod
 				if dist < bestDist then
 					best = cell
 					bestDist = dist
@@ -894,14 +894,14 @@ function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignor
 	end
 	self:UpdateMap()
 	if enemyBaseCell and not ignoreValue then
-		local dist = distance(position, enemyBaseCell.pos)
+		local dist = Distance(position, enemyBaseCell.pos)
 		if dist < range then return enemyBaseCell end
 	end
 	local best
 	local bestValueThreat = 0
 	if minValueThreat then bestValueThreat = minValueThreat end
 	for i, cell in pairs(cellList) do
-		local dist = distance(position, cell.pos)
+		local dist = Distance(position, cell.pos)
 		if dist < range then
 			local value, threat = CellValueThreat("ALL", cell)
 			local valuethreat = 0
@@ -960,7 +960,7 @@ function TargetHandler:GetBestReclaimCell(representative)
 		local value, threat, gas = CellValueThreat(representative, cell)
 		if threat == 0 and cell.pos then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) then
-				local dist = distance(rpos, cell.pos) - (cell.wrecks * wreckMult)
+				local dist = Distance(rpos, cell.pos) - (cell.wrecks * wreckMult)
 				local vulnerable = CellVulnerable(cell, gas)
 				if vulnerable then dist = dist - vulnerableReclaimDistMod end
 				if dist < bestDist then

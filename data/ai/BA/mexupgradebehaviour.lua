@@ -1,4 +1,4 @@
-require "unitlists"
+require "common"
 
 local DebugEnabled = false
 
@@ -142,7 +142,7 @@ function StartUpgradeProcess(self)
 					if ai.targethandler:IsSafePosition(pos, selfUnit) then
 						-- if mod number by itself is too high, don't compute the distance at all
 						if distMod < closestDistance then
-							local dist = distance(pos, selfPos) + distMod
+							local dist = Distance(pos, selfPos) + distMod
 							if dist < closestDistance then
 								mexUnit = unit
 								closestDistance = dist

@@ -1,4 +1,4 @@
-require "unitlists"
+require "common"
 
 ExitFactoryBehaviour = class(Behaviour)
 
@@ -38,7 +38,7 @@ function ExitFactoryBehaviour:Update()
 			local u = self.unit:Internal()
 			if not u:IsBeingBuilt() then
 				local pos = u:GetPosition()
-				local dist = distance(pos, self.initialPosition)
+				local dist = Distance(pos, self.initialPosition)
 				if dist >= 50 then
 					self.fresh = nil
 					self.unit:ElectBehaviour()
@@ -66,7 +66,7 @@ function ExitFactoryBehaviour:Update()
 			local u = self.unit:Internal()
 			if not u:IsBeingBuilt() then
 				local pos = u:GetPosition()
-				local dist = distance(pos, self.initialPosition)
+				local dist = Distance(pos, self.initialPosition)
 				if dist < 50 then
 					self.fresh = true
 					self.unit:ElectBehaviour()

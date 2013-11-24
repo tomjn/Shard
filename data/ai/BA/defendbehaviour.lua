@@ -1,4 +1,4 @@
-require "unitlists"
+require "common"
 
 local DebugEnabled = false
 
@@ -85,7 +85,7 @@ function DefendBehaviour:Update()
 						self.unit:Internal():Move(right)
 						self.moving = right
 					else
-						local dist = distance(self.unit:Internal():GetPosition(), right)
+						local dist = Distance(self.unit:Internal():GetPosition(), right)
 						EchoDebug(dist)
 						if dist < 100 then
 							local floats = api.vectorFloat()

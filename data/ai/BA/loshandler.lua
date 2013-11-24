@@ -1,5 +1,5 @@
-require "unittable"
-require "unitlists"
+
+require "common"
 
 local DebugEnabled = false
 local debugPlotLosFile

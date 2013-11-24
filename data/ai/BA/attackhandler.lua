@@ -1,4 +1,4 @@
-require "unitlists"
+require "common"
 
 local DebugEnabled = false
 
@@ -30,7 +30,6 @@ function AttackHandler:Init()
 	self.recruits = {}
 	self.squads = {}
 	self.counter = {}
-	self.totalThreat = {}
 	ai.hasAttacked = 0
 	ai.couldAttack = 0
 end
@@ -172,7 +171,7 @@ function AttackHandler:DoMovement()
 				if member.damaged then damaged = damaged + 1 end
 				local unit = member.unit:Internal()
 				local upos = unit:GetPosition()
-				local cdist = quickdistance(upos, midPos)
+				local cdist = ManhattanDistance(upos, midPos)
 				if cdist > congDist then
 					if member.straggler == nil then
 						member.straggler = 1
@@ -299,8 +298,6 @@ function AttackHandler:AddRecruit(attkbehaviour)
 			local mtype = ai.maphandler:MobilityOfUnit(attkbehaviour.unit:Internal())
 			if self.recruits[mtype] == nil then self.recruits[mtype] = {} end
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-			if self.totalThreat[mtype] == nil then self.totalThreat[mtype] = 0 end
-			self.totalThreat[mtype] = self.totalThreat[mtype] + UnitThreat(attkbehaviour.unit:Internal():Name())
 			table.insert(self.recruits[mtype], attkbehaviour)
 			attkbehaviour:SetMoveState()
 			attkbehaviour:Free()
@@ -314,7 +311,6 @@ function AttackHandler:RemoveRecruit(attkbehaviour)
 	for mtype, recruits in pairs(self.recruits) do
 		for i,v in ipairs(recruits) do
 			if v == attkbehaviour then
-				self.totalThreat[mtype] = self.totalThreat[mtype] - UnitThreat(attkbehaviour.unit:Internal():Name())
 				table.remove(self.recruits[mtype], i)
 				return true
 			end

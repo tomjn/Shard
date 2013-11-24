@@ -2,8 +2,8 @@
  Task Queues!
 ]]--
 
-require "unitlists"
-require "unittable"
+require "common"
+
 
 local DebugEnabled = false
 
@@ -1192,7 +1192,7 @@ function CountOwnUnitsInRadius(unitName, pos, radius, maxCount)
 	for _, u in pairs(ownUnits) do
 		if u:Name() == unitName then
 			local upos = u:GetPosition()
-			if distance(pos, upos) < radius then
+			if Distance(pos, upos) < radius then
 				unitCount = unitCount + 1
 			end
 			-- optimisation: if the limit is already exceeded, don't count further

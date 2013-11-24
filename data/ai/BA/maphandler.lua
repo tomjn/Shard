@@ -1,4 +1,4 @@
-require "unitlists"
+require "common"
 
 local DebugEnabled = false
 
@@ -310,7 +310,7 @@ local function MergePositions(posTable, cutoff, includeNonMerged)
 		local pos1 = table.remove(list)
 		local merge = nil
 		for i, pos2 in pairs(list) do
-			local dist = distance(pos1, pos2)
+			local dist = Distance(pos1, pos2)
 			if dist < cutoff then
 				EchoDebug("merging " .. pos1.x .. "," .. pos1.z .. " with " .. pos2.x .. "," .. pos2.z .. " -- " .. dist .. " away")
 				merge = MiddleOfTwo(pos1, pos2)
@@ -344,7 +344,7 @@ function MapHandler:GuessStartLocations(spots)
 	while #spotsCopy > 0 do
 		local closest = nil
 		for i, to in pairs(spotsCopy) do
-			local dist = distance(from, to)
+			local dist = Distance(from, to)
 			if dist < minDist then
 				minDist = dist
 				closest = i
@@ -800,7 +800,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 			end
 		end
 		if not justGaveThatOne then
-			local dist = distance(position, p)
+			local dist = Distance(position, p)
 			-- don't add if it's already too high
 			if dist < bestDistance then
 				-- now check if we can build there
@@ -980,7 +980,7 @@ end
 			EchoDebug("#" .. i .. " " .. p.x .. " , " .. p.z)
 			local on = n + 1
 			if on == 10 then on = 1 end
-			local dist = distance(p, thistest[on])
+			local dist = Distance(p, thistest[on])
 			local build = game.map:CanBuildHere(utype, p)
 			local safe = ai.targethandler:IsSafePosition(p, testunit)
 			thing = p

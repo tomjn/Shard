@@ -1,5 +1,5 @@
-require "unitlists"
-require "unittable"
+require "common"
+
 
 local DebugEnabled = false
 local debugPlotBuildFile
@@ -128,7 +128,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 		local uname = unitTypeToBuild:Name()
 		if nanoTurretList[uname] then
 			-- don't build nanos too far away from factory
-			local dist = distance(originalPosition, pos)
+			local dist = Distance(originalPosition, pos)
 			EchoDebug("nano distance: " .. dist)
 			if dist > 400 then
 				EchoDebug("nano too far from factory")
@@ -254,7 +254,7 @@ function BuildSiteHandler:ClosestHighestLevelFactory(builder, maxDist)
 	local factoryPos = nil
 	for i, factory in pairs(ai.factoriesAtLevel[maxLevel]) do
 		if not ai.outmodedFactoryID[factory.id] then
-			local dist = distance(bpos, factory.position)
+			local dist = Distance(bpos, factory.position)
 			if dist < minDist then
 				minDist = dist
 				factoryPos = factory.position
@@ -273,7 +273,7 @@ function BuildSiteHandler:ClosestNanoTurret(builder, maxDist)
 		local un = unit:Name()
 		if nanoTurretList[un] then
 			local upos = unit:GetPosition()
-			local dist = distance(bpos, upos)
+			local dist = Distance(bpos, upos)
 			if dist < minDist then
 				minDist = dist
 				nano = unit
