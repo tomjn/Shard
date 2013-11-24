@@ -1,4 +1,5 @@
 require "unitlists"
+require "unittable"
 
 NukeBehaviour = class(Behaviour)
 
@@ -14,6 +15,15 @@ local CMD_STOCKPILE = 100
 local CMD_ATTACK = 20
 
 function NukeBehaviour:Init()
+	local uname = self.unit:Internal():Name()
+	if uname == "armemp" then
+		self.stunning = true
+	elseif uname == "cortron" then
+		self.tactical = true
+	end
+	self.stockpileTime = nukeList[uname]
+	self.position = self.unit:Internal():GetPosition()
+	self.range = unitTable[uname].groundRange
     self.lastStockpileFrame = 0
     self.lastLaunchFrame = 0
     self.gotTarget = false
@@ -37,7 +47,14 @@ function NukeBehaviour:Update()
 		if f > self.lastLaunchFrame + 100 then
 			self.gotTarget = false
 			if ai.needNukes and ai.canNuke then
-				local bestCell = ai.targethandler:GetBestNukeCell()
+				local bestCell
+				if self.tactical then
+					bestCell = ai.targethandler:GetBestBombardCell(self.position, self.range, 2500)
+				elseif self.stunning then
+					bestCell = ai.targethandler:GetBestBombardCell(self.position, self.range, 3000) -- only targets threats
+				else
+					bestCell = ai.targethandler:GetBestNukeCell()
+				end
 				if bestCell ~= nil then
 					local position = bestCell.pos
 					local floats = api.vectorFloat()
@@ -53,7 +70,7 @@ function NukeBehaviour:Update()
 			self.lastLaunchFrame = f
 		end
 		if self.gotTarget then
-			if self.lastStockpileFrame == 0 or f > self.lastStockpileFrame + 2500 then
+			if self.lastStockpileFrame == 0 or f > self.lastStockpileFrame + self.stockpileTime then
 				local floats = api.vectorFloat()
 				floats:push_back(1)
 				self.unit:Internal():ExecuteCustomCommand(CMD_STOCKPILE, floats)

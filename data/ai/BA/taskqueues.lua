@@ -29,6 +29,7 @@ local needSiege = false
 local heavyPlasmaLimit = 3 -- changes with CheckForMapControl
 local AAUnitPerTypeLimit = 3 -- changes with CheckForMapControl
 local nukeLimit = 1 -- changes with CheckForMapControl
+local tacticalNukeLimit = 1 -- changes with CheckForMapControl
 
 local lastCheckFrame = 0
 local lastSiegeCheckFrame = 0
@@ -139,9 +140,10 @@ function CheckForMapControl()
 		else
 			ai.needToReclaim = false
 		end
-		AAUnitPerTypeLimit = math.ceil(Metal.income / 12)
+		AAUnitPerTypeLimit = math.ceil(ai.turtlehandler:GetTotalPriority() / 4)
 		heavyPlasmaLimit = math.ceil(ai.combatCount / 7)
 		nukeLimit = math.ceil(ai.combatCount / 20)
+		tacticalNukeLimit = math.ceil(ai.combatCount / 12)
 
 		local attackCounter = ai.attackhandler:GetCounter()
 		local couldAttack = ai.couldAttack - ai.factories >= 2 or ai.couldBomb > 2
@@ -1270,6 +1272,16 @@ function BuildNukeIfNeeded()
 	end
 end
 
+function BuildTacticalNuke()
+	local unitName = ""
+	if ai.mySide == CORESideName then
+		unitName = "cortron"
+	else
+		unitName = "armemp"
+	end
+	return BuildWithLimitedNumber(unitName, tacticalNukeLimit)
+end
+
 local function BuildLvl1Plasma()
 	local unitName = ""
 	if ai.mySide == CORESideName then
@@ -1926,6 +1938,7 @@ local anyAdvConUnit = {
 	BuildLvl2Plasma,
 	BuildTachyon,
 	BuildHeavyPlasma,
+	BuildTacticalNuke,
 	BuildFusion,
 	BuildAdvancedRadar,
 	BuildLvl2Jammer,

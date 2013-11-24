@@ -42,6 +42,8 @@ function ExitFactoryBehaviour:Update()
 				if dist >= 50 then
 					self.fresh = nil
 					self.unit:ElectBehaviour()
+				end
+				--[[
 				elseif self.lastOrderFrame ~= nil then
 					if f > self.lastOrderFrame + 300 then
 						-- can't get out by going south, try going north
@@ -55,6 +57,7 @@ function ExitFactoryBehaviour:Update()
 						u:Move(out)
 					end
 				end
+				]]--
 			end
 		end
 	else

@@ -1,4 +1,5 @@
 require "unitlists"
+require "unittable"
 
 local DebugEnabled = false
 
@@ -8,8 +9,8 @@ local function EchoDebug(inStr)
 	end
 end
 
-local factoryPriority = 3
-local damagedPriority = 4
+-- local factoryPriority = 3
+local threatenedPriority = 4
 local techLevelPriority = 1
 local commanderPriority = 2
 
@@ -26,7 +27,9 @@ end
 function DefendHandler:Init()
 	 self.defenders = {}
 	 self.defendees = {}
+	 self.scrambles = {}
 	 self.totalPriority = 0
+	 self.lastThreats = 0
 end
 
 function DefendHandler:UnitCreated(unit)
@@ -34,23 +37,19 @@ function DefendHandler:UnitCreated(unit)
 	local un = unit:Name()
 	local utable = unitTable[un]
 	local priority = 0
-	if utable.buildOptions then
+	if utable.buildOptions and not utable.isBuilding then
 		priority = priority + utable.techLevel * techLevelPriority
-		if utable.isBuilding then
-			priority = priority + factoryPriority
-		elseif un == "corcom" or un == "armcom" then
+		-- if utable.isBuilding then
+		-- 	priority = priority + factoryPriority
+		if un == "corcom" or un == "armcom" then
 			priority = priority + commanderPriority
 		end
 	end
 	if priority ~= 0 then
-		table.insert(self.defendees, {unit = unit, uid = unit:ID(), priority = priority, damaged = nil})
+		table.insert(self.defendees, {unit = unit, uid = unit:ID(), priority = priority, threatened = nil})
 		self.totalPriority = self.totalPriority + priority
 		self:AssignAll()
 	end
-end
-
-function DefendHandler:UnitDamaged(unit)
-
 end
 
 function DefendHandler:UnitDead(unit)
@@ -81,22 +80,32 @@ end
 function DefendHandler:Update()
 	local f = game:Frame()
 	if f % 30 == 0 then
-		local damage = false
+		local threats = 0
+		local scrambleCalls = 0
 		for i, defendee in pairs(self.defendees) do
-			if defendee.damaged ~= nil then
-				damage = true
-				-- defend damaged for thirty seconds after they've stopped being fired at
-				if f > defendee.damaged + 900 then
-					defendee.priority = defendee.priority - damagedPriority
-					self.totalPriority = self.totalPriority - damagedPriority
-					defendee.damaged = nil
+			if defendee.threatened ~= nil then
+				threats = threats + 1
+				if defendee.scrambleForMe then scrambleCalls = scrambleCalls + 1 end
+				-- defend threatened for thirty seconds after they've stopped being within range of fire or fired at
+				if f > defendee.threatened + 900 then
+					defendee.priority = defendee.priority - threatenedPriority
+					self.totalPriority = self.totalPriority - threatenedPriority
+					defendee.threatened = nil
 					if defendee.priority == 0 then
 						table.remove(self.defendees, i)
 					end
 				end
 			end
 		end
-		if damage then self:AssignAll() end
+		if scrambleCalls ~= 0 then
+			self:Scramble()
+		else
+			self:Unscramble()
+		end
+		if threats ~= self.lastThreats then
+			self:AssignAll()
+		end
+		self.lastThreats = threats
 	end
 end
 
@@ -120,7 +129,8 @@ function DefendHandler:AssignAll()
 	for i, defendee in pairs(self.defendees) do
 		local number = math.floor(defendee.priority * defendersPerPriority)
 		if number ~= 0 and #defendersToAssign ~= 0 then
-			local defendeePos = defendee.unit:GetPosition()
+			local defendeePos = defendee.position
+			if defendeePos == nil then defendeePos = defendee.unit:GetPosition() end
 			-- put into table to sort by distance
 			local bydistance = {}
 			for di, dfndbehaviour in pairs(defendersToAssign) do
@@ -134,9 +144,9 @@ function DefendHandler:AssignAll()
 				end
 				if okay then
 					local defender = dfndbehaviour.unit:Internal()
-					if ai.maphandler:UnitCanGetToUnit(defender, defendee.unit) then
+					if ai.maphandler:UnitCanGoHere(defender, defendeePos) then
 						local defenderPos = defender:GetPosition()
-						local dist = quickdistance(defenderPos, defendeePos)
+						local dist = distance(defenderPos, defendeePos)
 						bydistance[dist] = dfndbehaviour -- the probability of the same distance is near zero
 					end
 				end
@@ -145,7 +155,7 @@ function DefendHandler:AssignAll()
 			local n = 0
 			for dist, dfndbehaviour in pairsByKeys(bydistance) do
 				if n < number then
-					dfndbehaviour:Assign(defendee.unit)
+					dfndbehaviour:Assign(defendee)
 					table.insert(defendersToRemove, dfndbehaviour)
 				else
 					break
@@ -161,7 +171,7 @@ function DefendHandler:AssignAll()
 			local defendee = self.defendees[i]
 			if #defendersToAssign ~= 0 then
 				local dfndbehaviour = table.remove(defendersToAssign)
-				dfndbehaviour:Assign(defendee.unit)
+				dfndbehaviour:Assign(defendee)
 			else
 				break
 			end
@@ -213,22 +223,77 @@ function DefendHandler:RemoveDefender(dfndbehaviour)
 	end
 end
 
+function DefendHandler:IsScramble(dfndbehaviour)
+	for i, db in pairs(self.scrambles) do
+		if db == dfndbehaviour then
+			return true
+		end
+	end
+	return false
+end
+
+function DefendHandler:AddScramble(dfndbehaviour)
+	if not self:IsScramble(dfndbehaviour) then
+		table.insert(self.scrambles, dfndbehaviour)
+		if self.scrambling then
+			dfndbehaviour.scrambled = true
+		end
+	end
+end
+
+function DefendHandler:RemoveScramble(dfndbehaviour)
+	for i, db in pairs(self.scrambles) do
+		if db == dfndbehaviour then
+			table.remove(self.scrambles, i)
+			break
+		end
+	end
+end
+
+function DefendHandler:Scramble()
+	if not self.scrambling then
+		for i, db in pairs(self.scrambles) do
+			db:Scramble()
+		end
+		self.scrambling = true
+	end
+end
+
+function DefendHandler:Unscramble()
+	if self.scrambling then
+		for i, db in pairs(self.scrambles) do
+			db:Unscramble()
+		end
+		self.scrambling = false
+	end
+end
+
 -- receive a signal that a unit is threatened
 function DefendHandler:Danger(defendeeUnit)
 	local defendeeID = defendeeUnit:ID()
 	for i, defendee in pairs(self.defendees) do
 		if defendee.uid == defendeeID then
-			if not defendee.damaged then
-				EchoDebug("defendee damaged")
-				defendee.damaged = game:Frame()
-				defendee.priority = defendee.priority + damagedPriority
-				self.totalPriority = self.totalPriority + damagedPriority
+			if not defendee.threatened then
+				EchoDebug("defendee threatened")
+				defendee.threatened = game:Frame()
+				defendee.priority = defendee.priority + threatenedPriority
+				self.totalPriority = self.totalPriority + threatenedPriority
 			end
 			return
 		end
 	end
 	-- if it's not a defendee, make it one
-	local defendee = {unit = defendeeUnit, uid = defendeeUnit:ID(), priority = damagedPriority, damaged = game:Frame()}
+	local defendee = {priority = threatenedPriority, threatened = game:Frame()}
+	local uname = defendeeUnit:Name()
+	local turtlePriority = 0
+	if turtleList[uname] then turtlePriority = turtleList[uname] end
+	if unitTable[uname].buildOptions or turtlePriority > 2 then defendee.scrambleForMe = true end
+	if unitTable[uname].isBuilding then
+		defendee.position = defendeeUnit:GetPosition()
+	else
+		defendee.unit = defendeeUnit
+		defendee.uid = defendeeUnit:ID()
+	end
 	table.insert(self.defendees, defendee)
-	self.totalPriority = self.totalPriority + damagedPriority
+	self.totalPriority = self.totalPriority + threatenedPriority
 end

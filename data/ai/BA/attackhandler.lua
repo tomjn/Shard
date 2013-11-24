@@ -167,7 +167,9 @@ function AttackHandler:DoMovement()
 			midPos.y = 0
 			local congDist = math.max(#squad.members * congregateDistancePerMember, congregateDistanceMinimum)
 			local stragglers = 0
+			local damaged = 0
 			for iu, member in pairs(squad.members) do
+				if member.damaged then damaged = damaged + 1 end
 				local unit = member.unit:Internal()
 				local upos = unit:GetPosition()
 				local cdist = quickdistance(upos, midPos)
@@ -214,7 +216,8 @@ function AttackHandler:DoMovement()
 			end
 			local congregate = false
 			EchoDebug("attack squad of " .. #squad.members .. " members, " .. stragglers .. " stragglers")
-			if stragglers >= math.ceil(#squad.members * 0.1) then
+			local tenth = math.ceil(#squad.members * 0.1)
+			if stragglers >= tenth and damaged < tenth then -- don't congregate if we're being shot
 				congregate = true
 			end
 			-- attack or congregate

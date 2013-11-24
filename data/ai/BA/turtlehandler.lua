@@ -287,3 +287,7 @@ function TurtleHandler:MostTurtled(builder, bombard)
 	end
 	return best
 end
+
+function TurtleHandler:GetTotalPriority()
+	return self.totalPriority
+end
