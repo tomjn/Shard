@@ -1019,10 +1019,15 @@ function TargetHandler:WreckToResurrect(representative)
 		local bestWreck
 		local bestMetalCost = 0
 		for i, w in pairs(best.resurrectables) do
-			local metalCost = unitTable[featureTable[w:Name()].unitName].metalCost
-			if metalCost > bestMetalCost then
-				bestWreck = w
-				bestMetalCost = metalCost
+			if w ~= nil then
+				local wname = w:Name()
+				if wname ~= nil then
+					local metalCost = unitTable[featureTable[wname].unitName].metalCost
+					if metalCost > bestMetalCost then
+						bestWreck = w
+						bestMetalCost = metalCost
+					end
+				end
 			end
 		end
 		return bestWreck

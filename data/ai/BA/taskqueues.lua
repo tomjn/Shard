@@ -194,6 +194,10 @@ function IsTorpedoNeeded()
 	return ai.needSubmergedDefense
 end
 
+function IsJammerNeeded()
+	return ai.needJammers
+end
+
 function IsAntinukeNeeded()
 	return ai.needAntinuke
 end
@@ -1606,6 +1610,7 @@ local function BuildAdvancedRadar()
 end
 
 local function BuildLvl1Jammer()
+	if not IsJammerNeeded() then return DummyUnitName end
 	if ai.mySide == CORESideName then
 		return "corjamt"
 	else
@@ -1614,6 +1619,7 @@ local function BuildLvl1Jammer()
 end
 
 local function BuildLvl2Jammer()
+	if not IsJammerNeeded() then return DummyUnitName end
 	if ai.mySide == CORESideName then
 		return "corshroud"
 	else

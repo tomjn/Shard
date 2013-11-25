@@ -1,6 +1,6 @@
 require "common"
 
-local DebugEnabled = true
+local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -137,7 +137,7 @@ function ReclaimBehaviour:Reclaim()
 			floats:push_back(resPosition.z)
 			floats:push_back(15) 
 			self.unit:Internal():ExecuteCustomCommand(CMD_RESURRECT, floats)
-			ai.buildsitehandler:NewResurrection(unitName, self.targetResurrection:GetPosition(), self)
+			ai.buildsitehandler:NewPlan(unitName, self.targetResurrection:GetPosition(), self, true)
 			self.resurrecting = true
 		end
 	end
@@ -156,5 +156,5 @@ end
 
 function ReclaimBehaviour:ResurrectionComplete()
 	self.resurrecting = false
-	ai.buildsitehandler:ClearMyResurrections(self)
+	ai.buildsitehandler:ClearMyPlans(self)
 end

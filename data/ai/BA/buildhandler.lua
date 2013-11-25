@@ -2,11 +2,18 @@ require "common"
 
 
 local DebugEnabled = false
+local DebugEnabledPlans = false
 local debugPlotBuildFile
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
 		game:SendToConsole("BuildSiteHandler: " .. inStr)
+	end
+end
+
+local function EchoDebugPlans(inStr)
+	if DebugEnabledPlans then
+		game:SendToConsole("BuildSiteHandler Plans: " .. inStr)
 	end
 end
 
@@ -45,7 +52,6 @@ function BuildSiteHandler:Init()
 	self.resurrectionRepair = {}
 	self.dontBuildRects = {}
 	self.plans = {}
-	self.resurrections = {}
 	self:DontBuildOnMetalOrGeoSpots()
 end
 
@@ -54,7 +60,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	if pos ~= nil then
 		if unitTable[unitTypeToBuild:Name()].buildOptions then
 			-- don't build factories too close to south map edge because they face south
-			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ - 150) then
+			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ - 240) then
 				EchoDebug("bad position: " .. pos.x .. ", " .. pos.z)
 				pos = nil
 			end
@@ -76,7 +82,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	-- don't build where you shouldn't (metal spots, geo spots, factory lanes)
 	if pos ~= nil then
 		for i, rect in pairs(self.dontBuildRects) do
-			if pos.x >= rect.x1 and pos.x <= rect.x2 and pos.z >= rect.z1 and pos.z <= rect.z2 then
+			if PositionWithinRect(pos, rect) then
 				pos = nil
 				break
 			end
@@ -85,7 +91,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	-- don't build on top of current build orders
 	if pos ~= nil then
 		for i, plan in pairs(self.plans) do
-			if pos.x >= plan.x1 and pos.x <= plan.x2 and pos.z >= plan.z1 and pos.z <= plan.z2 then
+			if PositionWithinRect(pos, plan) then
 				pos = nil
 				break
 			end
@@ -192,7 +198,7 @@ function BuildSiteHandler:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, pos
 
 	EchoDebug("new spiral search")
 	while segmentSize < 8 do
-		EchoDebug(i .. " " .. direction .. " " .. segmentSize .. " : " .. math.ceil(position.x) .. " " .. math.ceil(position.z))
+		-- EchoDebug(i .. " " .. direction .. " " .. segmentSize .. " : " .. math.ceil(position.x) .. " " .. math.ceil(position.z))
 		if direction == 1 then
 			position.x = position.x + dist
 		elseif direction == 2 then
@@ -226,12 +232,14 @@ function BuildSiteHandler:ClosestHighestLevelFactory(builder, maxDist)
 	local maxLevel = ai.maxFactoryLevel
 	EchoDebug(maxLevel .. " max factory level")
 	local factoryPos = nil
-	for i, factory in pairs(ai.factoriesAtLevel[maxLevel]) do
-		if not ai.outmodedFactoryID[factory.id] then
-			local dist = Distance(bpos, factory.position)
-			if dist < minDist then
-				minDist = dist
-				factoryPos = factory.position
+	if ai.factoriesAtLevel[maxLevel] ~= nil then
+		for i, factory in pairs(ai.factoriesAtLevel[maxLevel]) do
+			if not ai.outmodedFactoryID[factory.id] then
+				local dist = Distance(bpos, factory.position)
+				if dist < minDist then
+					minDist = dist
+					factoryPos = factory.position
+				end
 			end
 		end
 	end
@@ -285,54 +293,47 @@ function BuildSiteHandler:UnitCreated(unit)
 	local unitName = unit:Name()
 	local position = unit:GetPosition()
 	for i, plan in pairs(self.plans) do
-		if plan.unitName == unitName and PositionWithinRect(position, plan.x1, plan.z1, plan.x2, plan.z2) then
-			plan.tskqbehaviour:ConstructionBegun()
-			table.remove(self.plans, i)
-		end
-	end
-	for i, resurrection in pairs(self.resurrections) do
-		if resurrection.unitName == unitName and PositionWithinRect(position, resurrection.x1, resurrection.z1, resurrection.x2, resurrection.z2) then
-			-- so that factoryExit will hold it in place while it gets repaired
-			self.resurrectionRepair[unit:ID()] = resurrection.rclmbehaviour
+		if plan.unitName == unitName and PositionWithinRect(position, plan) then
+			if plan.resurrect then
+				-- so that factoryExit will hold it in place while it gets repaired
+				EchoDebugPlans("resurrection of " .. unitName .. " begun")
+				self.resurrectionRepair[unit:ID()] = plan.behaviour
+			else
+				EchoDebugPlans(plan.behaviour.name .. " began constructing " .. unitName)
+				plan.behaviour:ConstructionBegun()
+				table.remove(self.plans, i)
+			end
 		end
 	end
 end
 
-function BuildSiteHandler:NewPlan(unitName, position, builderID, tskqbehaviour)
-	local plan = {unitName = unitName, position = position, builderID = builderID, tskqbehaviour = tskqbehaviour}
-	-- positions are in the center of units, so outX and outZ are half the footprint size
+function BuildSiteHandler:CalculateRect(rect)
+	local unitName = rect.unitName
+	local position = rect.position
 	local outX = unitTable[unitName].xsize * 8
 	local outZ = unitTable[unitName].zsize * 8
-	plan.x1 = position.x - outX
-	plan.z1 = position.z - outZ
-	plan.x2 = position.x + outX
-	plan.z2 = position.z + outZ
+	rect.x1 = position.x - outX
+	rect.z1 = position.z - outZ
+	rect.x2 = position.x + outX
+	rect.z2 = position.z + outZ
+end
+
+function BuildSiteHandler:NewPlan(unitName, position, behaviour, resurrect)
+	if resurrect then
+		EchoDebugPlans("new plan to resurrect " .. unitName .. " at " .. position.x .. ", " .. position.z)
+	else
+		EchoDebugPlans(behaviour.name .. " plans to build " .. unitName .. " at " .. position.x .. ", " .. position.z)
+	end
+	local plan = {unitName = unitName, position = position, behaviour = behaviour, resurrect = resurrect}
+	-- positions are in the center of units, so outX and outZ are half the footprint size
+	self:CalculateRect(plan)
 	table.insert(self.plans, plan)
 end
 
-function BuildSiteHandler:ClearMyPlans(builderID)
+function BuildSiteHandler:ClearMyPlans(behaviour)
 	for i, plan in pairs(self.plans) do
-		if plan.builderID == builderID then
+		if plan.behaviour == behaviour then
 			table.remove(self.plans, i)
-		end
-	end
-end
-
-function BuildSiteHandler:NewResurrection(unitName, position, rclmbehaviour)
-	local resurrection = {unitName = unitName, position = position, rclmbehaviour = rclmbehaviour}
-	local outX = unitTable[unitName].xsize * 8
-	local outZ = unitTable[unitName].zsize * 8
-	resurrection.x1 = position.x - outX
-	resurrection.z1 = position.z - outZ
-	resurrection.x2 = position.x + outX
-	resurrection.z2 = position.z + outZ
-	table.insert(self.resurrections, resurrection)
-end
-
-function BuildSiteHandler:ClearMyResurrections(rclmbehaviour)
-	for i, resurrection in pairs(self.resurrections) do
-		if resurrection.rclmbehaviour == rclmbehaviour then
-			table.remove(self.resurrections, i)
 		end
 	end
 end

@@ -612,4 +612,4 @@ CORESideName = "core"
 ARMSideName = "arm"
 
 -- how much metal to assume features with these strings in their names have
-local baseFeatureMetal = { rock = 30, heap = 80, wreck = 150 }
+baseFeatureMetal = { rock = 30, heap = 80, wreck = 150 }
