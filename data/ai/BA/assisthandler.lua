@@ -1,4 +1,4 @@
-require "unitlists"
+require "common"
 
 local DebugEnabled = false
 
@@ -30,7 +30,7 @@ end
 function AssistHandler:IsLocal(asstbehaviour, position)
 	local aunit = asstbehaviour.unit:Internal()
 	local apos = aunit:GetPosition()
-	local dist = distance(position, apos)
+	local dist = Distance(position, apos)
 	if asstbehaviour.isNanoTurret then
 		if dist > 390 then
 			return false

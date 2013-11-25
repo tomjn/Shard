@@ -82,7 +82,7 @@ function UnitHandler:AIRepresentation(engineUnit)
 		
 		u:SetEngineRepresentation(engineUnit)
 		u:Init()
-		if engineunit:Team() == game:GetTeamID() then
+		if engineUnit:Team() == game:GetTeamID() then
 			self.behaviourFactory:AddBehaviours(u)
 			self.myUnits[engineUnit:ID()] = u
 		end

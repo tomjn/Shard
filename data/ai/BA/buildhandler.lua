@@ -1,12 +1,19 @@
-require "unitlists"
-require "unittable"
+require "common"
+
 
 local DebugEnabled = false
+local DebugEnabledPlans = false
 local debugPlotBuildFile
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
 		game:SendToConsole("BuildSiteHandler: " .. inStr)
+	end
+end
+
+local function EchoDebugPlans(inStr)
+	if DebugEnabledPlans then
+		game:SendToConsole("BuildSiteHandler Plans: " .. inStr)
 	end
 end
 
@@ -38,41 +45,14 @@ function BuildSiteHandler:internalName()
 end
 
 function BuildSiteHandler:Init()
-	-- a convenient place for some other inits
-	ai.factories = 0
-	ai.maxFactoryLevel = 0
-	ai.factoriesAtLevel = {}
-	ai.outmodedFactoryID = {}
 	local mapSize = map:MapDimensions()
 	ai.maxElmosX = mapSize.x * 8
 	ai.maxElmosZ = mapSize.z * 8
-	ai.nameCount = {}
-	ai.nameCountFinished = {}
-	ai.lastNameCreated = {}
-	ai.lastNameFinished = {}
-	ai.lastNameDead = {}
-	ai.mexCount = 0
-	ai.conCount = 0
-	ai.combatCount = 0
-	ai.battleCount = 0
-	ai.breakthroughCount = 0
-	ai.reclaimerCount = 0
-	ai.assistCount = 0
 	ai.lvl1Mexes = 1 -- this way mexupgrading doesn't revert to taskqueuing before it has a chance to find mexes to upgrade
+	self.resurrectionRepair = {}
 	self.dontBuildRects = {}
 	self.plans = {}
 	self:DontBuildOnMetalOrGeoSpots()
-end
-
-function BuildSiteHandler:UnitCreated(unit)
-	local unitName = unit:Name()
-	local position = unit:GetPosition()
-	for i, plan in pairs(self.plans) do
-		if plan.unitName == unitName and plan.position.x == position.x and plan.position.z == position.z then
-			plan.tskqbehaviour:ConstructionBegun()
-			table.remove(self.plans, i)
-		end
-	end
 end
 
 function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalPosition)
@@ -80,7 +60,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	if pos ~= nil then
 		if unitTable[unitTypeToBuild:Name()].buildOptions then
 			-- don't build factories too close to south map edge because they face south
-			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ - 50) then
+			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ - 240) then
 				EchoDebug("bad position: " .. pos.x .. ", " .. pos.z)
 				pos = nil
 			end
@@ -102,7 +82,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	-- don't build where you shouldn't (metal spots, geo spots, factory lanes)
 	if pos ~= nil then
 		for i, rect in pairs(self.dontBuildRects) do
-			if pos.x >= rect.x1 and pos.x <= rect.x2 and pos.z >= rect.z1 and pos.z <= rect.z2 then
+			if PositionWithinRect(pos, rect) then
 				pos = nil
 				break
 			end
@@ -111,7 +91,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	-- don't build on top of current build orders
 	if pos ~= nil then
 		for i, plan in pairs(self.plans) do
-			if pos.x >= plan.x1 and pos.x <= plan.x2 and pos.z >= plan.z1 and pos.z <= plan.z2 then
+			if PositionWithinRect(pos, plan) then
 				pos = nil
 				break
 			end
@@ -128,7 +108,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 		local uname = unitTypeToBuild:Name()
 		if nanoTurretList[uname] then
 			-- don't build nanos too far away from factory
-			local dist = distance(originalPosition, pos)
+			local dist = Distance(originalPosition, pos)
 			EchoDebug("nano distance: " .. dist)
 			if dist > 400 then
 				EchoDebug("nano too far from factory")
@@ -218,7 +198,7 @@ function BuildSiteHandler:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, pos
 
 	EchoDebug("new spiral search")
 	while segmentSize < 8 do
-		EchoDebug(i .. " " .. direction .. " " .. segmentSize .. " : " .. math.ceil(position.x) .. " " .. math.ceil(position.z))
+		-- EchoDebug(i .. " " .. direction .. " " .. segmentSize .. " : " .. math.ceil(position.x) .. " " .. math.ceil(position.z))
 		if direction == 1 then
 			position.x = position.x + dist
 		elseif direction == 2 then
@@ -252,12 +232,14 @@ function BuildSiteHandler:ClosestHighestLevelFactory(builder, maxDist)
 	local maxLevel = ai.maxFactoryLevel
 	EchoDebug(maxLevel .. " max factory level")
 	local factoryPos = nil
-	for i, factory in pairs(ai.factoriesAtLevel[maxLevel]) do
-		if not ai.outmodedFactoryID[factory.id] then
-			local dist = distance(bpos, factory.position)
-			if dist < minDist then
-				minDist = dist
-				factoryPos = factory.position
+	if ai.factoriesAtLevel[maxLevel] ~= nil then
+		for i, factory in pairs(ai.factoriesAtLevel[maxLevel]) do
+			if not ai.outmodedFactoryID[factory.id] then
+				local dist = Distance(bpos, factory.position)
+				if dist < minDist then
+					minDist = dist
+					factoryPos = factory.position
+				end
 			end
 		end
 	end
@@ -273,7 +255,7 @@ function BuildSiteHandler:ClosestNanoTurret(builder, maxDist)
 		local un = unit:Name()
 		if nanoTurretList[un] then
 			local upos = unit:GetPosition()
-			local dist = distance(bpos, upos)
+			local dist = Distance(bpos, upos)
 			if dist < minDist then
 				minDist = dist
 				nano = unit
@@ -307,21 +289,59 @@ function BuildSiteHandler:DontBuildOnMetalOrGeoSpots()
 	end
 end
 
-function BuildSiteHandler:NewPlan(unitName, position, builderID, tskqbehaviour)
-	local plan = {unitName = unitName, position = position, builderID = builderID, tskqbehaviour = tskqbehaviour}
-	-- positions are in the center of units, so outX and outZ are half the footprint size
-	local outX = unitTable[unitName].xsize * 8
-	local outZ = unitTable[unitName].zsize * 8
-	plan.x1 = position.x - outX
-	plan.z1 = position.z - outZ
-	plan.x2 = position.x + outX
-	plan.z2 = position.z + outZ
+function BuildSiteHandler:UnitCreated(unit)
+	local unitName = unit:Name()
+	local position = unit:GetPosition()
+	for i, plan in pairs(self.plans) do
+		if plan.unitName == unitName and PositionWithinRect(position, plan) then
+			if plan.resurrect then
+				-- so that factoryExit will hold it in place while it gets repaired
+				EchoDebugPlans("resurrection of " .. unitName .. " begun")
+				self.resurrectionRepair[unit:ID()] = plan.behaviour
+			else
+				EchoDebugPlans(plan.behaviour.name .. " began constructing " .. unitName)
+				plan.behaviour:ConstructionBegun()
+				table.remove(self.plans, i)
+			end
+		end
+	end
 end
 
-function BuildSiteHandler:ClearMyPlans(builderID)
+function BuildSiteHandler:CalculateRect(rect)
+	local unitName = rect.unitName
+	local position = rect.position
+	local outX = unitTable[unitName].xsize * 8
+	local outZ = unitTable[unitName].zsize * 8
+	rect.x1 = position.x - outX
+	rect.z1 = position.z - outZ
+	rect.x2 = position.x + outX
+	rect.z2 = position.z + outZ
+end
+
+function BuildSiteHandler:NewPlan(unitName, position, behaviour, resurrect)
+	if resurrect then
+		EchoDebugPlans("new plan to resurrect " .. unitName .. " at " .. position.x .. ", " .. position.z)
+	else
+		EchoDebugPlans(behaviour.name .. " plans to build " .. unitName .. " at " .. position.x .. ", " .. position.z)
+	end
+	local plan = {unitName = unitName, position = position, behaviour = behaviour, resurrect = resurrect}
+	-- positions are in the center of units, so outX and outZ are half the footprint size
+	self:CalculateRect(plan)
+	table.insert(self.plans, plan)
+end
+
+function BuildSiteHandler:ClearMyPlans(behaviour)
 	for i, plan in pairs(self.plans) do
-		if plan.builderID == builderID then
+		if plan.behaviour == behaviour then
 			table.remove(self.plans, i)
 		end
 	end
+end
+
+function BuildSiteHandler:RemoveResurrectionRepairedBy(unitID)
+	self.resurrectionRepair[unitID] = nil
+end
+
+function BuildSiteHandler:ResurrectionRepairedBy(unitID)
+	return self.resurrectionRepair[unitID]
 end

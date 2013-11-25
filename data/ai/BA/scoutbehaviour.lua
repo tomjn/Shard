@@ -1,5 +1,5 @@
-require "unitlists"
-require "unittable"
+require "common"
+
 
 local DebugEnabled = false
 
@@ -127,7 +127,7 @@ function ScoutBehaviour:Update()
 			local unit = self.unit:Internal()
 			local upos = unit:GetPosition()
 			if self.target then
-				local dist = distance(upos, self.target)
+				local dist = Distance(upos, self.target)
 				if dist < self.airDistance then
 					unit:Move(RandomAway(self.target, 100))
 				end

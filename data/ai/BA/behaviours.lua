@@ -15,8 +15,8 @@ require "nukebehaviour"
 require "bombardbehaviour"
 require "exitfactorybehaviour"
 require "countbehaviour"
-require "unitlists"
-require "unittable"
+require "common"
+
 
 behaviours = {
 	corcrw = {

@@ -1,4 +1,4 @@
-require "unitlists"
+require "common"
 
 local DebugEnabled = false
 
@@ -30,7 +30,6 @@ function AttackHandler:Init()
 	self.recruits = {}
 	self.squads = {}
 	self.counter = {}
-	self.totalThreat = {}
 	ai.hasAttacked = 0
 	ai.couldAttack = 0
 end
@@ -140,6 +139,7 @@ function AttackHandler:DoMovement()
 		local representative
 		local totalx = 0
 		local totalz = 0
+		local totalSize = 0
 		for iu, member in pairs(squad.members) do
 			local unit
 			if member ~= nil then
@@ -152,6 +152,7 @@ function AttackHandler:DoMovement()
 				local tmpPos = unit:GetPosition()
 				totalx = totalx + tmpPos.x
 				totalz = totalz + tmpPos.z
+				totalSize = totalSize + member.size
 			else 
 				table.remove(squad.members, iu)
 			end
@@ -165,14 +166,16 @@ function AttackHandler:DoMovement()
 			midPos.x = totalx / #squad.members
 			midPos.z = totalz / #squad.members
 			midPos.y = 0
-			local congDist = math.max(#squad.members * congregateDistancePerMember, congregateDistanceMinimum)
+			local congDist = sqrt(pi * totalSize) * 2
 			local stragglers = 0
 			local damaged = 0
+			local maxRange = 0
 			for iu, member in pairs(squad.members) do
 				if member.damaged then damaged = damaged + 1 end
+				if member.range > maxRange then maxRange = member.range end
 				local unit = member.unit:Internal()
 				local upos = unit:GetPosition()
-				local cdist = quickdistance(upos, midPos)
+				local cdist = Distance(upos, midPos)
 				if cdist > congDist then
 					if member.straggler == nil then
 						member.straggler = 1
@@ -220,6 +223,16 @@ function AttackHandler:DoMovement()
 			if stragglers >= tenth and damaged < tenth then -- don't congregate if we're being shot
 				congregate = true
 			end
+			local twiceMaxRange = maxRange * 2
+			local distToTarget = Distance(midPos, squad.target)
+			local realClose = false
+			if stragglers < math.ceil(#squad.members * 0.5) and distToTarget < twiceMaxRange then
+				congregate = false
+				realClose = true
+			end
+			if not realClose and damaged > tenth then
+				realClose = true
+			end
 			-- attack or congregate
 			if congregate then
 				if not squad.congregating then
@@ -231,14 +244,16 @@ function AttackHandler:DoMovement()
 					end
 				end
 				squad.attacking = nil
+				squad.close = nil
 			else
-				if squad.attacking ~= squad.target then
+				if squad.attacking ~= squad.target or squad.close ~= realClose then
 					-- squad attacks if that wasn't the last order
 					if squad.target ~= nil then
 						for iu, member in pairs(squad.members) do
-							member:Attack(squad.target)
+							member:Attack(squad.target, realClose)
 						end
 						squad.attacking = squad.target
+						squad.close = realClose
 					end
 				end
 				squad.congregating = false
@@ -299,8 +314,6 @@ function AttackHandler:AddRecruit(attkbehaviour)
 			local mtype = ai.maphandler:MobilityOfUnit(attkbehaviour.unit:Internal())
 			if self.recruits[mtype] == nil then self.recruits[mtype] = {} end
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-			if self.totalThreat[mtype] == nil then self.totalThreat[mtype] = 0 end
-			self.totalThreat[mtype] = self.totalThreat[mtype] + UnitThreat(attkbehaviour.unit:Internal():Name())
 			table.insert(self.recruits[mtype], attkbehaviour)
 			attkbehaviour:SetMoveState()
 			attkbehaviour:Free()
@@ -314,7 +327,6 @@ function AttackHandler:RemoveRecruit(attkbehaviour)
 	for mtype, recruits in pairs(self.recruits) do
 		for i,v in ipairs(recruits) do
 			if v == attkbehaviour then
-				self.totalThreat[mtype] = self.totalThreat[mtype] - UnitThreat(attkbehaviour.unit:Internal():Name())
 				table.remove(self.recruits[mtype], i)
 				return true
 			end

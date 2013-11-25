@@ -1,4 +1,4 @@
-require "unitlists"
+require "common"
 
 local DebugEnabled = false
 
@@ -44,7 +44,7 @@ end
 function ReclaimBehaviour:UnitIdle(unit)
 	--[[
 	if unit.engineID == self.unit.engineID then
-		self.targetcell = nil
+		self.targetCell = nil
 		self.unit:ElectBehaviour()
 	end
 	]]--
@@ -54,7 +54,7 @@ function ReclaimBehaviour:Update()
 	local f = game:Frame()
 	if f % 120 == 0 then
 		local doreclaim = false
-		if self.dedicated then
+		if self.dedicated and not self.resurrecting then
 			doreclaim = true
 		elseif ai.conCount > 2 and ai.needToReclaim and ai.reclaimerCount == 0 and ai.IDByType[self.id] ~= 1 and ai.IDByType[self.id] ~= 3 then
 			if not ai.haveExtraReclaimer then
@@ -68,14 +68,13 @@ function ReclaimBehaviour:Update()
 			if self.extraReclaimer then
 				ai.haveExtraReclaimer = false
 				self.extraReclaimer = false
-				self.targetcell = nil
+				self.targetCell = nil
 				self.unit:ElectBehaviour()
 			end
 		end
 		if doreclaim then
 			self:Retarget()
 			self:Reclaim()
-			self.unit:ElectBehaviour()
 		end
 	end
 end
@@ -83,18 +82,18 @@ end
 function ReclaimBehaviour:Retarget()
 	EchoDebug("needs target")
 	local unit = self.unit:Internal()
-	local bestCell = ai.targethandler:GetBestReclaimCell(unit)
-	if bestCell then
-		EchoDebug("got reclaim cell")
-		self.targetcell = bestCell
+	if not ai.needToReclaim and self.dedicated then
+		self.targetResurrection = ai.targethandler:WreckToResurrect(unit)
+		self.targetCell = nil
 	else
-		self.targetcell = nil
+		self.targetCell = ai.targethandler:GetBestReclaimCell(unit)
+		self.targetResurrection = nil
 	end
+	self.unit:ElectBehaviour()
 end
 
 function ReclaimBehaviour:Priority()
-	if self.targetcell ~= nil then
-		EchoDebug("priority 101")
+	if self.targetCell ~= nil or self.targetResurrection ~= nil then
 		return 101
 	else
 		-- EchoDebug("priority 0")
@@ -103,35 +102,43 @@ function ReclaimBehaviour:Priority()
 end
 
 function ReclaimBehaviour:Reclaim()
-	EchoDebug("reclaim")
-	if self.targetcell ~= nil and self.active then
-		local cell = self.targetcell
-		self.target = cell.pos
-		EchoDebug("actually reclaiming cell at" .. self.target.x .. " " .. self.target.z)
-		-- find an enemy unit to reclaim if there is one
-		local vulnerable
-		if self.mtype == "veh" or self.mtype == "bot" or self.mtype == "amp" or self.mtype == "hov" then
-			vulnerable = cell.groundVulnerable
-		end
-		if not vulnerable and (self.mtype == "sub" or self.mtype == "amp" or self.mtype == "shp" or self.mtype == "hov") then
-			vulnerable = cell.submergedVulnerable
-		end
-		if not vulnerable and (self.mtype == "air") then
-			vulnerable = cell.airVulnerable
-		end
-		if vulnerable ~= nil then
-			EchoDebug("reclaiming enemy...")
-			self.unit:Internal():Reclaim(vulnerable)
-		elseif not ai.needToReclaim and self.dedicated then
+	if self.active then
+		if self.targetCell ~= nil then
+			local cell = self.targetCell
+			self.target = cell.pos
+			EchoDebug("actually reclaiming cell at" .. self.target.x .. " " .. self.target.z)
+			-- find an enemy unit to reclaim if there is one
+			local vulnerable
+			if self.mtype == "veh" or self.mtype == "bot" or self.mtype == "amp" or self.mtype == "hov" then
+				vulnerable = cell.groundVulnerable
+			end
+			if not vulnerable and (self.mtype == "sub" or self.mtype == "amp" or self.mtype == "shp" or self.mtype == "hov") then
+				vulnerable = cell.submergedVulnerable
+			end
+			if not vulnerable and (self.mtype == "air") then
+				vulnerable = cell.airVulnerable
+			end
+			if vulnerable ~= nil then
+				EchoDebug("reclaiming enemy...")
+				self.unit:Internal():Reclaim(vulnerable)
+			else
+				EchoDebug("reclaiming area...")
+				self.unit:Internal():AreaReclaim(self.target, 200)
+			end
+		elseif self.targetResurrection ~= nil and not self.resurrecting then
 			EchoDebug("resurrecting...")
+			local resPosition = self.targetResurrection:GetPosition()
+			local unitName = featureTable[self.targetResurrection:Name()].unitName
+			EchoDebug(unitName)
 			local floats = api.vectorFloat()
-			floats:push_back(self.target.x)
-			floats:push_back(self.target.y)
-			floats:push_back(self.target.z)
+			--floats:push_back(self.targetResurrection:ID())
+			floats:push_back(resPosition.x)
+			floats:push_back(resPosition.y)
+			floats:push_back(resPosition.z)
+			floats:push_back(15) 
 			self.unit:Internal():ExecuteCustomCommand(CMD_RESURRECT, floats)
-		else
-			EchoDebug("reclaiming area...")
-			self.unit:Internal():AreaReclaim(self.target, 360)
+			ai.buildsitehandler:NewPlan(unitName, self.targetResurrection:GetPosition(), self, true)
+			self.resurrecting = true
 		end
 	end
 end
@@ -144,4 +151,10 @@ end
 function ReclaimBehaviour:Deactivate()
 	EchoDebug("deactivate")
 	self.active = false
+	self:ResurrectionComplete() -- so we don't get stuck
+end
+
+function ReclaimBehaviour:ResurrectionComplete()
+	self.resurrecting = false
+	ai.buildsitehandler:ClearMyPlans(self)
 end

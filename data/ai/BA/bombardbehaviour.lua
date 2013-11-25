@@ -1,5 +1,5 @@
-require "unitlists"
-require "unittable"
+require "common"
+
 
 BombardBehaviour = class(Behaviour)
 

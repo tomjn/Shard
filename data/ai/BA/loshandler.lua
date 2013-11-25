@@ -1,5 +1,5 @@
-require "unittable"
-require "unitlists"
+
+require "common"
 
 local DebugEnabled = false
 local debugPlotLosFile
@@ -251,7 +251,24 @@ function LosHandler:UpdateWrecks()
 	if self.knownWrecks == nil then self.knownWrecks = {} end
 	for i, w  in pairs(wrecks) do
 		if w ~= nil then
-			if not string.find(w:Name(), "geo") then
+			local wname = w:Name()
+			-- only count features that aren't geovents and that are known to be reclaimable or guessed to be so
+			local okay = false
+			if wname ~= "geovent" then
+				if featureTable[wname] then
+					if featureTable[wname].reclaimable then
+						okay = true
+					end
+				else
+					for findString, metalValue in pairs(baseFeatureMetal) do
+						if string.find(wname, findString) then
+							okay = true
+							break
+						end
+					end
+				end
+			end
+			if okay then
 				-- don't get geo spots
 				local pos = w:GetPosition()
 				local los = self:GroundLos(pos)

@@ -1,5 +1,5 @@
-require "unitlists"
-require "unittable"
+require "common"
+
 
 local DebugEnabled = false
 
@@ -254,6 +254,7 @@ function TaskQueueBehaviour:Init()
 	self.active = false
 	self.currentProject = nil
 	self.lastWatchdogCheck = game:Frame()
+	self.watchdogTimeout = 1800
 	local u = self.unit:Internal()
 	local mtype, network = ai.maphandler:MobilityOfUnit(u)
 	self.mtype = mtype
@@ -331,7 +332,7 @@ function TaskQueueBehaviour:UnitDead(unit)
 			if self.target then ai.targethandler:AddBadPosition(self.target, self.mtype) end
 			currentProjects[self.id] = nil
 			ai.assisthandler:Release(nil, self.id, true)
-			ai.buildsitehandler:ClearMyPlans(self.id)
+			ai.buildsitehandler:ClearMyPlans(self)
 		end
 	end
 end
@@ -348,6 +349,7 @@ function TaskQueueBehaviour:GetHelp(value, position)
 		end
 	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
 		if ai.factories == 0 then
+			EchoDebug("first factory can get help but doesn't need it")
 			ai.assisthandler:Summon(builder, position)
 			ai.assisthandler:Magnetize(builder, position)
 			return value
@@ -543,7 +545,7 @@ function TaskQueueBehaviour:Update()
 	end
 	-- watchdog check
 	if not self.constructing and not self.isFactory then
-		if (self.lastWatchdogCheck + 2400 < f) or (self.currentProject == nil and (self.lastWatchdogCheck + 1 < f)) then
+		if (self.lastWatchdogCheck + self.watchdogTimeout < f) or (self.currentProject == nil and (self.lastWatchdogCheck + 1 < f)) then
 			-- we're probably stuck doing nothing
 			local tmpOwnName = self.unit:Internal():Name() or "no-unit"
 			local tmpProjectName = self.currentProject or "empty project"
@@ -561,11 +563,12 @@ end
 
 function TaskQueueBehaviour:ProgressQueue()
 	self.lastWatchdogCheck = game:Frame()
+	self.constructing = false
 	self.progress = false
-		local builder = self.unit:Internal()
+	local builder = self.unit:Internal()
 	if not self.released then
 		ai.assisthandler:Release(builder)
-		ai.buildsitehandler:ClearMyPlans(self.id)
+		ai.buildsitehandler:ClearMyPlans(self)
 		self.released = true
 	end
 	if self.queue ~= nil then
@@ -617,7 +620,9 @@ function TaskQueueBehaviour:ProgressQueue()
 								EchoDebug(value ..  " passed location filter of " .. self.name)
 								local helpValue = self:GetHelp(value, p)
 								if helpValue ~= nil and helpValue ~= DummyUnitName then
+									EchoDebug(utype:Name() .. " has help")
 									success = self.unit:Internal():Build(utype, p)
+									EchoDebug(tostring(success))
 								end
 							end
 						end
@@ -635,8 +640,9 @@ function TaskQueueBehaviour:ProgressQueue()
 						ai.assisthandler:TakeUpSlack(builder)
 					end
 				else
-					ai.buildsitehandler:NewPlan(value, p, self.id)
+					ai.buildsitehandler:NewPlan(value, p, self)
 					self.target = p
+					self.watchdogTimeout = math.max(Distance(self.unit:Internal():GetPosition(), p) * 1.3, 240)
 					self.currentProject = value
 					currentProjects[self.id] = value
 				end

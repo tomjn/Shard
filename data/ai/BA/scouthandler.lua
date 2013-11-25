@@ -1,4 +1,4 @@
-require "unitlists"
+require "common"
 
 local DebugEnabled = false
 
@@ -100,7 +100,7 @@ function ScoutHandler:ClosestSpot(scoutbehaviour)
 		if los == 2 or los == 3 or not ai.targethandler:IsSafePosition(p, unit, 1) then
 			table.remove(self.spotsToScout[mtype][network], i)
 		else
-			local dist = distance(position, p)
+			local dist = Distance(position, p)
 			if dist < bestDistance then
 				bestDistance = dist
 				pos = p

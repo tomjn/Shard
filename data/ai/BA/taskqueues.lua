@@ -2,8 +2,8 @@
  Task Queues!
 ]]--
 
-require "unitlists"
-require "unittable"
+require "common"
+
 
 local DebugEnabled = false
 
@@ -192,6 +192,10 @@ end
 
 function IsTorpedoNeeded()
 	return ai.needSubmergedDefense
+end
+
+function IsJammerNeeded()
+	return ai.needJammers
 end
 
 function IsAntinukeNeeded()
@@ -1192,7 +1196,7 @@ function CountOwnUnitsInRadius(unitName, pos, radius, maxCount)
 	for _, u in pairs(ownUnits) do
 		if u:Name() == unitName then
 			local upos = u:GetPosition()
-			if distance(pos, upos) < radius then
+			if Distance(pos, upos) < radius then
 				unitCount = unitCount + 1
 			end
 			-- optimisation: if the limit is already exceeded, don't count further
@@ -1606,6 +1610,7 @@ local function BuildAdvancedRadar()
 end
 
 local function BuildLvl1Jammer()
+	if not IsJammerNeeded() then return DummyUnitName end
 	if ai.mySide == CORESideName then
 		return "corjamt"
 	else
@@ -1614,6 +1619,7 @@ local function BuildLvl1Jammer()
 end
 
 local function BuildLvl2Jammer()
+	if not IsJammerNeeded() then return DummyUnitName end
 	if ai.mySide == CORESideName then
 		return "corshroud"
 	else

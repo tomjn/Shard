@@ -1,4 +1,4 @@
-require "unitlists"
+require "common"
 
 function IsBomber(unit)
 	local tmpName = unit:Internal():Name()

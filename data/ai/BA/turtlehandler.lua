@@ -1,5 +1,5 @@
-require "unittable"
-require "unitlists"
+
+require "common"
 
 local DebugEnabled = false
 
@@ -107,7 +107,7 @@ function TurtleHandler:AddTurtle(position, uid, priority)
 	if priority > factoryPriority then nameLimit = 2 end
 	local turtle = {position = position, uid = uid, nameCounts = {}, nameLimit = nameLimit, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
 	for i, shell in pairs(self.shells) do
-		local dist = distance(position, shell.position)
+		local dist = Distance(position, shell.position)
 		if dist < shell.radius then
 			self:Attach(turtle, shell)
 		end
@@ -150,7 +150,7 @@ end
 function TurtleHandler:AddShell(position, uid, uname, value, layer, radius)
 	local shell = {position = position, uid = uid, uname = uname, value = value, layer = layer, radius = radius, attachments = {}}
 	for i, turtle in pairs(self.turtles) do
-		local dist = distance(position, turtle.position)
+		local dist = Distance(position, turtle.position)
 		if dist < radius then
 			self:Attach(turtle, shell)
 		end
@@ -242,7 +242,7 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 				local modDefecit = modLimit - mod
 				EchoDebug("turtled: " .. mod .. ", limit: " .. tostring(modLimit) .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
 				if mod == 0 or mod < ut.metalCost or (mod < modLimit and modDefecit < ut.metalCost * 3) then
-					local dist = distance(position, turtle.position)
+					local dist = Distance(position, turtle.position)
 					dist = dist - (modLimit * distanceMod)
 					EchoDebug("distance: " .. dist)
 					if dist < bestDist then
@@ -273,7 +273,7 @@ function TurtleHandler:MostTurtled(builder, bombard)
 				local mod = turtle.ground + turtle.air + turtle.submerged
 				EchoDebug("turtled: " .. mod .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
 				if mod ~= 0 then
-					local dist = distance(position, turtle.position)
+					local dist = Distance(position, turtle.position)
 					dist = dist - (mod * distanceMod)
 					EchoDebug("distance: " .. dist)
 					if dist < bestDist then
