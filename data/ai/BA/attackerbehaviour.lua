@@ -66,7 +66,7 @@ function AttackerBehaviour:Attack(pos, realClose)
 		-- wwttff
 	else
 		if realClose then
-			self.target = self:AwayFromTarget(pos, realClose)
+			self.target = self:AwayFromTarget(pos, halfPi)
 		else
 			self.target = RandomAway(pos, 150)
 		end
@@ -79,12 +79,14 @@ function AttackerBehaviour:Attack(pos, realClose)
 	end
 end
 
-function AttackerBehaviour:AwayFromTarget(pos, halfCircle)
+function AttackerBehaviour:AwayFromTarget(pos, spread)
 	local upos = self.unit:Internal():GetPosition()
 	local dx = upos.x - pos.x
 	local dz = upos.z - pos.z
 	local angle = atan2(-dz, dx)
-	if halfCircle then angle = (angle - halfPi) + (random() * pi) end
+	if spread then
+		local halfSpread = spread / 2
+		angle = (angle - halfSpread) + (random() * spread) end
 	if angle > twicePi then
 		angle = angle - twicePi
 	elseif angle < 0 then

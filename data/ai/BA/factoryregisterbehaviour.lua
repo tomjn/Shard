@@ -15,7 +15,6 @@ function FactoryRegisterBehaviour:Init()
     self.id = self.unit:Internal():ID()
     self.position = self.unit:Internal():GetPosition() -- factories don't move
     self.level = unitTable[self.name].techLevel
-    self:KeepFactoryLanesClear()
 end
 
 function FactoryRegisterBehaviour:UnitCreated(unit)
@@ -69,7 +68,6 @@ function FactoryRegisterBehaviour:Unregster()
 	local un = self.name
     local level = self.level
    	EchoDebug("factory " .. un .. " level " .. level .. " unregistering")
-   	ai.buildsitehandler:DoBuildRectangleByUnitID(self.id)
    	for i, factory in pairs(ai.factoriesAtLevel[level]) do
    		if factory == self then
    			table.remove(ai.factoriesAtLevel[level], i)
@@ -112,19 +110,4 @@ function FactoryRegisterBehaviour:Register()
 		ai.maxFactoryLevel = level
 	end
 	-- game:SendToConsole(ai.factories .. " factories")
-end
-
-function FactoryRegisterBehaviour:KeepFactoryLanesClear()
-	local sides = factoryExitSides[self.name]
- 	if sides ~= nil and sides ~= 0 then
-	    -- tell the build handler not to build where the units exit
-	    if sides == 1 or sides == 3 then
-	    	ai.buildsitehandler:DontBuildRectangle(self.position.x-80, self.position.z, self.position.x+80, self.position.z+240, self.id)
-	   	elseif sides == 2 or sides == 4 then
-	    	ai.buildsitehandler:DontBuildRectangle(self.position.x-80, self.position.z-240, self.position.x+80, self.position.z+240, self.id)
-	    end
-	    if sides == 3 or sides == 4 then
-	    	ai.buildsitehandler:DontBuildRectangle(self.position.x-120, self.position.z-50, self.position.x+120, self.position.z+50, self.id)
-		end
-	end
 end

@@ -543,7 +543,7 @@ end
 
 function MapHandler:Init()
 
-	self.recentlyGivenSpots = {}
+	-- self.recentlyGivenSpots = {}
 
 	ai.activeMobTypes = {}
 	ai.factoryListMap = {}
@@ -761,6 +761,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 	end
 	local uname = unittype:Name()
 	local pos = nil
+	local reclaimEnemyMex = false
 	local bestDistance = 10000
  	-- check for armed enemy units nearby
 	local uw = nil
@@ -788,7 +789,9 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 	end
 	local f = game:Frame()
 	for i,p in pairs(spots) do
-		local justGaveThatOne = false
+		-- dont use this spot if we're already building there
+		local alreadyPlanned = ai.buildsitehandler:PlansOverlap(p, uname)
+		--[[
 		for gi, given in pairs(self.recentlyGivenSpots) do
 			if f > given.frame + 300 then
 				table.remove(self.recentlyGivenSpots, gi)
@@ -799,7 +802,8 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 				end
 			end
 		end
-		if not justGaveThatOne then
+		]]--
+		if not alreadyPlanned then
 			local dist = Distance(position, p)
 			-- don't add if it's already too high
 			if dist < bestDistance then
@@ -812,15 +816,31 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 				if game.map:CanBuildHere(unittype, p) or uwcheck then
 					-- EchoDebug("can build mex at" .. p.x .. " " .. p.z)
 					if ai.targethandler:IsSafePosition(p, builder) then
-						if dist < bestDistance then
+						bestDistance = dist
+						pos = p
+						reclaimEnemyMex = false
+						if uwcheck then
+							-- EchoDebug("uw mex is best distance")
+							uw = uwutype
+						else
+							uw = nil
+						end
+					end
+				elseif ai.targethandler:IsSafePosition(p, builder, 200) then
+					-- is it an enemy mex that's blocking a safe position (or an unknown radar blip)?
+					for i, enemySpot in pairs(ai.enemyMexSpots) do
+						local epos = enemySpot.position
+						if p.x > epos.x - 100 and p.x < epos.x + 100 and p.z > epos.z - 100 and p.z < epos.z + 100 then
 							bestDistance = dist
-							pos = p
+							pos = epos
+							reclaimEnemyMex = enemySpot.unit
 							if uwcheck then
 								-- EchoDebug("uw mex is best distance")
 								uw = uwutype
 							else
 								uw = nil
 							end
+							break
 						end
 					end
 				end
@@ -832,8 +852,8 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 	-- game:SendToConsole("maphandler gcinfo: " .. kbytes .. " (after ClosestFreeSpot)")
 
 	-- if uw then EchoDebug("uw mex is final best distance") end
-	if pos ~= nil then table.insert(self.recentlyGivenSpots, {spot = pos, frame = f}) end
-	return pos, uw, bestDistance
+	-- if pos ~= nil then table.insert(self.recentlyGivenSpots, {spot = pos, frame = f}) end
+	return pos, uw, reclaimEnemyMex
 end
 
 function MapHandler:MobilityNetworkHere(mtype, position)

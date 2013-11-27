@@ -17,17 +17,16 @@ local function EchoDebugPlans(inStr)
 	end
 end
 
-local function PlotSquareDebug(x, z, size, label)
-	if DebugEnabled then
-		x = math.ceil(x)
-		z = math.ceil(z)
-		size = math.ceil(size)
-		-- if debugSquares[x .. "  " .. z .. " " .. size] == nil then
-			if label == nil then label = "nil" end
-			local string = x .. " " .. z .. " " .. size .. " " .. label .. "\n"
-			debugPlotBuildFile:write(string)
-			-- debugSquares[x .. "  " .. z .. " " .. size] = true
-		-- end
+local function PlotRectDebug(rect)
+	if DebugEnabledPlans then
+		local label
+		if rect.unitName then
+			label = "PLAN"
+		else
+			label = "NOBUILD"
+		end
+		local string = rect.x1 .. " " .. rect.z1 .. " " .. rect.x2 .. " " .. rect.z2 .. " " .. label .. "\n"
+		debugPlotBuildFile:write(string)
 	end
 end
 
@@ -55,6 +54,17 @@ function BuildSiteHandler:Init()
 	self:DontBuildOnMetalOrGeoSpots()
 end
 
+function BuildSiteHandler:PlansOverlap(position, unitName)
+	for i, plan in pairs(self.plans) do
+		local rect = {position = position, unitName = unitName}
+		self:CalculateRect(rect)
+		if RectsOverlap(rect, plan) then
+			return true
+		end
+	end
+	return false
+end
+
 function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalPosition)
 	-- make sure it's on the map
 	if pos ~= nil then
@@ -79,10 +89,15 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 			pos = nil
 		end
 	end
+	local rect
+	if pos ~= nil then
+		rect = {position = pos, unitName = unitTypeToBuild:Name()}
+		self:CalculateRect(rect)
+	end
 	-- don't build where you shouldn't (metal spots, geo spots, factory lanes)
 	if pos ~= nil then
-		for i, rect in pairs(self.dontBuildRects) do
-			if PositionWithinRect(pos, rect) then
+		for i, dont in pairs(self.dontBuildRects) do
+			if RectsOverlap(rect, dont) then
 				pos = nil
 				break
 			end
@@ -91,7 +106,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	-- don't build on top of current build orders
 	if pos ~= nil then
 		for i, plan in pairs(self.plans) do
-			if PositionWithinRect(pos, plan) then
+			if RectsOverlap(rect, plan) then
 				pos = nil
 				break
 			end
@@ -110,7 +125,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 			-- don't build nanos too far away from factory
 			local dist = Distance(originalPosition, pos)
 			EchoDebug("nano distance: " .. dist)
-			if dist > 400 then
+			if dist > 390 then
 				EchoDebug("nano too far from factory")
 				pos = nil
 			end
@@ -129,9 +144,9 @@ end
 function BuildSiteHandler:GetBuildSpacing(unitTypeToBuild)
 	local spacing = 1
 	local name = unitTypeToBuild:Name()
-	if unitTable[name].isWeapon then spacing = 10 end
+	if unitTable[name].isWeapon then spacing = 8 end
 	if unitTable[name].bigExplosion then spacing = 20 end
-	if unitTable[name].buildOptions then spacing = 21 end
+	if unitTable[name].buildOptions then spacing = 4 end
 	return spacing
 end
 
@@ -192,9 +207,9 @@ function BuildSiteHandler:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, pos
 	if i == nil then i = 0 end
 	-- have to set it this way, otherwise both just point to the same set of data, and originalPosition doesn't stay the same
 	local originalPosition = api.Position()
-	originalPosition.x = position.x
-	originalPosition.y = position.y
-	originalPosition.z = position.z
+	originalPosition.x = position.x * 1
+	originalPosition.y = position.y * 1
+	originalPosition.z = position.z * 1
 
 	EchoDebug("new spiral search")
 	while segmentSize < 8 do
@@ -273,61 +288,107 @@ function BuildSiteHandler:DontBuildRectangle(x1, z1, x2, z2, unitID)
 	table.insert(self.dontBuildRects, {x1 = x1, z1 = z1, x2 = x2, z2 = z2, unitID = unitID})
 end
 
--- to handle factory deaths
+-- handle deaths
 function BuildSiteHandler:DoBuildRectangleByUnitID(unitID)
 	for i, rect in pairs(self.dontBuildRects) do
 		if rect.unitID == unitID then
 			table.remove(self.dontBuildRects, i)
 		end
 	end
+	self:PlotAllDebug()
 end
 
 function BuildSiteHandler:DontBuildOnMetalOrGeoSpots()
 	local spots = ai.scoutSpots["air"][1]
 	for i, p in pairs(spots) do
-		self:DontBuildRectangle(p.x-30, p.z-30, p.x+30, p.z+30)
+		self:DontBuildRectangle(p.x-40, p.z-40, p.x+40, p.z+40)
 	end
+	self:PlotAllDebug()
 end
 
 function BuildSiteHandler:UnitCreated(unit)
 	local unitName = unit:Name()
 	local position = unit:GetPosition()
+	local planned = false
 	for i, plan in pairs(self.plans) do
 		if plan.unitName == unitName and PositionWithinRect(position, plan) then
 			if plan.resurrect then
 				-- so that factoryExit will hold it in place while it gets repaired
-				EchoDebugPlans("resurrection of " .. unitName .. " begun")
+				EchoDebug("resurrection of " .. unitName .. " begun")
 				self.resurrectionRepair[unit:ID()] = plan.behaviour
 			else
-				EchoDebugPlans(plan.behaviour.name .. " began constructing " .. unitName)
+				EchoDebug(plan.behaviour.name .. " began constructing " .. unitName)
+				if unitTable[unitName].isBuilding then
+					-- so that oversized factory lane rectangles will overlap with existing buildings
+					self:DontBuildRectangle(plan.x1, plan.z1, plan.x2, plan.z2, unit:ID())
+				end
 				plan.behaviour:ConstructionBegun()
 				table.remove(self.plans, i)
 			end
+			planned = true
+			break
 		end
 	end
+	if not planned and unitTable[unitName].isBuilding then
+		-- for when we're restarting the AI
+		local rect = { position = position, unitName = unitName }
+		self:CalculateRect(rect)
+		self:DontBuildRectangle(rect.x1, rect.z1, rect.x2, rect.z2, unit:ID())
+	end
+	self:PlotAllDebug()
+end
+
+function BuildSiteHandler:UnitDead(unit)
+	self:DoBuildRectangleByUnitID(unit:ID())
 end
 
 function BuildSiteHandler:CalculateRect(rect)
 	local unitName = rect.unitName
+	if factoryExitSides[unitName] ~= nil and factoryExitSides[unitName] ~= 0 then
+		self:CalculateFactoryLane(rect)
+		return
+	end
 	local position = rect.position
-	local outX = unitTable[unitName].xsize * 8
-	local outZ = unitTable[unitName].zsize * 8
+	local outX = unitTable[unitName].xsize * 4
+	local outZ = unitTable[unitName].zsize * 4
 	rect.x1 = position.x - outX
 	rect.z1 = position.z - outZ
 	rect.x2 = position.x + outX
 	rect.z2 = position.z + outZ
 end
 
+function BuildSiteHandler:CalculateFactoryLane(rect)
+	local unitName = rect.unitName
+	local position = rect.position
+	local outX = unitTable[unitName].xsize * 4
+	local outZ = unitTable[unitName].zsize * 4
+	rect.x1 = position.x - outX
+	rect.x2 = position.x + outX
+	local sides = factoryExitSides[unitName]
+	if sides == 1 then
+		rect.z1 = position.z - outZ
+		rect.z2 = position.z + outZ * 5
+	elseif sides >= 2 then
+		local tall = outZ * 5
+		rect.z1 = position.z - tall
+		rect.z2 = position.z + tall
+	else
+		rect.z1 = position.z - outZ
+		rect.z2 = position.z + outZ
+	end
+end
+
 function BuildSiteHandler:NewPlan(unitName, position, behaviour, resurrect)
 	if resurrect then
-		EchoDebugPlans("new plan to resurrect " .. unitName .. " at " .. position.x .. ", " .. position.z)
+		EchoDebug("new plan to resurrect " .. unitName .. " at " .. position.x .. ", " .. position.z)
 	else
-		EchoDebugPlans(behaviour.name .. " plans to build " .. unitName .. " at " .. position.x .. ", " .. position.z)
+		EchoDebug(behaviour.name .. " plans to build " .. unitName .. " at " .. position.x .. ", " .. position.z)
 	end
 	local plan = {unitName = unitName, position = position, behaviour = behaviour, resurrect = resurrect}
 	-- positions are in the center of units, so outX and outZ are half the footprint size
 	self:CalculateRect(plan)
 	table.insert(self.plans, plan)
+	self:PlotAllDebug()
 end
 
 function BuildSiteHandler:ClearMyPlans(behaviour)
@@ -336,6 +397,7 @@ function BuildSiteHandler:ClearMyPlans(behaviour)
 			table.remove(self.plans, i)
 		end
 	end
+	self:PlotAllDebug()
 end
 
 function BuildSiteHandler:RemoveResurrectionRepairedBy(unitID)
@@ -344,4 +406,17 @@ end
 
 function BuildSiteHandler:ResurrectionRepairedBy(unitID)
 	return self.resurrectionRepair[unitID]
+end
+
+function BuildSiteHandler:PlotAllDebug()
+	if DebugEnabledPlans then
+		debugPlotBuildFile = assert(io.open("debugbuildplot",'w'), "Unable to write debugbuildplot")
+		for i, plan in pairs(self.plans) do
+			PlotRectDebug(plan)
+		end
+		for i, rect in pairs(self.dontBuildRects) do
+			PlotRectDebug(rect)
+		end
+		debugPlotBuildFile:close()
+	end
 end

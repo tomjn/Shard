@@ -382,12 +382,16 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 	if unitTable[value].extractsMetal > 0 then
 		-- metal extractor
 		local uw
-		p, uw = ai.maphandler:ClosestFreeSpot(utype, builder)
+		p, uw, reclaimEnemyMex = ai.maphandler:ClosestFreeSpot(utype, builder)
 		if p ~= nil then
-			EchoDebug("extractor spot: " .. p.x .. ", " .. p.z)
-			if uw then
-				EchoDebug("underwater extractor " .. uw:Name())
-				utype = uw
+			if reclaimEnemyMex then
+				value = {"ReclaimEnemyMex", reclaimEnemyMex}
+			else
+				EchoDebug("extractor spot: " .. p.x .. ", " .. p.z)
+				if uw then
+					EchoDebug("underwater extractor " .. uw:Name())
+					utype = uw
+				end
 			end
 		else
 			utype = nil
@@ -617,12 +621,16 @@ function TaskQueueBehaviour:ProgressQueue()
 						else
 							utype, value, p = self:LocationFilter(utype, value)
 							if utype ~= nil and p ~= nil then
-								EchoDebug(value ..  " passed location filter of " .. self.name)
-								local helpValue = self:GetHelp(value, p)
-								if helpValue ~= nil and helpValue ~= DummyUnitName then
-									EchoDebug(utype:Name() .. " has help")
-									success = self.unit:Internal():Build(utype, p)
-									EchoDebug(tostring(success))
+								if type(value) == "table" and value[1] == "ReclaimEnemyMex" then
+									EchoDebug("reclaiming enemy mex...")
+									success = self.unit:Internal():Reclaim(value[2])
+									value = value[1]
+								else
+									local helpValue = self:GetHelp(value, p)
+									if helpValue ~= nil and helpValue ~= DummyUnitName then
+										EchoDebug(utype:Name() .. " has help")
+										success = self.unit:Internal():Build(utype, p)
+									end
 								end
 							end
 						end
@@ -640,11 +648,15 @@ function TaskQueueBehaviour:ProgressQueue()
 						ai.assisthandler:TakeUpSlack(builder)
 					end
 				else
-					ai.buildsitehandler:NewPlan(value, p, self)
 					self.target = p
 					self.watchdogTimeout = math.max(Distance(self.unit:Internal():GetPosition(), p) * 1.3, 240)
 					self.currentProject = value
-					currentProjects[self.id] = value
+					if value == "ReclaimEnemyMex" then
+						self.watchdogTimeout = self.watchdogTimeout + 450 -- give it 15 more seconds to reclaim it
+					else
+						ai.buildsitehandler:NewPlan(value, p, self)
+						currentProjects[self.id] = value
+					end
 				end
 				self.released = false
 				self.progress = false
