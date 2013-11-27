@@ -465,6 +465,7 @@ local function UpdateDangers()
 end
 
 local function UpdateEnemies()
+	ai.enemyMexSpots = {}
 	local enemies = game:GetEnemies()
 	if enemies == nil then return end
 	if #enemies == 0 then return end
@@ -506,6 +507,9 @@ local function UpdateEnemies()
 			elseif los == 2 then
 				DangerCheck(name, e:ID())
 				local value = Value(name)
+				if unitTable[name].extractsMetal ~= 0 then
+					table.insert(ai.enemyMexSpots, { position = pos, unit = e })
+				end
 				for i, groundAirSubmerged in pairs(threatTypes) do
 					local threat, range = ThreatRange(name, groundAirSubmerged)
 					-- EchoDebug(name .. " " .. groundAirSubmerged .. " " .. threat .. " " .. range)
@@ -707,6 +711,7 @@ function TargetHandler:UnitDamaged(unit, attacker)
 end
 
 function TargetHandler:Init()
+	ai.enemyMexSpots = {}
 	currentEnemyThreatCount = 0
 	currentEnemyImmobileThreatCount = 0
 	currentEnemyMobileThreatCount = 0
@@ -980,10 +985,10 @@ function TargetHandler:GetBestReclaimCell(representative, lookForEnergy)
 				else
 					mod = cell.metal
 				end
+				local vulnerable = CellVulnerable(cell, gas)
+				if vulnerable then mod = mod + vulnerableReclaimDistMod end
 				if mod > 0 then
 					local dist = Distance(rpos, cell.pos) - mod
-					local vulnerable = CellVulnerable(cell, gas)
-					if vulnerable then dist = dist - vulnerableReclaimDistMod end
 					if dist < bestDist then
 						best = cell
 						bestDist = dist
@@ -1016,6 +1021,7 @@ function TargetHandler:WreckToResurrect(representative)
 		end
 	end
 	if best then
+		game:SendToConsole("got wreck to resurrect")
 		local bestWreck
 		local bestMetalCost = 0
 		for i, w in pairs(best.resurrectables) do
@@ -1030,8 +1036,33 @@ function TargetHandler:WreckToResurrect(representative)
 				end
 			end
 		end
-		return bestWreck
+		return bestWreck, best
+	else
+		return nil, self:NearestVulnerableCell(representative)
 	end
+end
+
+function TargetHandler:NearestVulnerableCell(representative)
+	if not representative then return end
+	self:UpdateMap()
+	local rpos = representative:GetPosition()
+	local best
+	local bestDist = 99999
+	for i, cell in pairs(cellList) do
+		local value, threat, gas = CellValueThreat(representative, cell)
+		if threat == 0 and cell.pos then
+			if ai.maphandler:UnitCanGoHere(representative, cell.pos) then
+				if cell.groundVulnerable or cell.airVulnerable or cell.submergedVulnerable then
+					local dist = Distance(rpos, cell.pos)
+					if dist < bestDist then
+						best = cell
+						bestDist = dist
+					end
+				end
+			end
+		end
+	end
+	return best
 end
 
 function TargetHandler:IsBombardPosition(position, unitName)

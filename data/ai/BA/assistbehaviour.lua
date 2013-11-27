@@ -71,14 +71,14 @@ function AssistBehaviour:Update()
 		if self.isCommander then
 			-- turn commander into build assister if you control more than half the mexes or if it's damaged
 			if self.IDByType == 1 then
-				if IsSiegeEquipmentNeeded() or unit:GetHealth() < unit:GetMaxHealth() * 0.9 then
+				if (IsSiegeEquipmentNeeded() or unit:GetHealth() < unit:GetMaxHealth() * 0.9) and ai.factories ~= 0 and ai.conCount > 2 then
 					self.IDByType = 2
 					ai.IDByType[self.id] = 2
 					self.unit:ElectBehaviour()
 				end
 			else
 				-- switch commander back to building
-				if not IsSiegeEquipmentNeeded() and unit:GetHealth() >= unit:GetMaxHealth() * 0.9 then
+				if (not IsSiegeEquipmentNeeded() and unit:GetHealth() >= unit:GetMaxHealth() * 0.9) or ai.factories == 0 or ai.conCount <= 2 then
 					self.IDByType = 1
 					ai.IDByType[self.id] = 1
 					self.unit:ElectBehaviour()

@@ -20,6 +20,16 @@ ReclaimBehaviour = class(Behaviour)
 function ReclaimBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
+	self.layers = {}
+	if self.mtype == "veh" or self.mtype == "bot" or self.mtype == "amp" or self.mtype == "hov" then
+		table.insert(self.layers, "ground")
+	end
+	if self.mtype == "sub" or self.mtype == "amp" or self.mtype == "shp" or self.mtype == "hov" then
+		table.insert(self.layers, "submerged")
+	end
+	if self.mtype == "air" then
+		table.insert(self.layers, "air")
+	end
 	self.name = self.unit:Internal():Name()
 	if reclaimerList[self.name] then self.dedicated = true end
 	self.id = self.unit:Internal():ID()
@@ -38,6 +48,7 @@ function ReclaimBehaviour:UnitDead(unit)
 		if self.target then
 			ai.targethandler:AddBadPosition(self.target, self.mtype)
 		end
+		ai.buildsitehandler:ClearMyPlans(self)
 	end
 end
 
@@ -83,8 +94,7 @@ function ReclaimBehaviour:Retarget()
 	EchoDebug("needs target")
 	local unit = self.unit:Internal()
 	if not ai.needToReclaim and self.dedicated then
-		self.targetResurrection = ai.targethandler:WreckToResurrect(unit)
-		self.targetCell = nil
+		self.targetResurrection, self.targetCell = ai.targethandler:WreckToResurrect(unit)
 	else
 		self.targetCell = ai.targethandler:GetBestReclaimCell(unit)
 		self.targetResurrection = nil
@@ -93,7 +103,7 @@ function ReclaimBehaviour:Retarget()
 end
 
 function ReclaimBehaviour:Priority()
-	if self.targetCell ~= nil or self.targetResurrection ~= nil then
+	if self.targetCell ~= nil then
 		return 101
 	else
 		-- EchoDebug("priority 0")
@@ -106,39 +116,35 @@ function ReclaimBehaviour:Reclaim()
 		if self.targetCell ~= nil then
 			local cell = self.targetCell
 			self.target = cell.pos
-			EchoDebug("actually reclaiming cell at" .. self.target.x .. " " .. self.target.z)
+			EchoDebug("cell at" .. self.target.x .. " " .. self.target.z)
 			-- find an enemy unit to reclaim if there is one
 			local vulnerable
-			if self.mtype == "veh" or self.mtype == "bot" or self.mtype == "amp" or self.mtype == "hov" then
-				vulnerable = cell.groundVulnerable
-			end
-			if not vulnerable and (self.mtype == "sub" or self.mtype == "amp" or self.mtype == "shp" or self.mtype == "hov") then
-				vulnerable = cell.submergedVulnerable
-			end
-			if not vulnerable and (self.mtype == "air") then
-				vulnerable = cell.airVulnerable
+			for i, layer in pairs(self.layers) do
+				local vLayer = layer .. "Vulnerable"
+				vulnerable = cell[vLayer]
+				if vulnerable ~= nil then break end
 			end
 			if vulnerable ~= nil then
 				EchoDebug("reclaiming enemy...")
 				self.unit:Internal():Reclaim(vulnerable)
+			elseif self.targetResurrection ~= nil and not self.resurrecting then
+				EchoDebug("resurrecting...")
+				local resPosition = self.targetResurrection:GetPosition()
+				local unitName = featureTable[self.targetResurrection:Name()].unitName
+				EchoDebug(unitName)
+				local floats = api.vectorFloat()
+				--floats:push_back(self.targetResurrection:ID())
+				floats:push_back(resPosition.x)
+				floats:push_back(resPosition.y)
+				floats:push_back(resPosition.z)
+				floats:push_back(15) 
+				self.unit:Internal():ExecuteCustomCommand(CMD_RESURRECT, floats)
+				ai.buildsitehandler:NewPlan(unitName, self.targetResurrection:GetPosition(), self, true)
+				self.resurrecting = true
 			else
 				EchoDebug("reclaiming area...")
 				self.unit:Internal():AreaReclaim(self.target, 200)
 			end
-		elseif self.targetResurrection ~= nil and not self.resurrecting then
-			EchoDebug("resurrecting...")
-			local resPosition = self.targetResurrection:GetPosition()
-			local unitName = featureTable[self.targetResurrection:Name()].unitName
-			EchoDebug(unitName)
-			local floats = api.vectorFloat()
-			--floats:push_back(self.targetResurrection:ID())
-			floats:push_back(resPosition.x)
-			floats:push_back(resPosition.y)
-			floats:push_back(resPosition.z)
-			floats:push_back(15) 
-			self.unit:Internal():ExecuteCustomCommand(CMD_RESURRECT, floats)
-			ai.buildsitehandler:NewPlan(unitName, self.targetResurrection:GetPosition(), self, true)
-			self.resurrecting = true
 		end
 	end
 end

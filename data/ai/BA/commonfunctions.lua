@@ -45,28 +45,37 @@ function ManhattanDistance(pos1,pos2)
 	return dist
 end
 
-function PositionsWithinSquare(pos1, pos2, dist)
-	local halfDist = dist / 2
-	return pos1.x >= pos2.x - halfDist and pos1.x <= pos2.x + halfDist and pos1.z >= pos2.z - halfDist and pos1.z <= pos2.z + halfDist
+function CheckRect(rect)
+	local new = {}
+	if rect.x1 > rect.x2 then
+		new.x1 = rect.x2 * 1
+		new.x2 = rect.x1 * 1
+	else
+		new.x1 = rect.x1 * 1
+		new.x2 = rect.x2 * 1
+	end
+	if rect.z1 > rect.z2 then
+		new.z1 = rect.z2 * 1
+		new.z2 = rect.z1 * 1
+	else
+		new.z1 = rect.z1 * 1
+		new.z2 = rect.z2 * 1
+	end
+	rect.x1 = new.x1
+	rect.z1 = new.z1
+	rect.x2 = new.x2
+	rect.z2 = new.z2
 end
 
 function PositionWithinRect(position, rect)
-	local x1, z1, x2, z2
-	if rect.x1 > rect.x2 then
-		x1 = rect.x2
-		x2 = rect.x1
-	else
-		x1 = rect.x1
-		x2 = rect.x2
-	end
-	if rect.z1 > rect.z2 then
-		z1 = rect.z2
-		z2 = rect.z1
-	else
-		z1 = rect.z1
-		z2 = rect.z2
-	end
-	return position.x >= x1 and position.x <= x2 and position.z >= z1 and position.z <= z2
+	return position.x > rect.x1 and position.x < rect.x2 and position.z > rect.z1 and position.z < rect.z2
+end
+
+function RectsOverlap(rectA, rectB)
+	return rectA.x1 < rectB.x2 and
+           rectB.x1 < rectA.x2 and
+           rectA.z1 < rectB.z2 and
+           rectB.z1 < rectA.z2
 end
 
 function pairsByKeys(t, f)
