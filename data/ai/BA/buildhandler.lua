@@ -261,25 +261,6 @@ function BuildSiteHandler:ClosestHighestLevelFactory(builder, maxDist)
 	return factoryPos
 end
 
-function BuildSiteHandler:ClosestNanoTurret(builder, maxDist)
-	local bpos = builder:GetPosition()
-	local ownUnits = game:GetFriendlies()
-	local minDist = maxDist
-	local nano = nil
-	for i, unit in pairs(ownUnits) do
-		local un = unit:Name()
-		if nanoTurretList[un] then
-			local upos = unit:GetPosition()
-			local dist = Distance(bpos, upos)
-			if dist < minDist then
-				minDist = dist
-				nano = unit
-			end
-		end
-	end
-	return nano
-end
-
 function BuildSiteHandler:DontBuildRectangle(x1, z1, x2, z2, unitID)
 	x1 = math.ceil(x1)
 	z1 = math.ceil(z1)

@@ -93,7 +93,7 @@ local dangers = {}
 local lastUpdateFrame = 0
 
 local function NewCell(px, pz)
-	local newcell = {value = 0, groundValue = 0, airValue = 0, submergedValue = 0, bomberValue = 0, groundThreat = 0, airThreat = 0, submergedThreat = 0, bomberTargets = {}, resurrectables = {}, metal = 0, energy = 0, friendlyValue = 0, friendlyBuildings = 0, friendlyLandCombats = 0, friendlyAirCombats = 0, friendlyWaterCombats = 0, x = px, z = pz}
+	local newcell = {value = 0, groundValue = 0, airValue = 0, submergedValue = 0, bomberValue = 0, torpedoBomberValue = 0, groundThreat = 0, airThreat = 0, submergedThreat = 0, bomberTargets = {}, torpedoBomberTargets = {}, resurrectables = {}, metal = 0, energy = 0, friendlyValue = 0, friendlyBuildings = 0, friendlyLandCombats = 0, friendlyAirCombats = 0, friendlyWaterCombats = 0, x = px, z = pz}
 	return newcell
 end
 
@@ -383,8 +383,8 @@ local function CountDanger(layer, id)
 	local danger = dangers[layer]
 	if not danger.alreadyCounted[id] then
 		danger.count = danger.count + 1
-		danger.alreadyCounted[id] = true
 		EchoDebug("spotted " .. layer .. " threat")
+		danger.alreadyCounted[id] = true
 	end
 end
 
@@ -392,6 +392,13 @@ local function DangerCheck(unitName, unitID)
 	local un = unitName
 	local ut = unitTable[un]
 	local id = unitID
+	if ut.isBuilding then
+		if ut.needsWater then
+			CountDanger("watertarget", id)
+		else
+			CountDanger("landtarget", id)
+		end
+	end
 	if not ut.isBuilding and not commanderList[un] and ut.mtype ~= "air" and ut.mtype ~= "sub" and ut.groundRange > 0 then
 		CountDanger("ground", id)
 	elseif groundFacList[un] then
@@ -427,6 +434,11 @@ end
 
 local function InitializeDangers()
 	dangers = {}
+	dangers["watertarget"] = NewDangerLayer()
+	dangers["landtarget"] = NewDangerLayer()
+	dangers["landtarget"].duration = 2400
+	dangers["landtarget"].present = true
+	dangers["landtarget"].obsolesce = game:Frame() + 5400
 	dangers["ground"] = NewDangerLayer()
 	dangers["ground"].duration = 2400 -- keep ground threat alive for one and a half minutes
 	-- assume there are ground threats for the first three minutes
@@ -455,6 +467,8 @@ local function UpdateDangers()
 		end
 	end
 
+	ai.areWaterTargets = dangers.watertarget.present
+	ai.areLandTargets = dangers.landtarget.present or not dangers.watertarget.present
 	ai.needGroundDefense = dangers.ground.present or (not dangers.air.present and not dangers.submerged.present) -- don't turn off ground defense if there aren't air or submerged dangers
 	ai.needAirDefense = dangers.air.present
 	ai.needSubmergedDefense = dangers.submerged.present
@@ -516,7 +530,7 @@ local function UpdateEnemies()
 					if threat ~= 0 then
 						FillCircle(px, pz, range, groundAirSubmerged, threat)
 						CountEnemyThreat(e, threat)
-					elseif not unitsToIgnoreAsAttackTarget[name] then
+					elseif unitTable[name].mtype ~= "air" then
 						-- for those times when you need to attack the unit itself, not the ground
 						local health = e:GetHealth()
 						local mtype = unitTable[name].mtype
@@ -529,7 +543,16 @@ local function UpdateEnemies()
 								cell.groundValue = cell.groundValue + value
 							end
 						elseif groundAirSubmerged == "air" then
-							if mtype ~= "sub" and mtype ~= "air" then
+							if mtype == "sub" then
+								table.insert(cell.torpedoBomberTargets, e)
+								cell.torpedoBomberValue = cell.torpedoBomberValue + value
+								if unitTable[name].bigExplosion then cell.torpedoBomberValue = cell.torpedoBomberValue + bomberExplosionValue end
+							else
+								if mtype == "shp" then
+									table.insert(cell.torpedoBomberTargets, e)
+									cell.torpedoBomberValue = cell.torpedoBomberValue + value
+									if unitTable[name].bigExplosion then cell.torpedoBomberValue = cell.torpedoBomberValue + bomberExplosionValue end
+								end
 								cell.airTarget = e
 								table.insert(cell.bomberTargets, e)
 								if health < vulnerableHealth then
@@ -720,6 +743,7 @@ function TargetHandler:Init()
 	ai.totalEnemyImmobileThreat = 5000
 	ai.totalEnemyMobileThreat = 5000
 	ai.needGroundDefense = true
+	ai.areLandTargets = true
 	ai.canNuke = true
 	InitializeDangers()
 	self.lastEnemyThreatUpdateFrame = 0
@@ -830,6 +854,7 @@ function TargetHandler:GetBestRaidCell(representative)
 	local rthreat, rrange = ThreatRange(rname)
 	EchoDebug(rname .. ": " .. rthreat .. " " .. rrange)
 	if rthreat > maxThreat then maxThreat = rthreat end
+	if rname == "corcrw" then maxThreat = maxThreat * 5 end
 	local best
 	local bestDist = 99999
 	for i, cell in pairs(cellList) do
@@ -914,7 +939,11 @@ function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignor
 	self:UpdateMap()
 	if enemyBaseCell and not ignoreValue then
 		local dist = Distance(position, enemyBaseCell.pos)
-		if dist < range then return enemyBaseCell end
+		if dist < range then
+			local value, threat = CellValueThreat("ALL", cell)
+			local valuethreat = value + threat 
+			return enemyBaseCell, valuethreat
+		end
 	end
 	local best
 	local bestValueThreat = 0
@@ -935,12 +964,17 @@ function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignor
 	return best, bestValueThreat
 end
 
-function TargetHandler:GetBestBomberTarget()
+function TargetHandler:GetBestBomberTarget(torpedo)
 	self:UpdateMap()
 	local best
 	local bestValue = 0
 	for i, cell in pairs(cellList) do
-		local value = cell.airValue
+		local value = 0
+		if torpedo then
+			value = cell.torpedoBomberValue
+		else
+			value = cell.bomberValue
+		end
 		if value > 0 then
 			value = value - cell.airThreat
 			if value > bestValue then
@@ -952,7 +986,13 @@ function TargetHandler:GetBestBomberTarget()
 	if best then
 		local bestTarget
 		bestValue = 0
-		for i, e in pairs(best.bomberTargets) do
+		local targets
+		if torpedo then
+			targets = best.torpedoBomberTargets
+		else
+			targets = best.bomberTargets
+		end
+		for i, e in pairs(targets) do
 			local name = e:Name()
 			local value = Value(name)
 			if name then
@@ -1021,7 +1061,7 @@ function TargetHandler:WreckToResurrect(representative)
 		end
 	end
 	if best then
-		game:SendToConsole("got wreck to resurrect")
+		EchoDebug("got wreck to resurrect")
 		local bestWreck
 		local bestMetalCost = 0
 		for i, w in pairs(best.resurrectables) do

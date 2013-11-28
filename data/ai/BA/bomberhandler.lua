@@ -49,40 +49,52 @@ function BomberHandler:UnitIdle(engineunit)
 end
 
 function BomberHandler:DoTargetting()
-	if #self.recruits >= self.counter then
-		ai.couldBomb = ai.couldBomb + 1
-		-- find somewhere to attack
-		local bombTarget = ai.targethandler:GetBestBomberTarget()
-
-		if bombTarget ~= nil then
-			for i,recruit in ipairs(self.recruits) do
-				recruit:BombTarget(bombTarget)
+	for weapon, recruits in pairs(self.recruits) do
+		if #recruits >= self.counter then
+			ai.couldBomb = ai.couldBomb + 1
+			-- find somewhere to attack
+			local bombTarget
+			EchoDebug("getting target for " .. weapon)
+			if weapon == "torpedo" then
+				bombTarget = ai.targethandler:GetBestBomberTarget(true)
+			else
+				bombTarget = ai.targethandler:GetBestBomberTarget()
 			end
-			self.recruits = {}
-			ai.hasBombed = ai.hasBombed + 1
+
+			if bombTarget ~= nil then
+				EchoDebug("got target for " .. weapon)
+				for i,recruit in ipairs(recruits) do
+					recruit:BombTarget(bombTarget)
+				end
+				self.recruits[weapon] = {}
+				ai.hasBombed = ai.hasBombed + 1
+			end
 		end
 	end
 end
 
-function BomberHandler:IsRecruit(attkbehaviour)
-	for i,v in ipairs(self.recruits) do
-		if v == attkbehaviour then
+function BomberHandler:IsRecruit(bmbrbehaviour)
+	if self.recruits[bmbrbehaviour.weapon] == nil then self.recruits[bmbrbehaviour.weapon] = {} end
+	for i,v in ipairs(self.recruits[bmbrbehaviour.weapon]) do
+		if v == bmbrbehaviour then
 			return true
 		end
 	end
 	return false
 end
 
-function BomberHandler:AddRecruit(attkbehaviour)
-	if not self:IsRecruit(attkbehaviour) then
-		table.insert(self.recruits,attkbehaviour)
+function BomberHandler:AddRecruit(bmbrbehaviour)
+	if self.recruits[bmbrbehaviour.weapon] == nil then self.recruits[bmbrbehaviour.weapon] = {} end
+	if not self:IsRecruit(bmbrbehaviour) then
+		table.insert(self.recruits[bmbrbehaviour.weapon],bmbrbehaviour)
 	end
 end
 
-function BomberHandler:RemoveRecruit(attkbehaviour)
-	for i,v in ipairs(self.recruits) do
-		if v == attkbehaviour then
-			table.remove(self.recruits, i)
+function BomberHandler:RemoveRecruit(bmbrbehaviour)
+	if self.recruits[bmbrbehaviour.weapon] == nil then self.recruits[bmbrbehaviour.weapon] = {} end
+	for i,v in ipairs(self.recruits[bmbrbehaviour.weapon]) do
+		if v == bmbrbehaviour then
+			table.remove(self.recruits[bmbrbehaviour.weapon], i)
 			return true
 		end
 	end

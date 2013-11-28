@@ -25,6 +25,8 @@ factoryMobilities = {
 	armavp = {"veh"},
 	coraap = {"air"},
 	armaap = {"air"},
+	corplat = {"air"},
+	armplat = {"air"},
 	corsy = {"shp", "sub"},
 	armsy = {"shp", "sub"},
 	corasy = {"shp", "sub"},
@@ -80,6 +82,8 @@ factoryExitSides = {
 	armavp = 2,
 	coraap = 0,
 	armaap = 0,
+	corplat = 0,
+	armplat = 0,
 	corsy = 4,
 	armsy = 4,
 	corasy = 4,
@@ -176,10 +180,12 @@ advFactories = {
 	coralab = 1,
 	corasy = 1,
 	coraap = 1,
+	corplat = 1,
 	armavp = 1,
 	armalab = 1,
 	armasy = 1,
 	armaap = 1,
+	armplat = 1,
 }
 
 -- experimental factories
@@ -253,8 +259,10 @@ defenderList = {
 	"corspec",
 	"armfig",
 	"armhawk",
+	"armsfig",
 	"corveng",
 	"corvamp",
+	"corsfig",
 }
 
 attackerlist = {
@@ -332,6 +340,8 @@ scoutList = {
 	"armawac",
 	"corpt",
 	"armpt",
+	"corhunt",
+	"armsehak",
 }
 
 antinukeList = {
@@ -382,66 +392,6 @@ advConList = {
 	armaca = 1,
 }
 
--- these will be set to Hold Position
-holdPositionList = {
-	corthud = 1,
-	armham = 1,
-	corgol = 1,
-	cormart = 1,
-	armmart = 1,
-	cormort = 1,
-	corcrash = 1,
-	armjeth = 1,
-	armsnipe = 1,
-	corlevlr = 1,
-	corsent = 1,
-	armyork = 1,
-	corhrk = 1,
-	cormh = 1,
-	corah = 1,
-	armmanni = 1,
-	armmerl = 1,
-	armfido = 1,
-	corroy = 1,
-	armroy = 1,
-	armshock = 1,
-	armfboy = 1,
-	shiva = 1,
-	armraven = 1,
-	gorg = 1,
-}
-
--- these will be set to Roam
-roamList = {
-	corak = 1,
-	armpw = 1,
-	armfast = 1,
-	corpyro = 1,
-	corpt = 1,
-	armpt = 1,
-	corsub = 1,
-	armsub = 1,
-	marauder = 1,
-}
-
--- these will not be interrupted by watchdog checks
-dontInterruptList = {
-	"corack",
-	"corfus",
-	"coralab",
-	"coravp",
-	"corgeo",
-	"corfmd",
-	"armack",
-	"armfus",
-	"armalab",
-	"armavp",
-	"armgeo",
-	"armamd",
-	"corgant",
-	"armshltx",
-}
-
 groundFacList = {
 	corvp = 1,
 	armvp = 1,
@@ -477,7 +427,7 @@ airFacList = {
 -- if any of these is found among enemy units, torpedo launchers and sonar will be built
 subFacList = {
 	corsy = 1,
-	carmsy = 1,
+	armsy = 1,
 	corasy = 1,
 	armasy = 1,
 	csubpen = 1,
@@ -535,39 +485,24 @@ raiderDisarms = {
 	bladew = 1,
 }
 
--- these will be ignored when looking for an attack target
-unitsToIgnoreAsAttackTarget = {
-	-- no sense chasing after planes
-	corshad = 1,
-	corfink = 1,
-	corveng = 1,
-	cortitan = 1,
-	corhurc = 1,
-	corca = 1,
-	corvamp = 1,
-	corawac = 1,
-	corhunt = 1,
-	armpeep = 1,
-	armfig = 1,
-	armthund = 1,
-	armatlas = 1,
-	armlance = 1,
-	armpnix = 1,
-	armca = 1,
-	armhawk = 1,
-	blade = 1,
-	armawac = 1,
-	armsehak = 1,
-}
-
--- units in this list are bombers
-bomberList =
-{
+-- units in this list are bombers or torpedo bombers
+bomberList = {
 	corshad = 1,
 	armthund = 1,
 	corhurc = 2,
 	armpnix = 2,
 	armcybr = 3,
+	corsb = 2,
+	armsb = 2,
+	cortitan = 2,
+	armlance = 2,
+	corseap = 2,
+	armseap = 2,
+}
+
+seaplaneConList = {
+	corcsa = 1,
+	armcsa = 1,
 }
 
 -- minimum, maximum, starting point units required to attack, bomb

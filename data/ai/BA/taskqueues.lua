@@ -207,6 +207,14 @@ function IsNukeNeeded()
 	return nuke
 end
 
+function IsLandAttackNeeded()
+	return ai.areLandTargets or ai.needGroundDefense
+end
+
+function IsWaterAttackNeeded()
+	return ai.areWaterTargets or ai.needSubmergedDefense
+end
+
 function BuildMex()
 	local unitName
 	if ai.mySide == CORESideName then
@@ -345,7 +353,8 @@ function DoSomethingAdvancedForTheEconomy(self)
 	local extraE = Energy.income - Energy.usage
 	local Metal = game:GetResourceByName("Metal")
 	local extraM = Metal.income - Metal.usage
-	local isWater = unitTable[self.unit:Internal():Name()].needsWater
+	local unitName = self.unit:Internal():Name()
+	local isWater = unitTable[unitName].needsWater or seaplaneConList[unitName]
 	local unitName = DummyUnitName
 	-- maybe we need conversion?
 	if extraE > 600 and extraM < 0 and Energy.income > 2000 then
@@ -422,7 +431,7 @@ function BuildBreakthroughIfNeeded(unitName)
 	local mtype = unitTable[unitName].mtype
 	if mtype == "air" then
 		local bomberCounter = ai.bomberhandler:GetCounter()
-		if bomberCounter >= breathroughBomberCounter and bomberCounter < maxBomberCounter then
+		if bomberCounter >= breakthroughBomberCounter and bomberCounter < maxBomberCounter then
 			return unitName
 		else
 			return DummyUnitName
@@ -1161,6 +1170,14 @@ local function ConAdvAir()
 	end
 end
 
+local function ConSeaAir()
+	if ai.mySide == CORESideName then
+		return BuildWithLimitedNumber("corcsa", ConUnitPerTypeLimit)
+	else
+		return BuildWithLimitedNumber("armcsa", ConUnitPerTypeLimit)
+	end
+end
+
 local function ConShip()
 	if ai.mySide == CORESideName then
 		return BuildWithLimitedNumber("corcs", ConUnitPerTypeLimit)
@@ -1536,7 +1553,7 @@ local function BuildFloatHeavyAA(self)
 	end
 	local unitName = ""
 	if ai.mySide == CORESideName then
-		unitName = BuildAAIfNeeded("corfflak")
+		unitName = BuildAAIfNeeded("corenaa")
 	else
 		unitName = BuildAAIfNeeded("armfflak")
 	end
@@ -1557,7 +1574,6 @@ local function BuildExtraHeavyAA(self)
 end
 
 local function BuildSonar()
-	if not IsTorpedoNeeded() then return DummyUnitName end
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corsonar"
@@ -1568,7 +1584,6 @@ local function BuildSonar()
 end
 
 local function BuildAdvancedSonar()
-	if not IsTorpedoNeeded() then return DummyUnitName end
 	local unitName = ""
 	if ai.mySide == CORESideName then
 		unitName = "corason"
@@ -1658,6 +1673,17 @@ local function corDebug(self)
 end
 
 function BuildBomberIfNeeded(unitName)
+	if not IsLandAttackNeeded() then return DummyUnitName end
+	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
+	if ai.bomberhandler:GetCounter() == maxBomberCounter then
+		return DummyUnitName
+	else
+		return unitName
+	end
+end
+
+function BuildTorpedoBomberIfNeeded(unitName)
+	if not IsWaterAttackNeeded() then return DummyUnitName end
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
 	if ai.bomberhandler:GetCounter() == maxBomberCounter then
 		return DummyUnitName
@@ -1696,6 +1722,16 @@ function Lvl2Bomber()
 	return BuildBomberIfNeeded(unitName)
 end
 
+function Lvl2TorpedoBomber()
+	local unitName
+	if ai.mySide == CORESideName then
+		unitName = "cortitan"
+	else
+		unitName = "armlance"
+	end
+	return BuildTorpedoBomberIfNeeded(unitName)
+end
+
 function Lvl2Fighter()
 	local unitName
 	if ai.mySide == CORESideName then
@@ -1704,6 +1740,46 @@ function Lvl2Fighter()
 		unitName = "armhawk"
 	end
 	return BuildAAIfNeeded(unitName)
+end
+
+function SeaBomber()
+	local unitName
+	if ai.mySide == CORESideName then
+		unitName = "corsb"
+	else
+		unitName = "armsb"
+	end
+	return BuildBomberIfNeeded(unitName)
+end
+
+function SeaTorpedoBomber()
+	local unitName
+	if ai.mySide == CORESideName then
+		unitName = "corseap"
+	else
+		unitName = "armseap"
+	end
+	return BuildTorpedoBomberIfNeeded(unitName)
+end
+
+function SeaFighter()
+	local unitName
+	if ai.mySide == CORESideName then
+		unitName = "corsfig"
+	else
+		unitName = "armsfig"
+	end
+	return BuildAAIfNeeded(unitName)
+end
+
+function SeaAirRaider(self)
+	local unitName = ""
+	if ai.mySide == CORESideName then
+		unitName = "corcut"
+	else
+		unitName = "armsaber"
+	end
+	return BuildRaiderIfNeeded(unitName)
 end
 
 local function CheckMySideIfNeeded()
@@ -1825,7 +1901,12 @@ local function ScoutShip()
 	else
 		unitName = "armpt"
 	end
-	return BuildWithLimitedNumber(unitName, 1)
+	local scout = BuildWithLimitedNumber(unitName, 1)
+	if scout == DummyUnitName then
+		return BuildAAIfNeeded(unitName)
+	else
+		return unitName
+	end
 end
 
 local function ScoutAdvAir()
@@ -1834,6 +1915,16 @@ local function ScoutAdvAir()
 		unitName = "corawac"
 	else
 		unitName = "armawac"
+	end
+	return BuildWithLimitedNumber(unitName, 1)
+end
+
+local function ScoutSeaAir()
+	local unitName
+	if ai.mySide == CORESideName then
+		unitName = "corhunt"
+	else
+		unitName = "armsehak"
 	end
 	return BuildWithLimitedNumber(unitName, 1)
 end
@@ -1934,7 +2025,6 @@ local anyConShip = {
 	BuildAppropriateFactory,
 	BuildFloatHLT,
 	DoSomethingForTheEconomy,
-	BuildDepthCharge,
 }
 
 local anyAdvConUnit = {
@@ -1956,12 +2046,23 @@ local anyAdvConUnit = {
 	DoSomethingAdvancedForTheEconomy,
 }
 
+local anyConSeaplane = {
+	BuildUWMohoMex,
+	BuildFloatHeavyAA,
+	BuildUWFusion,
+	BuildAdvancedSonar,
+	BuildHeavyTorpedo,
+	BuildAppropriateFactory,
+	DoSomethingAdvancedForTheEconomy,
+}
+
 local anyAdvConSub = {
 	BuildUWMohoMex,
 	BuildFloatHeavyAA,
 	BuildUWFusion,
 	BuildAdvancedSonar,
 	BuildHeavyTorpedo,
+	DoSomethingAdvancedForTheEconomy,
 }
 
 local anyNavalEngineer = {
@@ -2078,11 +2179,21 @@ local anyLvl2BotLab = {
 
 local anyLvl2AirPlant = {
 	Lvl2Bomber,
+	Lvl2TorpedoBomber,
 	ConAdvAir,
 	ScoutAdvAir,
 	Lvl2Fighter,
 	Lvl2AirRaider,
 	MegaAircraft,
+}
+
+local anySeaplanePlatform = {
+	SeaBomber,
+	SeaTorpedoBomber,
+	ConSeaAir,
+	ScoutSeaAir,
+	SeaFighter,
+	SeaAirRaider,
 }
 
 local anyLvl2ShipYard = {
@@ -2192,6 +2303,8 @@ taskqueues = {
 	armacv = anyAdvConUnit,
 	coraca = anyAdvConUnit,
 	armaca = anyAdvConUnit,
+	corcsa = anyConSeaplane,
+	armcsa = anyConSeaplane,
 	corcs = anyConShip,
 	armcs = anyConShip,
 	coracsub = anyAdvConSub,
@@ -2212,10 +2325,14 @@ taskqueues = {
 	armhp = anyHoverPlatform,
 	corfhp = anyHoverPlatform,
 	armfhp = anyHoverPlatform,
+	csubpen = anyAmphibiousComplex,
+	asubpen = anyAmphibiousComplex,
 	armalab = anyLvl2BotLab,
 	armavp = anyLvl2VehPlant,
 	coraap = anyLvl2AirPlant,
 	armaap = anyLvl2AirPlant,
+	corplat = anySeaplanePlatform,
+	armplat = anySeaplanePlatform,
 	corsy = anyLvl1ShipYard,
 	armsy = anyLvl1ShipYard,
 	corasy = anyLvl2ShipYard,
