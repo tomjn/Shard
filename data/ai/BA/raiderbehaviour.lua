@@ -10,7 +10,6 @@ end
 
 local CMD_IDLEMODE = 145
 local CMD_MOVE_STATE = 50
-local MOVESTATE_HOLDPOS = 0
 local MOVESTATE_ROAM = 2
 
 function IsRaider(unit)
@@ -171,20 +170,13 @@ function RaiderBehaviour:Update()
 	end
 end
 
+-- set all raiders to roam
 function RaiderBehaviour:SetMoveState()
 	local thisUnit = self.unit
 	if thisUnit then
-		local unitName = thisUnit:Internal():Name()
-		if holdPositionList[unitName] then
-			local floats = api.vectorFloat()
-			floats:push_back(MOVESTATE_HOLDPOS)
-			thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
-		end
-		if roamList[unitName] then
-			local floats = api.vectorFloat()
-			floats:push_back(MOVESTATE_ROAM)
-			thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
-		end
+		local floats = api.vectorFloat()
+		floats:push_back(MOVESTATE_ROAM)
+		thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
 		if self.mtype == "air" then
 			local floats = api.vectorFloat()
 			floats:push_back(1)

@@ -21,7 +21,6 @@ require "common"
 behaviours = {
 	corcrw = {
 		RaiderBehaviour,
-		DefendBehaviour,
 		CountBehaviour,
 	}
 }

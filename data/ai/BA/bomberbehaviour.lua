@@ -14,6 +14,11 @@ function BomberBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
+	if unitTable[self.name].submergedRange > 0 then
+		self.weapon = "torpedo"
+	else
+		self.weapon = "bomb"
+	end
 end
 
 function BomberBehaviour:UnitBuilt(unit)

@@ -10,6 +10,9 @@ local function EchoDebug(inStr)
 	end
 end
 
+local CMD_MOVE_STATE = 50
+local MOVESTATE_HOLDPOS = 0
+
 function ExitFactoryBehaviour:Init()
 end
 
@@ -19,6 +22,9 @@ function ExitFactoryBehaviour:UnitCreated(unit)
 		self.initialPosition = self.unit:Internal():GetPosition()
 		self.id = self.unit:Internal():ID()
 		self.repairedBy = ai.buildsitehandler:ResurrectionRepairedBy(self.id)
+		if self.repairedBy then
+			self:SetMoveState()
+		end
 		self.unit:ElectBehaviour()
 	end
 end
@@ -81,6 +87,7 @@ function ExitFactoryBehaviour:Activate()
 	self.active = true
 	if self.repairedBy then
 		-- stay here
+
 	else
 		local u = self.unit:Internal()
 		local pos = u:GetPosition()
@@ -111,5 +118,15 @@ end
 function ExitFactoryBehaviour:UnitDead(unit)
 	if unit.engineID == self.unit.engineID then
 		ai.buildsitehandler:RemoveResurrectionRepairedBy(self.id)
+	end
+end
+
+-- set to hold position while being repaired after resurrect
+function ExitFactoryBehaviour:SetMoveState()
+	local thisUnit = self.unit
+	if thisUnit then
+		local floats = api.vectorFloat()
+		floats:push_back(MOVESTATE_HOLDPOS)
+		thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
 	end
 end

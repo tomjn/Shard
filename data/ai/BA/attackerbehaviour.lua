@@ -10,6 +10,7 @@ end
 
 local CMD_MOVE_STATE = 50
 local MOVESTATE_HOLDPOS = 0
+local MOVESTATE_MANEUVER = 1
 local MOVESTATE_ROAM = 2
 
 function IsAttacker(unit)
@@ -134,11 +135,12 @@ end
 
 function AttackerBehaviour:Activate()
 	self.active = true
+	self:SetMoveState()
 	if self.target then
 		if self.congregating then
 			self.unit:Internal():Move(self.target)
 		else
-			self.unit:Internal():MoveAndFire(self.target)
+			self.unit:Internal():Move(self.target)
 		end
 	end
 end
@@ -156,21 +158,23 @@ function AttackerBehaviour:Update()
 	end
 end
 
--- this will issue Hold Pos order to units that need it
+-- this will issue the correct move state to all units
 function AttackerBehaviour:SetMoveState()
 	local thisUnit = self.unit
 	if thisUnit then
 		local unitName = self.name
-		if holdPositionList[unitName] then
-			local floats = api.vectorFloat()
-			floats:push_back(MOVESTATE_HOLDPOS)
-			thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
-		end
-		if roamList[unitName] then
+		if battleList[unitName] then
 			local floats = api.vectorFloat()
 			floats:push_back(MOVESTATE_ROAM)
 			thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
-			
+		elseif breakthroughList[unitName] then
+			local floats = api.vectorFloat()
+			floats:push_back(MOVESTATE_MANEUVER)
+			thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
+		else
+			local floats = api.vectorFloat()
+			floats:push_back(MOVESTATE_HOLDPOS)
+			thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
 		end
 	end
 end

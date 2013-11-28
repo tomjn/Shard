@@ -442,22 +442,14 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		end
 	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
 		-- build factories next to a nano turret near you
-		EchoDebug("looking for nano to build factory next to")
-		local nano = ai.buildsitehandler:ClosestNanoTurret(builder, 3000)
-		if nano ~= nil then
-			local nanoPos = nano:GetPosition()
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, nanoPos, utype)
-		end
-		if p == nil then
-			EchoDebug("no nano found for factory, trying a turtle position")
-			local turtlePos = ai.turtlehandler:MostTurtled(builder)
-			if turtlePos then
-				p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
-			else
-				EchoDebug("no turtle position found, building wherever")
-				local builderPos = builder:GetPosition()
-				p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
-			end
+		EchoDebug("looking for most turtled position for factory")
+		local turtlePos = ai.turtlehandler:MostTurtled(builder)
+		if turtlePos then
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+		else
+			EchoDebug("no turtle position found, building wherever")
+			local builderPos = builder:GetPosition()
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 		end
 	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or unitTable[value].radarRadius ~= 0 or unitTable[value].sonarRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value] and not littlePlasmaList[value]) then
 		-- shields, defense, antinukes, jammer towers, radar, and sonar

@@ -28,11 +28,14 @@ end
 function DefendBehaviour:Init()
 	self.active = false
 	self.name = self.unit:Internal():Name()
+	self.mtype = unitTable[self.name].mtype
 	for i, name in pairs(raiderList) do
 		if name == self.name then
 			EchoDebug(self.name .. " is scramble")
 			self.scramble = true
-			ai.defendhandler:AddScramble(self)
+			if self.mtype ~= "air" then
+				ai.defendhandler:AddScramble(self)
+			end
 			break
 		end
 	end
@@ -149,7 +152,7 @@ function DefendBehaviour:Deactivate()
 end
 
 function DefendBehaviour:Priority()
-	if self.scramble then
+	if self.scramble and self.mtype ~= "air" then
 		if self.scrambled then
 			return 110
 		else
@@ -160,7 +163,7 @@ function DefendBehaviour:Priority()
 	end
 end
 
--- this will issue Raom to all defenders
+-- set all defenders to roam
 function DefendBehaviour:SetMoveState()
 	local thisUnit = self.unit
 	if thisUnit then
