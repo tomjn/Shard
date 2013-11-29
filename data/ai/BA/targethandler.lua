@@ -97,7 +97,7 @@ local function NewCell(px, pz)
 	return newcell
 end
 
-local function ThreatRange(unitName, groundAirSubmerged)
+local function ThreatRange(unitName, groundAirSubmerged, enemy)
 	if antinukeList[unitName] or nukeList[unitName] or bigPlasmaList[unitName] or shieldList[unitName] then
 		return 0, 0
 	end
@@ -113,7 +113,7 @@ local function ThreatRange(unitName, groundAirSubmerged)
 	end
 	local threat = 0
 	local range = 0
-	if groundAirSubmerged == "ground" and utable.mtype ~= "air" then -- air units ignored because they move too fast for their position to matter for ground threat calculations
+	if groundAirSubmerged == "ground" and (utable.mtype ~= "air" or not enemy) then -- air units ignored because they move too fast for their position to matter for ground threat calculations. however our own air units need to count
 		range = utable.groundRange
 	elseif groundAirSubmerged == "air" then
 		range = utable.airRange
@@ -461,6 +461,7 @@ local function UpdateDangers()
 			danger.obsolesce = f + danger.duration
 			danger.count = 0
 			danger.alreadyCounted = {}
+			EchoDebug(layer .. " danger present")
 		elseif danger.present and f >= danger.obsolesce then
 			EchoDebug(layer .. " obsolete")
 			danger.present = false
@@ -525,7 +526,7 @@ local function UpdateEnemies()
 					table.insert(ai.enemyMexSpots, { position = pos, unit = e })
 				end
 				for i, groundAirSubmerged in pairs(threatTypes) do
-					local threat, range = ThreatRange(name, groundAirSubmerged)
+					local threat, range = ThreatRange(name, groundAirSubmerged, true)
 					-- EchoDebug(name .. " " .. groundAirSubmerged .. " " .. threat .. " " .. range)
 					if threat ~= 0 then
 						FillCircle(px, pz, range, groundAirSubmerged, threat)
@@ -694,7 +695,8 @@ local function UpdateWrecks()
 				cell.metal = cell.metal + ftable.metal
 				cell.energy = cell.energy + ftable.energy
 				if ftable.unitName ~= nil then
-					if unitTable[ftable.unitName].isWeapon then
+					local rut = unitTable[ftable.unitName]
+					if rut.isWeapon or rut.extractsMetal > 0 then
 						table.insert(cell.resurrectables, w)
 					end
 				end
@@ -854,7 +856,6 @@ function TargetHandler:GetBestRaidCell(representative)
 	local rthreat, rrange = ThreatRange(rname)
 	EchoDebug(rname .. ": " .. rthreat .. " " .. rrange)
 	if rthreat > maxThreat then maxThreat = rthreat end
-	if rname == "corcrw" then maxThreat = maxThreat * 5 end
 	local best
 	local bestDist = 99999
 	for i, cell in pairs(cellList) do

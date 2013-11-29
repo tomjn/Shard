@@ -152,14 +152,14 @@ function DefendBehaviour:Deactivate()
 end
 
 function DefendBehaviour:Priority()
-	if self.scramble and self.mtype ~= "air" then
+	if self.scramble then
 		if self.scrambled then
 			return 110
 		else
 			return 0
 		end
 	else
-		return 50
+		return 40
 	end
 end
 

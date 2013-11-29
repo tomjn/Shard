@@ -217,7 +217,9 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 			end
 		end
 		if not enough and (ground or air or submerged) and important then
-			isLocal = ai.maphandler:CheckDefenseLocalization(unitName, turtle.position)
+			-- isLocal = ai.maphandler:CheckDefenseLocalization(unitName, turtle.position)
+			-- this isn't that useful, and causes problems on some maps
+			isLocal = true
 		end
 		if not enough and isLocal and important then
 			local okay = ai.maphandler:UnitCanGoHere(builder, turtle.position) 

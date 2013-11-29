@@ -474,6 +474,7 @@ raiderList = {
 	"bladew",
 	"corape",
 	"corcut",
+	"corcrw",
 	-- subs
 	"corsub",
 	"armsub",

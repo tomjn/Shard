@@ -592,7 +592,7 @@ function TaskQueueBehaviour:ProgressQueue()
 			if value ~= DummyUnitName then
 				EchoDebug(self.name .. " filtering...")
 				value = DuplicateFilter(builder, value)
-				value = LandWaterFilter(builder, value)
+				-- value = LandWaterFilter(builder, value)
 				value = self:CategoryEconFilter(value)
 				EchoDebug(value .. " after filters")
 			end
