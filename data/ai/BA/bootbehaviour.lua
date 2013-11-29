@@ -19,15 +19,10 @@ function BootBehaviour:Init()
 	self.mobile = not unitTable[self.name].isBuilding
 	self.mtype = unitTable[self.name].mtype
 	self.lastInFactoryCheck = game:Frame()
-	self:FindMyFactory()
-	self.repairedBy = ai.buildsitehandler:ResurrectionRepairedBy(self.id)
-	if self.repairedBy or self.factory then
-		if not self.repairedBy and (self.mtype == "air" or commanderList[self.name]) then
-			-- air units and commanders don't need to leave the factory
-		else
-			self.fresh = true
-		end
-	end
+	BootBehaviour = ai.buildsitehandler:ResurrectionRepairedBy(self.id)
+	-- air units don't need to leave the factory
+	self.ignoreFactories = self.mtype == "air" or not self.mobile
+	if not self.ignoreFactories then self:FindMyFactory() end
 	self.unit:ElectBehaviour()
 end
 
@@ -41,7 +36,10 @@ end
 
 function BootBehaviour:UnitDead(unit)
 	if unit.engineID == self.unit.engineID then
-		self.fresh = nil
+		self.factory = nil
+		self.repairedBy:ResurrectionComplete()
+		ai.buildsitehandler:RemoveResurrectionRepairedBy(self.id)
+		self.repairedBy = nil
 	end
 end
 
@@ -49,28 +47,26 @@ function BootBehaviour:Update()
 	local f = game:Frame()
 
 	if self.repairedBy then
-		if self.fresh then
-			if f % 30 == 0 then
-				if self.unit:Internal():GetHealth() == self.unit:Internal():GetMaxHealth() then
-					self.fresh = nil
-					self.repairedBy:ResurrectionComplete()
-					self.unit:ElectBehaviour()
-				end
+		if f % 30 == 0 then
+			if self.unit:Internal():GetHealth() == self.unit:Internal():GetMaxHealth() then
+				self.repairedBy:ResurrectionComplete()
+				self.repairedBy = nil
+				self.unit:ElectBehaviour()
 			end
 		end
 		return
 	end
 
-	if not self.mobile then return end
+	if self.ignoreFactories then return end
 
-	if self.fresh then
+	if self.factory then
 		if f % 30 == 0 then
 			local u = self.unit:Internal()
 			if not u:IsBeingBuilt() then
 				local pos = u:GetPosition()
 				-- EchoDebug(pos.x .. " " .. pos.z .. " " .. self.factory.exitRect.x1 .. " " .. self.factory.exitRect.z1 .. " " .. self.factory.exitRect.x2 .. " " .. self.factory.exitRect.z2)
 				if not PositionWithinRect(pos, self.factory.exitRect) then
-					self.fresh = nil
+					self.factory = nil
 					self.unit:ElectBehaviour()
 				elseif self.active and self.lastOrderFrame and self.lastExitSide then
 					-- fifteen seconds after the first attempt, try a different side
@@ -101,17 +97,15 @@ function BootBehaviour:Update()
 	else
 		if f > self.lastInFactoryCheck + 150 then
 			-- units (especially construction units) can still get stuck in factories long after they're built
+			self.lastInFactoryCheck = f
 			local u = self.unit:Internal()
 			if not u:IsBeingBuilt() then
 				self:FindMyFactory()
 				if self.factory then
 					EchoDebug(self.name .. " is in a factory")
-					self.fresh = true
 					self.unit:ElectBehaviour()
-					return
 				end
 			end
-			self.lastInFactoryCheck = f
 		end
 	end
 end
@@ -121,7 +115,7 @@ function BootBehaviour:Activate()
 	self.active = true
 	if self.repairedBy then
 		self:SetMoveState()
-	else
+	elseif self.factory then
 		self:ExitFactory("south")
 	end
 end
@@ -132,16 +126,10 @@ function BootBehaviour:Deactivate()
 end
 
 function BootBehaviour:Priority()
-	if self.fresh and self.mobile then
+	if self.factory or (self.repairedBy and self.mobile) then
 		return 120
 	else
 		return 0
-	end
-end
-
-function BootBehaviour:UnitDead(unit)
-	if unit.engineID == self.unit.engineID then
-		ai.buildsitehandler:RemoveResurrectionRepairedBy(self.id)
 	end
 end
 
