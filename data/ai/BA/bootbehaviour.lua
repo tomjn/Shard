@@ -19,7 +19,7 @@ function BootBehaviour:Init()
 	self.mobile = not unitTable[self.name].isBuilding
 	self.mtype = unitTable[self.name].mtype
 	self.lastInFactoryCheck = game:Frame()
-	BootBehaviour = ai.buildsitehandler:ResurrectionRepairedBy(self.id)
+	self.repairedBy = ai.buildsitehandler:ResurrectionRepairedBy(self.id)
 	-- air units don't need to leave the factory
 	self.ignoreFactories = self.mtype == "air" or not self.mobile
 	if not self.ignoreFactories then self:FindMyFactory() end
@@ -37,7 +37,7 @@ end
 function BootBehaviour:UnitDead(unit)
 	if unit.engineID == self.unit.engineID then
 		self.factory = nil
-		self.repairedBy:ResurrectionComplete()
+		if self.repairedBy then self.repairedBy:ResurrectionComplete() end
 		ai.buildsitehandler:RemoveResurrectionRepairedBy(self.id)
 		self.repairedBy = nil
 	end
