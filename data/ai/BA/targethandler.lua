@@ -728,11 +728,14 @@ end
 
 function TargetHandler:UnitDamaged(unit, attacker)
 	-- even if the attacker can't be seen, human players know what weapons look like
+	-- but attacker is nil if it's an enemy unit, so this is useless
+	--[[
 	if attacker ~= nil then
 		local attackerName = attacker:Name()
 		local attackerID = attacker:ID()
 		DangerCheck(attackerName, attackerID)
 	end
+	]]--
 end
 
 function TargetHandler:Init()
@@ -884,7 +887,7 @@ function TargetHandler:GetBestAttackCell(representative)
 	local bestThreatCell
 	local bestThreat = 0
 	local name = representative:Name()
-	local longrange = unitTable[name].groundRange > 650
+	local longrange = unitTable[name].groundRange > 1000
 	local mtype = unitTable[name].mtype
 	if mtype ~= "sub" and longrange then longrange = true end
 	for i, cell in pairs(cellList) do

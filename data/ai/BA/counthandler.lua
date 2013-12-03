@@ -1,6 +1,6 @@
 require "common"
 
-local DebugEnabled = false
+local DebugEnabled = true
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -43,5 +43,21 @@ end
 function CountHandler:InitializeNameCounts()
 	for name, t in pairs(unitTable) do
 		ai.nameCount[name] = 0
+	end
+end
+
+function CountHandler:UnitDamaged(unit, attacker)
+	local aname = "nil"
+	if attacker then 
+		if attacker:Team() ~= game:GetTeamID() then
+			EchoDebug(unit:Name() .. " on team " .. unit:Team() .. " damaged by " .. attacker:Name() .. " on team " .. attacker:Team())
+		end
+	end
+end
+
+function CountHandler:UnitDead(unit)
+	EchoDebug(unit:Name() .. " on team " .. unit:Team() .. " dead")
+	if unit:Team() ~= game:GetTeamID() then
+		EchoDebug("enemy unit died")
 	end
 end

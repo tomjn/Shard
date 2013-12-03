@@ -1,4 +1,3 @@
-
 require "common"
 
 local DebugEnabled = false
@@ -49,9 +48,9 @@ function TurtleHandler:UnitBuilt(unit)
 		local upos = unit:GetPosition()
 		local uid = unit:ID()
 		if turtleList[un] then
-			self:AddTurtle(upos, uid, turtleList[un])
+			self:AddTurtle(upos, uid, turtleList[un], ut.needsWater)
 		elseif ut.buildOptions then
-			self:AddTurtle(upos, uid, factoryPriority + ut.techLevel)
+			self:AddTurtle(upos, uid, factoryPriority + ut.techLevel, ut.needsWater)
 		elseif ut.isWeapon and not antinukeList[un] and not nukeList[un] and not bigPlasmaList[un] then
 			self:AddDefense(upos, uid, un)
 		elseif antinukeList[un] then
@@ -102,10 +101,10 @@ function TurtleHandler:Detach(turtle, shell)
 	self.totalPriority = self.totalPriority - priorityAddition
 end
 
-function TurtleHandler:AddTurtle(position, uid, priority)
+function TurtleHandler:AddTurtle(position, uid, priority, water)
 	local nameLimit = 1
 	if priority > factoryPriority then nameLimit = 2 end
-	local turtle = {position = position, uid = uid, nameCounts = {}, nameLimit = nameLimit, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
+	local turtle = {position = position, uid = uid, water = water, nameCounts = {}, nameLimit = nameLimit, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
 	for i, shell in pairs(self.shells) do
 		local dist = Distance(position, shell.position)
 		if dist < shell.radius then
@@ -149,11 +148,23 @@ end
 
 function TurtleHandler:AddShell(position, uid, uname, value, layer, radius)
 	local shell = {position = position, uid = uid, uname = uname, value = value, layer = layer, radius = radius, attachments = {}}
+	local nearestDist = radius * 3
+	local nearestTurtle
+	local attached = false
 	for i, turtle in pairs(self.turtles) do
 		local dist = Distance(position, turtle.position)
 		if dist < radius then
 			self:Attach(turtle, shell)
+			attached = true
 		end
+		if not attached and dist < nearestDist then
+			nearestDist = dist
+			nearestTurtle = turtle
+		end
+	end
+	-- if nothing is close enough, attach to the nearest turtle, so that we don't end up building infinite laser towers at the same turtle
+	if not attached and nearestTurtle then
+		self:Attach(nearestTurtle, shell)
 	end
 	table.insert(self.shells, shell)
 end
@@ -217,9 +228,8 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 			end
 		end
 		if not enough and (ground or air or submerged) and important then
-			-- isLocal = ai.maphandler:CheckDefenseLocalization(unitName, turtle.position)
-			-- this isn't that useful, and causes problems on some maps
-			isLocal = true
+			-- don't build land shells on water turtles or water shells on land turtles
+			isLocal = unitTable[unitName].needsWater == turtle.water
 		end
 		if not enough and isLocal and important then
 			local okay = ai.maphandler:UnitCanGoHere(builder, turtle.position) 
