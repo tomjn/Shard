@@ -1,6 +1,6 @@
 require "common"
 
-local DebugEnabled = true
+local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then

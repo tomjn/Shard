@@ -44,9 +44,9 @@ mobilityEffeciencyMultiplier = {
 	shp = 1,
 	bot = 0.9,
 	sub = 0.9,
-	hov = 0.8,
-	amp = 0.65,
-	air = 0.5,
+	hov = 0.75,
+	amp = 0.5,
+	air = 0.55,
 }
 
 -- for calculating what factories to build

@@ -313,8 +313,8 @@ function TaskQueueBehaviour:GetHelp(value, position)
 			return value
 		end
 	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
-		if ai.factories == 0 then
-			EchoDebug("first factory can get help but doesn't need it")
+		if ai.factories - ai.outmodedFactories <= 0 or advFactories[value] then
+			EchoDebug("can get help to build factory but don't need it")
 			ai.assisthandler:Summon(builder, position)
 			ai.assisthandler:Magnetize(builder, position)
 			return value
@@ -499,7 +499,18 @@ function TaskQueueBehaviour:BestFactory()
 						if mtype == "air" or ai.mobRating[mtype] > ai.mobilityRatingFloor then
 							local network = ai.maphandler:MobilityNetworkHere(mtype, p)
 							if ai.scoutSpots[mtype][network] then
-								local numberOfSpots = #ai.scoutSpots[mtype][network]
+								local numberOfSpots
+								if mtype == "air" then
+									if factoryName == "armplat" or factoryName == "corplat" then
+										-- seaplanes can only build on UW metal
+										numberOfSpots = #ai.UWMetalSpots
+									else
+										-- other aircraft can only build land metal spots and geospots
+										numberOfSpots = #ai.landMetalSpots + #ai.geoSpots
+									end
+								else
+									numberOfSpots = #ai.scoutSpots[mtype][network]
+								end
 								if numberOfSpots > 5 then
 									local dist = Distance(builderPos, p)
 									local spotPercentage = numberOfSpots / #ai.scoutSpots["air"][1]

@@ -51,17 +51,6 @@ local function MapHasWater()
 	return (ai.waterMap or ai.hasUWSpots) or false
 end
 
-function MapLandType()
-	if ai ~= nil then
-		if ai.mapMobType ~= nil then
-			EchoDebug(ai.mapMobType)
-			return ai.mapMobType
-		else
-			game:SendToConsole("map has no land type!") -- if this happens, i've clearly done something wrong
-		end
-	end
-end
-
 local function CheckMySide(self)
 	-- fix: moved here so map object is present when it's accessed
 	ConUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)
@@ -1947,7 +1936,6 @@ local anyCommander = {
 	BuildRadar,
 	BuildSonar,
 	BuildLightAA,
-	BuildDepthCharge,
 	DoSomethingForTheEconomy,
 }
 
@@ -1991,7 +1979,6 @@ local anyConAmphibious = {
 	TidalIfTidal,
 	BuildFloatHLT,
 	DoSomethingForTheEconomy,
-	BuildDepthCharge,
 }
 
 local anyConShip = {

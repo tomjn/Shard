@@ -12,7 +12,8 @@ local debugSquares = {}
 local debugPlotFile
 
 -- mobTypes = {}
-mobUnitType = {}
+local mobUnitType = {}
+local UWMetalSpotCheckUnitType
 
 local mobMap = {}
 local savepositions = {}
@@ -269,6 +270,16 @@ local function MapSpotMobility(metals, geos)
 			spots = geos
 		end
 		for i, spot in pairs(spots) do
+			local landOrWater
+			if metalOrGeo == 1 then
+				if game.map:CanBuildHere(UWMetalSpotCheckUnitType, spot) then
+					table.insert(ai.UWMetalSpots, spot)
+					landOrWater = 2
+				else
+					table.insert(ai.landMetalSpots, spot)
+					landOrWater = 1
+				end
+			end
 			local x = math.ceil(spot.x / ai.mobilityGridSize)
 			local z = math.ceil(spot.z / ai.mobilityGridSize)
 			for mtype, utype in pairs(mobUnitType) do
@@ -289,7 +300,13 @@ local function MapSpotMobility(metals, geos)
 						mobNetworkCount[mtype][thisNetwork] = mobNetworkCount[mtype][thisNetwork] + 1
 					end
 					table.insert(mobSpots[mtype], {x = x, z = z})
-					if metalOrGeo == 1 then table.insert(mobNetworkMetals[mtype][thisNetwork], spot) end
+					if metalOrGeo == 1 then
+						if landOrWater == 1 and mtype ~= "sub" and mtype ~= "shp" then
+							table.insert(mobNetworkMetals[mtype][thisNetwork], spot)
+						elseif landOrWater == 2 and mtype ~= "veh" and mtype ~= "bot" then
+							table.insert(mobNetworkMetals[mtype][thisNetwork], spot)
+						end
+					end
 					if ai.scoutSpots[mtype][thisNetwork] == nil then ai.scoutSpots[mtype][thisNetwork] = {} end
 					table.insert(ai.scoutSpots[mtype][thisNetwork], spot)
 				end
@@ -403,7 +420,6 @@ function MapHandler:SaveMapData()
 	EchoData("ai.waterMap", ai.waterMap)
 	EchoData("ai.mapHasGeothermal", ai.mapHasGeothermal)
 	EchoData("ai.mobilityRatingFloor", ai.mobilityRatingFloor)
-	EchoData("ai.mapMobType", ai.mapMobType)
 	EchoData("ai.hasUWSpots", ai.hasUWSpots)
 	EchoData("ai.mobilityGridSizeHalf", ai.mobilityGridSizeHalf)
 	EchoData("ai.mobilityGridArea", ai.mobilityGridArea)
@@ -411,6 +427,9 @@ function MapHandler:SaveMapData()
 	EchoData("ai.mobCount", ai.mobCount)
 	EchoData("ai.mobNetworks", ai.mobNetworks)
 	EchoData("ai.networkSize", ai.networkSize)
+	EchoData("ai.landMetalSpots", ai.landMetalSpots)
+	EchoData("ai.UWMetalSpots", ai.UWMetalSpots)
+	EchoData("ai.geoSpots", ai.geoSpots)
 	EchoData("ai.startLocations", ai.startLocations)
 	EchoData("ai.mobNetworkMetals", ai.mobNetworkMetals)
 	EchoData("ai.scoutSpots", ai.scoutSpots)
@@ -463,6 +482,7 @@ function MapHandler:Init()
 	for mtype, uname in pairs(mobUnitName) do
 		mobUnitType[mtype] = game:GetTypeByName(uname)
 	end
+	UWMetalSpotCheckUnitType = game:GetTypeByName(UWMetalSpotCheckUnit)
 
 	local totalCount, maxX, maxZ, mobCount = MapMobility()
 	ai.mobilityGridMaxX = maxX
@@ -496,13 +516,16 @@ function MapHandler:Init()
 	for _, feature in pairs(tmpFeatures) do
 		if feature then
 			tmpName = feature:Name()
-			if string.find(tmpName, "geo") then
+			if tmpName == "geovent" then
 				ai.mapHasGeothermal = true
 				table.insert(geoSpots, feature:GetPosition())
 			end
 		end
 	end
+	ai.geoSpots = geoSpots
 
+	ai.UWMetalSpots = {}
+	ai.landMetalSpots = {}
 	local mobSpots, mobNetworks, mobNetworkCount
 	mobSpots, ai.mobNetworkMetals, mobNetworks, mobNetworkCount = MapSpotMobility(metalSpots, geoSpots)
 	ai.mobNetworks = mobNetworks
@@ -516,6 +539,7 @@ function MapHandler:Init()
 			EchoDebug("network #" .. n .. " has " .. count .. " spots and " .. ai.networkSize[mtype][n] .. " grids")
 		end
 	end
+
 
 	-- deciding what kind of map it is
 	local maxSpots = 0
@@ -557,21 +581,6 @@ function MapHandler:Init()
 	local avgRating = totalRating / numberOfRatings
 	local ratingFloor = avgRating * 0.65
 	ai.mobilityRatingFloor = ratingFloor
-	EchoDebug("average rating: " .. avgRating)
-	if mobRating["veh"] > ratingFloor and mobRating["veh"] > mobRating["bot"] - 5 then
-		ai.mapMobType = "veh"
-	elseif mobRating["bot"] > ratingFloor then
-		ai.mapMobType = "bot"
-	elseif mobRating["shp"] > ratingFloor then
-		ai.mapMobType = "shp"
-	elseif mobRating["hov"] > ratingFloor then
-		ai.mapMobType = "hov"
-	elseif mobRating["amp"] > ratingFloor then
-		ai.mapMobType = "amp"
-	else
-		ai.mapMobType = "air"
-	end
-	EchoDebug("MapHandler: " .. ai.mapMobType .. " map detected")
 
 	ai.mobRating = mobRating
 
@@ -601,9 +610,6 @@ function MapHandler:Init()
 			end
 		end
 	end
-
-	-- initialize factory lists
-	InitializeFactoryLists()
 
 	if DebugEnabled then debugPlotFile:close() end
 
