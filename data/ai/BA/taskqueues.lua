@@ -1456,6 +1456,19 @@ local function BuildLightTorpedo(self)
 	return BuildTorpedoIfNeeded(unitName)
 end
 
+local function BuildPopTorpedo(self)
+	if self.unit == nil then
+		return DummyUnitName
+	end
+	local unitName = ""
+	if ai.mySide == CORESideName then
+		unitName = "corptl"
+	else
+		unitName = "armptl"
+	end
+	return BuildTorpedoIfNeeded(unitName)
+end
+
 local function BuildHeavyTorpedo(self)
 	if self.unit == nil then
 		return DummyUnitName
@@ -1931,12 +1944,13 @@ local anyCommander = {
 	BuildMex,
 	BuildAppropriateFactory,
 	WindSolar,
-	TidalIfTidal,
 	BuildLLT,
 	BuildRadar,
-	BuildSonar,
 	BuildLightAA,
 	DoSomethingForTheEconomy,
+	TidalIfTidal,
+	BuildPopTorpedo,
+	BuildSonar,
 }
 
 local anyConUnit = {
@@ -1971,10 +1985,9 @@ local anyConAmphibious = {
 	DoSomethingForTheEconomy,
 	BuildHeavyishAA,
 	BuildMex,
-	BuildLightTorpedo,
+	BuildPopTorpedo,
 	BuildFloatLightAA,
 	BuildSonar,
-	BuildLightTorpedo,
 	BuildFloatRadar,
 	TidalIfTidal,
 	BuildFloatHLT,

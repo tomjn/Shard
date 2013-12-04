@@ -471,14 +471,14 @@ function TaskQueueBehaviour:BestFactory()
 			local buildMe = true
 			local isAdvanced = advFactories[factoryName]
 			local isExperimental = expFactories[factoryName] or leadsToExpFactories[factoryName]
-			if ai.needAdvanced then
+			if ai.needAdvanced and not ai.haveAdvFactory then
 				if not isAdvanced then buildMe = false end
-			else
+			elseif not ai.needAdvanced then
 				if isAdvanced then buildMe = false end
 			end
-			if ai.needExperimental then
+			if ai.needExperimental and not ai.haveExpFactory then
 				if not isExperimental then buildMe = false end
-			else
+			elseif not ai.needExperimental then
 				if expFactories[factoryName] then buildMe = false end
 			end
 			if buildMe and ai.nameCount[factoryName] == 0 then
@@ -539,7 +539,7 @@ function TaskQueueBehaviour:GetQueue()
 	-- fall back to only making enough construction units if a level 2 factory exists
 	local got = false
 	if wateryTaskqueues[self.name] ~= nil then
-		if ai.mobRating["shp"] > ai.mobRating["veh"] * 0.5 then
+		if ai.mobRating["shp"] * 0.5 > ai.mobRating["veh"] then
 			q = wateryTaskqueues[self.name]
 			got = true
 		end

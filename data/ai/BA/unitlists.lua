@@ -45,7 +45,7 @@ mobilityEffeciencyMultiplier = {
 	bot = 0.9,
 	sub = 0.9,
 	hov = 0.75,
-	amp = 0.5,
+	amp = 0.4,
 	air = 0.55,
 }
 
