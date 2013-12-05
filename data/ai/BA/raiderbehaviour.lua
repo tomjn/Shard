@@ -57,7 +57,8 @@ function RaiderBehaviour:UnitIdle(unit)
 	end
 end
 
-function RaiderBehaviour:RaidCell(cell, mtype)
+function RaiderBehaviour:RaidCell(cell)
+	EchoDebug(self.name .. " raiding cell...")
 	if self.unit == nil then
 		EchoDebug("no raider unit to raid cell with!")
 		-- ai.raidhandler:RemoveRecruit(self)
@@ -66,17 +67,18 @@ function RaiderBehaviour:RaidCell(cell, mtype)
 		-- ai.raidhandler:RemoveRecruit(self)
 	else
 		local utable = unitTable[self.name]
-		if mtype == "sub" then
+		if self.mtype == "sub" then
 			range = utable.submergedRange
 		else
 			range = utable.groundRange
 		end
 		self.target = RandomAway(cell.pos, range * 0.5)
-		if mtype == "air" then
+		if self.mtype == "air" then
+			EchoDebug("air raid target: " .. tostring(self.unitTarget))
 			self.unitTarget = cell.airTarget
 		end
 		if self.active then
-			if mtype == "air" then
+			if self.mtype == "air" then
 				if self.unitTarget ~= nil then
 					self.unit:Internal():Attack(self.unitTarget)
 				end
@@ -98,6 +100,7 @@ function RaiderBehaviour:Priority()
 end
 
 function RaiderBehaviour:Activate()
+	EchoDebug(self.name .. " active")
 	self.active = true
 	if self.target then
 		if self.mtype == "air" then
@@ -111,6 +114,7 @@ function RaiderBehaviour:Activate()
 end
 
 function RaiderBehaviour:Deactivate()
+	EchoDebug(self.name .. " inactive")
 	self.active = false
 	self.target = nil
 end
@@ -122,7 +126,9 @@ function RaiderBehaviour:Update()
 		if math.mod(f, 89) == 0 then
 			local unit = self.unit:Internal()
 			local bestCell = ai.targethandler:GetBestRaidCell(unit)
+			EchoDebug(self.name .. " targetting...")
 			if bestCell then
+				EchoDebug(self.name .. " got target")
 				self:RaidCell(bestCell)
 			else
 				self.target = nil
@@ -145,15 +151,15 @@ function RaiderBehaviour:Update()
 				if self.target ~= nil then
 					local newPos, arrived = ai.targethandler:BestAdjacentPosition(unit, self.target)
 					if newPos then
-						EchoDebug("raider evading")
+						EchoDebug(self.name .. " evading")
 						unit:Move(newPos)
 						self.evading = true
 					elseif arrived then
-						EchoDebug("raider arrived")
+						EchoDebug(self.name .. " arrived")
 						-- if we're at the target
 						self.evading = false
 					elseif self.evading then
-						EchoDebug("raider setting course to taget")
+						EchoDebug(self.name .. " setting course to taget")
 						-- return to course to target after evading
 						if self.mtype == "air" then
 							if self.unitTarget ~= nil then

@@ -54,41 +54,6 @@ local function DuplicateFilter(builder, value)
 	return value
 end
 
--- keeps amphibious/hover cons from zigzagging from the water to the land
-local function LandWaterFilter(builder, value)
-	if value == nil then return DummyUnitName end
-	if value == DummyUnitName then return DummyUnitName end
-	EchoDebug(value .. " (before landwater filter)")
-	if value == "armmex" or value == "cormex" or value == "armmohomex" or value == "cormohomex" or value == "armsy" or value == "corsy" then
-		-- leave these alone, these are dealt with at the time of finding a spot for them
-		return value
-	end
-	local bmtype = ai.maphandler:MobilityOfUnit(builder)
-	local bname = builder:Name()
-	if bmtype == "amp" or bmtype == "hov" or bname == "armcom" or bname == "corcom" then
-		-- only check if the unit goes on both land and water
-		local bpos = builder:GetPosition()
-		if unitTable[value].needsWater then
-			-- water
-			if ai.maphandler:MobilityNetworkHere("shp", bpos) ~= nil then
-				return value
-			else
-				return DummyUnitName
-			end
-		else
-			-- land
-			if ai.maphandler:MobilityNetworkHere("bot", bpos) ~= nil then
-				return value
-			else
-				return DummyUnitName
-			end
-		end
-	else
-		-- if builder is limited to land or water, don't bother checking
-		return value
-	end
-end
-
 TaskQueueBehaviour = class(Behaviour)
 
 function TaskQueueBehaviour:CategoryEconFilter(value)
@@ -348,8 +313,8 @@ function TaskQueueBehaviour:GetHelp(value, position)
 			return value
 		end
 	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
-		if ai.factories == 0 then
-			EchoDebug("first factory can get help but doesn't need it")
+		if ai.factories - ai.outmodedFactories <= 0 or advFactories[value] then
+			EchoDebug("can get help to build factory but don't need it")
 			ai.assisthandler:Summon(builder, position)
 			ai.assisthandler:Magnetize(builder, position)
 			return value
@@ -391,6 +356,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 				if uw then
 					EchoDebug("underwater extractor " .. uw:Name())
 					utype = uw
+					value = uw:Name()
 				end
 			end
 		else
@@ -495,12 +461,85 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 	return utype, value, p
 end
 
+function TaskQueueBehaviour:BestFactory()
+	local bestScore = -99999
+	local bestName, bestPos
+	local builder = self.unit:Internal()
+	local factoryNames = unitTable[self.name].factoriesCanBuild
+	if factoryNames ~= nil then
+		for i, factoryName in pairs(factoryNames) do
+			local buildMe = true
+			local isAdvanced = advFactories[factoryName]
+			local isExperimental = expFactories[factoryName] or leadsToExpFactories[factoryName]
+			if ai.needAdvanced and not ai.haveAdvFactory then
+				if not isAdvanced then buildMe = false end
+			elseif not ai.needAdvanced then
+				if isAdvanced then buildMe = false end
+			end
+			if ai.needExperimental and not ai.haveExpFactory then
+				if not isExperimental then buildMe = false end
+			elseif not ai.needExperimental then
+				if expFactories[factoryName] then buildMe = false end
+			end
+			if buildMe and ai.nameCount[factoryName] == 0 then
+				local utype = game:GetTypeByName(factoryName)
+				local builderPos = builder:GetPosition()
+				local p
+				EchoDebug("looking for most turtled position for " .. factoryName)
+				local turtlePos = ai.turtlehandler:MostTurtled(builder)
+				if turtlePos then
+					p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+				else
+					EchoDebug("no turtle position found for " .. factoryName .. ", trying near builder")
+					p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
+				end
+				if p ~= nil then
+					EchoDebug("found spot for " .. factoryName)
+					for mi, mtype in pairs(factoryMobilities[factoryName]) do
+						if mtype == "air" or ai.mobRating[mtype] > ai.mobilityRatingFloor then
+							local network = ai.maphandler:MobilityNetworkHere(mtype, p)
+							if ai.scoutSpots[mtype][network] then
+								local numberOfSpots
+								if mtype == "air" then
+									if factoryName == "armplat" or factoryName == "corplat" then
+										-- seaplanes can only build on UW metal
+										numberOfSpots = #ai.UWMetalSpots
+									else
+										-- other aircraft can only build land metal spots and geospots
+										numberOfSpots = #ai.landMetalSpots + #ai.geoSpots
+									end
+								else
+									numberOfSpots = #ai.scoutSpots[mtype][network]
+								end
+								if numberOfSpots > 5 then
+									local dist = Distance(builderPos, p)
+									local spotPercentage = numberOfSpots / #ai.scoutSpots["air"][1]
+									local score = (spotPercentage * ai.maxElmosDiag) - (dist * mobilitySlowMultiplier[mtype])
+									score = score * mobilityEffeciencyMultiplier[mtype]
+									EchoDebug(factoryName .. " " .. mtype .. " has enough spots (" .. numberOfSpots .. ") and a score of " .. score .. " (" .. spotPercentage .. " " .. dist .. ")")
+									if score > bestScore then
+										bestScore = score
+										bestName = factoryName
+										bestPos = p
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	if bestName ~= nil then EchoDebug("best factory: " .. bestName) end
+	return bestPos, bestName
+end
+
 function TaskQueueBehaviour:GetQueue()
 	self.unit:ElectBehaviour()
 	-- fall back to only making enough construction units if a level 2 factory exists
 	local got = false
 	if wateryTaskqueues[self.name] ~= nil then
-		if ai.mobRating["shp"] > ai.mobRating["veh"] * 0.5 then
+		if ai.mobRating["shp"] * 0.5 > ai.mobRating["veh"] then
 			q = wateryTaskqueues[self.name]
 			got = true
 		end
@@ -587,14 +626,19 @@ function TaskQueueBehaviour:ProgressQueue()
 		if type(value) == "table" then
 			-- not using this
 		else
-			local success = false
 			local p
-			if value ~= DummyUnitName then
+			if value == FactoryUnitName then
+				-- build the best factory this builder can build
+				p, value = self:BestFactory()
+			end
+			local success = false
+			if value ~= DummyUnitName and value ~= nil then
 				EchoDebug(self.name .. " filtering...")
 				value = DuplicateFilter(builder, value)
-				value = LandWaterFilter(builder, value)
 				value = self:CategoryEconFilter(value)
 				EchoDebug(value .. " after filters")
+			else
+				value = DummyUnitName
 			end
 			if value ~= DummyUnitName then
 				if value ~= nil then
@@ -611,7 +655,7 @@ function TaskQueueBehaviour:ProgressQueue()
 								success = self.unit:Internal():Build(utype)
 							end
 						else
-							utype, value, p = self:LocationFilter(utype, value)
+							if p == nil then utype, value, p = self:LocationFilter(utype, value) end
 							if utype ~= nil and p ~= nil then
 								if type(value) == "table" and value[1] == "ReclaimEnemyMex" then
 									EchoDebug("reclaiming enemy mex...")

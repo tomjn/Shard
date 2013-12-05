@@ -14,6 +14,13 @@ function FactoryRegisterBehaviour:Init()
     self.name = self.unit:Internal():Name()
     self.id = self.unit:Internal():ID()
     self.position = self.unit:Internal():GetPosition() -- factories don't move
+    self.exitRect = {
+    	x1 = self.position.x - 40,
+    	z1 = self.position.z - 40,
+    	x2 = self.position.x + 40,
+    	z2 = self.position.z + 40,
+	}
+	self.sides = factoryExitSides[self.name]
     self.level = unitTable[self.name].techLevel
 end
 

@@ -13,16 +13,13 @@ require "scoutbehaviour"
 require "antinukebehaviour"
 require "nukebehaviour"
 require "bombardbehaviour"
-require "exitfactorybehaviour"
+require "bootbehaviour"
 require "countbehaviour"
 require "common"
 
 
 behaviours = {
-	corcrw = {
-		RaiderBehaviour,
-		CountBehaviour,
-	}
+
 }
 
 
@@ -33,6 +30,7 @@ function defaultBehaviours(unit)
 
 	-- keep track of how many of each kind of unit we have
 	table.insert(b, CountBehaviour)
+	table.insert(b, BootBehaviour)
 
 	if nanoTurretList[un] then
 		table.insert(b, AssistBehaviour)
@@ -48,9 +46,6 @@ function defaultBehaviours(unit)
 		elseif bigPlasmaList[un] then
 			table.insert(b, BombardBehaviour)
 		end
-	elseif unitTable[un].mtype ~= "air" and not commanderList[un] then
-		-- non-air mobile units need to not get stuck in the factory
-		table.insert(b, ExitFactoryBehaviour)
 	end
 
 	if u:CanBuild() then
@@ -83,7 +78,7 @@ function defaultBehaviours(unit)
 		end
 	elseif IsReclaimer(unit) then
 		table.insert(b, ReclaimBehaviour)
-		table.insert(b, ScoutBehaviour)
+		table.insert(b, DefendBehaviour)
 		table.insert(b, RunFromAttackBehaviour)
 	else
 		if IsAttacker(unit) then
@@ -96,7 +91,7 @@ function defaultBehaviours(unit)
 		if IsRaider(unit) then
 			table.insert(b, RaiderBehaviour)
 			table.insert(b, ScoutBehaviour)
-			table.insert(b, DefendBehaviour) -- will only defend when scrambled by danger
+			if unitTable[un].mtype ~= "air" then table.insert(b, DefendBehaviour) end -- will only defend when scrambled by danger
 		end
 		if IsBomber(unit) then
 			table.insert(b, BomberBehaviour)

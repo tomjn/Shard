@@ -45,3 +45,19 @@ function CountHandler:InitializeNameCounts()
 		ai.nameCount[name] = 0
 	end
 end
+
+function CountHandler:UnitDamaged(unit, attacker)
+	local aname = "nil"
+	if attacker then 
+		if attacker:Team() ~= game:GetTeamID() then
+			EchoDebug(unit:Name() .. " on team " .. unit:Team() .. " damaged by " .. attacker:Name() .. " on team " .. attacker:Team())
+		end
+	end
+end
+
+function CountHandler:UnitDead(unit)
+	EchoDebug(unit:Name() .. " on team " .. unit:Team() .. " dead")
+	if unit:Team() ~= game:GetTeamID() then
+		EchoDebug("enemy unit died")
+	end
+end

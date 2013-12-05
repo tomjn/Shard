@@ -13,16 +13,16 @@ factoryMobilities = {
 	armap = {"air"},
 	corlab = {"bot"},
 	armlab = {"bot"},
-	corvp = {"veh"},
-	armvp = {"veh"},
+	corvp = {"veh", "amp"},
+	armvp = {"veh", "amp"},
 	coralab = {"bot"},
-	coravp = {"veh"},
+	coravp = {"veh", "amp"},
 	corhp = {"hov"},
 	armhp = {"hov"},
 	corfhp = {"hov"},
 	armfhp = {"hov"},
 	armalab = {"bot"},
-	armavp = {"veh"},
+	armavp = {"veh", "amp"},
 	coraap = {"air"},
 	armaap = {"air"},
 	corplat = {"air"},
@@ -37,33 +37,29 @@ factoryMobilities = {
 	armshltx = {"bot"},
 }
 
-local function BuilderFactoriesByMobility()
-	local builderFactByMob = {}
-	for name, utable in pairs(unitTable) do
-		if utable.factoriesCanBuild ~= nil then
-			local factByMob = {}
-			for i, fname in pairs(utable.factoriesCanBuild) do
-				EchoDebug(fname)
-				local mtypes = factoryMobilities[fname]
-				if mtypes ~= nil then
-					for mi, mtype in pairs(mtypes) do
-						if factByMob[mtype] == nil then
-							factByMob[mtype] = fname
-						else
-							if unitTable[fname].techLevel > unitTable[factByMob[mtype]].techLevel then
-								factByMob[mtype] = fname
-							end
-						end
-					end
-				end
-			end
-			builderFactByMob[name] = factByMob
-		end
-	end
-	return builderFactByMob
-end
+-- for calculating what factories to build
+-- higher values mean more effecient
+mobilityEffeciencyMultiplier = {
+	veh = 1,
+	shp = 1,
+	bot = 0.9,
+	sub = 0.9,
+	hov = 0.75,
+	amp = 0.4,
+	air = 0.55,
+}
 
-builderFactByMob = BuilderFactoriesByMobility()
+-- for calculating what factories to build
+-- higher values mean slower
+mobilitySlowMultiplier = {
+	veh = 1,
+	shp = 1,
+	sub = 1.3,
+	bot = 1.3,
+	hov = 0.75,
+	amp = 1.5,
+	air = 0.25,
+}
 
 factoryExitSides = {
 	corap = 0,
@@ -192,6 +188,14 @@ advFactories = {
 expFactories = {
 	corgant = 1,
 	armshltx = 1,
+}
+
+-- leads to experimental
+leadsToExpFactories = {
+	corlab = 1,
+	armlab = 1,
+	coralab = 1,
+	armalab = 1,
 }
 
 -- sturdy, cheap units to be built in larger numbers than siege units
@@ -474,6 +478,7 @@ raiderList = {
 	"bladew",
 	"corape",
 	"corcut",
+	"corcrw",
 	-- subs
 	"corsub",
 	"armsub",
@@ -527,6 +532,9 @@ ConUnitAdvPerTypeLimit = 4
 
 -- Taskqueuebehaviour was modified to skip this name
 DummyUnitName = "skipthisorder"
+
+-- Taskqueuebehaviour was modified to use this as a generic "build me a factory" order
+FactoryUnitName = "buildfactory"
 
 -- this unit is used to check for underwater metal spots
 UWMetalSpotCheckUnit = "coruwmex"

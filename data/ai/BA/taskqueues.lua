@@ -51,17 +51,6 @@ local function MapHasWater()
 	return (ai.waterMap or ai.hasUWSpots) or false
 end
 
-function MapLandType()
-	if ai ~= nil then
-		if ai.mapMobType ~= nil then
-			EchoDebug(ai.mapMobType)
-			return ai.mapMobType
-		else
-			game:SendToConsole("map has no land type!") -- if this happens, i've clearly done something wrong
-		end
-	end
-end
-
 local function CheckMySide(self)
 	-- fix: moved here so map object is present when it's accessed
 	ConUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)
@@ -1467,6 +1456,19 @@ local function BuildLightTorpedo(self)
 	return BuildTorpedoIfNeeded(unitName)
 end
 
+local function BuildPopTorpedo(self)
+	if self.unit == nil then
+		return DummyUnitName
+	end
+	local unitName = ""
+	if ai.mySide == CORESideName then
+		unitName = "corptl"
+	else
+		unitName = "armptl"
+	end
+	return BuildTorpedoIfNeeded(unitName)
+end
+
 local function BuildHeavyTorpedo(self)
 	if self.unit == nil then
 		return DummyUnitName
@@ -1805,37 +1807,16 @@ local function CheckForOwnUnit(name)
 	return false
 end
 
-local function BuildAppropriateFactory(self)
-	local builder = self.unit:Internal()
-	EchoDebug("checking control for " .. builder:Name())
-	CheckForMapControl()
-	EchoDebug("building appropriate factory..")
-	local factories, advanced, experimental = ai.maphandler:WhatFactories(builder)
-	if experimental ~= nil and ai.needExperimental then
-		return BuildWithLimitedNumber(experimental, 1)
-	end
-	if advanced ~= nil and ai.needAdvanced then
-		return BuildWithLimitedNumber(advanced, 1)
-	end
-	local unitName = DummyUnitName
-	if factories ~= nil then
-		EchoDebug(#factories)
-		for i, fname in pairs(factories) do
-			EchoDebug("trying" .. fname)
-			unitName = BuildWithLimitedNumber(fname, 1)
-			if unitName ~= DummyUnitName then break end
-		end
-	end
-	EchoDebug(unitName)
-	return unitName
+local function BuildAppropriateFactory()
+	return FactoryUnitName
 end
 
 local function FactoryOrNano(self)
-	if ai.factories == 0 then return BuildAppropriateFactory(self) end
+	if ai.factories == 0 then return BuildAppropriateFactory() end
 	EchoDebug("factories: " .. ai.factories .. "  combat units: " .. ai.combatCount)
 	local unitName = DummyUnitName
 	if ai.combatCount > 10 or ai.needAdvanced then
-		unitName = BuildAppropriateFactory(self)
+		unitName = BuildAppropriateFactory()
 	end
 	if ai.combatCount > 3 and unitName == DummyUnitName then
 		unitName = NanoTurret()
@@ -1963,13 +1944,13 @@ local anyCommander = {
 	BuildMex,
 	BuildAppropriateFactory,
 	WindSolar,
-	TidalIfTidal,
 	BuildLLT,
 	BuildRadar,
-	BuildSonar,
 	BuildLightAA,
-	BuildDepthCharge,
 	DoSomethingForTheEconomy,
+	TidalIfTidal,
+	BuildPopTorpedo,
+	BuildSonar,
 }
 
 local anyConUnit = {
@@ -2004,15 +1985,13 @@ local anyConAmphibious = {
 	DoSomethingForTheEconomy,
 	BuildHeavyishAA,
 	BuildMex,
-	BuildLightTorpedo,
+	BuildPopTorpedo,
 	BuildFloatLightAA,
 	BuildSonar,
-	BuildLightTorpedo,
 	BuildFloatRadar,
 	TidalIfTidal,
 	BuildFloatHLT,
 	DoSomethingForTheEconomy,
-	BuildDepthCharge,
 }
 
 local anyConShip = {

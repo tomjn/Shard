@@ -1,6 +1,5 @@
 require "common"
 
-
 local DebugEnabled = false
 local DebugEnabledPlans = false
 local debugPlotBuildFile
@@ -47,6 +46,7 @@ function BuildSiteHandler:Init()
 	local mapSize = map:MapDimensions()
 	ai.maxElmosX = mapSize.x * 8
 	ai.maxElmosZ = mapSize.z * 8
+	ai.maxElmosDiag = sqrt(ai.maxElmosX^2 + ai.maxElmosZ^2)
 	ai.lvl1Mexes = 1 -- this way mexupgrading doesn't revert to taskqueuing before it has a chance to find mexes to upgrade
 	self.resurrectionRepair = {}
 	self.dontBuildRects = {}
@@ -55,14 +55,49 @@ function BuildSiteHandler:Init()
 end
 
 function BuildSiteHandler:PlansOverlap(position, unitName)
+	local rect = { position = position, unitName = unitName }
+	self:CalculateRect(rect)
 	for i, plan in pairs(self.plans) do
-		local rect = {position = position, unitName = unitName}
-		self:CalculateRect(rect)
 		if RectsOverlap(rect, plan) then
 			return true
 		end
 	end
 	return false
+end
+
+-- keeps amphibious/hover cons from zigzagging from the water to the land too far
+function BuildSiteHandler:LandWaterFilter(pos, unitTypeToBuild, builder)
+	local builderName = builder:Name()
+	local mtype = unitTable[builderName].mtype
+	if mtype ~= "amp" and  mtype ~= "hov" and not commanderList[builderName] then
+		-- don't bother with units that aren't amphibious
+		return true
+	end
+	local unitName = unitTypeToBuild:Name()
+	if unitTable[unitName].extractsMetal > 0 or unitTable[unitName].buildOptions then
+		-- leave mexes and factories alone
+		return true
+	end
+	-- where is the con?
+	local builderPos = builder:GetPosition()
+	local water = ai.maphandler:MobilityNetworkHere("shp", builderPos)
+	-- is this a land or a water unit we're building?
+	local waterBuildOrder = unitTable[unitName].needsWater
+	-- if this is a movement from land to water or water to land, check the distance
+	if water then EchoDebug(builderName .. " is in water") else EchoDebug(builderName .. " is on land") end
+	if waterBuildOrder then EchoDebug(unitName .. " would be in water") else EchoDebug(unitName .. " would be on land") end
+	if (water and not waterBuildOrder) or (not water and waterBuildOrder) then
+		EchoDebug("builder would traverse the shore to build " .. unitName)
+		local dist = Distance(pos, builderPos)
+		if dist > 250 then
+			EchoDebug("build too far away from shore to build " .. unitName)
+			return false
+		else
+			return true
+		end
+	else
+		return true
+	end
 end
 
 function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalPosition)
@@ -93,6 +128,13 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	if pos ~= nil then
 		rect = {position = pos, unitName = unitTypeToBuild:Name()}
 		self:CalculateRect(rect)
+	end
+	-- is it too far away from an amphibious constructor?
+	if pos ~= nil then
+		local lw = self:LandWaterFilter(pos, unitTypeToBuild, builder)
+		if not lw then
+			pos = nil
+		end
 	end
 	-- don't build where you shouldn't (metal spots, geo spots, factory lanes)
 	if pos ~= nil then
@@ -165,7 +207,7 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 		searchPos.x = position.x + searchRadius * math.sin(searchAngle)
 		searchPos.z = position.z + searchRadius * math.cos(searchAngle)
 		searchPos.y = position.y
-		EchoDebug(math.ceil(searchPos.x) .. ", " .. math.ceil(searchPos.z))
+		-- EchoDebug(math.ceil(searchPos.x) .. ", " .. math.ceil(searchPos.z))
 		pos = map:FindClosestBuildSite(unitTypeToBuild, searchPos, searchRadius / 2, minDistance)
 	else
 		pos = map:FindClosestBuildSite(unitTypeToBuild, position, buildDistance, minDistance)
