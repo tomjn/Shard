@@ -11,8 +11,6 @@ end
 
 local Energy, Metal, extraEnergy, extraMetal, energyTooLow, energyOkay, metalTooLow, metalOkay, metalBelowHalf, metalAboveHalf, notEnoughCombats, farTooFewCombats
 
-local currentProjects = {}
-
 local function GetEcon()
 	Energy = game:GetResourceByName("Energy")
 	Metal = game:GetResourceByName("Metal")
@@ -30,28 +28,6 @@ local function GetEcon()
 	metalAboveHalf = Metal.reserves >= lotsMetalReserves
 	notEnoughCombats = ai.combatCount < 13
 	farTooFewCombats = ai.combatCount < 5
-end
-
--- prevents duplication of expensive buildings
-local function DuplicateFilter(builder, value)
-	if value == nil then return DummyUnitName end
-	if value == DummyUnitName then return DummyUnitName end
-	EchoDebug(value .. " before duplicate filter")
-	if unitTable[value].isBuilding and unitTable[value].buildOptions then
-		-- don't build two factories at once
-		for uid, v in pairs(currentProjects) do
-			if uid ~= buid and unitTable[v].isBuilding and unitTable[v].buildOptions then return DummyUnitName end
-		end
-		return value
-	end
-	local utable = unitTable[value]
-	if utable.isBuilding and utable.metalCost > 300 then
-		local buid = builder:ID()
-		for uid, v in pairs(currentProjects) do
-			if uid ~= buid and v == value then return DummyUnitName end
-		end
-	end
-	return value
 end
 
 TaskQueueBehaviour = class(Behaviour)
@@ -278,7 +254,7 @@ function TaskQueueBehaviour:UnitIdle(unit)
 	if unit.engineID == self.unit.engineID then
 		self.progress = true
 		self.currentProject = nil
-		currentProjects[self.id] = nil
+		ai.buildsitehandler:ClearMyPlans(self)
 		self.unit:ElectBehaviour()
 	end
 end
@@ -295,9 +271,9 @@ function TaskQueueBehaviour:UnitDead(unit)
 			if self.outmodedFactory then ai.outmodedFactories = ai.outmodedFactories - 1 end
 			-- self.unit = nil
 			if self.target then ai.targethandler:AddBadPosition(self.target, self.mtype) end
-			currentProjects[self.id] = nil
 			ai.assisthandler:Release(nil, self.id, true)
 			ai.buildsitehandler:ClearMyPlans(self)
+			ai.buildsitehandler:ClearMyConstruction(self)
 		end
 	end
 end
@@ -565,8 +541,8 @@ function TaskQueueBehaviour:GetQueue()
 	return q
 end
 
-function TaskQueueBehaviour:ConstructionBegun()
-	self.constructing = true
+function TaskQueueBehaviour:ConstructionBegun(plan)
+	self.constructing = plan
 end
 
 function TaskQueueBehaviour:Update()
@@ -634,8 +610,12 @@ function TaskQueueBehaviour:ProgressQueue()
 			local success = false
 			if value ~= DummyUnitName and value ~= nil then
 				EchoDebug(self.name .. " filtering...")
-				value = DuplicateFilter(builder, value)
 				value = self:CategoryEconFilter(value)
+				if value ~= DummyUnitName then
+					EchoDebug("before duplicate filter " .. value)
+					local duplicate = ai.buildsitehandler:CheckForDuplicates(value)
+					if duplicate then value = DummyUnitName end
+				end
 				EchoDebug(value .. " after filters")
 			else
 				value = DummyUnitName
@@ -685,20 +665,18 @@ function TaskQueueBehaviour:ProgressQueue()
 					end
 				else
 					self.target = p
-					self.watchdogTimeout = math.max(Distance(self.unit:Internal():GetPosition(), p) * 1.3, 240)
+					self.watchdogTimeout = math.max(Distance(self.unit:Internal():GetPosition(), p) * 1.5, 360)
 					self.currentProject = value
 					if value == "ReclaimEnemyMex" then
 						self.watchdogTimeout = self.watchdogTimeout + 450 -- give it 15 more seconds to reclaim it
 					else
 						ai.buildsitehandler:NewPlan(value, p, self)
-						currentProjects[self.id] = value
 					end
 				end
 				self.released = false
 				self.progress = false
 			else
 				self.target = nil
-				currentProjects[self.id] = nil
 				self.currentProject = nil
 				self.progress = true
 			end
@@ -707,13 +685,18 @@ function TaskQueueBehaviour:ProgressQueue()
 end
 
 function TaskQueueBehaviour:Activate()
-	self.progress = true
 	self.active = true
+	local success = false
+	if self.constructing then
+		-- resume construction if we were interrupted
+		success = self.unit:Internal():Build(game:GetTypeByName(self.constructing.unitName), self.constructing.position)
+	end
+	if not success then self.progress = true end
 end
 
 function TaskQueueBehaviour:Deactivate()
 	self.active = false
-	currentProjects[self.id] = nil
+	ai.buildsitehandler:ClearMyPlans()
 end
 
 function TaskQueueBehaviour:Priority()

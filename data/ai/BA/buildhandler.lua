@@ -51,6 +51,8 @@ function BuildSiteHandler:Init()
 	self.resurrectionRepair = {}
 	self.dontBuildRects = {}
 	self.plans = {}
+	self.constructing = {}
+	self.history = {}
 	self:DontBuildOnMetalOrGeoSpots()
 end
 
@@ -336,7 +338,7 @@ function BuildSiteHandler:UnitCreated(unit)
 	for i, plan in pairs(self.plans) do
 		if plan.unitName == unitName and PositionWithinRect(position, plan) then
 			if plan.resurrect then
-				-- so that factoryExit will hold it in place while it gets repaired
+				-- so that bootbehaviour will hold it in place while it gets repaired
 				EchoDebug("resurrection of " .. unitName .. " begun")
 				self.resurrectionRepair[unit:ID()] = plan.behaviour
 			else
@@ -345,7 +347,12 @@ function BuildSiteHandler:UnitCreated(unit)
 					-- so that oversized factory lane rectangles will overlap with existing buildings
 					self:DontBuildRectangle(plan.x1, plan.z1, plan.x2, plan.z2, unit:ID())
 				end
-				plan.behaviour:ConstructionBegun()
+				local unitID = unit:ID()
+				-- tell the builder behaviour that construction has begun
+				plan.behaviour:ConstructionBegun(plan)
+				-- pass on to the table of what we're actually building
+				plan.frame = game:Frame()
+				self.constructing[unitID] = plan
 				table.remove(self.plans, i)
 			end
 			planned = true
@@ -361,8 +368,61 @@ function BuildSiteHandler:UnitCreated(unit)
 	self:PlotAllDebug()
 end
 
+-- prevents duplication of expensive buildings and building more than one factory at once
+-- true means there's a duplicate, false means there isn't
+function BuildSiteHandler:CheckForDuplicates(unitName)
+	if unitName == nil then return true end
+	if unitName == DummyUnitName then return true end
+	local utable = unitTable[unitName]
+	local isFactory = utable.isBuilding and utable.buildOptions
+	local isExpensive = utable.metalCost > 300
+	if not isFactory and not isExpensive then return false end
+	EchoDebugPlans("looking for duplicate plan")
+	for i, plan in pairs(self.plans) do
+		local thisIsFactory = unitTable[plan.unitName].isBuilding and unitTable[plan.unitName].buildOptions
+		if isFactory and thisIsFactory then return true end
+		if isExpensive and plan.unitName == unitName then return true end
+	end
+	EchoDebugPlans("looking for duplicate construction")
+	for unitID, construct in pairs(self.constructing) do
+		local thisIsFactory = unitTable[construct.unitName].isBuilding and unitTable[construct.unitName].buildOptions
+		if isFactory and thisIsFactory then return true end
+		if isExpensive and construct.unitName == unitName then return true end
+	end
+	EchoDebugPlans("looking for duplicate history")
+	if isFactory then
+		-- look through history for factories built recently
+		local f = game:Frame()
+		for i, done in pairs(self.history) do
+			if f > done.frame + 1800 then
+				-- clear history older than a minute
+				table.remove(self.history, i)
+			end
+			local thisIsFactory = unitTable[done.unitName].isBuilding and unitTable[done.unitName].buildOptions
+			if thisIsFactory then
+				if f < done.frame + 600 then
+					-- don't build factories within 20 seconds of one another
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+function BuildSiteHandler:ConstructionComplete(unitID)
+	local done = self.constructing[unitID]
+	if done then
+		done.frame = game:Frame()
+		table.insert(self.history, done)
+		self.constructing[unitID] = nil
+	end
+end
+
 function BuildSiteHandler:UnitDead(unit)
-	self:DoBuildRectangleByUnitID(unit:ID())
+	local unitID = unit:ID()
+	self.constructing[unitID] = nil
+	self:DoBuildRectangleByUnitID(unitID)
 end
 
 function BuildSiteHandler:CalculateRect(rect)
@@ -418,6 +478,15 @@ function BuildSiteHandler:ClearMyPlans(behaviour)
 	for i, plan in pairs(self.plans) do
 		if plan.behaviour == behaviour then
 			table.remove(self.plans, i)
+		end
+	end
+	self:PlotAllDebug()
+end
+
+function BuildSiteHandler:ClearMyConstruction(behaviour)
+	for unitID, construct in pairs(self.constructing) do
+		if construct.behaviour == behaviour then
+			self.constructing[unitID] = nil
 		end
 	end
 	self:PlotAllDebug()

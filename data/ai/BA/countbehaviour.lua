@@ -71,6 +71,7 @@ function CountBehaviour:Update()
 						ai.lastNameFinished[self.name] = f
 						EchoDebug(ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
 						self.finished = true
+						ai.buildsitehandler:ConstructionComplete(self.id)
 					end
 				end
 			end
