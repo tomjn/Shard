@@ -13,9 +13,6 @@ local floor = math.floor
 local ceil = math.ceil
 local mod = math.mod
 
-local congregateDistanceMinimum = 75
-local congregateDistancePerMember = 30
-
 AttackHandler = class(Module)
 
 function AttackHandler:Name()
@@ -30,6 +27,10 @@ function AttackHandler:Init()
 	self.recruits = {}
 	self.squads = {}
 	self.counter = {}
+	self.attackSent = {}
+	for mtype, name in pairs(mobUnitName) do
+		self.attackSent[mtype] = 0
+	end
 	ai.hasAttacked = 0
 	ai.couldAttack = 0
 end
@@ -65,15 +66,16 @@ end
 
 function AttackHandler:DraftSquads()
 	local needtarget = {}
+	local f = game:Frame()
 	-- find which mtypes need targets
 	for mtype, recruits in pairs(self.recruits) do
-		if #recruits >= self.counter[mtype] then
+		if f > self.attackSent[mtype] + 1800 and #recruits >= self.counter[mtype] then
 			table.insert(needtarget, mtype)
 		end
 	end
 	for nothing, mtype in pairs(needtarget) do
 		-- prepare a squad
-		local squad = { members = {}, notarget = 0, congregating = false }
+		local squad = { members = {}, notarget = 0, congregating = false, mtype = mtype }
 		local representative
 		for _, attkbehaviour in pairs(self.recruits[mtype]) do
 			if attkbehaviour ~= nil then
@@ -89,10 +91,12 @@ function AttackHandler:DraftSquads()
 			local bestCell = ai.targethandler:GetBestAttackCell(representative)
 			if bestCell ~= nil then
 				squad.target = bestCell.pos
+				self.attackSent[mtype] = f
 				table.insert(self.squads, squad)
 				-- clear recruits
 				self.recruits[mtype] = {}
 				ai.hasAttacked = ai.hasAttacked + 1
+				self.counter[mtype] = self.counter[mtype] + 1
 			end
 		end
 	end
@@ -112,6 +116,7 @@ function AttackHandler:ReTarget()
 			end
 		end
 		if representative == nil then
+			self.attackSent[squad.mtype] = 0
 			table.remove(self.squads, is)
 		else
 			-- find a target
@@ -123,6 +128,7 @@ function AttackHandler:ReTarget()
 					for iu, member in pairs(squad.members) do
 						self:AddRecruit(member)
 					end
+					self.attackSent[squad.mtype] = 0
 					table.remove(self.squads, is)
 				end
 			else
@@ -159,12 +165,13 @@ function AttackHandler:DoMovement()
 		end
 
 		if #squad.members == 0 then
+			self.attackSent[squad.mtype] = 0
 			table.remove(self.squads, is)
 		else
 			-- determine distances from midpoint
 			local midPos = api.Position()
 			midPos.x = totalx / #squad.members
-			midPos.z = totalz / #squad.members
+ 			midPos.z = totalz / #squad.members
 			midPos.y = 0
 			local congDist = sqrt(pi * totalSize) * 2
 			local stragglers = 0
@@ -284,7 +291,8 @@ function AttackHandler:RemoveMember(attkbehaviour)
 			end
 		end
 		if found then
-			if #squad.members == 0 then 
+			if #squad.members == 0 then
+				self.attackSent[squad.mtype] = 0
 				table.remove(self.squads, is)
 			end
 			break
