@@ -50,8 +50,8 @@ end
 function CountBehaviour:Update()
 	-- find out when it finished building
 	if not self.finished then
-		local f = game:Frame()
-		if f % 30 == 0 then
+		-- local f = game:Frame()
+		-- if f % 30 == 0 then
 			if self.unit ~= nil then
 				local unit = self.unit:Internal()
 				if unit ~= nil then
@@ -68,14 +68,14 @@ function CountBehaviour:Update()
 						if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount + 1 end
 						if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount + 1 end
 						if self.isAssist then ai.assistCount = ai.assistCount + 1 end
-						ai.lastNameFinished[self.name] = f
+						ai.lastNameFinished[self.name] = game:Frame()
 						EchoDebug(ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
 						self.finished = true
 						ai.buildsitehandler:ConstructionComplete(self.id)
 					end
 				end
 			end
-		end
+		-- end
 	end
 end
 

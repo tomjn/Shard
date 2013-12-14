@@ -9,6 +9,8 @@ local function EchoDebug(inStr)
 	end
 end
 
+local CMD_GUARD = 25
+
 local Energy, Metal, extraEnergy, extraMetal, energyTooLow, energyOkay, metalTooLow, metalOkay, metalBelowHalf, metalAboveHalf, notEnoughCombats, farTooFewCombats
 
 local function GetEcon()
@@ -541,8 +543,12 @@ function TaskQueueBehaviour:GetQueue()
 	return q
 end
 
-function TaskQueueBehaviour:ConstructionBegun(plan)
-	self.constructing = plan
+function TaskQueueBehaviour:ConstructionBegun(unitID, unitName, position)
+	self.constructing = { unitID = unitID, unitName = unitName, position = position }
+end
+
+function TaskQueueBehaviour:ConstructionComplete()
+	self.constructing = nil
 end
 
 function TaskQueueBehaviour:Update()
@@ -686,12 +692,18 @@ end
 
 function TaskQueueBehaviour:Activate()
 	self.active = true
-	local success = false
 	if self.constructing then
+		game:SendToConsole(self.name .. " " .. self.id .. " resuming construction of " .. self.constructing.unitName .. " " .. self.constructing.unitID)
 		-- resume construction if we were interrupted
-		success = self.unit:Internal():Build(game:GetTypeByName(self.constructing.unitName), self.constructing.position)
+		local floats = api.vectorFloat()
+		floats:push_back(self.constructing.unitID)
+		self.unit:Internal():ExecuteCustomCommand(CMD_GUARD, floats)
+		self:GetHelp(self.constructing.unitName, self.constructing.position)
+		-- self.target = self.constructing.position
+		-- self.currentProject = self.constructing.unitName
+		self.released = false
+		self.progress = false
 	end
-	if not success then self.progress = true end
 end
 
 function TaskQueueBehaviour:Deactivate()

@@ -349,7 +349,7 @@ function BuildSiteHandler:UnitCreated(unit)
 				end
 				local unitID = unit:ID()
 				-- tell the builder behaviour that construction has begun
-				plan.behaviour:ConstructionBegun(plan)
+				plan.behaviour:ConstructionBegun(unitID, plan.unitName, plan.position)
 				-- pass on to the table of what we're actually building
 				plan.frame = game:Frame()
 				self.constructing[unitID] = plan
@@ -413,6 +413,8 @@ end
 function BuildSiteHandler:ConstructionComplete(unitID)
 	local done = self.constructing[unitID]
 	if done then
+		game:SendToConsole(done.behaviour.name .. " " .. done.behaviour.id ..  " completed " .. done.unitName .. " " .. unitID)
+		done.behaviour:ConstructionComplete()
 		done.frame = game:Frame()
 		table.insert(self.history, done)
 		self.constructing[unitID] = nil
@@ -421,7 +423,11 @@ end
 
 function BuildSiteHandler:UnitDead(unit)
 	local unitID = unit:ID()
-	self.constructing[unitID] = nil
+	local construct = self.constructing[unitID]
+	if construct then
+		construct.behaviour:ConstructionComplete()
+		self.constructing[unitID] = nil
+	end
 	self:DoBuildRectangleByUnitID(unitID)
 end
 
