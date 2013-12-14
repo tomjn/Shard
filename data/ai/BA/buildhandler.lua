@@ -413,7 +413,7 @@ end
 function BuildSiteHandler:ConstructionComplete(unitID)
 	local done = self.constructing[unitID]
 	if done then
-		game:SendToConsole(done.behaviour.name .. " " .. done.behaviour.id ..  " completed " .. done.unitName .. " " .. unitID)
+		EchoDebug(done.behaviour.name .. " " .. done.behaviour.id ..  " completed " .. done.unitName .. " " .. unitID)
 		done.behaviour:ConstructionComplete()
 		done.frame = game:Frame()
 		table.insert(self.history, done)

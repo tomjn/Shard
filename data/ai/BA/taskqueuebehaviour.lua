@@ -693,7 +693,7 @@ end
 function TaskQueueBehaviour:Activate()
 	self.active = true
 	if self.constructing then
-		game:SendToConsole(self.name .. " " .. self.id .. " resuming construction of " .. self.constructing.unitName .. " " .. self.constructing.unitID)
+		EchoDebug(self.name .. " " .. self.id .. " resuming construction of " .. self.constructing.unitName .. " " .. self.constructing.unitID)
 		-- resume construction if we were interrupted
 		local floats = api.vectorFloat()
 		floats:push_back(self.constructing.unitID)
