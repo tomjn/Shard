@@ -14,6 +14,7 @@ function CountBehaviour:Init()
 	self.finished = false
     self.name = self.unit:Internal():Name()
     self.id = self.unit:Internal():ID()
+    -- game:SendToConsole(self.name .. " " .. self.id .. " init")
     if unitTable[self.name].isBuilding then
    		self.position = self.unit:Internal():GetPosition() -- buildings don't move
    	else
@@ -40,7 +41,30 @@ function CountBehaviour:Init()
 end
 
 function CountBehaviour:UnitCreated(unit)
+	if unit.engineID == self.unit.engineID then
+		-- game:SendToConsole(self.name .. " " .. self.id .. " created")
+	end
+end
 
+function CountBehaviour:UnitBuilt(unit)
+	if unit.engineID == self.unit.engineID then
+		-- game:SendToConsole(self.name .. " " .. self.id .. " built")
+		if ai.nameCountFinished[self.name] == nil then
+			ai.nameCountFinished[self.name] = 1
+		else
+			ai.nameCountFinished[self.name] = ai.nameCountFinished[self.name] + 1
+		end
+		if self.isMex then ai.mexCount = ai.mexCount + 1 end
+		if self.isCon then ai.conCount = ai.conCount + 1 end
+		if self.isCombat then ai.combatCount = ai.combatCount + 1 end
+		if self.isBattle then ai.battleCount = ai.battleCount + 1 end
+		if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount + 1 end
+		if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount + 1 end
+		if self.isAssist then ai.assistCount = ai.assistCount + 1 end
+		ai.lastNameFinished[self.name] = game:Frame()
+		EchoDebug(ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
+		self.finished = true
+	end
 end
 
 function CountBehaviour:UnitIdle(unit)
@@ -48,35 +72,7 @@ function CountBehaviour:UnitIdle(unit)
 end
 
 function CountBehaviour:Update()
-	-- find out when it finished building
-	if not self.finished then
-		-- local f = game:Frame()
-		-- if f % 30 == 0 then
-			if self.unit ~= nil then
-				local unit = self.unit:Internal()
-				if unit ~= nil then
-					if not unit:IsBeingBuilt() then
-						if ai.nameCountFinished[self.name] == nil then
-							ai.nameCountFinished[self.name] = 1
-						else
-							ai.nameCountFinished[self.name] = ai.nameCountFinished[self.name] + 1
-						end
-						if self.isMex then ai.mexCount = ai.mexCount + 1 end
-						if self.isCon then ai.conCount = ai.conCount + 1 end
-						if self.isCombat then ai.combatCount = ai.combatCount + 1 end
-						if self.isBattle then ai.battleCount = ai.battleCount + 1 end
-						if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount + 1 end
-						if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount + 1 end
-						if self.isAssist then ai.assistCount = ai.assistCount + 1 end
-						ai.lastNameFinished[self.name] = game:Frame()
-						EchoDebug(ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
-						self.finished = true
-						ai.buildsitehandler:ConstructionComplete(self.id)
-					end
-				end
-			end
-		-- end
-	end
+
 end
 
 function CountBehaviour:Activate()

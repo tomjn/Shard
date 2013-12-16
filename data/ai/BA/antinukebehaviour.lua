@@ -17,6 +17,12 @@ function AntinukeBehaviour:Init()
     self.finished = false
 end
 
+function AntinukeBehaviour:UnitBuilt(unit)
+	if unit.engineID == self.unit.engineID then
+		self.finished = true
+	end
+end
+
 function AntinukeBehaviour:UnitCreated(unit)
 
 end
@@ -35,15 +41,6 @@ function AntinukeBehaviour:Update()
 			floats:push_back(1)
 			self.unit:Internal():ExecuteCustomCommand(CMD_STOCKPILE, floats)
 			self.lastStockpileFrame = f
-		end
-	end
-
-	if not self.finished then
-		local f = game:Frame()
-		if f % 60 == 0 then
-			if not self.unit:Internal():IsBeingBuilt() then
-				self.finished = true
-			end
 		end
 	end
 end

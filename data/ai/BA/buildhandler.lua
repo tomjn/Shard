@@ -410,10 +410,11 @@ function BuildSiteHandler:CheckForDuplicates(unitName)
 	return false
 end
 
-function BuildSiteHandler:ConstructionComplete(unitID)
+function BuildSiteHandler:UnitBuilt(unit)
+	local unitID = unit:ID()
 	local done = self.constructing[unitID]
 	if done then
-		EchoDebug(done.behaviour.name .. " " .. done.behaviour.id ..  " completed " .. done.unitName .. " " .. unitID)
+		EchoDebugPlans(done.behaviour.name .. " " .. done.behaviour.id ..  " completed " .. done.unitName .. " " .. unitID)
 		done.behaviour:ConstructionComplete()
 		done.frame = game:Frame()
 		table.insert(self.history, done)
@@ -469,9 +470,9 @@ end
 
 function BuildSiteHandler:NewPlan(unitName, position, behaviour, resurrect)
 	if resurrect then
-		EchoDebug("new plan to resurrect " .. unitName .. " at " .. position.x .. ", " .. position.z)
+		EchoDebugPlans("new plan to resurrect " .. unitName .. " at " .. position.x .. ", " .. position.z)
 	else
-		EchoDebug(behaviour.name .. " plans to build " .. unitName .. " at " .. position.x .. ", " .. position.z)
+		EchoDebugPlans(behaviour.name .. " plans to build " .. unitName .. " at " .. position.x .. ", " .. position.z)
 	end
 	local plan = {unitName = unitName, position = position, behaviour = behaviour, resurrect = resurrect}
 	-- positions are in the center of units, so outX and outZ are half the footprint size
