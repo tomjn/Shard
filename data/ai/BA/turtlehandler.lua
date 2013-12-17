@@ -8,6 +8,8 @@ local function EchoDebug(inStr)
 	end
 end
 
+local maxOrganDistance = 300
+
 local antinukeMod = 1000
 local shieldMod = 1000
 local jamMod = 1000
@@ -36,21 +38,20 @@ function TurtleHandler:internalName()
 end
 
 function TurtleHandler:Init()
-	self.turtles = {} -- things to protect
+	self.turtles = {} -- zones to protect
+	self.looseOrgans = {} -- things to protect not yet in a protected zone
 	self.shells = {} -- defense buildings, shields, and jamming
 	self.totalPriority = 0
 end
 
-function TurtleHandler:UnitBuilt(unit)
+function TurtleHandler:UnitCreated(unit)
 	local un = unit:Name()
 	local ut = unitTable[un]
 	if ut.isBuilding then
 		local upos = unit:GetPosition()
 		local uid = unit:ID()
-		if turtleList[un] then
-			self:AddTurtle(upos, uid, turtleList[un], ut.needsWater)
-		elseif ut.buildOptions then
-			self:AddTurtle(upos, uid, factoryPriority + ut.techLevel, ut.needsWater)
+		if turtleList[un] or ut.buildOptions then
+			self:AddOrgan(upos, uid, un)
 		elseif ut.isWeapon and not antinukeList[un] and not nukeList[un] and not bigPlasmaList[un] then
 			self:AddDefense(upos, uid, un)
 		elseif antinukeList[un] then
@@ -63,6 +64,8 @@ function TurtleHandler:UnitBuilt(unit)
 			self:AddShell(upos, uid, un, 1, "radar", ut.radarRadius * 0.67)
 		elseif ut.sonarRadius ~= 0 then
 			self:AddShell(upos, uid, un, 1, "sonar", ut.sonarRadius * 0.67)
+		else
+			self:AddOrgan(upos, uid, un)
 		end
 	end
 end
@@ -70,15 +73,87 @@ end
 function TurtleHandler:UnitDead(unit)
 	local un = unit:Name()
 	local ut = unitTable[un]
+	local uid = unit:ID()
 	if ut.isBuilding then
 		if ut.isWeapon or shieldList[un] then
-			self:RemoveShell(unit:ID())
-		elseif turtleList[un] or ut.buildOptions then
-			self:RemoveTurtle(unit:ID())
+			self:RemoveShell(uid)
+		else
+			self:RemoveOrgan(uid)
 		end
 	end
 end
 
+function TurtleHandler:AddOrgan(position, unitID, unitName)
+	-- calculate priority
+	local priority = 0
+	local ut = unitTable[unitName]
+	if turtleList[unitName] then
+		priority = turtleList[unitName]
+	elseif ut.buildOptions then
+		priority = factoryPriority + ut.techLevel
+	elseif ut.extractsMetal > 0 then
+		priority = priority + (ut.extractsMetal * 1000)
+	elseif ut.totalEnergyOut > 0 then
+		priority = priority + (ut.totalEnergyOut / 200)
+	else
+		priority = priority + (ut.metalCost / 1000)
+	end
+	-- create the organ
+	local organ = { priority = priority, position = position, uid = unitID }
+	-- find a turtle to attach to
+	local nearestDist = maxOrganDistance
+	local nearestTurtle
+	for i, turtle in pairs(self.turtles) do
+		if turtle.water == ut.needsWater then
+			local dist = Distance(position, turtle.position)
+			if dist < nearestDist then
+				nearestDist = dist
+				nearestTurtle = turtle
+			end
+		end
+	end
+	if not nearestTurtle then
+		nearestTurtle = self:AddTurtle(position, ut.needsWater)
+	end
+	self:Transplant(nearestTurtle, organ)
+end
+
+function TurtleHandler:RemoveOrgan(uid)
+	local foundOrgan = false
+	local emptyTurtle = false
+	for ti, turtle in pairs(self.turtles) do
+		for oi, organ in pairs(turtle.organs) do
+			if organ.uid == uid then
+				turtle.priority = turtle.priority - organ.priority
+				self.totalPriority = self.totalPriority - organ.priority
+				table.remove(turtle.organs, oi)
+				if #turtle.organs == 0 then
+					emptyTurtle = turtle
+					table.remove(self.turtles, ti)
+				end
+				foundOrgan = true
+				break
+			end
+		end
+		if foundOrgan then break end
+	end
+	if emptyTurtle then
+		for si, shell in pairs(self.shells) do
+			for ti, turtle in pairs(shell.attachments) do
+				if turtle == emptyTurtle then
+					table.remove(shell.attachments, ti)
+				end
+			end
+		end
+	end
+end
+
+function TurtleHandler:Transplant(turtle, organ)
+	table.insert(turtle.organs, organ)
+	turtle.priority = turtle.priority + organ.priority
+	if turtle.priority > factoryPriority then turtle.nameLimit = 2 end
+	self.totalPriority = self.totalPriority + organ.priority
+end
 
 function TurtleHandler:Attach(turtle, shell)
 	turtle[shell.layer] = turtle[shell.layer] + shell.value
@@ -89,6 +164,7 @@ function TurtleHandler:Attach(turtle, shell)
 	end
 	local priorityAddition = layerPriority[shell.layer] or 0
 	turtle.priority = turtle.priority + priorityAddition
+	if turtle.priority > factoryPriority then turtle.nameLimit = 2 end
 	self.totalPriority = self.totalPriority + priorityAddition
 	table.insert(shell.attachments, turtle)
 end
@@ -98,13 +174,15 @@ function TurtleHandler:Detach(turtle, shell)
 	turtle.nameCounts[shell.uname] = turtle.nameCounts[shell.uname] - 1
 	local priorityAddition = layerPriority[shell.layer] or 0
 	turtle.priority = turtle.priority - priorityAddition
+	if turtle.priority <= factoryPriority then turtle.nameLimit = 1 end
 	self.totalPriority = self.totalPriority - priorityAddition
 end
 
-function TurtleHandler:AddTurtle(position, uid, priority, water)
+function TurtleHandler:AddTurtle(position, water, priority)
+	if priority == nil then priority = 0 end
 	local nameLimit = 1
 	if priority > factoryPriority then nameLimit = 2 end
-	local turtle = {position = position, uid = uid, water = water, nameCounts = {}, nameLimit = nameLimit, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
+	local turtle = {position = position, organs = {}, water = water, nameCounts = {}, nameLimit = nameLimit, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
 	for i, shell in pairs(self.shells) do
 		local dist = Distance(position, shell.position)
 		if dist < shell.radius then
@@ -113,22 +191,7 @@ function TurtleHandler:AddTurtle(position, uid, priority, water)
 	end
 	table.insert(self.turtles, turtle)
 	self.totalPriority = self.totalPriority + priority
-end
-
-function TurtleHandler:RemoveTurtle(uid)
-	for i, turtle in pairs(self.turtles) do
-		if turtle.uid == uid then
-			table.remove(self.turtles, i)
-			self.totalPriority = self.totalPriority - turtle.priority
-		end
-	end
-	for si, shell in pairs(self.shells) do
-		for ti, turtle in pairs(shell.attachments) do
-			if turtle.uid == uid then
-				table.remove(shell.attachments, ti)
-			end
-		end
-	end
+	return turtle
 end
 
 function TurtleHandler:AddDefense(position, uid, unitName)
