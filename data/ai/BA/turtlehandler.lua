@@ -1,11 +1,17 @@
 require "common"
 
 local DebugEnabled = false
+local DebugPlotEnabled = true
+local debugPlotTurtleFile
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
 		game:SendToConsole("TurtleHandler: " .. inStr)
 	end
+end
+
+local function PlotPointDebug(x, z, label)
+	debugPlotTurtleFile:write(math.ceil(x) .. " " .. math.ceil(z) .. " " .. label .. "\n")
 end
 
 local maxOrganDistance = 300
@@ -112,10 +118,11 @@ function TurtleHandler:AddOrgan(position, unitID, unitName)
 			end
 		end
 	end
-	if not nearestTurtle then
+	if nearestTurtle == nil then
 		nearestTurtle = self:AddTurtle(position, ut.needsWater)
 	end
 	self:Transplant(nearestTurtle, organ)
+	self:PlotAllDebug()
 end
 
 function TurtleHandler:RemoveOrgan(uid)
@@ -146,6 +153,7 @@ function TurtleHandler:RemoveOrgan(uid)
 			end
 		end
 	end
+	self:PlotAllDebug()
 end
 
 function TurtleHandler:Transplant(turtle, organ)
@@ -230,6 +238,7 @@ function TurtleHandler:AddShell(position, uid, uname, value, layer, radius)
 		self:Attach(nearestTurtle, shell)
 	end
 	table.insert(self.shells, shell)
+	self:PlotAllDebug()
 end
 
 function TurtleHandler:RemoveShell(uid)
@@ -241,6 +250,7 @@ function TurtleHandler:RemoveShell(uid)
 			table.remove(self.shells, si)
 		end
 	end
+	self:PlotAllDebug()
 end
 
 function TurtleHandler:LeastTurtled(builder, unitName, bombard)
@@ -329,7 +339,15 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 			end
 		end
 	end
-	return best
+	if best then
+		local newpos = api.Position()
+		newpos.x = best.x
+		newpos.z = best.z
+		newpos.y = best.y
+		return newpos
+	else
+		return nil
+	end
 end
 
 function TurtleHandler:MostTurtled(builder, bombard)
@@ -360,9 +378,27 @@ function TurtleHandler:MostTurtled(builder, bombard)
 			end
 		end
 	end
-	return best
+	if best then
+		local newpos = api.Position()
+		newpos.x = best.x
+		newpos.z = best.z
+		newpos.y = best.y
+		return newpos
+	else
+		return nil
+	end
 end
 
 function TurtleHandler:GetTotalPriority()
 	return self.totalPriority
+end
+
+function TurtleHandler:PlotAllDebug()
+	if DebugPlotEnabled then
+		debugPlotTurtleFile= assert(io.open("debugturtleplot",'w'), "Unable to write debugturtleplot")
+		for i, turtle in pairs(self.turtles) do
+			PlotPointDebug(turtle.position.x, turtle.position.z, turtle.priority)
+		end
+		debugPlotTurtleFile:close()
+	end
 end
