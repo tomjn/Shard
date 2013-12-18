@@ -24,6 +24,14 @@ function FactoryRegisterBehaviour:Init()
     self.level = unitTable[self.name].techLevel
 end
 
+function FactoryRegisterBehaviour:UnitBuilt(unit)
+	-- don't add factories to factory location table until they're done
+	if unit.engineID == self.unit.engineID then
+		self:Register()
+		self.finished = true
+	end
+end
+
 function FactoryRegisterBehaviour:UnitCreated(unit)
 
 end
@@ -33,21 +41,7 @@ function FactoryRegisterBehaviour:UnitIdle(unit)
 end
 
 function FactoryRegisterBehaviour:Update()
-	-- don't add factories to factory location table until they're done
-	if not self.finished then
-		local f = game:Frame()
-		if f % 60 == 0 then
-			if self.unit ~= nil then
-				local unit = self.unit:Internal()
-				if unit ~= nil then
-					if not unit:IsBeingBuilt() then
-						self:Register()
-						self.finished = true
-					end
-				end
-			end
-		end
-	end
+
 end
 
 function FactoryRegisterBehaviour:Activate()
@@ -65,12 +59,12 @@ function FactoryRegisterBehaviour:UnitDead(unit)
 	if unit.engineID == self.unit.engineID then
 		-- game:SendToConsole("factory " .. self.name .. " died")
 		if self.finished then
-			self:Unregster()
+			self:Unregister()
 		end
 	end
 end
 
-function FactoryRegisterBehaviour:Unregster()
+function FactoryRegisterBehaviour:Unregister()
 	ai.factories = ai.factories - 1
 	local un = self.name
     local level = self.level

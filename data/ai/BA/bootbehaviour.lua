@@ -22,12 +22,16 @@ function BootBehaviour:Init()
 	self.repairedBy = ai.buildsitehandler:ResurrectionRepairedBy(self.id)
 	-- air units don't need to leave the factory
 	self.ignoreFactories = self.mtype == "air" or not self.mobile
+	self.finished = false
 	if not self.ignoreFactories then self:FindMyFactory() end
 	self.unit:ElectBehaviour()
 end
 
-function BootBehaviour:UnitCreated(unit)
-
+function BootBehaviour:UnitBuilt(unit)
+	if unit.engineID == self.unit.engineID then
+		self.finished = true
+		if self.active then self.lastOrderFrame = game:Frame() end
+	end
 end
 
 function BootBehaviour:UnitIdle(unit)
@@ -44,6 +48,9 @@ function BootBehaviour:UnitDead(unit)
 end
 
 function BootBehaviour:Update()
+
+	if not self.finished then return end
+
 	local f = game:Frame()
 
 	if self.repairedBy then
@@ -62,32 +69,38 @@ function BootBehaviour:Update()
 	if self.factory then
 		if f % 30 == 0 then
 			local u = self.unit:Internal()
-			if not u:IsBeingBuilt() then
-				local pos = u:GetPosition()
-				-- EchoDebug(pos.x .. " " .. pos.z .. " " .. self.factory.exitRect.x1 .. " " .. self.factory.exitRect.z1 .. " " .. self.factory.exitRect.x2 .. " " .. self.factory.exitRect.z2)
-				if not PositionWithinRect(pos, self.factory.exitRect) then
-					self.factory = nil
-					self.unit:ElectBehaviour()
-				elseif self.active and self.lastOrderFrame and self.lastExitSide then
-					-- fifteen seconds after the first attempt, try a different side
-					if f > self.lastOrderFrame + 450 then
-						if self.factory.sides ~= 1 then
-							if self.factory.sides == 2 then
+			local pos = u:GetPosition()
+			-- EchoDebug(pos.x .. " " .. pos.z .. " " .. self.factory.exitRect.x1 .. " " .. self.factory.exitRect.z1 .. " " .. self.factory.exitRect.x2 .. " " .. self.factory.exitRect.z2)
+			if not PositionWithinRect(pos, self.factory.exitRect) then
+				self.factory = nil
+				self.unit:ElectBehaviour()
+			elseif self.active and self.lastOrderFrame and self.lastExitSide then
+				-- fifteen seconds after the first attempt, try a different side
+				if f > self.lastOrderFrame + 450 then
+					if self.factory.sides ~= 1 then
+						if self.factory.sides == 2 then
+							if self.lastExitSide == "south" then
 								self:ExitFactory("north")
-							elseif self.factory.sides == 3 then
-								if self.lastExitSide == "south" then
-									self:ExitFactory("east")
-								elseif self.lastExitSide == "east" then
-									self:ExitFactory("west")
-								end
-							elseif self.factory.sides == 4 then
-								if self.lastExitSide == "south" then
-									self:ExitFactory("north")
-								elseif self.lastExitSide == "north" then
-									self:ExitFactory("east")
-								elseif self.lastExitSide == "east" then
-									self:ExitFactory("west")
-								end
+							elseif self.lastExitSide == "north" then
+								self:ExitFactory("south")
+							end
+						elseif self.factory.sides == 3 then
+							if self.lastExitSide == "south" then
+								self:ExitFactory("east")
+							elseif self.lastExitSide == "east" then
+								self:ExitFactory("west")
+							elseif self.lastExitSide == "west" then
+								self:ExitFactory("south")
+							end
+						elseif self.factory.sides == 4 then
+							if self.lastExitSide == "south" then
+								self:ExitFactory("north")
+							elseif self.lastExitSide == "north" then
+								self:ExitFactory("east")
+							elseif self.lastExitSide == "east" then
+								self:ExitFactory("west")
+							elseif self.lastExitSide == "west" then
+								self:ExitFactory("south")
 							end
 						end
 					end
@@ -98,13 +111,10 @@ function BootBehaviour:Update()
 		if f > self.lastInFactoryCheck + 150 then
 			-- units (especially construction units) can still get stuck in factories long after they're built
 			self.lastInFactoryCheck = f
-			local u = self.unit:Internal()
-			if not u:IsBeingBuilt() then
-				self:FindMyFactory()
-				if self.factory then
-					EchoDebug(self.name .. " is in a factory")
-					self.unit:ElectBehaviour()
-				end
+			self:FindMyFactory()
+			if self.factory then
+				EchoDebug(self.name .. " is in a factory")
+				self.unit:ElectBehaviour()
 			end
 		end
 	end
@@ -157,6 +167,7 @@ function BootBehaviour:FindMyFactory()
 end
 
 function BootBehaviour:ExitFactory(side)
+		EchoDebug(self.name .. " exiting " .. side)
 		local outX, outZ
 		if side == "south" then
 			outX = 0

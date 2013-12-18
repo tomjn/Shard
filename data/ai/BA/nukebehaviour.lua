@@ -30,6 +30,12 @@ function NukeBehaviour:Init()
     self.finished = false
 end
 
+function NukeBehaviour:UnitBuilt(unit)
+	if unit.engineID == self.unit.engineID then
+		self.finished = true
+	end
+end
+
 function NukeBehaviour:UnitCreated(unit)
 
 end
@@ -75,12 +81,6 @@ function NukeBehaviour:Update()
 				floats:push_back(1)
 				self.unit:Internal():ExecuteCustomCommand(CMD_STOCKPILE, floats)
 				self.lastStockpileFrame = f
-			end
-		end
-	else
-		if f % 60 == 0 then
-			if not self.unit:Internal():IsBeingBuilt() then
-				self.finished = true
 			end
 		end
 	end
