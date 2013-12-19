@@ -11,26 +11,24 @@ local function EchoDebug(inStr)
 end
 
 local function PlotPointDebug(x, z, label)
+	label = string.format("%.1f", label)
 	debugPlotTurtleFile:write(math.ceil(x) .. " " .. math.ceil(z) .. " " .. label .. "\n")
 end
 
-local maxOrganDistance = 300
+local maxOrganDistance = 200
 
 local antinukeMod = 1000
 local shieldMod = 1000
 local jamMod = 1000
 local radarMod = 1000
 local sonarMod = 1000
-local distanceMod = 20
+local distanceMod = 1.5
 
 local factoryPriority = 4 -- added to tech level. above this priority allows two of the same type of defense tower.
 
 -- this is added to the turtle's priority if a shell of this layer is added to it
 local layerPriority = {}
-layerPriority["radar"] = 1
-layerPriority["sonar"] = 1
 layerPriority["jam"] = 1
-layerPriority["antinuke"] = 2
 layerPriority["shield"] = 2
 
 TurtleHandler = class(Module)
@@ -56,21 +54,20 @@ function TurtleHandler:UnitCreated(unit)
 	if ut.isBuilding then
 		local upos = unit:GetPosition()
 		local uid = unit:ID()
-		if turtleList[un] or ut.buildOptions then
-			self:AddOrgan(upos, uid, un)
-		elseif ut.isWeapon and not antinukeList[un] and not nukeList[un] and not bigPlasmaList[un] then
+		if ut.isWeapon and not ut.buildOptions and not antinukeList[un] and not nukeList[un] and not bigPlasmaList[un] then
 			self:AddDefense(upos, uid, un)
-		elseif antinukeList[un] then
-			self:AddShell(upos, uid, un, 1, "antinuke", 72000)
-		elseif shieldList[un] then
-			self:AddShell(upos, uid, un, 1, "shield", 450)
-		elseif ut.jammerRadius ~= 0 then
-			self:AddShell(upos, uid, un, 1, "jam", ut.jammerRadius)
-		elseif ut.radarRadius ~= 0 then
-			self:AddShell(upos, uid, un, 1, "radar", ut.radarRadius * 0.67)
-		elseif ut.sonarRadius ~= 0 then
-			self:AddShell(upos, uid, un, 1, "sonar", ut.sonarRadius * 0.67)
 		else
+			if antinukeList[un] then
+				self:AddShell(upos, uid, un, 1, "antinuke", 72000)
+			elseif shieldList[un] then
+				self:AddShell(upos, uid, un, 1, "shield", 450)
+			elseif ut.jammerRadius ~= 0 then
+				self:AddShell(upos, uid, un, 1, "jam", ut.jammerRadius)
+			elseif ut.radarRadius ~= 0 then
+				self:AddShell(upos, uid, un, 1, "radar", ut.radarRadius * 0.67)
+			elseif ut.sonarRadius ~= 0 then
+				self:AddShell(upos, uid, un, 1, "sonar", ut.sonarRadius * 0.67)
+			end
 			self:AddOrgan(upos, uid, un)
 		end
 	end
@@ -95,13 +92,29 @@ function TurtleHandler:AddOrgan(position, unitID, unitName)
 	local ut = unitTable[unitName]
 	if turtleList[unitName] then
 		priority = turtleList[unitName]
-	elseif ut.buildOptions then
-		priority = factoryPriority + ut.techLevel
-	elseif ut.extractsMetal > 0 then
-		priority = priority + (ut.extractsMetal * 1000)
-	elseif ut.totalEnergyOut > 0 then
-		priority = priority + (ut.totalEnergyOut / 200)
+	elseif antinukeList[unitName] then
+		priority = 2
+	elseif shieldList[unitName] then
+		priority = 2
 	else
+		if ut.buildOptions then
+			priority = priority + factoryPriority + ut.techLevel
+		end
+		if ut.extractsMetal > 0 then
+			priority = priority + (ut.extractsMetal * 1000)
+		end
+		if ut.totalEnergyOut > 0 then
+			priority = priority + (ut.totalEnergyOut / 200)
+		end
+		if ut.jammerRadius > 0 then
+			priority = priority + (ut.jammerRadius / 700)
+		end
+		if ut.radarRadius > 0 then
+			priority = priority + (ut.radarRadius / 3500)
+		end
+		if ut.sonarRadius > 0 then
+			priority = priority + (ut.sonarRadius / 2400)
+		end
 		priority = priority + (ut.metalCost / 1000)
 	end
 	-- create the organ
@@ -309,6 +322,10 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 			if okay and bombard and unitName ~= nil then 
 				okay = ai.targethandler:IsBombardPosition(turtle.position, unitName)
 			end
+			if okay and (radar or sonar or shield or antinuke or jammer) then
+				-- only build these things at already defended spots
+				okay = turtle.ground + turtle.air + turtle.submerged > 0
+			end
 			if okay then
 				local mod = 0
 				if ground then mod = mod + turtle.ground end
@@ -328,7 +345,7 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 				EchoDebug("turtled: " .. mod .. ", limit: " .. tostring(modLimit) .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
 				if mod == 0 or mod < ut.metalCost or (mod < modLimit and modDefecit < ut.metalCost * 3) then
 					local dist = Distance(position, turtle.position)
-					dist = dist - (modLimit * distanceMod)
+					dist = dist - (modDefecit * distanceMod)
 					EchoDebug("distance: " .. dist)
 					if dist < bestDist then
 						EchoDebug("best distance")
@@ -363,11 +380,11 @@ function TurtleHandler:MostTurtled(builder, bombard)
 				okay = ai.targethandler:IsBombardPosition(turtle.position, bombard)
 			end
 			if okay then
-				local mod = turtle.ground + turtle.air + turtle.submerged
+				local mod = turtle.ground + turtle.air + turtle.submerged + (turtle.shield * shieldMod) + (turtle.jam * jamMod)
 				EchoDebug("turtled: " .. mod .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
 				if mod ~= 0 then
 					local dist = Distance(position, turtle.position)
-					dist = dist - (mod * distanceMod)
+					dist = dist - (mod * distanceMod * 2)
 					EchoDebug("distance: " .. dist)
 					if dist < bestDist then
 						EchoDebug("best distance")

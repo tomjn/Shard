@@ -27,8 +27,8 @@ end
 function FactoryRegisterBehaviour:UnitBuilt(unit)
 	-- don't add factories to factory location table until they're done
 	if unit.engineID == self.unit.engineID then
-		self:Register()
 		self.finished = true
+		self:Register()
 	end
 end
 
@@ -95,6 +95,7 @@ function FactoryRegisterBehaviour:Register()
 	-- register maximum factory level
     local un = self.name
     local level = self.level
+    EchoDebug("factory " .. un .. " level " .. level .. " registering")
 	if ai.factoriesAtLevel[level] == nil then
 		ai.factoriesAtLevel[level] = {}
 	end
