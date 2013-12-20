@@ -377,19 +377,19 @@ function BuildSiteHandler:CheckForDuplicates(unitName)
 	local isFactory = utable.isBuilding and utable.buildOptions
 	local isExpensive = utable.metalCost > 300
 	if not isFactory and not isExpensive then return false end
-	EchoDebugPlans("looking for duplicate plan")
+	EchoDebugPlans("looking for duplicate plan for " .. unitName)
 	for i, plan in pairs(self.plans) do
 		local thisIsFactory = unitTable[plan.unitName].isBuilding and unitTable[plan.unitName].buildOptions
 		if isFactory and thisIsFactory then return true end
 		if isExpensive and plan.unitName == unitName then return true end
 	end
-	EchoDebugPlans("looking for duplicate construction")
+	EchoDebugPlans("looking for duplicate construction for " .. unitName)
 	for unitID, construct in pairs(self.constructing) do
 		local thisIsFactory = unitTable[construct.unitName].isBuilding and unitTable[construct.unitName].buildOptions
 		if isFactory and thisIsFactory then return true end
 		if isExpensive and construct.unitName == unitName then return true end
 	end
-	EchoDebugPlans("looking for duplicate history")
+	EchoDebugPlans("looking for duplicate history " .. unitName)
 	if isFactory then
 		-- look through history for factories built recently
 		local f = game:Frame()
@@ -402,6 +402,7 @@ function BuildSiteHandler:CheckForDuplicates(unitName)
 			if thisIsFactory then
 				if f < done.frame + 600 then
 					-- don't build factories within 20 seconds of one another
+					EchoDebug("found a factory too recently")
 					return true
 				end
 			end

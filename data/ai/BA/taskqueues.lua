@@ -162,6 +162,7 @@ function CheckForMapControl()
 			ai.needNukes = true
 		end
 		EchoDebug("metal income: " .. Metal.income .. "  combat units: " .. ai.combatCount)
+		EchoDebug("have advanced? " .. tostring(ai.haveAdvFactory) .. " have experimental? " .. tostring(ai.haveExpFactory))
 		EchoDebug("need advanced? " .. tostring(ai.needAdvanced) .. "  need experimental? " .. tostring(ai.needExperimental))
 	end
 end

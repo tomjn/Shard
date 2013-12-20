@@ -96,8 +96,8 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 			if ai.factories - ai.outmodedFactories <= 0 and metalOkay and energyOkay and Metal.income > 3 and Metal.reserves > unitTable[value].metalCost * 0.7 then
 				EchoDebug("   first factory")
 				-- build the first factory
-			elseif advFactories[value] and (ai.factoriesAtLevel[3] == nil or ai.factoriesAtLevel[3] == {}) and metalOkay and energyOkay then
-				-- easily build advanced factory only if it's the first one
+			elseif advFactories[value] and metalOkay and energyOkay then
+				-- build advanced factory
 			elseif expFactories[value] and metalOkay and energyOkay then
 				-- build experimental factory
 			elseif ai.couldAttack - ai.factories >= 1 or ai.couldBomb - ai.factories >= 1 then

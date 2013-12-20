@@ -153,21 +153,28 @@ helpList = {
 	armuwmme = 2,
 }
 
--- things to defend with defense towers other than factories
--- value is priority
+-- priorities of things to defend that can't be accounted for by the formula in turtlehandler
 turtleList = {
-	aafus = 8,
-	cafus = 8,
-	corfus = 5,
-	armfus = 5,
-	cmgeo = 4,
-	amgeo = 4,
-	corgeo = 3,
-	armgeo = 3,
-	cormoho = 2,
-	armmoho = 2,
-	cormex = 1,
-	armmex = 1,
+	cormakr = 0.5,
+	armmakr = 0.5,
+	corfmkr = 0.5,
+	armfmkr = 0.5,
+	cormmkr = 4,
+	armmmkr = 4,
+	coruwmmm = 4,
+	armuwmmm = 4,
+	corestor = 0.5,
+	armestor = 0.5,
+	cormstor = 0.5,
+	armmstor = 0.5,
+	coruwes = 0.5,
+	armuwes = 0.5,
+	coruwms = 0.5,
+	armuwms = 0.5,
+	coruwadves = 2,
+	armuwadves = 2,
+	coruwadvms = 2,
+	armuwadvms = 2,
 }
 
 -- factories that can build advanced construction units (i.e. moho mines)
