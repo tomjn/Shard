@@ -117,12 +117,6 @@ local function ThreatRange(unitName, groundAirSubmerged, enemy)
 		range = utable.groundRange
 	elseif groundAirSubmerged == "air" then
 		range = utable.airRange
-		if range == 0 then
-			-- ground weapons can hurt air units sometimes
-			if utable.groundRange > 0 then
-				return math.ceil(utable.metalCost * 0.1), utable.groundRange
-			end
-		end
 	elseif groundAirSubmerged == "submerged" then
 		range = utable.submergedRange
 	end
@@ -156,9 +150,12 @@ local function Value(unitName)
 	return val
 end
 
-local function WhatHurtsUnit(unit, mtype)
-	if unit ~= nil then 
-		mtype = unitTable[unit:Name()].mtype
+local function WhatHurtsUnit(unitName, mtype)
+	if unitName then 
+		local ut = unitTable[unitName]
+		if ut then
+			mtype = ut.mtype
+		end
 	end
 	local hurts = {}
 	if mtype == "veh" or mtype == "bot" or mtype == "amp" or mtype == "hov" or mtype == "shp" then
@@ -190,19 +187,17 @@ local function WhereUnitGoes(unit)
 end
 ]]--
 
-local function CellValueThreat(unit, cell)
+local function CellValueThreat(unitName, cell)
 	if cell == nil then return 0, 0 end
 	local gas
-	local name
-	if unit == "ALL" then
+	if unitName == "ALL" then
 		gas = {}
 		gas["ground"] = true
 		gas["air"] = true
 		gas["submerged"] = true
-		name = "nothing"
+		unitName = "nothing"
 	else
-		gas = WhatHurtsUnit(unit)
-		name = unit:Name()
+		gas = WhatHurtsUnit(unitName)
 	end
 	local threat = 0
 	local value = 0
@@ -212,13 +207,17 @@ local function CellValueThreat(unit, cell)
 	end
 	if gas["air"] then
 		threat = threat + cell.airThreat
+		-- ground weapons can hurt gunships sometimes
+		if raiderList[unitName] and not raiderDisarms[unitName] then
+			threat = threat + cell.groundThreat * 0.1
+		end
 		value = value + cell.airValue
 	end
 	if gas["submerged"] then
 		threat = threat + cell.submergedThreat
 		value = value + cell.submergedValue
 	end
-	if raiderDisarms[name] then
+	if raiderDisarms[unitName] then
 		local notThreat = 0
 		if not gas["ground"] then notThreat = notThreat + cell.groundThreat end
 		if not gas["air"] then notThreat = notThreat + cell.airThreat end
@@ -559,6 +558,17 @@ local function UpdateEnemies()
 								if health < vulnerableHealth then
 									cell.airVulnerable = e
 								end
+								local gt, gr = ThreatRange(name, "ground", true)
+								if gt > 0 then
+									if cell.disarmTarget then
+										local ogt, ogr = ThreatRange(cell.disarmTarget:Name(), "ground", true)
+										if gt > ogt then
+											cell.disarmTarget = e
+										end
+									else
+										cell.disarmTarget = e
+									end
+								end
 								cell.airValue = cell.airValue + value
 								cell.bomberValue = cell.bomberValue + value
 								if unitTable[name].bigExplosion then cell.bomberValue = cell.bomberValue + bomberExplosionValue end
@@ -825,7 +835,7 @@ function TargetHandler:NearbyVulnerable(unit)
 	if unit == nil then return end
 	self:UpdateMap()
 	local px, pz = GetCellPosition(unit:GetPosition())
-	local gas = WhatHurtsUnit(unit)
+	local gas = WhatHurtsUnit(unit:Name())
 	-- check this cell
 	local vulnerable = nil
 	if cells[px] ~= nil then
@@ -862,7 +872,7 @@ function TargetHandler:GetBestRaidCell(representative)
 	local best
 	local bestDist = 99999
 	for i, cell in pairs(cellList) do
-		local value, threat, gas = CellValueThreat(representative, cell)
+		local value, threat, gas = CellValueThreat(rname, cell)
 		-- EchoDebug(value .. " " .. threat)
 		if value > 0 and threat <= maxThreat then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) then
@@ -893,7 +903,7 @@ function TargetHandler:GetBestAttackCell(representative)
 	for i, cell in pairs(cellList) do
 		if cell.pos then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) or longrange then
-				local value, threat = CellValueThreat(representative, cell)
+				local value, threat = CellValueThreat(name, cell)
 				if value > 0 then
 					if value > bestValue then
 						bestValueCell = cell
@@ -1017,10 +1027,11 @@ function TargetHandler:GetBestReclaimCell(representative, lookForEnergy)
 	if not representative then return end
 	self:UpdateMap()
 	local rpos = representative:GetPosition()
+	local rname = representative:Name()
 	local best
 	local bestDist = 99999
 	for i, cell in pairs(cellList) do
-		local value, threat, gas = CellValueThreat(representative, cell)
+		local value, threat, gas = CellValueThreat(rname, cell)
 		if threat == 0 and cell.pos then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) then
 				local mod
@@ -1048,11 +1059,12 @@ function TargetHandler:WreckToResurrect(representative)
 	if not representative then return end
 	self:UpdateMap()
 	local rpos = representative:GetPosition()
+	local rname = representative:Name()
 	local best
 	local bestDist = 99999
 	for i, cell in pairs(cellList) do
 		if #cell.resurrectables ~= 0 then
-			local value, threat, gas = CellValueThreat(representative, cell)
+			local value, threat, gas = CellValueThreat(rname, cell)
 			if threat == 0 and cell.pos then
 				if ai.maphandler:UnitCanGoHere(representative, cell.pos) then
 					local dist = Distance(rpos, cell.pos)
@@ -1090,10 +1102,11 @@ function TargetHandler:NearestVulnerableCell(representative)
 	if not representative then return end
 	self:UpdateMap()
 	local rpos = representative:GetPosition()
+	local rname = representative:Name()
 	local best
 	local bestDist = 99999
 	for i, cell in pairs(cellList) do
-		local value, threat, gas = CellValueThreat(representative, cell)
+		local value, threat, gas = CellValueThreat(rname, cell)
 		if threat == 0 and cell.pos then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) then
 				if cell.groundVulnerable or cell.airVulnerable or cell.submergedVulnerable then
@@ -1124,11 +1137,12 @@ end
 function TargetHandler:IsSafePosition(position, unit, threshold)
 	self:UpdateMap()
 	if unit == nil then game:SendToConsole("nil unit") end
-	if unit:Name() == nil then game:SendToConsole("nil unit name") end
+	local uname = unit:Name()
+	if uname == nil then game:SendToConsole("nil unit name") end
 	local cell = GetCellHere(position)
-	local value, threat = CellValueThreat(unit, cell)
+	local value, threat = CellValueThreat(uname, cell)
 	if threshold then
-		return threat < unitTable[unit:Name()].metalCost * threshold
+		return threat < unitTable[uname].metalCost * threshold
 	else
 		return threat == 0
 	end
@@ -1162,7 +1176,7 @@ function TargetHandler:BestAdjacentPosition(unit, targetPosition)
 				local dist = dist2d(tx, tz, x, z) * cellElmos
 				if cells[x] ~= nil then
 					if cells[x][z] ~= nil then
-						local value, threat = CellValueThreat(unit, cells[x][z])
+						local value, threat = CellValueThreat(uname, cells[x][z])
 						if threat > maxThreat then
 							-- if it's below baseUnitThreat, it's probably a lone construction unit
 							dist = dist + threat

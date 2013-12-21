@@ -27,6 +27,7 @@ function RaiderBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
+	self.disarmer = raiderDisarms[self.name]
 	if ai.raiderCount[mtype] == nil then
 		ai.raiderCount[mtype] = 1
 	else
@@ -74,8 +75,12 @@ function RaiderBehaviour:RaidCell(cell)
 		end
 		self.target = RandomAway(cell.pos, range * 0.5)
 		if self.mtype == "air" then
+			if self.disarmer then
+				self.unitTarget = cell.disarmTarget
+			else
+				self.unitTarget = cell.airTarget
+			end
 			EchoDebug("air raid target: " .. tostring(self.unitTarget))
-			self.unitTarget = cell.airTarget
 		end
 		if self.active then
 			if self.mtype == "air" then
