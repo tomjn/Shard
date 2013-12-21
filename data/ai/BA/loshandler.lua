@@ -215,6 +215,12 @@ function LosHandler:UpdateEnemies()
 	for id, los in pairs(self.knownEnemies) do
 		if not exists[id] then
 			-- enemy died
+			if ai.IDsWeAreAttacking[id] then
+				ai.attackhandler:TargetDied(ai.IDsWeAreAttacking[id])
+			end
+			if ai.IDsWeAreRaiding[id] then
+				ai.raidhandler:TargetDied(ai.IDsWeAreRaiding[id])
+			end
 			local uname = self.enemyNames[id]
 			EchoDebug("enemy " .. uname .. " died!")	
 			local mtypes = WhatUnitHurts(uname)

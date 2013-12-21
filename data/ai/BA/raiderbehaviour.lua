@@ -67,6 +67,11 @@ function RaiderBehaviour:RaidCell(cell)
 		EchoDebug("no raider unit internal to raid cell with!")
 		-- ai.raidhandler:RemoveRecruit(self)
 	else
+		if self.buildingIDs ~= nil then
+			ai.raidhandler:IDsWeAreNotRaiding(self.buildingIDs)
+		end
+		ai.raidhandler:IDsWeAreRaiding(cell.buildingIDs, self.mtype)
+		self.buildingIDs = cell.buildingIDs
 		local utable = unitTable[self.name]
 		if self.mtype == "sub" then
 			range = utable.submergedRange

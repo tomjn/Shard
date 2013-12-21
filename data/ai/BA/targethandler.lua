@@ -93,7 +93,7 @@ local dangers = {}
 local lastUpdateFrame = 0
 
 local function NewCell(px, pz)
-	local newcell = {value = 0, groundValue = 0, airValue = 0, submergedValue = 0, bomberValue = 0, torpedoBomberValue = 0, groundThreat = 0, airThreat = 0, submergedThreat = 0, bomberTargets = {}, torpedoBomberTargets = {}, resurrectables = {}, metal = 0, energy = 0, friendlyValue = 0, friendlyBuildings = 0, friendlyLandCombats = 0, friendlyAirCombats = 0, friendlyWaterCombats = 0, x = px, z = pz}
+	local newcell = {value = 0, groundValue = 0, airValue = 0, submergedValue = 0, bomberValue = 0, torpedoBomberValue = 0, groundThreat = 0, airThreat = 0, submergedThreat = 0, buildingIDs = {}, bomberTargets = {}, torpedoBomberTargets = {}, resurrectables = {}, metal = 0, energy = 0, friendlyValue = 0, friendlyBuildings = 0, friendlyLandCombats = 0, friendlyAirCombats = 0, friendlyWaterCombats = 0, x = px, z = pz}
 	return newcell
 end
 
@@ -524,6 +524,9 @@ local function UpdateEnemies()
 				if unitTable[name].extractsMetal ~= 0 then
 					table.insert(ai.enemyMexSpots, { position = pos, unit = e })
 				end
+				if unitTable[name].isBuilding then
+					table.insert(cell.buildingIDs, e:ID())
+				end
 				for i, groundAirSubmerged in pairs(threatTypes) do
 					local threat, range = ThreatRange(name, groundAirSubmerged, true)
 					-- EchoDebug(name .. " " .. groundAirSubmerged .. " " .. threat .. " " .. range)
@@ -893,7 +896,7 @@ function TargetHandler:GetBestAttackCell(representative)
 	self:UpdateMap()
 	if enemyBaseCell then return enemyBaseCell end
 	local bestValueCell
-	local bestValue = 0
+	local bestValue = -999999
 	local bestThreatCell
 	local bestThreat = 0
 	local name = representative:Name()
@@ -905,15 +908,14 @@ function TargetHandler:GetBestAttackCell(representative)
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) or longrange then
 				local value, threat = CellValueThreat(name, cell)
 				if value > 0 then
+					value = value - threat
 					if value > bestValue then
 						bestValueCell = cell
 						bestValue = value
 					end
-				elseif threat > 0 then
-					if threat > bestThreat then
-						bestThreatCell = cell
-						bestThreat = threat
-					end
+				elseif threat > bestThreat then
+					bestThreatCell = cell
+					bestThreat = threat
 				end
 			end
 		end

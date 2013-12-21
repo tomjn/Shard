@@ -496,9 +496,18 @@ function TaskQueueBehaviour:BestFactory()
 									score = score * mobilityEffeciencyMultiplier[mtype]
 									EchoDebug(factoryName .. " " .. mtype .. " has enough spots (" .. numberOfSpots .. ") and a score of " .. score .. " (" .. spotPercentage .. " " .. dist .. ")")
 									if score > bestScore then
-										bestScore = score
-										bestName = factoryName
-										bestPos = p
+										local okay = true
+										if mtype == "veh" then
+											if ai.maphandler:OutmodedFactoryHere("veh", builderPos) and not ai.maphandler:OutmodedFactoryHere("bot", builderPos) then
+												-- don't build a not very useful vehicle plant if a bot factory can be built instead
+												okay = false
+											end
+										end
+										if okay then
+											bestScore = score
+											bestName = factoryName
+											bestPos = p
+										end
 									end
 								end
 							end
