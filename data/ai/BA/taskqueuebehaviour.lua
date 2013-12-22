@@ -202,6 +202,7 @@ function TaskQueueBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(u)
 	self.mtype = mtype
 	self.name = u:Name()
+	if commanderList[self.name] then self.isCommander = true end
 	self.id = u:ID()
 
 	-- register if factory is going to use outmoded queue
@@ -245,6 +246,9 @@ function TaskQueueBehaviour:UnitBuilt(unit)
 	if self.unit == nil then return end
 	if unit.engineID == self.unit.engineID then
 		self.progress = true
+		if not self.isFactory then
+			ai.defendhandler:AddDefendee(self)
+		end
 	end
 end
 
@@ -496,9 +500,18 @@ function TaskQueueBehaviour:BestFactory()
 									score = score * mobilityEffeciencyMultiplier[mtype]
 									EchoDebug(factoryName .. " " .. mtype .. " has enough spots (" .. numberOfSpots .. ") and a score of " .. score .. " (" .. spotPercentage .. " " .. dist .. ")")
 									if score > bestScore then
-										bestScore = score
-										bestName = factoryName
-										bestPos = p
+										local okay = true
+										if mtype == "veh" then
+											if ai.maphandler:OutmodedFactoryHere("veh", builderPos) and not ai.maphandler:OutmodedFactoryHere("bot", builderPos) then
+												-- don't build a not very useful vehicle plant if a bot factory can be built instead
+												okay = false
+											end
+										end
+										if okay then
+											bestScore = score
+											bestName = factoryName
+											bestPos = p
+										end
 									end
 								end
 							end
@@ -586,6 +599,13 @@ function TaskQueueBehaviour:ProgressQueue()
 	if not self.released then
 		ai.assisthandler:Release(builder)
 		ai.buildsitehandler:ClearMyPlans(self)
+		if not self.isCommander and not self.isFactory then
+			if ai.IDByName[self.id] ~= nil then
+				if ai.IDByName[self.id] > ai.nonAssistantsPerName then
+					ai.nonAssistant[self.id] = nil
+				end
+			end
+		end
 		self.released = true
 	end
 	if self.queue ~= nil then

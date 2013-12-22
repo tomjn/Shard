@@ -135,7 +135,7 @@ function CheckForMapControl()
 		tacticalNukeLimit = math.ceil(ai.combatCount / 12)
 
 		local attackCounter = ai.attackhandler:GetCounter()
-		local couldAttack = ai.couldAttack - ai.factories >= 2 or ai.couldBomb > 2
+		local couldAttack = ai.couldAttack - ai.factories >= 1 or ai.couldBomb > 1
 		local bombingTooExpensive = ai.bomberhandler:GetCounter() == maxBomberCounter
 		local attackTooExpensive = attackCounter == maxAttackCounter
 		local plentyOfCombatUnits = ai.combatCount > attackCounter * 2.5

@@ -23,7 +23,32 @@ function AssistHandler:Init()
 	self.working = {}
 	self.totalAssignments = 0
 	self.magnets = {}
-	ai.IDByType = {}
+	ai.IDByName = {}
+	self.IDByNameTaken = {}
+	self.lastAllocation = game:Frame()
+	ai.nonAssistantsPerName = 2
+	ai.nonAssistant = {}
+end
+
+function AssistHandler:Update()
+	local f = game:Frame()
+	if f > self.lastAllocation + 1800 then
+		self.lastAllocation = f
+		local Metal = game:GetResourceByName("Metal")
+		if Metal.reserves > Metal.capacity * 0.33 then
+			ai.nonAssistantsPerName = math.max(ai.nonAssistantsPerName - 1, 2)
+		elseif Metal.reserves < math.min(Metal.income * 2, Metal.capacity * 0.1) then
+			ai.nonAssistantsPerName = math.min(ai.nonAssistantsPerName + 1, ConUnitPerTypeLimit)
+			for fi, asstbehaviour in pairs(self.free) do
+				if ai.IDByName[asstbehaviour.id] <= ai.nonAssistantsPerName then
+					ai.nonAssistant[asstbehaviour.id] = true
+					asstbehaviour.unit:ElectBehaviour()
+					table.remove(self.free, fi)
+				end
+			end
+		end
+		EchoDebug("nonassistants per name: " .. ai.nonAssistantsPerName)
+	end
 end
 
 -- checks whether the assistant can help the builder
@@ -103,7 +128,7 @@ function AssistHandler:Summon(builder, position, number, force)
 					table.insert(self.free, asstbehaviour)
 				else
 					table.insert(self.working[bid], asstbehaviour)
-					asstbehaviour:Assign(builder)
+					asstbehaviour:Assign(bid)
 					n = n + 1
 				end
 			end
@@ -121,7 +146,7 @@ end
 -- assistants that become free before this magnet is released will get assigned to this builder
 function AssistHandler:Magnetize(builder, position, number)
 	if number == nil or number == 0 then number = -1 end
-	table.insert(self.magnets, {bid = builder:ID(), builder = builder, pos = position, number = number})
+	table.insert(self.magnets, {bid = builder:ID(), pos = position, number = number})
 end
 
 -- summons and magnetizes until released
@@ -165,7 +190,7 @@ function AssistHandler:TakeUpSlack(builder)
 		end
 		if not skip then
 			if self:IsLocal(asstbehaviour, builderPos) then
-				asstbehaviour:SoftAssign(builder)
+				asstbehaviour:SoftAssign(builder:ID())
 			end
 		end
 	end
@@ -204,7 +229,7 @@ function AssistHandler:DoMagnets()
 					self.totalAssignments = self.totalAssignments + 1
 				end
 				table.insert(self.working[magnet.bid], asstbehaviour)
-				asstbehaviour:Assign(magnet.builder)
+				asstbehaviour:Assign(magnet.bid)
 				table.remove(self.free, fi)
 				if magnet.number ~= -1 then magnet.number = magnet.number - 1 end
 				EchoDebug("one assistant magnetted to " .. magnet.bid .. " magnet has " .. magnet.number .. " left to get from " .. #self.free .. " available")
@@ -231,6 +256,11 @@ function AssistHandler:Release(builder, bid, dead)
 		local asstbehaviour = table.remove(self.working[bid])
 		if dead then asstbehaviour:Assign(nil) end
 		table.insert(self.free, asstbehaviour)
+		if ai.IDByName[asstbehaviour.id] ~= nil then
+			if ai.IDByName[asstbehaviour.id] <= ai.nonAssistantsPerName then
+				ai.nonAssistant[asstbehaviour.id] = true
+			end
+		end
 		EchoDebug(asstbehaviour.name .. " released to available assistants")
 	end
 	self.working[bid] = nil
@@ -239,7 +269,6 @@ function AssistHandler:Release(builder, bid, dead)
 	for i, magnet in pairs(self.magnets) do
 		if magnet.bid == bid then
 			EchoDebug("removing a magnet")
-			magnet.builder = nil
 			table.remove(self.magnets, i)
 		end
 	end
@@ -280,7 +309,7 @@ end
 
 function AssistHandler:RemoveWorking(asstbehaviour)
 	if asstbehaviour.target == nil then return false end
-	local targetID = asstbehaviour.target:ID()
+	local targetID = asstbehaviour.target
 	for bid, workers in pairs(self.working) do
 		if bid == targetID then
 			for i, ab in pairs(workers) do
@@ -297,4 +326,46 @@ function AssistHandler:RemoveWorking(asstbehaviour)
 		end
 	end
 	return false
+end
+
+function AssistHandler:AssignIDByName(asstbehaviour)
+	local uname = asstbehaviour.name
+	if self.IDByNameTaken[uname] == nil then
+		asstbehaviour.IDByName = 1
+		ai.IDByName[asstbehaviour.id] = 1
+		self.IDByNameTaken[uname] = {}
+		self.IDByNameTaken[uname][1] = asstbehaviour.id
+	else
+		if asstbehaviour.IDByName ~= nil then
+			self.IDByNameTaken[uname][asstbehaviour.IDByName] = nil
+		end
+		local id = 1
+		while id <= ai.nameCount[uname] do
+			id = id + 1
+			if not self.IDByNameTaken[uname][id] then break end
+		end
+		asstbehaviour.IDByName = id
+		ai.IDByName[asstbehaviour.id] = id
+		self.IDByNameTaken[uname][id] = asstbehaviour.id
+	end
+	if ai.IDByName[asstbehaviour.id] > ai.nonAssistantsPerName then
+		ai.nonAssistant[asstbehaviour.id] = nil
+	else
+		ai.nonAssistant[asstbehaviour.id] = true
+	end
+	if asstbehaviour.active then
+		if asstbehaviour:DoIAssist() then
+			self:AddFree(asstbehaviour)
+		end
+	end
+end
+
+function AssistHandler:RemoveAssistant(asstbehaviour)
+	self:RemoveWorking(asstbehaviour)
+	self:RemoveFree(asstbehaviour)
+	local uname = asstbehaviour.name
+	local uid = asstbehaviour.id
+	-- game:SendToConsole("assistant " .. uname .. " died")
+	if self.IDByNameTaken[uname] ~= nil then self.IDByNameTaken[uname][ai.IDByName[uid]] = nil end
+	ai.IDByName[uid] = nil
 end

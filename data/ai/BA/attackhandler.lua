@@ -28,23 +28,22 @@ function AttackHandler:Init()
 	self.squads = {}
 	self.counter = {}
 	self.attackSent = {}
-	for mtype, name in pairs(mobUnitName) do
-		self.attackSent[mtype] = 0
-	end
 	ai.hasAttacked = 0
 	ai.couldAttack = 0
+	ai.IDsWeAreAttacking = {}
 end
 
 function AttackHandler:Update()
 	local f = game:Frame()
-	if mod(f, 300) == 0 then
-		self:ReTarget()
-	end
 	if mod(f, 150) == 0 then
 		self:DraftSquads()
 	end
 	if mod(f, 60) == 0 then
 		self:DoMovement()
+	end
+	if mod(f, 30) == 0 then
+		-- actually retargets each squad every 15 seconds
+		self:ReTarget()
 	end
 end
 
@@ -75,7 +74,7 @@ function AttackHandler:DraftSquads()
 	end
 	for nothing, mtype in pairs(needtarget) do
 		-- prepare a squad
-		local squad = { members = {}, notarget = 0, congregating = false, mtype = mtype }
+		local squad = { members = {}, notarget = 0, congregating = false, mtype = mtype, lastReTarget = f }
 		local representative
 		for _, attkbehaviour in pairs(self.recruits[mtype]) do
 			if attkbehaviour ~= nil then
@@ -91,6 +90,8 @@ function AttackHandler:DraftSquads()
 			local bestCell = ai.targethandler:GetBestAttackCell(representative)
 			if bestCell ~= nil then
 				squad.target = bestCell.pos
+				self:IDsWeAreAttacking(bestCell.buildingIDs, squad.mtype)
+				squad.buildingIDs = bestCell.buildingIDs
 				self.attackSent[mtype] = f
 				table.insert(self.squads, squad)
 				-- clear recruits
@@ -103,37 +104,46 @@ function AttackHandler:DraftSquads()
 end
 
 function AttackHandler:ReTarget()
+	local f = game:Frame()
 	for is, squad in pairs(self.squads) do
-		local representative
-		for iu, member in pairs(squad.members) do
-			if member ~= nil then
-				if member.unit ~= nil then
-					representative = member.unit:Internal()
-					if representative ~= nil then
-						break
+		if f > squad.lastReTarget + 450 then
+			squad.lastReTarget = f
+			local representative
+			for iu, member in pairs(squad.members) do
+				if member ~= nil then
+					if member.unit ~= nil then
+						representative = member.unit:Internal()
+						if representative ~= nil then
+							break
+						end
 					end
 				end
 			end
-		end
-		if representative == nil then
-			self.attackSent[squad.mtype] = 0
-			table.remove(self.squads, is)
-		else
-			-- find a target
-			local bestCell = ai.targethandler:GetBestAttackCell(representative)
-			if bestCell == nil then
-				squad.notarget = squad.notarget + 1
-				if squad.target == nil or squad.notarget > 3 then
-					-- if no target found initially, or no target for the last three targetting checks, disassemble and recruit the squad
-					for iu, member in pairs(squad.members) do
-						self:AddRecruit(member)
-					end
-					self.attackSent[squad.mtype] = 0
-					table.remove(self.squads, is)
-				end
+			if squad.buildingIDs ~= nil then
+				self:IDsWeAreNotAttacking(squad.buildingIDs)
+			end
+			if representative == nil then
+				self.attackSent[squad.mtype] = 0
+				table.remove(self.squads, is)
 			else
-				squad.target = bestCell.pos
-				squad.notarget = 0
+				-- find a target
+				local bestCell = ai.targethandler:GetBestAttackCell(representative)
+				if bestCell == nil then
+					squad.notarget = squad.notarget + 1
+					if squad.target == nil or squad.notarget > 3 then
+						-- if no target found initially, or no target for the last three targetting checks, disassemble and recruit the squad
+						for iu, member in pairs(squad.members) do
+							self:AddRecruit(member)
+						end
+						self.attackSent[squad.mtype] = 0
+						table.remove(self.squads, is)
+					end
+				else
+					squad.target = bestCell.pos
+					self:IDsWeAreAttacking(bestCell.buildingIDs, squad.mtype)
+					squad.buildingIDs = bestCell.buildingIDs
+					squad.notarget = 0
+				end
 			end
 		end
 	end
@@ -269,6 +279,23 @@ function AttackHandler:DoMovement()
 	end
 end
 
+function AttackHandler:IDsWeAreAttacking(unitIDs, mtype)
+	for i, unitID in pairs(unitIDs) do
+		ai.IDsWeAreAttacking[unitID] = mtype
+	end
+end
+
+function AttackHandler:IDsWeAreNotAttacking(unitIDs)
+	for i, unitID in pairs(unitIDs) do
+		ai.IDsWeAreAttacking[unitID] = nil
+	end
+end
+
+function AttackHandler:TargetDied(mtype)
+	EchoDebug("target died")
+	self:NeedLess(mtype, 1)
+end
+
 function AttackHandler:IsMember(attkbehaviour)
 	if attkbehaviour == nil then return false end
 	for is, squad in pairs(self.squads) do
@@ -322,6 +349,7 @@ function AttackHandler:AddRecruit(attkbehaviour)
 			local mtype = ai.maphandler:MobilityOfUnit(attkbehaviour.unit:Internal())
 			if self.recruits[mtype] == nil then self.recruits[mtype] = {} end
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
+			if self.attackSent[mtype] == nil then self.attackSent[mtype] = 0 end
 			table.insert(self.recruits[mtype], attkbehaviour)
 			attkbehaviour:SetMoveState()
 			attkbehaviour:Free()
@@ -349,17 +377,18 @@ function AttackHandler:NeedMore(attkbehaviour)
 	EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 end
 
-function AttackHandler:NeedLess(mtype)
+function AttackHandler:NeedLess(mtype, subtract)
+	if subtract == nil then subtract = 0.1 end
 	if mtype == nil then
 		for mtype, count in pairs(self.counter) do
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-			self.counter[mtype] = self.counter[mtype] - 0.25
+			self.counter[mtype] = self.counter[mtype] - subtract
 			self.counter[mtype] = math.max(self.counter[mtype], minAttackCounter)
 			EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 		end
 	else
 		if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-		self.counter[mtype] = self.counter[mtype] - 0.25
+		self.counter[mtype] = self.counter[mtype] - subtract
 		self.counter[mtype] = math.max(self.counter[mtype], minAttackCounter)
 		EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 	end

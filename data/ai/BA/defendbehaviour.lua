@@ -70,12 +70,11 @@ function DefendBehaviour:Update()
 			if self.target ~= nil then
 				self.moving = nil
 				self.patroling = nil
-				local tid = self.target:ID()
-				if self.guarding ~= tid then
+				if self.guarding ~= self.target then
 					local floats = api.vectorFloat()
-	    			floats:push_back(tid)
+	    			floats:push_back(self.target)
 					self.unit:Internal():ExecuteCustomCommand(CMD_GUARD, floats)
-					self.guarding = tid
+					self.guarding = self.target
 				end
 			elseif self.targetPos ~= nil then
 				self.guarding = nil
@@ -90,9 +89,9 @@ function DefendBehaviour:Update()
 					else
 						local dist = Distance(self.unit:Internal():GetPosition(), right)
 						EchoDebug(dist)
-						if dist < 100 then
+						if dist < 200 then
 							local floats = api.vectorFloat()
-							floats:push_back(self.targetPos.x - 100)
+							floats:push_back(self.targetPos.x - 200)
 							floats:push_back(self.targetPos.y)
 							floats:push_back(self.targetPos.z)
 							self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats)
@@ -111,7 +110,7 @@ function DefendBehaviour:Assign(defendee)
 		self.target = nil
 		self.targetPos = nil
 	else
-		self.target = defendee.unit
+		self.target = defendee.uid
 		self.targetPos = defendee.position
 	end
 end

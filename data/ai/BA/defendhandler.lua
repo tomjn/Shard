@@ -32,21 +32,22 @@ function DefendHandler:Init()
 	 self.lastThreats = 0
 end
 
-function DefendHandler:UnitCreated(unit)
-	-- local unit = u:Internal()
-	local un = unit:Name()
+function DefendHandler:AddDefendee(behaviour)
+	if behaviour == nil then return end
+	if behaviour.unit == nil then return end
+	if behaviour.name == nil then behaviour.name = behaviour.unit:Internal():Name() end
+	if behaviour.id == nil then behaviour.id = behaviour.unit:Internal():ID() end
+	local un = behaviour.name
 	local utable = unitTable[un]
 	local priority = 0
-	if utable.buildOptions and not utable.isBuilding then
-		priority = priority + utable.techLevel * techLevelPriority
-		-- if utable.isBuilding then
-		-- 	priority = priority + factoryPriority
-		if un == "corcom" or un == "armcom" then
-			priority = priority + commanderPriority
-		end
+	priority = priority + utable.techLevel * techLevelPriority
+	-- if utable.isBuilding then
+	-- 	priority = priority + factoryPriority
+	if un == "corcom" or un == "armcom" then
+		priority = priority + commanderPriority
 	end
 	if priority ~= 0 then
-		table.insert(self.defendees, {unit = unit, uid = unit:ID(), priority = priority, threatened = nil})
+		table.insert(self.defendees, {uid = behaviour.id, behaviour = behaviour, priority = priority, threatened = nil})
 		self.totalPriority = self.totalPriority + priority
 		self:AssignAll()
 	end
@@ -57,18 +58,15 @@ function DefendHandler:UnitDead(unit)
 	local uid = unit:ID()
 	for i, defendee in pairs(self.defendees) do
 		if uid == defendee.uid then
-			-- game:SendToConsole("defendee " .. defendee.unit:Name() .. " died")
 			EchoDebug("defendee with id " .. uid .. " dead. there are " .. #self.defendees .. " defendees total")
 			for di, dfndbehaviour in pairs(self.defenders) do
 				if dfndbehaviour.target ~= nil then
-					if dfndbehaviour.target:ID() == uid then
+					if dfndbehaviour.target == uid then
 						dfndbehaviour:Assign(nil)
 					end
 				end
 			end
 			self.totalPriority = self.totalPriority - defendee.priority
-			defendee.unit = nil
-			defendee = nil
 			table.remove(self.defendees, i)
 			EchoDebug("defendee removed from table. there are " .. #self.defendees .. " defendees total")
 			self:AssignAll()
@@ -130,7 +128,13 @@ function DefendHandler:AssignAll()
 		local number = math.floor(defendee.priority * defendersPerPriority)
 		if number ~= 0 and #defendersToAssign ~= 0 then
 			local defendeePos = defendee.position
-			if defendeePos == nil then defendeePos = defendee.unit:GetPosition() end
+			if defendeePos == nil then 
+				if defendee.behaviour ~= nil then
+					if defendee.behaviour.unit ~= nil then
+						defendeePos = defendee.behaviour.unit:Internal():GetPosition()
+					end
+				end
+			end
 			-- put into table to sort by distance
 			local bydistance = {}
 			for di, dfndbehaviour in pairs(defendersToAssign) do
@@ -140,6 +144,13 @@ function DefendHandler:AssignAll()
 						table.remove(defendersToAssign, di)
 						okay = false
 						break
+					end
+				end
+				if okay then
+					if dfndbehaviour == nil then
+						okay = false
+					elseif dfndbehaviour.unit == nil then
+						okay = false
 					end
 				end
 				if okay then
@@ -184,10 +195,10 @@ function DefendHandler:IsDefendingMe(defenderUnit, defendeeUnit)
 	local defenderID = defenderUnit:ID()
 	local defendeeID = defendeeUnit:ID()
 	for i, dfndbehaviour in pairs(self.defenders) do
-		if dfndbehaviour.unit:Internal() ~= nil then
+		if dfndbehaviour.unit ~= nil then
 			if dfndbehaviour.unit:Internal():ID() == defenderID then
 				if dfndbehaviour.target ~= nil then
-					if dfndbehaviour.target:ID() == defendeeID then
+					if dfndbehaviour.target == defendeeID then
 						return true
 					end
 				end
@@ -269,10 +280,13 @@ function DefendHandler:Unscramble()
 end
 
 -- receive a signal that a unit is threatened
-function DefendHandler:Danger(defendeeUnit)
-	local defendeeID = defendeeUnit:ID()
+function DefendHandler:Danger(behaviour)
+	if behaviour == nil then return end
+	if behaviour.unit == nil then return end
+	if behaviour.name == nil then behaviour.name = behaviour.unit:Internal():Name() end
+	if behaviour.id == nil then behaviour.id = behaviour.unit:Internal():ID() end
 	for i, defendee in pairs(self.defendees) do
-		if defendee.uid == defendeeID then
+		if defendee.uid == behaviour.id then
 			if not defendee.threatened then
 				EchoDebug("defendee threatened")
 				defendee.threatened = game:Frame()
@@ -284,15 +298,13 @@ function DefendHandler:Danger(defendeeUnit)
 	end
 	-- if it's not a defendee, make it one
 	local defendee = {priority = threatenedPriority, threatened = game:Frame()}
-	local uname = defendeeUnit:Name()
-	local turtlePriority = 0
-	if turtleList[uname] then turtlePriority = turtleList[uname] end
-	if unitTable[uname].buildOptions or turtlePriority > 2 then defendee.scrambleForMe = true end
+	local uname = behaviour.name
+	if unitTable[uname].buildOptions then defendee.scrambleForMe = true end
 	if unitTable[uname].isBuilding then
 		defendee.position = defendeeUnit:GetPosition()
 	else
-		defendee.unit = defendeeUnit
-		defendee.uid = defendeeUnit:ID()
+		defendee.behaviour = behaviour
+		defendee.uid = behaviour.id
 	end
 	table.insert(self.defendees, defendee)
 	self.totalPriority = self.totalPriority + threatenedPriority

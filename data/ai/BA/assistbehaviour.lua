@@ -9,14 +9,13 @@ local function EchoDebug(inStr)
 	end
 end
 
-local IDByTypeTaken = {}
 local CMD_GUARD = 25
 local CMD_PATROL = 15
 
 AssistBehaviour = class(Behaviour)
 
 function AssistBehaviour:DoIAssist()
-	if (self.IDByType ~= 1 and self.IDByType ~= 3) or self.isNanoTurret then
+	if ai.nonAssistant[self.id] ~= true or self.isNanoTurret then
 		return true
 	else
 		return false
@@ -32,8 +31,8 @@ function AssistBehaviour:Init()
 	if nanoTurretList[uname] then self.isNanoTurret = true end
 	if commanderList[uname] then self.isCommander = true end
 	self.id = self.unit:Internal():ID()
-	self:AssignIDByType()
-	EchoDebug(uname .. " " .. self.IDByType)
+	ai.assisthandler:AssignIDByName(self)
+	EchoDebug(uname .. " " .. ai.IDByName[self.id])
 	EchoDebug("AssistBehaviour: added to unit "..uname)
 end
 
@@ -70,26 +69,24 @@ function AssistBehaviour:Update()
 		local uname = self.name
 		if self.isCommander then
 			-- turn commander into build assister if you control more than half the mexes or if it's damaged
-			if self.IDByType == 1 then
+			if ai.nonAssistant[self.id] then
 				if (IsSiegeEquipmentNeeded() or unit:GetHealth() < unit:GetMaxHealth() * 0.9) and ai.factories ~= 0 and ai.conCount > 2 then
-					self.IDByType = 2
-					ai.IDByType[self.id] = 2
+					ai.nonAssistant[self.id] = nil
 					self.unit:ElectBehaviour()
 				end
 			else
 				-- switch commander back to building
 				if (not IsSiegeEquipmentNeeded() and unit:GetHealth() >= unit:GetMaxHealth() * 0.9) or ai.factories == 0 or ai.conCount <= 2 then
-					self.IDByType = 1
-					ai.IDByType[self.id] = 1
+					ai.nonAssistant[self.id] = true
 					self.unit:ElectBehaviour()
 				end
 			end
 		else
 			-- fill empty spots after con units die
-			if self.IDByType > ai.nameCount[uname] then
-				EchoDebug("filling empty spots with " .. uname .. " " .. self.IDByType)
-				self:AssignIDByType()
-				EchoDebug("ID now: " .. self.IDByType)
+			if ai.IDByName[self.id] > ai.nameCount[uname] then
+				EchoDebug("filling empty spots with " .. uname .. " " .. ai.IDByName[self.id])
+				ai.assisthandler:AssignIDByName(self)
+				EchoDebug("ID now: " .. ai.IDByName[self.id])
 				self.unit:ElectBehaviour()
 			end
 		end
@@ -98,11 +95,11 @@ function AssistBehaviour:Update()
 	if math.mod(f,60) == 0 then
 		if self.active then
 			if self.target ~= nil then
-				if self.assisting ~= self.target:ID() then
+				if self.assisting ~= self.target then
 					local floats = api.vectorFloat()
-					floats:push_back(self.target:ID())
+					floats:push_back(self.target)
 					self.unit:Internal():ExecuteCustomCommand(CMD_GUARD, floats)
-					self.assisting = self.target:ID()
+					self.assisting = self.target
 					self.patroling = false
 				end
 			elseif not self.patroling then
@@ -150,18 +147,12 @@ end
 
 function AssistBehaviour:UnitDead(unit)
 	if unit.engineID == self.unit.engineID then
-		-- game:SendToConsole("assistant " .. self.name .. " died")
-		local uname = self.name
-		if IDByTypeTaken[uname] ~= nil then IDByTypeTaken[uname][self.IDByType] = nil end
-		self.IDByType = nil
-		ai.IDByType[self.id] = nil
-		ai.assisthandler:RemoveWorking(self)
-		ai.assisthandler:RemoveFree(self)
+		ai.assisthandler:RemoveAssistant(self)
 	end
 end
 
-function AssistBehaviour:Assign(builder)
-	self.target = builder
+function AssistBehaviour:Assign(builderID)
+	self.target = builderID
 	self.lastAssignFrame = game:Frame()
 end
 
@@ -170,44 +161,17 @@ function AssistBehaviour:SetFallback(position)
 end
 
 -- assign if not busy (used by factories to occupy idle assistants)
-function AssistBehaviour:SoftAssign(builder)
+function AssistBehaviour:SoftAssign(builderID)
 	if self.target == nil then
-		self.target = builder
+		self.target = builderID
 	else
 		if self.lastAssignFrame == nil then
-			self.target = builder
+			self.target = builderID
 		else
 			local f = game:Frame()
 			if f > self.lastAssignFrame + 900 then
-				self.target = builder
+				self.target = builderID
 			end
-		end
-	end
-end
-
-function AssistBehaviour:AssignIDByType()
-	local uname = self.name
-	if IDByTypeTaken[uname] == nil then
-		self.IDByType = 1
-		ai.IDByType[self.id] = 1
-		IDByTypeTaken[uname] = {}
-		IDByTypeTaken[uname][1] = true
-	else
-		if self.IDByType ~= nil then
-			IDByTypeTaken[uname][self.IDByType] = nil
-		end
-		local id = 1
-		while id <= ai.nameCount[uname] do
-			id = id + 1
-			if not IDByTypeTaken[uname][id] then break end
-		end
-		self.IDByType = id
-		ai.IDByType[self.id] = id
-		IDByTypeTaken[uname][id] = true
-	end
-	if self.active then
-		if self:DoIAssist() then
-			ai.assisthandler:AddFree(self)
 		end
 	end
 end

@@ -67,7 +67,7 @@ function ReclaimBehaviour:Update()
 		local doreclaim = false
 		if self.dedicated and not self.resurrecting then
 			doreclaim = true
-		elseif ai.conCount > 2 and ai.needToReclaim and ai.reclaimerCount == 0 and ai.IDByType[self.id] ~= 1 and ai.IDByType[self.id] ~= 3 then
+		elseif ai.conCount > 2 and ai.needToReclaim and ai.reclaimerCount == 0 and ai.IDByName[self.id] ~= 1 and ai.IDByName[self.id] == ai.nameCount[self.name] then
 			if not ai.haveExtraReclaimer then
 				ai.haveExtraReclaimer = true
 				self.extraReclaimer = true
