@@ -22,6 +22,7 @@ local shieldMod = 1000
 local jamMod = 1000
 local radarMod = 1000
 local sonarMod = 1000
+local missingFactoryDefenseMod = 1500 -- if a turtle with a factory has no defense, subtract this much from distance
 local distanceMod = 1.5
 
 local factoryPriority = 4 -- added to tech level. above this priority allows two of the same type of defense tower.
@@ -346,6 +347,9 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard)
 				if mod == 0 or mod < ut.metalCost or (mod < modLimit and modDefecit < ut.metalCost * 3) then
 					local dist = Distance(position, turtle.position)
 					dist = dist - (modDefecit * distanceMod)
+					if (ground or air or submerged) and mod == 0 and turtle.priority > factoryPriority then
+						dist = dist - missingFactoryDefenseMod
+					end
 					EchoDebug("distance: " .. dist)
 					if dist < bestDist then
 						EchoDebug("best distance")

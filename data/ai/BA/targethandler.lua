@@ -927,15 +927,20 @@ function TargetHandler:GetBestAttackCell(representative)
 			end
 		end
 	end
+	local best
 	if bestValueCell then
-		return bestValueCell
+		best = bestValueCell
 	elseif enemyBaseCell then
-		return enemyBaseCell
+		best = enemyBaseCell
 	elseif bestAnyValueCell then
-		return bestAnyValueCell
+		best = bestAnyValueCell
 	elseif bestThreatCell then
-		return bestThreatCell
+		best = bestThreatCell
+	elseif self.lastAttackCell then
+		best = self.lastAttackCell
 	end
+	self.lastAttackCell = best
+	return best
 end
 
 function TargetHandler:GetBestNukeCell()

@@ -89,9 +89,9 @@ function DefendBehaviour:Update()
 					else
 						local dist = Distance(self.unit:Internal():GetPosition(), right)
 						EchoDebug(dist)
-						if dist < 100 then
+						if dist < 200 then
 							local floats = api.vectorFloat()
-							floats:push_back(self.targetPos.x - 100)
+							floats:push_back(self.targetPos.x - 200)
 							floats:push_back(self.targetPos.y)
 							floats:push_back(self.targetPos.z)
 							self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats)
