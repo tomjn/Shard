@@ -202,6 +202,7 @@ function TaskQueueBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(u)
 	self.mtype = mtype
 	self.name = u:Name()
+	if commanderList[self.name] then self.isCommander = true end
 	self.id = u:ID()
 
 	-- register if factory is going to use outmoded queue
@@ -595,6 +596,13 @@ function TaskQueueBehaviour:ProgressQueue()
 	if not self.released then
 		ai.assisthandler:Release(builder)
 		ai.buildsitehandler:ClearMyPlans(self)
+		if not self.isCommander and not self.isFactory then
+			if ai.IDByName[self.id] ~= nil then
+				if ai.IDByName[self.id] > ai.nonAssistantsPerName then
+					ai.nonAssistant[self.id] = nil
+				end
+			end
+		end
 		self.released = true
 	end
 	if self.queue ~= nil then
