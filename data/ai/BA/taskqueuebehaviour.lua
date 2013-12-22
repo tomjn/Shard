@@ -246,6 +246,9 @@ function TaskQueueBehaviour:UnitBuilt(unit)
 	if self.unit == nil then return end
 	if unit.engineID == self.unit.engineID then
 		self.progress = true
+		if not self.isFactory then
+			ai.defendhandler:AddDefendee(self)
+		end
 	end
 end
 

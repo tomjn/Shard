@@ -128,7 +128,7 @@ function AssistHandler:Summon(builder, position, number, force)
 					table.insert(self.free, asstbehaviour)
 				else
 					table.insert(self.working[bid], asstbehaviour)
-					asstbehaviour:Assign(builder)
+					asstbehaviour:Assign(bid)
 					n = n + 1
 				end
 			end
@@ -146,7 +146,7 @@ end
 -- assistants that become free before this magnet is released will get assigned to this builder
 function AssistHandler:Magnetize(builder, position, number)
 	if number == nil or number == 0 then number = -1 end
-	table.insert(self.magnets, {bid = builder:ID(), builder = builder, pos = position, number = number})
+	table.insert(self.magnets, {bid = builder:ID(), pos = position, number = number})
 end
 
 -- summons and magnetizes until released
@@ -190,7 +190,7 @@ function AssistHandler:TakeUpSlack(builder)
 		end
 		if not skip then
 			if self:IsLocal(asstbehaviour, builderPos) then
-				asstbehaviour:SoftAssign(builder)
+				asstbehaviour:SoftAssign(builder:ID())
 			end
 		end
 	end
@@ -229,7 +229,7 @@ function AssistHandler:DoMagnets()
 					self.totalAssignments = self.totalAssignments + 1
 				end
 				table.insert(self.working[magnet.bid], asstbehaviour)
-				asstbehaviour:Assign(magnet.builder)
+				asstbehaviour:Assign(magnet.bid)
 				table.remove(self.free, fi)
 				if magnet.number ~= -1 then magnet.number = magnet.number - 1 end
 				EchoDebug("one assistant magnetted to " .. magnet.bid .. " magnet has " .. magnet.number .. " left to get from " .. #self.free .. " available")
@@ -256,8 +256,10 @@ function AssistHandler:Release(builder, bid, dead)
 		local asstbehaviour = table.remove(self.working[bid])
 		if dead then asstbehaviour:Assign(nil) end
 		table.insert(self.free, asstbehaviour)
-		if ai.IDByName[asstbehaviour.id] <= ai.nonAssistantsPerName then
-			ai.nonAssistant[asstbehaviour.id] = true
+		if ai.IDByName[asstbehaviour.id] ~= nil then
+			if ai.IDByName[asstbehaviour.id] <= ai.nonAssistantsPerName then
+				ai.nonAssistant[asstbehaviour.id] = true
+			end
 		end
 		EchoDebug(asstbehaviour.name .. " released to available assistants")
 	end
@@ -267,7 +269,6 @@ function AssistHandler:Release(builder, bid, dead)
 	for i, magnet in pairs(self.magnets) do
 		if magnet.bid == bid then
 			EchoDebug("removing a magnet")
-			magnet.builder = nil
 			table.remove(self.magnets, i)
 		end
 	end
@@ -308,7 +309,7 @@ end
 
 function AssistHandler:RemoveWorking(asstbehaviour)
 	if asstbehaviour.target == nil then return false end
-	local targetID = asstbehaviour.target:ID()
+	local targetID = asstbehaviour.target
 	for bid, workers in pairs(self.working) do
 		if bid == targetID then
 			for i, ab in pairs(workers) do

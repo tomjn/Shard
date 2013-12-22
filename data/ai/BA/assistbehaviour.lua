@@ -85,7 +85,7 @@ function AssistBehaviour:Update()
 			-- fill empty spots after con units die
 			if ai.IDByName[self.id] > ai.nameCount[uname] then
 				EchoDebug("filling empty spots with " .. uname .. " " .. ai.IDByName[self.id])
-				ai.assisthandler:AssignIDByName()
+				ai.assisthandler:AssignIDByName(self)
 				EchoDebug("ID now: " .. ai.IDByName[self.id])
 				self.unit:ElectBehaviour()
 			end
@@ -95,11 +95,11 @@ function AssistBehaviour:Update()
 	if math.mod(f,60) == 0 then
 		if self.active then
 			if self.target ~= nil then
-				if self.assisting ~= self.target:ID() then
+				if self.assisting ~= self.target then
 					local floats = api.vectorFloat()
-					floats:push_back(self.target:ID())
+					floats:push_back(self.target)
 					self.unit:Internal():ExecuteCustomCommand(CMD_GUARD, floats)
-					self.assisting = self.target:ID()
+					self.assisting = self.target
 					self.patroling = false
 				end
 			elseif not self.patroling then
@@ -151,8 +151,8 @@ function AssistBehaviour:UnitDead(unit)
 	end
 end
 
-function AssistBehaviour:Assign(builder)
-	self.target = builder
+function AssistBehaviour:Assign(builderID)
+	self.target = builderID
 	self.lastAssignFrame = game:Frame()
 end
 
@@ -161,16 +161,16 @@ function AssistBehaviour:SetFallback(position)
 end
 
 -- assign if not busy (used by factories to occupy idle assistants)
-function AssistBehaviour:SoftAssign(builder)
+function AssistBehaviour:SoftAssign(builderID)
 	if self.target == nil then
-		self.target = builder
+		self.target = builderID
 	else
 		if self.lastAssignFrame == nil then
-			self.target = builder
+			self.target = builderID
 		else
 			local f = game:Frame()
 			if f > self.lastAssignFrame + 900 then
-				self.target = builder
+				self.target = builderID
 			end
 		end
 	end

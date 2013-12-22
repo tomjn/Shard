@@ -894,9 +894,10 @@ end
 function TargetHandler:GetBestAttackCell(representative)
 	if not representative then return end
 	self:UpdateMap()
-	if enemyBaseCell then return enemyBaseCell end
 	local bestValueCell
 	local bestValue = -999999
+	local bestAnyValueCell
+	local bestAnyValue = -999999
 	local bestThreatCell
 	local bestThreat = 0
 	local name = representative:Name()
@@ -907,11 +908,17 @@ function TargetHandler:GetBestAttackCell(representative)
 		if cell.pos then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) or longrange then
 				local value, threat = CellValueThreat(name, cell)
-				if value > 0 then
-					value = value - threat
+				if value > 750 then
+					value = 0 - threat
 					if value > bestValue then
 						bestValueCell = cell
 						bestValue = value
+					end
+				elseif value > 0 then
+					value = 0 - threat
+					if value > bestAnyValue then
+						bestAnyValueCell = cell
+						bestAnyValue = value
 					end
 				elseif threat > bestThreat then
 					bestThreatCell = cell
@@ -922,7 +929,11 @@ function TargetHandler:GetBestAttackCell(representative)
 	end
 	if bestValueCell then
 		return bestValueCell
-	else
+	elseif enemyBaseCell then
+		return enemyBaseCell
+	elseif bestAnyValueCell then
+		return bestAnyValueCell
+	elseif bestThreatCell then
 		return bestThreatCell
 	end
 end
