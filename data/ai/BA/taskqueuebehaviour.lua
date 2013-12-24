@@ -164,7 +164,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 						value = DummyUnitName
 					end
 				else
-					if metalBelowHalf or energyTooLow or Metal.income < ai.nameCount[value] * 9 or farTooFewCombats then
+					if metalBelowHalf or energyTooLow or ai.nameCount[value] > ai.conCount + ai.assistCount / 3 or notEnoughCombats then
 						value = DummyUnitName
 					end
 				end
@@ -416,7 +416,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 			utype = nil
 		end
 	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
-		-- build factories at a turtle
+		-- build factories at a turtle (this shouldn't come up, because BestFactory finds a location)
 		EchoDebug("looking for most turtled position for factory")
 		local turtlePos = ai.turtlehandler:MostTurtled(builder)
 		if turtlePos then
@@ -424,9 +424,9 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		end
 		if p == nil then
 			EchoDebug("no turtle position found, trying next to factory")
-			local factoryPos = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+			local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 5000)
 			if factoryPos then
-				p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+				p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
 			end
 		end
 		if p == nil then
@@ -488,6 +488,9 @@ function TaskQueueBehaviour:BestFactory()
 			local buildMe = true
 			local isAdvanced = advFactories[factoryName]
 			local isExperimental = expFactories[factoryName] or leadsToExpFactories[factoryName]
+			
+			-- if isExperimental or ai.needExperimental then DebugEnabled = true end
+			
 			if ai.needAdvanced and not ai.haveAdvFactory then
 				if not isAdvanced then buildMe = false end
 			end
@@ -508,7 +511,15 @@ function TaskQueueBehaviour:BestFactory()
 				local turtlePos = ai.turtlehandler:MostTurtled(builder)
 				if turtlePos then
 					p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
-				else
+				end
+				if p == nil then
+					EchoDebug("no turtle position found, trying next to factory")
+					local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 10000)
+					if factoryPos then
+						p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
+					end
+				end
+				if p == nil then
 					EchoDebug("no turtle position found for " .. factoryName .. ", trying near builder")
 					p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 				end
@@ -556,6 +567,7 @@ function TaskQueueBehaviour:BestFactory()
 					end
 				end
 			end
+			-- DebugEnabled = false
 		end
 	end
 	if bestName ~= nil then EchoDebug("best factory: " .. bestName) end
@@ -574,7 +586,7 @@ function TaskQueueBehaviour:GetQueue()
 	end
 	self.outmodedTechLevel = false
 	if outmodedTaskqueues[self.name] ~= nil and not got then
-		if self.isFactory and unitTable[self.name].techLevel < ai.maxFactoryLevel and metalBelowHalf then
+		if self.isFactory and unitTable[self.name].techLevel < ai.maxFactoryLevel and Metal.reserves < Metal.capacity * 0.8 then
 			-- stop buidling lvl1 attackers if we have a lvl2, unless we've got lots of metal, in which case use it up
 			q = outmodedTaskqueues[self.name]
 			got = true

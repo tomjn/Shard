@@ -140,12 +140,13 @@ function CheckForMapControl()
 		local attackTooExpensive = attackCounter == maxAttackCounter
 		local plentyOfCombatUnits = ai.combatCount > attackCounter * 0.9
 		local controlMetalSpots = ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
-		local needUpgrade = plentyOfCombatUnits or couldAttack or bombingTooExpensive or attackTooExpensive or Metal.income > 20 or controlMetalSpots
+		local needUpgrade = plentyOfCombatUnits or couldAttack or bombingTooExpensive or attackTooExpensive
+		local lotsOfMetal = Metal.income > 20 or controlMetalSpots
 
 		EchoDebug(ai.totalEnemyThreat .. " " .. ai.totalEnemyImmobileThreat .. " " .. ai.totalEnemyMobileThreat)
 		-- build siege units if the enemy is turtling, if a lot of our attackers are getting destroyed, or if we control over 40% of the metal spots
 		needSiege = (ai.totalEnemyImmobileThreat > ai.totalEnemyMobileThreat * 3.5 and ai.totalEnemyImmobileThreat > 50000) or attackCounter >= siegeAttackCounter or controlMetalSpots
-		ai.needAdvanced = (Metal.income > 10 or controlMetalSpots) and ai.factories > 0 and needUpgrade
+		ai.needAdvanced = (Metal.income > 10 or controlMetalSpots) and ai.factories > 0 and (needUpgrade or lotsOfMetal)
 		ai.needExperimental = false
 		ai.needNukes = false
 		if Metal.income > 50 and ai.haveAdvFactory and needUpgrade and ai.enemyBasePosition then
@@ -159,6 +160,7 @@ function CheckForMapControl()
 			end
 			ai.needNukes = true
 		end
+		EchoDebug("need experimental? " .. tostring(ai.needExperimental) .. ", need nukes? " .. tostring(ai.needNukes) .. ", have advanced? " .. tostring(ai.haveAdvFactory) .. ", need upgrade? " .. tostring(needUpgrade) .. ", have enemy base position? " .. tostring(ai.enemyBasePosition))
 		EchoDebug("metal income: " .. Metal.income .. "  combat units: " .. ai.combatCount)
 		EchoDebug("have advanced? " .. tostring(ai.haveAdvFactory) .. " have experimental? " .. tostring(ai.haveExpFactory))
 		EchoDebug("need advanced? " .. tostring(ai.needAdvanced) .. "  need experimental? " .. tostring(ai.needExperimental))
