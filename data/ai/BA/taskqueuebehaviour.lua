@@ -18,7 +18,7 @@ local function GetEcon()
 	Metal = game:GetResourceByName("Metal")
 	extraEnergy = Energy.income - Energy.usage
 	extraMetal = Metal.income - Metal.usage
-	local enoughMetalReserves = math.min(Metal.income * 2, Metal.capacity * 0.1)
+	local enoughMetalReserves = math.min(Metal.income, Metal.capacity * 0.1)
 	local lotsMetalReserves = math.min(Metal.income * 10, Metal.capacity * 0.5)
 	local enoughEnergyReserves = math.min(Energy.income * 2, Energy.capacity * 0.25)
 	-- local lotsEnergyReserves = math.min(Energy.income * 3, Energy.capacity * 0.5)
@@ -28,8 +28,9 @@ local function GetEcon()
 	metalOkay = Metal.reserves >= enoughMetalReserves
 	metalBelowHalf = Metal.reserves < lotsMetalReserves
 	metalAboveHalf = Metal.reserves >= lotsMetalReserves
-	notEnoughCombats = ai.combatCount < 13
-	farTooFewCombats = ai.combatCount < 5
+	local attackCounter = ai.attackhandler:GetCounter()
+	notEnoughCombats = ai.combatCount < attackCounter * 0.75
+	farTooFewCombats = ai.combatCount < attackCounter * 0.25
 end
 
 TaskQueueBehaviour = class(Behaviour)
@@ -100,15 +101,17 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 				-- build advanced factory
 			elseif expFactories[value] and metalOkay and energyOkay then
 				-- build experimental factory
-			elseif ai.couldAttack - ai.factories >= 1 or ai.couldBomb - ai.factories >= 1 then
-				-- other factory after attack
-				if metalTooLow or Metal.income < ai.factories * 10 or energyTooLow or Energy.income < 250 or (ai.needAdvanced and not ai.haveAdvFactory) then
-					value = DummyUnitName
-				end
 			else
-				-- other factory
-				if metalBelowHalf or Metal.income < ai.factories * 14 or energyTooLow or Energy.income < 350 or notEnoughCombats or (ai.needAdvanced and not ai.haveAdvFactory) then
-					value = DummyUnitName
+				if ai.couldAttack >= 1 or ai.couldBomb >= 1 then
+					-- other factory after attack
+					if metalTooLow or Metal.income < (ai.factories - ai.outmodedFactories) * 8 or energyTooLow or (ai.needAdvanced and not ai.haveAdvFactory) then
+						value = DummyUnitName
+					end
+				else
+					-- other factory before attack more stringent
+					if metalBelowHalf or Metal.income < (ai.factories - ai.outmodedFactories) * 12 or energyTooLow or (ai.needAdvanced and not ai.haveAdvFactory) then
+						value = DummyUnitName
+					end
 				end
 			end
 		elseif unitTable[value].isWeapon then
@@ -148,8 +151,23 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 		if unitTable[value].buildOptions ~= nil then
 			-- construction unit
 			EchoDebug("  construction unit")
-			if advConList[value] and (ai.nameCount[value] == nil or ai.nameCount[value] == 0 or ai.nameCount[value] == 1) and metalOkay and energyOkay and (self.outmodedFactory or not farTooFewCombats) then
-				-- build at least two of each advanced con
+			if advConList[value] then
+				-- advanced construction unit
+				if (ai.nameCount[value] == nil or ai.nameCount[value] == 0) then
+					-- build at least one of each advanced con (a mex upgrader)
+					if metalTooLow or energyTooLow or (farTooFewCombats and not self.outmodedFactory) then
+						value = DummyUnitName
+					end
+				elseif ai.nameCount[value] == 1 then
+					-- build another fairly easily
+					if metalTooLow or energyTooLow or Metal.income < 18 or (farTooFewCombats and not self.outmodedFactory) then
+						value = DummyUnitName
+					end
+				else
+					if metalBelowHalf or energyTooLow or Metal.income < ai.nameCount[value] * 9 or farTooFewCombats then
+						value = DummyUnitName
+					end
+				end
 			elseif (ai.nameCount[value] == nil or ai.nameCount[value] == 0) and metalOkay and energyOkay and (self.outmodedFactory or not farTooFewCombats) then
 				-- build at least one of each type
 			elseif assistList[value] then
@@ -164,7 +182,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 				end
 			else
 				EchoDebug(ai.combatCount .. " " .. ai.conCount .. " " .. tostring(metalBelowHalf) .. " " .. tostring(energyTooLow))
-				if metalBelowHalf or energyTooLow or (ai.combatCount < ai.conCount * 5 and not self.outmodedFactory and not airFacList[self.name]) then
+				if metalBelowHalf or energyTooLow or (ai.combatCount < ai.conCount * 4 and not self.outmodedFactory and not self.isAirFactory and not self.isShipyard) then
 					value = DummyUnitName
 				end
 			end
@@ -219,7 +237,19 @@ function TaskQueueBehaviour:Init()
 					ai.outmodedFactories = 1
 					break
 				end
+				if mtype == "air" then self.isAirFactory = true end
 			end
+		end
+	end
+
+	-- reset attack count
+	if self.isFactory and not self.outmodedFactory then
+		if self.isAirFactory then
+			ai.couldBomb = 0
+			ai.hasBombed = 0
+		else
+			ai.couldAttack = 0
+			ai.hasAttacked = 0
 		end
 	end
 
@@ -240,12 +270,9 @@ function TaskQueueBehaviour:UnitCreated(unit)
 end
 
 function TaskQueueBehaviour:UnitBuilt(unit)
-	if not self:IsActive() then
-		return
-	end
 	if self.unit == nil then return end
 	if unit.engineID == self.unit.engineID then
-		self.progress = true
+		if self:IsActive() then self.progress = true end
 		if not self.isFactory then
 			ai.defendhandler:AddDefendee(self)
 		end
@@ -377,7 +404,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		-- build nano turrets next to a factory near you
 		EchoDebug("looking for factory for nano")
 		local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 5000)
-		if factoryPos ~= nil then
+		if factoryPos then
 			EchoDebug("found factory")
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
 			if p == nil then
@@ -389,13 +416,21 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 			utype = nil
 		end
 	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
-		-- build factories next to a nano turret near you
+		-- build factories at a turtle
 		EchoDebug("looking for most turtled position for factory")
 		local turtlePos = ai.turtlehandler:MostTurtled(builder)
 		if turtlePos then
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
-		else
-			EchoDebug("no turtle position found, building wherever")
+		end
+		if p == nil then
+			EchoDebug("no turtle position found, trying next to factory")
+			local factoryPos = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+			if factoryPos then
+				p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+			end
+		end
+		if p == nil then
+			EchoDebug("no turtle position found, trying next to builder")
 			local builderPos = builder:GetPosition()
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 		end
@@ -455,12 +490,14 @@ function TaskQueueBehaviour:BestFactory()
 			local isExperimental = expFactories[factoryName] or leadsToExpFactories[factoryName]
 			if ai.needAdvanced and not ai.haveAdvFactory then
 				if not isAdvanced then buildMe = false end
-			elseif not ai.needAdvanced then
+			end
+			if not ai.needAdvanced then
 				if isAdvanced then buildMe = false end
 			end
 			if ai.needExperimental and not ai.haveExpFactory then
 				if not isExperimental then buildMe = false end
-			elseif not ai.needExperimental then
+			end
+			if not ai.needExperimental then
 				if expFactories[factoryName] then buildMe = false end
 			end
 			if buildMe and ai.nameCount[factoryName] == 0 then
@@ -537,7 +574,8 @@ function TaskQueueBehaviour:GetQueue()
 	end
 	self.outmodedTechLevel = false
 	if outmodedTaskqueues[self.name] ~= nil and not got then
-		if self.isFactory and unitTable[self.name].techLevel < ai.maxFactoryLevel then
+		if self.isFactory and unitTable[self.name].techLevel < ai.maxFactoryLevel and metalBelowHalf then
+			-- stop buidling lvl1 attackers if we have a lvl2, unless we've got lots of metal, in which case use it up
 			q = outmodedTaskqueues[self.name]
 			got = true
 			self.outmodedTechLevel = true
@@ -723,6 +761,8 @@ function TaskQueueBehaviour:Activate()
 		-- self.currentProject = self.constructing.unitName
 		self.released = false
 		self.progress = false
+	else
+		self:UnitIdle(self.unit:Internal())
 	end
 end
 

@@ -518,10 +518,11 @@ seaplaneConList = {
 }
 
 -- minimum, maximum, starting point units required to attack, bomb
-minAttackCounter = 5
-maxAttackCounter = 20
-baseAttackCounter = 10
-breakthroughAttackCounter = 11 -- build heavier battle units
+minAttackCounter = 8
+maxAttackCounter = 30
+baseAttackCounter = 15
+breakthroughAttackCounter = 16 -- build heavier battle units
+siegeAttackCounter = 22 -- build siege units
 minBomberCounter = 0
 maxBomberCounter = 16
 baseBomberCounter = 2
@@ -530,8 +531,8 @@ breakthroughBomberCounter = 8 -- build atomic bombers or air fortresses
 -- raid counter works backwards: it determines the number of raiders to build
 -- if it reaches minRaidCounter, none are built
 minRaidCounter = 0
-maxRaidCounter = 6
-baseRaidCounter = 4
+maxRaidCounter = 8
+baseRaidCounter = 5
 
 -- how many mobile con units of one type is allowed
 ConUnitPerTypeLimit = 4 --max(map:SpotCount() / 10, 2)

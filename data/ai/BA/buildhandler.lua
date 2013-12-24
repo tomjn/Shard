@@ -245,7 +245,11 @@ end
 
 function BuildSiteHandler:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, position, dist, segmentSize, direction, i)
 	local pos = nil
-	if dist == nil then dist = 64 end
+	if dist == nil then
+		local ut = unitTable[unitTypeToBuild:Name()]
+		dist = math.max(ut.xsize, ut.zsize) * 8
+		-- dist = 64
+	end
 	if segmentSize == nil then segmentSize = 1 end
 	if direction == nil then direction = 1 end
 	if i == nil then i = 0 end

@@ -102,12 +102,10 @@ function FactoryRegisterBehaviour:Register()
 	table.insert(ai.factoriesAtLevel[level], self)
 	if level > ai.maxFactoryLevel then
 		-- so that it will start producing combat units
-		ai.attackhandler:NeedLess()
-		ai.attackhandler:NeedLess()
+		ai.attackhandler:NeedLess(nil, 2)
 		ai.bomberhandler:NeedLess()
 		ai.bomberhandler:NeedLess()
-		ai.raidhandler:NeedMore()
-		ai.raidhandler:NeedMore()
+		ai.raidhandler:NeedMore(nil, 2)
 		-- set the current maximum factory level
 		ai.maxFactoryLevel = level
 	end

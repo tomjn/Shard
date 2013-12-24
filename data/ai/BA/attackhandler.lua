@@ -293,7 +293,7 @@ end
 
 function AttackHandler:TargetDied(mtype)
 	EchoDebug("target died")
-	self:NeedLess(mtype, 1)
+	self:NeedLess(mtype, 0.75)
 end
 
 function AttackHandler:IsMember(attkbehaviour)
@@ -373,7 +373,7 @@ end
 
 function AttackHandler:NeedMore(attkbehaviour)
 	local mtype = attkbehaviour.mtype
-	self.counter[mtype] = self.counter[mtype] + 0.5
+	self.counter[mtype] = self.counter[mtype] + 0.75
 	EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 end
 
