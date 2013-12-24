@@ -54,7 +54,7 @@ end
 local function CheckMySide(self)
 	-- fix: moved here so map object is present when it's accessed
 	ConUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)
-	ConUnitAdvPerTypeLimit = math.max(ConUnitPerTypeLimit / 2, 2)
+	ConUnitAdvPerTypeLimit = math.max(map:SpotCount() / 8, 2)
 	EchoDebug("per-type construction unit limit: " .. ConUnitPerTypeLimit)
 	minDefenseNetworkSize = ai.mobilityGridArea / 4 
 	-- set the averageWind
@@ -135,19 +135,18 @@ function CheckForMapControl()
 		tacticalNukeLimit = math.ceil(ai.combatCount / 12)
 
 		local attackCounter = ai.attackhandler:GetCounter()
-		local couldAttack = ai.couldAttack - ai.factories >= 1 or ai.couldBomb > 1
+		local couldAttack = ai.couldAttack >= 1 or ai.couldBomb >= 1
 		local bombingTooExpensive = ai.bomberhandler:GetCounter() == maxBomberCounter
 		local attackTooExpensive = attackCounter == maxAttackCounter
-		local plentyOfCombatUnits = ai.combatCount > attackCounter * 2.5
+		local plentyOfCombatUnits = ai.combatCount > attackCounter * 0.9
+		local controlMetalSpots = ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
 		local needUpgrade = plentyOfCombatUnits or couldAttack or bombingTooExpensive or attackTooExpensive
+		local lotsOfMetal = Metal.income > 20 or controlMetalSpots
 
 		EchoDebug(ai.totalEnemyThreat .. " " .. ai.totalEnemyImmobileThreat .. " " .. ai.totalEnemyMobileThreat)
-		-- build siege units if the enemy is turtling, if a lot of our attackers are getting destroyed, or if we control more than half the metal spots on the map
-		needSiege = (ai.totalEnemyImmobileThreat > ai.totalEnemyMobileThreat * 3 and ai.totalEnemyImmobileThreat > 50000) or (attackCounter > maxAttackCounter * 0.85) or (ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.5)
-		ai.needAdvanced = false
-		if Metal.income > 12 and ai.factories > 0 and needUpgrade then
-			ai.needAdvanced = true
-		end
+		-- build siege units if the enemy is turtling, if a lot of our attackers are getting destroyed, or if we control over 40% of the metal spots
+		needSiege = (ai.totalEnemyImmobileThreat > ai.totalEnemyMobileThreat * 3.5 and ai.totalEnemyImmobileThreat > 50000) or attackCounter >= siegeAttackCounter or controlMetalSpots
+		ai.needAdvanced = (Metal.income > 10 or controlMetalSpots) and ai.factories > 0 and (needUpgrade or lotsOfMetal)
 		ai.needExperimental = false
 		ai.needNukes = false
 		if Metal.income > 50 and ai.haveAdvFactory and needUpgrade and ai.enemyBasePosition then
@@ -161,9 +160,11 @@ function CheckForMapControl()
 			end
 			ai.needNukes = true
 		end
+		EchoDebug("need experimental? " .. tostring(ai.needExperimental) .. ", need nukes? " .. tostring(ai.needNukes) .. ", have advanced? " .. tostring(ai.haveAdvFactory) .. ", need upgrade? " .. tostring(needUpgrade) .. ", have enemy base position? " .. tostring(ai.enemyBasePosition))
 		EchoDebug("metal income: " .. Metal.income .. "  combat units: " .. ai.combatCount)
 		EchoDebug("have advanced? " .. tostring(ai.haveAdvFactory) .. " have experimental? " .. tostring(ai.haveExpFactory))
 		EchoDebug("need advanced? " .. tostring(ai.needAdvanced) .. "  need experimental? " .. tostring(ai.needExperimental))
+		EchoDebug("need advanced? " .. tostring(ai.needAdvanced) .. ", need upgrade? " .. tostring(needUpgrade) .. ", have attacked enough? " .. tostring(couldAttack) .. " (" .. ai.couldAttack .. "), have " .. ai.factories .. " factories, " .. math.floor(Metal.income) .. " metal income")
 	end
 end
 
@@ -1813,13 +1814,16 @@ local function BuildAppropriateFactory()
 end
 
 local function FactoryOrNano(self)
+	CheckForMapControl()
 	if ai.factories == 0 then return BuildAppropriateFactory() end
 	EchoDebug("factories: " .. ai.factories .. "  combat units: " .. ai.combatCount)
 	local unitName = DummyUnitName
-	if ai.combatCount > 10 or ai.needAdvanced then
+	local attackCounter = ai.attackhandler:GetCounter()
+	local couldAttack = ai.couldAttack >= 2 or ai.couldBomb >= 2
+	if (ai.combatCount > attackCounter * 0.5 and couldAttack) or ai.needAdvanced then
 		unitName = BuildAppropriateFactory()
 	end
-	if ai.combatCount > 3 and unitName == DummyUnitName then
+	if unitName == DummyUnitName and ai.combatCount > attackCounter * 0.2 then
 		unitName = NanoTurret()
 	end
 	return unitName

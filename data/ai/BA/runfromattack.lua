@@ -36,7 +36,7 @@ function RunFromAttackBehaviour:Update()
 
 	-- timeout on underfire condition
 	if self.underfire then
-		if f > self.lastAttackedFrame + 600 then
+		if f > self.lastAttackedFrame + 300 then
 			self.underfire = false
 		end
 	else
