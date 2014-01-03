@@ -1,7 +1,7 @@
 require "common"
 
 local DebugEnabled = false
-local DebugPlotEnabled = true
+local DebugPlotEnabled = false
 local debugPlotTurtleFile
 
 local function EchoDebug(inStr)
