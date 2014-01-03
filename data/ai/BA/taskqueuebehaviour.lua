@@ -415,37 +415,21 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 			EchoDebug("no factory found")
 			utype = nil
 		end
-	elseif unitTable[value].isBuilding and unitTable[value].buildOptions then
-		-- build factories at a turtle (this shouldn't come up, because BestFactory finds a location)
-		EchoDebug("looking for most turtled position for factory")
-		local turtlePos = ai.turtlehandler:MostTurtled(builder)
-		if turtlePos then
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
-		end
-		if p == nil then
-			EchoDebug("no turtle position found, trying next to factory")
-			local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 5000)
-			if factoryPos then
-				p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
-			end
-		end
-		if p == nil then
-			EchoDebug("no turtle position found, trying next to builder")
-			local builderPos = builder:GetPosition()
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
-		end
 	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or unitTable[value].radarRadius ~= 0 or unitTable[value].sonarRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value] and not littlePlasmaList[value]) then
 		-- shields, defense, antinukes, jammer towers, radar, and sonar
-		EchoDebug("looking for least turtled position")
-		local turtlePos = ai.turtlehandler:LeastTurtled(builder, value)
-		if turtlePos then
-			EchoDebug("found turtle position")
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
-			if p == nil then
-				EchoDebug("did NOT find build spot near turtle position")
-				utype = nil
+		EchoDebug("looking for least turtled positions")
+		local turtlePosList = ai.turtlehandler:LeastTurtled(builder, value)
+		if turtlePosList then
+			if #turtlePosList ~= 0 then
+				EchoDebug("found turtle positions")
+				for i, turtlePos in ipairs(turtlePosList) do
+					p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+					if p ~= nil then break end
+				end
 			end
-		else
+		end
+		if p == nil then
+			EchoDebug("did NOT find build spot near turtle position")
 			utype = nil
 		end
 	elseif unitTable[value].isBuilding then
@@ -454,21 +438,21 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		if nukeList[value] or bigPlasmaList[value] or littlePlasmaList[value] then
 			bombard = value
 		end
-		local turtlePos = ai.turtlehandler:MostTurtled(builder, bombard)
-		if turtlePos then
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
-		else
-			local builderPos = builder:GetPosition()
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
+		local turtlePosList = ai.turtlehandler:MostTurtled(builder, bombard)
+		if turtlePosList then
+			if #turtlePosList ~= 0 then
+				for i, turtlePos in ipairs(turtlePosList) do
+					p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+					if p ~= nil then break end
+				end
+			end
 		end
 		if p == nil and bombard then
 			utype = nil
 		end
-	else
-		local builderPos = builder:GetPosition()
-		p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 	end
-	if utype ~=nil and p == nil then
+	-- last ditch placement
+	if utype ~= nil and p == nil then
 		local builderPos = builder:GetPosition()
 		p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 		if p == nil then
@@ -508,9 +492,14 @@ function TaskQueueBehaviour:BestFactory()
 				local builderPos = builder:GetPosition()
 				local p
 				EchoDebug("looking for most turtled position for " .. factoryName)
-				local turtlePos = ai.turtlehandler:MostTurtled(builder)
-				if turtlePos then
-					p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+				local turtlePosList = ai.turtlehandler:MostTurtled(builder)
+				if turtlePosList then
+					if #turtlePosList ~= 0 then
+						for i, turtlePos in ipairs(turtlePosList) do
+							p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+							if p ~= nil then break end
+						end
+					end
 				end
 				if p == nil then
 					EchoDebug("no turtle position found, trying next to factory")
