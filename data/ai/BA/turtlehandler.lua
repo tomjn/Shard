@@ -1,7 +1,7 @@
 require "common"
 
 local DebugEnabled = false
-local DebugPlotEnabled = false
+local DebugPlotEnabled = true
 local debugPlotTurtleFile
 
 local function EchoDebug(inStr)
@@ -11,26 +11,44 @@ local function EchoDebug(inStr)
 end
 
 local function PlotPointDebug(x, z, label)
-	label = string.format("%.1f", label)
+	if label ~= "LIMB" then label = string.format("%.1f", label) end
 	debugPlotTurtleFile:write(math.ceil(x) .. " " .. math.ceil(z) .. " " .. label .. "\n")
 end
 
-local maxOrganDistance = 200
+local maxOrganDistance = 400
 
-local antinukeMod = 1000
-local shieldMod = 1000
-local jamMod = 1000
-local radarMod = 1000
-local sonarMod = 1000
-local missingFactoryDefenseMod = 1500 -- if a turtle with a factory has no defense, subtract this much from distance
-local distanceMod = 1.5
+local babySize = 200
+local outpostSize = 250
+local baseSize = 300
+
+local baseOrgans = 4
+local outpostOrgans = 2
+
+local outpostLimbs = 2
+local baseLimbs = 3
+
+local layerMod = {
+	ground = 1,
+	air = 1,
+	submerged = 1,
+	antinuke = 1000,
+	shield = 1000,
+	jam = 1000,
+	radar = 1000,
+	sonar = 1000,
+}
+
+local missingFactoryDefenseDistance = 1500 -- if a turtle with a factory has no defense, subtract this much from distance
+local modDistance = 1.25
 
 local factoryPriority = 4 -- added to tech level. above this priority allows two of the same type of defense tower.
 
--- this is added to the turtle's priority if a shell of this layer is added to it
-local layerPriority = {}
-layerPriority["jam"] = 1
-layerPriority["shield"] = 2
+local basePriority = factoryPriority + 1
+local outpostPriority = 2
+
+local exteriorLayer = { ground = 1, submerged = 1 }
+local interiorLayer = { air = 1, antinuke = 1, shield = 1, jam = 1, radar = 1, sonar = 1 }
+local hurtyLayer = { ground = 1, submerged = 1, air = 1 }
 
 TurtleHandler = class(Module)
 
@@ -126,12 +144,15 @@ function TurtleHandler:AddOrgan(position, unitID, unitName)
 	for i, turtle in pairs(self.turtles) do
 		if turtle.water == ut.needsWater then
 			local dist = Distance(position, turtle.position)
-			if dist < nearestDist then
-				nearestDist = dist
-				nearestTurtle = turtle
+			if dist < turtle.size then
+				if dist < nearestDist then
+					nearestDist = dist
+					nearestTurtle = turtle
+				end
 			end
 		end
 	end
+	-- make a new turtle if necessary
 	if nearestTurtle == nil then
 		nearestTurtle = self:AddTurtle(position, ut.needsWater)
 	end
@@ -173,42 +194,83 @@ end
 function TurtleHandler:Transplant(turtle, organ)
 	table.insert(turtle.organs, organ)
 	turtle.priority = turtle.priority + organ.priority
-	if turtle.priority > factoryPriority then turtle.nameLimit = 2 end
+	if #turtle.limbs < baseLimbs and turtle.priority >= basePriority and #turtle.organs >= baseOrgans then
+		self:Base(turtle, baseSize, baseLimbs)
+	elseif #turtle.limbs < outpostLimbs and turtle.priority >= outpostPriority and #turtle.organs >= outpostOrgans then
+		self:Base(turtle, outpostSize, outpostLimbs)
+	end
 	self.totalPriority = self.totalPriority + organ.priority
 end
 
-function TurtleHandler:Attach(turtle, shell)
+function TurtleHandler:Attach(limb, shell)
+	local turtle = limb.turtle
 	turtle[shell.layer] = turtle[shell.layer] + shell.value
 	if turtle.nameCounts[shell.uname] == nil then
 		turtle.nameCounts[shell.uname] = 1
 	else
 		turtle.nameCounts[shell.uname] = turtle.nameCounts[shell.uname] + 1
 	end
-	local priorityAddition = layerPriority[shell.layer] or 0
-	turtle.priority = turtle.priority + priorityAddition
-	if turtle.priority > factoryPriority then turtle.nameLimit = 2 end
-	self.totalPriority = self.totalPriority + priorityAddition
-	table.insert(shell.attachments, turtle)
+	limb[shell.layer] = limb[shell.layer] + shell.value
+	if limb.nameCounts[shell.uname] == nil then
+		limb.nameCounts[shell.uname] = 1
+	else
+		limb.nameCounts[shell.uname] = limb.nameCounts[shell.uname] + 1
+	end
+	table.insert(shell.attachments, limb)
 end
 
-function TurtleHandler:Detach(turtle, shell)
+function TurtleHandler:Detach(limb, shell)
+	local turtle = limb.turtle
 	turtle[shell.layer] = turtle[shell.layer] - shell.value
 	turtle.nameCounts[shell.uname] = turtle.nameCounts[shell.uname] - 1
-	local priorityAddition = layerPriority[shell.layer] or 0
-	turtle.priority = turtle.priority - priorityAddition
-	if turtle.priority <= factoryPriority then turtle.nameLimit = 1 end
-	self.totalPriority = self.totalPriority - priorityAddition
+	limb[shell.layer] = limb[shell.layer] - shell.value
+	limb.nameCounts[shell.uname] = limb.nameCounts[shell.uname] - 1
+end
+
+function TurtleHandler:InitializeInteriorLayers(limb)
+	for layer, nothing in pairs(interiorLayer) do
+		limb[layer] = 0
+	end
+end
+
+function TurtleHandler:Base(turtle, size, limbs)
+	turtle.size = size
+	for li, limb in pairs(turtle.limbs) do
+		if limb ~= turtle.firstLimb then
+			self:InitializeInteriorLayers(limb)
+			table.insert(turtle.interiorLimbs, limb)
+		end
+	end
+	turtle.limbs = {}
+	local angleAdd = twicePi / limbs
+	local angle = math.random() * twicePi
+	for l = 1, limbs do
+		local limb = { turtle = turtle, nameCounts = {}, ground = 0, submerged = 0 }
+		limb.position = RandomAway(turtle.position, size, false, angle)
+		for i, shell in pairs(self.shells) do
+			if exteriorLayer[shell.layer] then
+				local dist = Distance(limb.position, shell.position)
+				if dist < shell.radius then
+					self:Attach(limb, shell)
+				end
+			end
+		end
+		table.insert(turtle.limbs, limb)
+		angle = angle + angleAdd
+		if angle > twicePi then angle = angle - twicePi end
+	end
 end
 
 function TurtleHandler:AddTurtle(position, water, priority)
 	if priority == nil then priority = 0 end
-	local nameLimit = 1
-	if priority > factoryPriority then nameLimit = 2 end
-	local turtle = {position = position, organs = {}, water = water, nameCounts = {}, nameLimit = nameLimit, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
+	local firstLimb = { position = position, nameCounts = {}, ground = 0, submerged = 0 }
+	self:InitializeInteriorLayers(firstLimb)
+	local turtle = {position = position, size = babySize, organs = {}, limbs = { firstLimb }, interiorLimbs = { firstLimb }, firstLimb = firstLimb, water = water, nameCounts = {}, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
+	firstLimb.turtle = turtle
 	for i, shell in pairs(self.shells) do
 		local dist = Distance(position, shell.position)
 		if dist < shell.radius then
-			self:Attach(turtle, shell)
+			self:Attach(turtle.firstLimb, shell)
 		end
 	end
 	table.insert(self.turtles, turtle)
@@ -234,22 +296,30 @@ end
 function TurtleHandler:AddShell(position, uid, uname, value, layer, radius)
 	local shell = {position = position, uid = uid, uname = uname, value = value, layer = layer, radius = radius, attachments = {}}
 	local nearestDist = radius * 3
-	local nearestTurtle
+	local nearestLimb
 	local attached = false
 	for i, turtle in pairs(self.turtles) do
-		local dist = Distance(position, turtle.position)
-		if dist < radius then
-			self:Attach(turtle, shell)
-			attached = true
+		local checkThese
+		if exteriorLayer[layer] then
+			checkThese = turtle.limbs
+		else
+			checkThese = turtle.interiorLimbs
 		end
-		if not attached and dist < nearestDist then
-			nearestDist = dist
-			nearestTurtle = turtle
+		for li, limb in pairs(checkThese) do
+			local dist = Distance(position, limb.position)
+			if dist < radius then
+				self:Attach(limb, shell)
+				attached = true
+			end
+			if not attached and dist < nearestDist then
+				nearestDist = dist
+				nearestLimb = limb
+			end
 		end
 	end
 	-- if nothing is close enough, attach to the nearest turtle, so that we don't end up building infinite laser towers at the same turtle
 	if not attached and nearestTurtle then
-		self:Attach(nearestTurtle, shell)
+		self:Attach(nearestLimb, shell)
 	end
 	table.insert(self.shells, shell)
 	self:PlotAllDebug()
@@ -258,8 +328,8 @@ end
 function TurtleHandler:RemoveShell(uid)
 	for si, shell in pairs(self.shells) do
 		if shell.uid == uid then
-			for ti, turtle in pairs(shell.attachments) do
-				self:Detach(turtle, shell)
+			for li, limb in pairs(shell.attachments) do
+				self:Detach(limb, shell)
 			end
 			table.remove(self.shells, si)
 		end
@@ -267,116 +337,142 @@ function TurtleHandler:RemoveShell(uid)
 	self:PlotAllDebug()
 end
 
-function TurtleHandler:LeastTurtled(builder, unitName, bombard)
+function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
 	if builder == nil then return end
 	EchoDebug("checking for least turtled from " .. builder:Name() .. " for " .. tostring(unitName) .. " bombard: " .. tostring(bombard))
 	if unitName == nil then return end
 	local position = builder:GetPosition()
 	local ut = unitTable[unitName]
 	local Metal = game:GetResourceByName("Metal")
-	local ground, air, submerged, antinuke, shield, jam, radar, sonar
 	local priorityFloor = 1
+	local layer
 	if ut.isWeapon and not antinukeList[unitName] then
 		if ut.groundRange ~= 0 then
-			ground = true
-		end
-		if ut.airRange ~= 0 then
-			air = true
-		end
-		if ut.submergedRange ~= 0 then
-			submerged = true
+			layer = "ground"
+		elseif ut.airRange ~= 0 then
+			layer = "air"
+		elseif ut.submergedRange ~= 0 then
+			layer = "submerged"
 		end
 	elseif antinukeList[unitName] then
-		antinuke = true
+		layer = "antinuke"
 		priorityFloor = 5
 	elseif shieldList[unitName] then
-		shield = true
+		layer = "shield"
 		priorityFloor = 5
 	elseif ut.jammerRadius ~= 0 then
-		jam = true
+		layer = "jam"
 		priorityFloor = 5
 	elseif ut.radarRadius ~= 0 then
-		radar = true
+		layer = "radar"
 	elseif ut.sonarRadius ~= 0 then
-		sonar = true
+		layer = "sonar"
 	end
 	local bestDist = 100000
 	local best
+	local bydistance = {}
 	for i, turtle in pairs(self.turtles) do
 		local important = turtle.priority >= priorityFloor -- so that for example we don't build shields where there's just a mex
-		local enough = false
 		local isLocal = true
-		if unitName ~= nil and important then
-			if turtle.nameCounts[unitName] == nil or turtle.nameCounts[unitName] == 0 then
-				-- not enough
-			elseif turtle.nameCounts[unitName] >= turtle.nameLimit then
-				EchoDebug("too many " .. unitName .. " at turtle")
-				enough = true
-			end
-		end
-		if not enough and (ground or air or submerged) and important then
+		if important then
 			-- don't build land shells on water turtles or water shells on land turtles
 			isLocal = unitTable[unitName].needsWater == turtle.water
 		end
-		if not enough and isLocal and important then
-			local okay = ai.maphandler:UnitCanGoHere(builder, turtle.position) 
-			if okay and bombard and unitName ~= nil then 
-				okay = ai.targethandler:IsBombardPosition(turtle.position, unitName)
+		if isLocal and important then
+			local modLimit = 10000
+			if hurtyLayer[layer] then
+				modLimit = (turtle.priority / self.totalPriority) * Metal.income * 65
+				modLimit = math.floor(modLimit)
 			end
-			if okay and (radar or sonar or shield or antinuke or jammer) then
-				-- only build these things at already defended spots
-				okay = turtle.ground + turtle.air + turtle.submerged > 0
-			end
-			if okay then
-				local mod = 0
-				if ground then mod = mod + turtle.ground end
-				if air then mod = mod + turtle.air end
-				if submerged then mod = mod + turtle.submerged end
-				if antinuke then mod = mod + turtle.antinuke * antinukeMod end
-				if shield then mod = mod + turtle.shield * shieldMod end
-				if jam then mod = mod + turtle.jam * jamMod end
-				if radar then mod = mod + turtle.radar * radarMod end
-				if sonar then mod = mod + turtle.sonar * sonarMod end
-				local modLimit = 10000
-				if ground or air or submerged then
-					modLimit = (turtle.priority / self.totalPriority) * Metal.income * 65
-					modLimit = math.floor(modLimit)
+			local missingFactoryDefense = hurtyLayer[layer] and turtle[layer] == 0 and turtle.priority > factoryPriority
+			local checkThese
+			if interiorLayer[layer] then
+				if layer == "air" or turtle.ground + turtle.air + turtle.submerged > 0 then
+					checkThese = turtle.interiorLimbs
+				else
+					checkThese = {}
 				end
-				local modDefecit = modLimit - mod
-				EchoDebug("turtled: " .. mod .. ", limit: " .. tostring(modLimit) .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
-				if mod == 0 or mod < ut.metalCost or (mod < modLimit and modDefecit < ut.metalCost * 3) then
-					local dist = Distance(position, turtle.position)
-					dist = dist - (modDefecit * distanceMod)
-					if (ground or air or submerged) and mod == 0 and turtle.priority > factoryPriority then
-						dist = dist - missingFactoryDefenseMod
+			else
+				checkThese = turtle.limbs
+			end
+			for li, limb in pairs(checkThese) do
+				local enough
+				if interiorLayer[layer] then
+					enough = turtle.nameCounts[unitName] ~= nil and turtle.nameCounts[unitName] ~= 0
+				else
+					local turtleEnough = false
+					if turtle.nameCounts[unitName] ~= nil then
+						turtleEnough = turtle.nameCounts[unitName] >= #turtle.limbs
 					end
-					EchoDebug("distance: " .. dist)
-					if dist < bestDist then
-						EchoDebug("best distance")
-						bestDist = dist
-						best = turtle.position
+					enough = (limb.nameCounts[unitName] ~= nil and limb.nameCounts[unitName] ~= 0) or turtleEnough
+				end
+				local okay = false
+				if not enough then
+					okay = ai.maphandler:UnitCanGoHere(builder, limb.position) 
+				end
+				if okay and bombard and unitName ~= nil then 
+					okay = ai.targethandler:IsBombardPosition(limb.position, unitName)
+				end
+				if okay then
+					local mod
+					if interiorLayer[layer] then
+						mod = turtle[layer]
+					else
+						mod = limb[layer]
+					end
+					mod = mod * layerMod[layer]
+					local modDefecit = modLimit - mod
+					EchoDebug("turtled: " .. mod .. ", limit: " .. tostring(modLimit) .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
+					if mod == 0 or mod < ut.metalCost or mod < modLimit then
+						local dist = Distance(position, limb.position)
+						dist = dist - (modDefecit * modDistance)
+						if missingFactoryDefense then dist = dist - missingFactoryDefenseDistance end
+						EchoDebug("distance: " .. dist)
+						if oneOnly then
+							if dist < bestDist then
+								EchoDebug("best distance")
+								bestDist = dist
+								best = limb.position
+							end
+						else
+							bydistance[dist] = limb.position
+						end
 					end
 				end
 			end
 		end
 	end
-	if best then
-		local newpos = api.Position()
-		newpos.x = best.x
-		newpos.z = best.z
-		newpos.y = best.y
-		return newpos
+	if oneOnly then
+		if best then
+			local newpos = api.Position()
+			newpos.x = best.x
+			newpos.z = best.z
+			newpos.y = best.y
+			return newpos
+		else
+			return nil
+		end
 	else
-		return nil
+		local sorted = {}
+		for dist, pos in pairsByKeys(bydistance) do
+			local newpos = api.Position()
+			newpos.x = pos.x
+			newpos.z = pos.z
+			newpos.y = pos.y
+			table.insert(sorted, newpos)
+		end
+		EchoDebug("outputting " .. #sorted .. " least turtles")
+		return sorted
 	end
 end
 
-function TurtleHandler:MostTurtled(builder, bombard)
+function TurtleHandler:MostTurtled(builder, bombard, oneOnly)
 	if builder == nil then return end
 	EchoDebug("checking for most turtled from " .. builder:Name() .. ", bombard: " .. tostring(bombard))
 	local position = builder:GetPosition()
 	local bestDist = 100000
 	local best
+	local bydistance = {}
 	for i, turtle in pairs(self.turtles) do
 		if ai.maphandler:UnitCanGoHere(builder, turtle.position) then
 			local okay = true
@@ -384,29 +480,46 @@ function TurtleHandler:MostTurtled(builder, bombard)
 				okay = ai.targethandler:IsBombardPosition(turtle.position, bombard)
 			end
 			if okay then
-				local mod = turtle.ground + turtle.air + turtle.submerged + (turtle.shield * shieldMod) + (turtle.jam * jamMod)
+				local mod = turtle.ground + turtle.air + turtle.submerged + (turtle.shield * layerMod["shield"]) + (turtle.jam * layerMod["jam"])
 				EchoDebug("turtled: " .. mod .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
 				if mod ~= 0 then
 					local dist = Distance(position, turtle.position)
-					dist = dist - (mod * distanceMod * 2)
+					dist = dist - (mod * modDistance * 2)
 					EchoDebug("distance: " .. dist)
-					if dist < bestDist then
-						EchoDebug("best distance")
-						bestDist = dist
-						best = turtle.position
+					if oneOnly then
+						if dist < bestDist then
+							EchoDebug("best distance")
+							bestDist = dist
+							best = turtle.position
+						end
+					else
+						bydistance[dist] = turtle.position
 					end
 				end
 			end
 		end
 	end
-	if best then
-		local newpos = api.Position()
-		newpos.x = best.x
-		newpos.z = best.z
-		newpos.y = best.y
-		return newpos
+	if oneOnly then
+		if best then
+			local newpos = api.Position()
+			newpos.x = best.x
+			newpos.z = best.z
+			newpos.y = best.y
+			return newpos
+		else
+			return nil
+		end
 	else
-		return nil
+		local sorted = {}
+		for dist, pos in pairsByKeys(bydistance) do
+			local newpos = api.Position()
+			newpos.x = pos.x
+			newpos.z = pos.z
+			newpos.y = pos.y
+			table.insert(sorted, newpos)
+		end
+		EchoDebug("outputting " .. #sorted .. " most turtles")
+		return sorted
 	end
 end
 
@@ -419,6 +532,9 @@ function TurtleHandler:PlotAllDebug()
 		debugPlotTurtleFile= assert(io.open("debugturtleplot",'w'), "Unable to write debugturtleplot")
 		for i, turtle in pairs(self.turtles) do
 			PlotPointDebug(turtle.position.x, turtle.position.z, turtle.priority)
+			for li, limb in pairs(turtle.limbs) do
+				PlotPointDebug(limb.position.x, limb.position.z, "LIMB")
+			end
 		end
 		debugPlotTurtleFile:close()
 	end

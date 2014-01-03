@@ -306,7 +306,15 @@ function BuildSiteHandler:ClosestHighestLevelFactory(builder, maxDist)
 			end
 		end
 	end
-	return factoryPos
+	if factoryPos then
+		local newpos = api.Position()
+		newpos.x = factoryPos.x
+		newpos.z = factoryPos.z
+		newpos.y = factoryPos.y
+		return newpos
+	else
+		return
+	end
 end
 
 function BuildSiteHandler:DontBuildRectangle(x1, z1, x2, z2, unitID)
