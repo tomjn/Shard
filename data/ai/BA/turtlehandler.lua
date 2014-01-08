@@ -21,9 +21,6 @@ local babySize = 200
 local outpostSize = 250
 local baseSize = 300
 
-local baseOrgans = 4
-local outpostOrgans = 2
-
 local outpostLimbs = 2
 local baseLimbs = 3
 
@@ -149,6 +146,12 @@ function TurtleHandler:AddOrgan(position, unitID, unitName)
 					nearestDist = dist
 					nearestTurtle = turtle
 				end
+			elseif #turtle.organs == 1 then
+				if (turtle.priority + priority >= basePriority and dist < baseSize * 2) or (turtle.priority + priority >= outpostPriority and dist < outpostSize * 2) then
+					-- merge into an outpost or base
+					nearestDist = dist
+					nearestTurtle = turtle
+				end
 			end
 		end
 	end
@@ -194,10 +197,12 @@ end
 function TurtleHandler:Transplant(turtle, organ)
 	table.insert(turtle.organs, organ)
 	turtle.priority = turtle.priority + organ.priority
-	if #turtle.limbs < baseLimbs and turtle.priority >= basePriority and #turtle.organs >= baseOrgans then
-		self:Base(turtle, baseSize, baseLimbs)
-	elseif #turtle.limbs < outpostLimbs and turtle.priority >= outpostPriority and #turtle.organs >= outpostOrgans then
-		self:Base(turtle, outpostSize, outpostLimbs)
+	if #turtle.organs > 1 then
+		if #turtle.limbs < baseLimbs and turtle.priority >= basePriority then
+			self:Base(turtle, baseSize, baseLimbs)
+		elseif #turtle.limbs < outpostLimbs and turtle.priority >= outpostPriority then
+			self:Base(turtle, outpostSize, outpostLimbs)
+		end
 	end
 	self.totalPriority = self.totalPriority + organ.priority
 end
@@ -242,20 +247,50 @@ function TurtleHandler:Base(turtle, size, limbs)
 		end
 	end
 	turtle.limbs = {}
+	-- average the turtle's position
+	local totalX = 0
+	local totalZ = 0
+	for oi, organ in pairs(turtle.organs) do
+		totalX = totalX + organ.position.x
+		totalZ = totalZ + organ.position.z
+	end
+	turtle.position.x = totalX / #turtle.organs
+	turtle.position.z = totalZ / #turtle.organs
 	local angleAdd = twicePi / limbs
 	local angle = math.random() * twicePi
 	for l = 1, limbs do
 		local limb = { turtle = turtle, nameCounts = {}, ground = 0, submerged = 0 }
-		limb.position = RandomAway(turtle.position, size, false, angle)
-		for i, shell in pairs(self.shells) do
-			if exteriorLayer[shell.layer] then
-				local dist = Distance(limb.position, shell.position)
-				if dist < shell.radius then
-					self:Attach(limb, shell)
+		-- make sure the limb is in an acceptable position (not near the map edge, and not inside another turtle)
+		for aroundTheClock = 1, 12 do
+			local offMapCheck = RandomAway(turtle.position, size * 1.33, false, angle)
+			if offMapCheck.x ~= 1 and offMapCheck.x ~= ai.maxElmosX - 1 and offMapCheck.z ~= 1 and offMapCheck.z ~= ai.maxElmosZ - 1 then
+				limb.position = RandomAway(turtle.position, size, false, angle)
+				local inAnotherTurtle = false
+				for ti, turt in pairs(self.turtles) do
+					if turt ~= turtle then
+						local dist = Distance(turt.position, limb.position)
+						if dist < turt.size then
+							inAnotherTurtle = true
+							break
+						end
+					end
+				end
+				if not inAnotherTurtle then break end
+			end
+			angle = angle + twicePi / 12
+			if angle > twicePi then angle = angle - twicePi end
+		end
+		if limb.position then
+			for i, shell in pairs(self.shells) do
+				if exteriorLayer[shell.layer] then
+					local dist = Distance(limb.position, shell.position)
+					if dist < shell.radius then
+						self:Attach(limb, shell)
+					end
 				end
 			end
+			table.insert(turtle.limbs, limb)
 		end
-		table.insert(turtle.limbs, limb)
 		angle = angle + angleAdd
 		if angle > twicePi then angle = angle - twicePi end
 	end
@@ -381,10 +416,9 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
 		if isLocal and important then
 			local modLimit = 10000
 			if hurtyLayer[layer] then
-				modLimit = (turtle.priority / self.totalPriority) * Metal.income * 65
+				modLimit = (turtle.priority / self.totalPriority) * Metal.income * 60
 				modLimit = math.floor(modLimit)
 			end
-			local missingFactoryDefense = hurtyLayer[layer] and turtle[layer] == 0 and turtle.priority > factoryPriority
 			local checkThese
 			if interiorLayer[layer] then
 				if layer == "air" or turtle.ground + turtle.air + turtle.submerged > 0 then
@@ -426,7 +460,7 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
 					if mod == 0 or mod < ut.metalCost or mod < modLimit then
 						local dist = Distance(position, limb.position)
 						dist = dist - (modDefecit * modDistance)
-						if missingFactoryDefense then dist = dist - missingFactoryDefenseDistance end
+						if hurtyLayer[layer] and limb[layer] == 0 and turtle.priority > factoryPriority then dist = dist - missingFactoryDefenseDistance end
 						EchoDebug("distance: " .. dist)
 						if oneOnly then
 							if dist < bestDist then
