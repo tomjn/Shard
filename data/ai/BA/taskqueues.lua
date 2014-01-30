@@ -131,8 +131,8 @@ function CheckForMapControl()
 		end
 		AAUnitPerTypeLimit = math.ceil(ai.turtlehandler:GetTotalPriority() / 4)
 		heavyPlasmaLimit = math.ceil(ai.combatCount / 7)
-		nukeLimit = math.ceil(ai.combatCount / 20)
-		tacticalNukeLimit = math.ceil(ai.combatCount / 12)
+		nukeLimit = math.ceil(ai.combatCount / 24)
+		tacticalNukeLimit = math.ceil(ai.combatCount / 18)
 
 		local attackCounter = ai.attackhandler:GetCounter()
 		local couldAttack = ai.couldAttack >= 1 or ai.couldBomb >= 1
@@ -411,7 +411,9 @@ end
 function BuildSiegeIfNeeded(unitName)
 	if unitName == DummyUnitName then return DummyUnitName end
 	if IsSiegeEquipmentNeeded() then
-		return BuildWithLimitedNumber(unitName, math.ceil((ai.battleCount + ai.breakthroughCount) * 0.3))
+		if ai.siegeCount < (ai.battleCount + ai.breakthroughCount) * 0.3 then
+			return unitName
+		end
 	end
 	return DummyUnitName
 end
@@ -428,6 +430,7 @@ function BuildBreakthroughIfNeeded(unitName)
 			return DummyUnitName
 		end
 	else
+		if ai.battleCount <= minBattleCount then return DummyUnitName end
 		local attackCounter = ai.attackhandler:GetCounter(mtype)
 		if attackCounter == maxAttackCounter then
 			return unitName
@@ -765,7 +768,7 @@ function BuildBattleIfNeeded(unitName)
 	local mtype = unitTable[unitName].mtype
 	local attackCounter = ai.attackhandler:GetCounter(mtype)
 	EchoDebug(mtype .. " " .. attackCounter .. " " .. maxAttackCounter)
-	if attackCounter == maxAttackCounter then return DummyUnitName end
+	if attackCounter == maxAttackCounter and ai.battleCount > minBattleCount then return DummyUnitName end
 	if mtype == "veh" and ai.mySide == CORESideName and (ai.factoriesAtLevel[1] == nil or ai.factoriesAtLevel[1] == {}) then
 		-- core only has a lvl1 vehicle raider, so this prevents getting stuck
 		return unitName

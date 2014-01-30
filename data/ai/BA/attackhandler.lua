@@ -25,6 +25,7 @@ end
 
 function AttackHandler:Init()
 	self.recruits = {}
+	self.count = {}
 	self.squads = {}
 	self.counter = {}
 	self.attackSent = {}
@@ -67,8 +68,8 @@ function AttackHandler:DraftSquads()
 	local needtarget = {}
 	local f = game:Frame()
 	-- find which mtypes need targets
-	for mtype, recruits in pairs(self.recruits) do
-		if f > self.attackSent[mtype] + 1800 and #recruits >= self.counter[mtype] then
+	for mtype, count in pairs(self.count) do
+		if f > self.attackSent[mtype] + 1800 and count >= self.counter[mtype] then
 			table.insert(needtarget, mtype)
 		end
 	end
@@ -95,6 +96,7 @@ function AttackHandler:DraftSquads()
 				self.attackSent[mtype] = f
 				table.insert(self.squads, squad)
 				-- clear recruits
+				self.count[mtype] = 0
 				self.recruits[mtype] = {}
 				ai.hasAttacked = ai.hasAttacked + 1
 				self.counter[mtype] = self.counter[mtype] + 1
@@ -350,6 +352,9 @@ function AttackHandler:AddRecruit(attkbehaviour)
 			if self.recruits[mtype] == nil then self.recruits[mtype] = {} end
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
 			if self.attackSent[mtype] == nil then self.attackSent[mtype] = 0 end
+			if self.count[mtype] == nil then self.count[mtype] = 0 end
+			local level = unitTable[attkbehaviour.name].techLevel
+			self.count[mtype] = self.count[mtype] + level
 			table.insert(self.recruits[mtype], attkbehaviour)
 			attkbehaviour:SetMoveState()
 			attkbehaviour:Free()
@@ -363,6 +368,8 @@ function AttackHandler:RemoveRecruit(attkbehaviour)
 	for mtype, recruits in pairs(self.recruits) do
 		for i,v in ipairs(recruits) do
 			if v == attkbehaviour then
+				local level = unitTable[attkbehaviour.name].techLevel
+				self.count[mtype] = self.count[mtype] - level
 				table.remove(self.recruits[mtype], i)
 				return true
 			end
@@ -373,7 +380,8 @@ end
 
 function AttackHandler:NeedMore(attkbehaviour)
 	local mtype = attkbehaviour.mtype
-	self.counter[mtype] = self.counter[mtype] + 0.75
+	local level = unitTable[attkbehaviour.name].techLevel
+	self.counter[mtype] = self.counter[mtype] + (level * 0.7) -- 0.75
 	EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 end
 

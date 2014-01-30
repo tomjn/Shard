@@ -523,6 +523,7 @@ maxAttackCounter = 30
 baseAttackCounter = 15
 breakthroughAttackCounter = 16 -- build heavier battle units
 siegeAttackCounter = 22 -- build siege units
+minBattleCount = 4 -- how many battle units to build before building any breakthroughs, even if counter is too high
 minBomberCounter = 0
 maxBomberCounter = 16
 baseBomberCounter = 2

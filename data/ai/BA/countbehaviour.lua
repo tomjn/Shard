@@ -28,6 +28,9 @@ function CountBehaviour:Init()
     if unitTable[self.name].extractsMetal > 0 then self.isMex = true end
     if battleList[self.name] then self.isBattle = true end
     if breakthroughList[self.name] then self.isBreakthrough = true end
+    if self.isCombat and not battleList[self.name] and not breakthroughList[self.name] then
+    	self.isSiege = true
+    end
     if reclaimerList[self.name] then self.isReclaimer = true end
     if assistList[self.name] then self.isAssist = true end
 	if ai.nameCount[self.name] == nil then
@@ -59,6 +62,7 @@ function CountBehaviour:UnitBuilt(unit)
 		if self.isCombat then ai.combatCount = ai.combatCount + 1 end
 		if self.isBattle then ai.battleCount = ai.battleCount + 1 end
 		if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount + 1 end
+		if self.isSiege then ai.siegeCount = ai.siegeCount + 1 end
 		if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount + 1 end
 		if self.isAssist then ai.assistCount = ai.assistCount + 1 end
 		ai.lastNameFinished[self.name] = game:Frame()
@@ -96,6 +100,7 @@ function CountBehaviour:UnitDead(unit)
 			if self.isCombat then ai.combatCount = ai.combatCount - 1 end
 			if self.isBattle then ai.battleCount = ai.battleCount - 1 end
 			if self.isBreakthrough then ai.breakthroughCount = ai.breakthroughCount - 1 end
+			if self.isSiege then ai.siegeCount = ai.siegeCount - 1 end
 			if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount - 1 end
 			if self.isAssist then ai.assistCount = ai.assistCount - 1 end
 		end
