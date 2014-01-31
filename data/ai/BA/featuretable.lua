@@ -2,8 +2,42 @@
 
 featureTable = {}
 
+featureTable["a500_cluster1_dead"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["a500_cluster2_dead"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["a500_cluster3_dead"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["aa_cluster1_dead"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["aa_cluster2_dead"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["aa_cluster3_dead"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
 featureTable["aafus_dead"] = { reclaimable = true, blocking = true, unitName = "aafus", energy = 0, metal = 6441, }
 featureTable["aafus_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 2576, }
+featureTable["ad0500_senegal_1"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_1_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_2"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_2_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_3"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_3_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_4"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_4_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_5"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_5_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_6"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_6_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_7"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0500_senegal_7_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
+featureTable["ad0_senegal_1"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_1_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_2"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_2_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_3"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_3_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_4"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_4_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_5"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_5_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_6"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_6_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_7"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
+featureTable["ad0_senegal_7_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
 featureTable["ad0_bush_2_l"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
 featureTable["ad0_bush_2_m"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
 featureTable["ad0_bush_2_s"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
@@ -605,6 +639,8 @@ featureTable["nsaclash_dead"] = { reclaimable = true, blocking = false, unitName
 featureTable["nsaclash_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 156, }
 featureTable["packo_dead"] = { reclaimable = true, blocking = true, unitName = "packo", energy = 0, metal = 275, }
 featureTable["packo_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 110, }
+featureTable["rock1"] = { reclaimable = true, blocking = true, energy = 0, metal = 100, }
+featureTable["rock500"] = { reclaimable = true, blocking = true, energy = 0, metal = 500, }
 featureTable["screamer_dead"] = { reclaimable = true, blocking = true, unitName = "screamer", energy = 0, metal = 1145, }
 featureTable["screamer_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 458, }
 featureTable["shiva_dead"] = { reclaimable = true, blocking = true, unitName = "shiva", energy = 0, metal = 937, }
@@ -621,4 +657,22 @@ featureTable["tawf114_dead"] = { reclaimable = true, blocking = true, unitName =
 featureTable["tawf114_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 244, }
 featureTable["trem_dead"] = { reclaimable = true, blocking = true, unitName = "trem", energy = 0, metal = 1118, }
 featureTable["trem_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 527, }
+featureTable["zero_aa_cluster1_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_aa_cluster2_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_aa_cluster3_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_1"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_1_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_2"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_2_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_3"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_3_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_4"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_4_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_5"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_5_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_6"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_6_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_7"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_ad0_senegal_7_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
+featureTable["zero_rock1"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
 featureTable["geovent"] = { reclaimable = false, blocking = false, energy = 0, metal = 0, }
