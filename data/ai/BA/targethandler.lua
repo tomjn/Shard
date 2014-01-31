@@ -766,6 +766,7 @@ function TargetHandler:Init()
 	InitializeDangers()
 	self.lastEnemyThreatUpdateFrame = 0
 	self.feints = {}
+	self.raiderCounted = {}
 end
 
 function TargetHandler:Update()
@@ -806,6 +807,7 @@ end
 function TargetHandler:UpdateMap()
 	local f = game:Frame()
 	if f > lastUpdateFrame + 30 then
+		self.raiderCounted = {}
 		cells = {}
 		cellList = {}
 		UpdateEnemies()
@@ -867,6 +869,13 @@ function TargetHandler:GetBestRaidCell(representative)
 	if not representative then return end
 	self:UpdateMap()
 	local rpos = representative:GetPosition()
+	local inCell = GetCellHere(rpos)
+	local threatReduction = 0
+	if inCell ~= nil then
+		-- if we're near more raiders, these raiders can target more threatening targets together
+		if inCell.raiderHere then threatReduction = threatReduction + inCell.raiderHere end
+		if inCell.raiderAdjacent then threatReduction = threatReduction + inCell.raiderAdjacent end
+	end
 	local rname = representative:Name()
 	local maxThreat = baseUnitThreat
 	local rthreat, rrange = ThreatRange(rname)
@@ -876,6 +885,10 @@ function TargetHandler:GetBestRaidCell(representative)
 	local bestDist = 99999
 	for i, cell in pairs(cellList) do
 		local value, threat, gas = CellValueThreat(rname, cell)
+		-- cells with other raiders in or nearby are better places to go for raiders
+		if cell.raiderHere then threat = threat - cell.raiderHere end
+		if cell.raiderAdjacent then threat = threat - cell.raiderAdjacent end
+		threat = threat - threatReduction
 		-- EchoDebug(value .. " " .. threat)
 		if value > 0 and threat <= maxThreat then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) then
@@ -1195,6 +1208,11 @@ function TargetHandler:BestAdjacentPosition(unit, targetPosition)
 				if cells[x] ~= nil then
 					if cells[x][z] ~= nil then
 						local value, threat = CellValueThreat(uname, cells[x][z])
+						if raiderList[uname] then
+							-- cells with other raiders in or nearby are better places to go for raiders
+							if cells[x][z].raiderHere then threat = threat - cells[x][z].raiderHere end
+							if cells[x][z].raiderAdjacent then threat = threat - cells[x][z].raiderAdjacent end
+						end
 						if threat > maxThreat then
 							-- if it's below baseUnitThreat, it's probably a lone construction unit
 							dist = dist + threat
@@ -1234,4 +1252,40 @@ function TargetHandler:BestAdjacentPosition(unit, targetPosition)
 		table.insert(self.feints, {x = best.x, z = best.z, px = px, pz = pz, tx = tx, tz = tz, frame = f})
 		return best.pos
 	end
+end
+
+function TargetHandler:RaiderHere(raidbehaviour)
+	if raidbehaviour == nil then return end
+	if raidbehaviour.unit == nil then return end
+	if self.raiderCounted[raidbehaviour.id] then return end
+	local unit = raidbehaviour.unit:Internal()
+	if unit == nil then return end
+	local uthreat, urange = ThreatRange(unit:Name())
+	local position = unit:GetPosition()
+	local px, pz = GetCellPosition(position)
+	local inCell
+	if cells[px] then
+		inCell = cells[px][pz]
+	end
+	if inCell ~= nil then
+		if inCell.raiderHere == nil then inCell.raiderHere = 0 end
+		inCell.raiderHere = inCell.raiderHere + (uthreat * 0.67)
+	end
+	local adjacentThreatReduction = uthreat * 0.33
+	for x = px - 1, px + 1 do
+		if cells[x] ~= nil then
+			for z = pz - 1, pz + 1 do
+				if x == px and z == pz then
+					-- ignore center cell
+				else
+					local cell = cells[x][z]
+					if cell ~= nil then
+						if cell.raiderAdjacent == nil then cell.raiderAdjacent = 0 end
+						cell.raiderAdjacent = cell.raiderAdjacent + adjacentThreatReduction
+					end
+				end
+			end
+		end
+	end
+	self.raiderCounted[raidbehaviour.id] = true -- reset with UpdateMap()
 end

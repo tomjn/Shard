@@ -575,8 +575,8 @@ function TaskQueueBehaviour:GetQueue()
 	end
 	self.outmodedTechLevel = false
 	if outmodedTaskqueues[self.name] ~= nil and not got then
-		if self.isFactory and unitTable[self.name].techLevel < ai.maxFactoryLevel and Metal.reserves < Metal.capacity * 0.8 then
-			-- stop buidling lvl1 attackers if we have a lvl2, unless we've got lots of metal, in which case use it up
+		if self.isFactory and unitTable[self.name].techLevel < ai.maxFactoryLevel and Metal.reserves < Metal.capacity * 0.95 then
+			-- stop buidling lvl1 attackers if we have a lvl2, unless we're about to waste metal, in which case use it up
 			q = outmodedTaskqueues[self.name]
 			got = true
 			self.outmodedTechLevel = true

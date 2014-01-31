@@ -411,7 +411,7 @@ end
 function BuildSiegeIfNeeded(unitName)
 	if unitName == DummyUnitName then return DummyUnitName end
 	if IsSiegeEquipmentNeeded() then
-		if ai.siegeCount < (ai.battleCount + ai.breakthroughCount) * 0.3 then
+		if ai.siegeCount < (ai.battleCount + ai.breakthroughCount) * 0.35 then
 			return unitName
 		end
 	end

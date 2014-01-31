@@ -27,6 +27,7 @@ function RaiderBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
+	self.id = self.unit:Internal():ID()
 	self.disarmer = raiderDisarms[self.name]
 	if ai.raiderCount[mtype] == nil then
 		ai.raiderCount[mtype] = 1
@@ -136,6 +137,7 @@ function RaiderBehaviour:Update()
 		if math.mod(f, 89) == 0 then
 			local unit = self.unit:Internal()
 			local bestCell = ai.targethandler:GetBestRaidCell(unit)
+			ai.targethandler:RaiderHere(self)
 			EchoDebug(self.name .. " targetting...")
 			if bestCell then
 				EchoDebug(self.name .. " got target")
@@ -160,6 +162,7 @@ function RaiderBehaviour:Update()
 				-- evade enemies on the way to the target, if possible
 				if self.target ~= nil then
 					local newPos, arrived = ai.targethandler:BestAdjacentPosition(unit, self.target)
+					ai.targethandler:RaiderHere(self)
 					if newPos then
 						EchoDebug(self.name .. " evading")
 						unit:Move(newPos)
