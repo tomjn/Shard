@@ -176,10 +176,10 @@ int CSpringGame::GetTeamID(){
 
 std::vector<IUnit*> CSpringGame::GetUnits(){
 	std::vector<IUnit*> friendliesv;
-	
 	std::vector<springai::Unit*> friendlies = callback->GetTeamUnits();
 	std::vector<springai::Unit*>::iterator i = friendlies.begin();
 	for(;i != friendlies.end(); ++i){
+		//this.getUnitByID( *i );
 		CSpringUnit* unit = new CSpringUnit(callback,*i,this);
 		friendliesv.push_back(unit);
 	}
@@ -243,3 +243,17 @@ SResourceData CSpringGame::GetResourceByName(std::string name){
 	}
 	return res;
 }
+
+IUnit* CSpringGame::getUnitByID( int unit_id ) {
+	return ai->getUnitByID( unit_id );
+}
+
+/*void CSpringGame::removeUnit( IUnit* dead_unit ) {
+	std::map<int, CSpringUnit* >::iterator i = aliveUnits.find(evt->unit);
+	if(i != aliveUnits.end()){
+		CSpringUnit* u = i->second;
+		game->Me()->UnitDead(u);
+		aliveUnits.erase(i);
+		delete u;
+	}
+}*/

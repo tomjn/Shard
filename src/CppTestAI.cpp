@@ -122,6 +122,22 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 			}
 			break;
 		}
+		case EVENT_ENEMY_DESTROYED: {
+			struct SeNEMYDestroyedEvent* evt = (struct SEnemyDestroyedEvent*) data;
+			if(evt->unit < 0){
+				game->SendToConsole("shard-runtime warning: enemydestroyed evt->unit < 0");
+				break;
+			}
+			std::map<int, CSpringUnit* >::iterator i = aliveUnits.find(evt->unit);
+			if(i != aliveUnits.end()){
+				CSpringUnit* u = i->second;
+				// @TODO: Add enemy dead event
+				//game->Me()->UnitDead(u);
+				aliveUnits.erase(i);
+				delete u;
+			}
+			break;
+		}
 		case EVENT_UNIT_DAMAGED: {
 			struct SUnitDamagedEvent* evt = (struct SUnitDamagedEvent*) data;
 			if(evt->unit < 0){
@@ -167,6 +183,16 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 	// signal: everything went OK
 	return 0;
 }
+
+CSpringUnit* cpptestai::getUnitByID( int unit_id ) {
+	std::map<int, CSpringUnit* >::iterator i = aliveUnits.find( unit_id );
+	if(i != aliveUnits.end()){
+		CSpringUnit* u = i->second;
+		return u;
+	}
+	return 0;
+}
+
 /*EVENT_NULL                         =  0,
 	EVENT_INIT                         =  1,
 	EVENT_RELEASE                      =  2,

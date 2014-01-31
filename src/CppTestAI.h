@@ -35,10 +35,11 @@ private:
 	int skirmishAIId;
 	CSpringGame* game;
 	std::map<int,CSpringUnit*> aliveUnits;
-
 public:
 	CCppTestAI(springai::OOAICallback* callback);
 	~CCppTestAI();
+
+	CSpringUnit* getUnitByID( int unit_id );
 
 	int HandleEvent(int topic, const void* data);
 }; // class CCppTestAI

@@ -8,10 +8,10 @@ CSpringUnit::CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, IG
 	if(u == 0){
 		throw std::runtime_error("springai::unit must never be null when passed into the constructor of a CSpringUnit object! Bad bad coder");
 	}
-	
 }
 
 CSpringUnit::~CSpringUnit(){
+	delete unit;
 	unit = NULL;
 	callback = NULL;
 	//

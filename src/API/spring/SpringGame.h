@@ -11,7 +11,7 @@ class CSpringGame : public IGame {
 public:
 	CSpringGame(springai::OOAICallback* callback);
 	virtual ~CSpringGame();
-	
+
 	virtual IMap* Map();
 
 	virtual std::string GameID();
@@ -20,19 +20,18 @@ public:
 	virtual bool IsPaused();
 
 	virtual IUnitType* GetTypeByName(std::string typeName);
-	
+
 	virtual const char* ConfigFolderPath();
 	virtual std::string ReadFile(std::string filename);
 	virtual bool LocatePath(std::string& filename);
 
 	virtual int GetTeamID();
-	
+
 	virtual bool HasEnemies();
 	virtual bool HasFriendlies();
 	virtual std::vector<IUnit*> GetEnemies();
 	virtual std::vector<IUnit*> GetFriendlies();
 	virtual std::vector<IUnit*> GetUnits();
-	
 
 
 	virtual IAI* Me();
@@ -40,7 +39,7 @@ public:
 	virtual std::string GameName();
 
 	virtual bool FileExists(std::string filename);
-	
+
 	virtual void AddMarker(Position p,std::string label);
 
 	virtual std::string SendToContent(std::string data);
@@ -49,8 +48,11 @@ public:
 	virtual SResourceData GetResource(int idx);
 	virtual int GetResourceCount();
 	virtual SResourceData GetResourceByName(std::string name);
-	
+
 	IUnitType* ToIUnitType(springai::UnitDef* def);
+
+	virtual IUnit* getUnitByID( int unit_id );
+	/*virtual void removeUnit( IUnit* dead_unit );*/
 protected:
 
 	CSpringMap* map;
