@@ -73,7 +73,7 @@ game = {}
 			return e
 		end
 	end
-	
+
 	function game:GetUnits()
 		local fv = game_engine:GetUnits()
 		local f = {}
@@ -85,7 +85,7 @@ game = {}
 		fv = nil
 		return f
 	end
-	
+
 	function game:GetFriendlies()
 		local has_friendlies = game_engine:HasFriendlies()
 		if has_friendlies ~= true then
@@ -102,38 +102,39 @@ game = {}
 			return f
 		end
 	end
-	
-	
+
 	function game:GameName() -- returns the shortname of this game
 		--
 		return game_engine:GameName()
 	end
-	
+
 	function game:AddMarker(position,label) -- adds a marker
 		--
 		return game_engine:AddMarker(position,label)
 	end
-	
-	
+
 	function game:SendToContent(stringvar) -- returns a string passed from any lua gadgets
 		--
 		return game_engine:SendToContent(stringvar)
 	end
-	
+
 	function game:GetResource(idx) --  returns a Resource object
 		return game_engine:GetResource(idx)
 	end
-	
+
 	function game:GetResourceCount() -- return the number of resources
 		return game_engine:GetResourceCount()
 	end
-	
+
 	function game:GetResourceByName(name) -- returns a Resource object, takes the name of the resource
 		return game_engine:GetResourceByName(name)
 	end
-	
+
+	function game:GetUnitByID( unit_id ) -- returns a Shard unit when given an engine unit ID number
+		return game_engine:getUnitByID( unit_id )
+	end
+
 	function game:GetResources() -- returns a table of Resource objects, takes the name of the resource
-		
 		local rcount = game_engine:GetResourceCount()
 		if(rcount > 0) then
 

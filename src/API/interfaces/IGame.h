@@ -29,10 +29,8 @@ public:
 	virtual std::vector<IUnit*> GetEnemies()=0;
 	virtual std::vector<IUnit*> GetFriendlies()=0;
 	virtual std::vector<IUnit*> GetUnits()=0;
-	
 
 	virtual std::string GameName()=0;
-	
 
 	virtual bool FileExists(std::string filename)=0;
 
@@ -45,6 +43,8 @@ public:
 	virtual SResourceData GetResourceByName(std::string name)=0;
 
 	virtual IAI* Me()=0;
+
+	virtual IUnit* getUnitByID( int unit_id )=0;
 };
 
 #endif
