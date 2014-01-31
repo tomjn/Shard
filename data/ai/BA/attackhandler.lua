@@ -353,7 +353,7 @@ function AttackHandler:AddRecruit(attkbehaviour)
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
 			if self.attackSent[mtype] == nil then self.attackSent[mtype] = 0 end
 			if self.count[mtype] == nil then self.count[mtype] = 0 end
-			local level = unitTable[attkbehaviour.name].techLevel
+			local level = attkbehaviour.level
 			self.count[mtype] = self.count[mtype] + level
 			table.insert(self.recruits[mtype], attkbehaviour)
 			attkbehaviour:SetMoveState()
@@ -368,7 +368,7 @@ function AttackHandler:RemoveRecruit(attkbehaviour)
 	for mtype, recruits in pairs(self.recruits) do
 		for i,v in ipairs(recruits) do
 			if v == attkbehaviour then
-				local level = unitTable[attkbehaviour.name].techLevel
+				local level = attkbehaviour.level
 				self.count[mtype] = self.count[mtype] - level
 				table.remove(self.recruits[mtype], i)
 				return true
@@ -380,7 +380,7 @@ end
 
 function AttackHandler:NeedMore(attkbehaviour)
 	local mtype = attkbehaviour.mtype
-	local level = unitTable[attkbehaviour.name].techLevel
+	local level = attkbehaviour.level
 	self.counter[mtype] = self.counter[mtype] + (level * 0.7) -- 0.75
 	EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 end
