@@ -34,6 +34,7 @@ function CountHandler:Init()
 	ai.combatCount = 0
 	ai.battleCount = 0
 	ai.breakthroughCount = 0
+	ai.siegeCount = 0
 	ai.reclaimerCount = 0
 	ai.assistCount = 0
 	
