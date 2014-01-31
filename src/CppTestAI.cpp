@@ -123,7 +123,7 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 			break;
 		}
 		case EVENT_ENEMY_DESTROYED: {
-			struct SeNEMYDestroyedEvent* evt = (struct SEnemyDestroyedEvent*) data;
+			struct SEnemyDestroyedEvent* evt = (struct SEnemyDestroyedEvent*) data;
 			if(evt->unit < 0){
 				game->SendToConsole("shard-runtime warning: enemydestroyed evt->unit < 0");
 				break;
