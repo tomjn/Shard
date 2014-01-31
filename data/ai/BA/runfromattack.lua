@@ -45,7 +45,7 @@ function RunFromAttackBehaviour:Update()
 			local unit = self.unit:Internal()
 			local safe
 			if commanderList[self.name] then
-				safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 0.2)
+				safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 0.3)
 			else
 				safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 2)
 			end

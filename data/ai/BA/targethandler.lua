@@ -662,15 +662,15 @@ local function UpdateBadPositions()
 			cell = cells[r.px][r.pz]
 			if cell then
 				if r.groundAirSubmerged == "ground" then
-					cell.groundThreat = cell.groundThreat + badCellThreat
+					cell.groundThreat = cell.groundThreat + r.threat
 				elseif r.groundAirSubmerged == "air" then
-					cell.airThreat = cell.airThreat + badCellThreat
+					cell.airThreat = cell.airThreat + r.threat
 				elseif  r.groundAirSubmerged == "submerged" then
-					cell.submergedThreat = cell.submergedThreat + badCellThreat
+					cell.submergedThreat = cell.submergedThreat + r.threat
 				end
 			end
 		end
-		if f > r.frame + 1800 then
+		if f > r.frame + r.duration then
 			-- remove bad positions after 1 minute
 			table.remove(badPositions, i)
 			-- game:SendToConsole("bad position #" .. i .. " removed")
@@ -786,7 +786,9 @@ function TargetHandler:Update()
 	end
 end
 
-function TargetHandler:AddBadPosition(position, mtype)
+function TargetHandler:AddBadPosition(position, mtype, threat, duration)
+	if threat == nil then threat = badCellThreat end
+	if duration == nil then duration = 1800 end
 	local px, pz = GetCellPosition(position)
 	local gas = WhatHurtsUnit(nil, mtype)
 	local f = game:Frame()
@@ -798,6 +800,8 @@ function TargetHandler:AddBadPosition(position, mtype)
 				pz = pz,
 				groundAirsSubmerged = groundAirSubmerged,
 				frame = f,
+				threat = threat,
+				duration = duration,
 			}
 			table.insert(badPositions, newRecord)
 		end
@@ -1249,6 +1253,8 @@ function TargetHandler:BestAdjacentPosition(unit, targetPosition)
 		end
 	end
 	if best and notsafe then
+		local mtype = unitTable[uname].mtype
+		self:AddBadPosition(targetPosition, mtype, 16, 1200) -- every thing to avoid on the way to the target increases its threat a tiny bit
 		table.insert(self.feints, {x = best.x, z = best.z, px = px, pz = pz, tx = tx, tz = tz, frame = f})
 		return best.pos
 	end
