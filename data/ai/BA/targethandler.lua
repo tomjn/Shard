@@ -1162,7 +1162,7 @@ function TargetHandler:IsBombardPosition(position, unitName)
 	local px, pz = GetCellPosition(position)
 	local radius = unitTable[unitName].groundRange
 	local groundValue, groundThreat = CheckInRadius(px, pz, radius, "ground")
-	if groundValue + groundThreat > Value(unitName) * 2 then
+	if groundValue + groundThreat > Value(unitName) * 1.5 then
 		return true
 	else
 		return false

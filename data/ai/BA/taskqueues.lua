@@ -130,9 +130,9 @@ function CheckForMapControl()
 			ai.needToReclaim = false
 		end
 		AAUnitPerTypeLimit = math.ceil(ai.turtlehandler:GetTotalPriority() / 4)
-		heavyPlasmaLimit = math.ceil(ai.combatCount / 7)
+		heavyPlasmaLimit = math.ceil(ai.combatCount / 10)
 		nukeLimit = math.ceil(ai.combatCount / 24)
-		tacticalNukeLimit = math.ceil(ai.combatCount / 18)
+		tacticalNukeLimit = math.ceil(ai.combatCount / 20)
 
 		local attackCounter = ai.attackhandler:GetCounter()
 		local couldAttack = ai.couldAttack >= 1 or ai.couldBomb >= 1
@@ -141,7 +141,7 @@ function CheckForMapControl()
 		local plentyOfCombatUnits = ai.combatCount > attackCounter * 0.9
 		local controlMetalSpots = ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
 		local needUpgrade = plentyOfCombatUnits or couldAttack or bombingTooExpensive or attackTooExpensive
-		local lotsOfMetal = Metal.income > 20 or controlMetalSpots
+		local lotsOfMetal = Metal.income > 25 or controlMetalSpots
 
 		EchoDebug(ai.totalEnemyThreat .. " " .. ai.totalEnemyImmobileThreat .. " " .. ai.totalEnemyMobileThreat)
 		-- build siege units if the enemy is turtling, if a lot of our attackers are getting destroyed, or if we control over 40% of the metal spots
@@ -629,6 +629,13 @@ end
 function BuildRaiderIfNeeded(unitName)
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
 	local mtype = unitTable[unitName].mtype
+	if ai.factoriesAtLevel[3] ~= nil and ai.factoriesAtLevel[3] ~= {} then
+		-- if we have a level 2 factory, don't build raiders until we have some battle units
+		local attackCounter = ai.attackhandler:GetCounter(mtype)
+		if ai.battleCount + ai.breakthroughCount < attackCounter / 2 then
+			return DummyUnitName
+		end
+	end
 	local counter = ai.raidhandler:GetCounter(mtype)
 	if counter == minRaidCounter then return DummyUnitName end
 	if ai.raiderCount[mtype] == nil then
@@ -771,6 +778,10 @@ function BuildBattleIfNeeded(unitName)
 	if attackCounter == maxAttackCounter and ai.battleCount > minBattleCount then return DummyUnitName end
 	if mtype == "veh" and ai.mySide == CORESideName and (ai.factoriesAtLevel[1] == nil or ai.factoriesAtLevel[1] == {}) then
 		-- core only has a lvl1 vehicle raider, so this prevents getting stuck
+		return unitName
+	end
+	if ai.factoriesAtLevel[3] ~= nil and ai.factoriesAtLevel[3] ~= {} then
+		-- if we have a level 2 factory, don't wait to build raiders first
 		return unitName
 	end
 	local raidCounter = ai.raidhandler:GetCounter(mtype)

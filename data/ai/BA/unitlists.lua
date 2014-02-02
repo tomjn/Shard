@@ -342,17 +342,17 @@ attackerlist = {
 
 
 scoutList = {
-	"corfink",
-	"armpeep",
-	"corfav",
-	"armfav",
-	"armflea",
-	"corawac",
-	"armawac",
-	"corpt",
-	"armpt",
-	"corhunt",
-	"armsehak",
+	corfink = 1,
+	armpeep = 1,
+	corfav = 1,
+	armfav = 1,
+	armflea = 1,
+	corawac = 1,
+	armawac = 1,
+	corpt = 1,
+	armpt = 1,
+	corhunt = 1,
+	armsehak = 1,
 }
 
 antinukeList = {

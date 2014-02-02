@@ -29,8 +29,8 @@ local function GetEcon()
 	metalBelowHalf = Metal.reserves < lotsMetalReserves
 	metalAboveHalf = Metal.reserves >= lotsMetalReserves
 	local attackCounter = ai.attackhandler:GetCounter()
-	notEnoughCombats = ai.combatCount < attackCounter * 0.75
-	farTooFewCombats = ai.combatCount < attackCounter * 0.25
+	notEnoughCombats = ai.combatCount < attackCounter * 0.6
+	farTooFewCombats = ai.combatCount < attackCounter * 0.2
 end
 
 TaskQueueBehaviour = class(Behaviour)
@@ -415,6 +415,26 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 			EchoDebug("no factory found")
 			utype = nil
 		end
+	elseif nukeList[value] or bigPlasmaList[value] or littlePlasmaList[value] then
+		-- bombarders
+		EchoDebug("seeking bombard build spot")
+		local turtlePosList = ai.turtlehandler:MostTurtled(builder, value)
+		if turtlePosList then
+			EchoDebug("got sorted turtle list")
+			if #turtlePosList ~= 0 then
+				EchoDebug("turtle list has turtles")
+				for i, turtlePos in ipairs(turtlePosList) do
+					p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+					if p ~= nil then break end
+				end
+			end
+		end
+		if p == nil then
+			utype = nil
+			EchoDebug("could not find bombard build spot")
+		else
+			EchoDebug("found bombard build spot")
+		end
 	elseif shieldList[value] or antinukeList[value] or unitTable[value].jammerRadius ~= 0 or unitTable[value].radarRadius ~= 0 or unitTable[value].sonarRadius ~= 0 or (unitTable[value].isWeapon and unitTable[value].isBuilding and not nukeList[value] and not bigPlasmaList[value] and not littlePlasmaList[value]) then
 		-- shields, defense, antinukes, jammer towers, radar, and sonar
 		EchoDebug("looking for least turtled positions")
@@ -434,11 +454,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		end
 	elseif unitTable[value].isBuilding then
 		-- buildings in defended positions
-		local bombard = false
-		if nukeList[value] or bigPlasmaList[value] or littlePlasmaList[value] then
-			bombard = value
-		end
-		local turtlePosList = ai.turtlehandler:MostTurtled(builder, bombard)
+		local turtlePosList = ai.turtlehandler:MostTurtled(builder)
 		if turtlePosList then
 			if #turtlePosList ~= 0 then
 				for i, turtlePos in ipairs(turtlePosList) do
@@ -446,9 +462,6 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 					if p ~= nil then break end
 				end
 			end
-		end
-		if p == nil and bombard then
-			utype = nil
 		end
 	end
 	-- last ditch placement
@@ -667,6 +680,7 @@ function TaskQueueBehaviour:ProgressQueue()
 		if type(value) == "table" then
 			-- not using this
 		else
+			if bigPlasmaList[value] or littlePlasmaList[value] then DebugEnabled = true end -- debugging plasma
 			local p
 			if value == FactoryUnitName then
 				-- build the best factory this builder can build
@@ -722,6 +736,7 @@ function TaskQueueBehaviour:ProgressQueue()
 					game:SendToConsole(self.name .. " cannot build:"..value..", couldnt grab the unit type from the engine")
 				end
 			end
+			DebugEnabled = false -- debugging plasma
 			if success then
 				if self.isFactory then
 					if not self.outmodedTechLevel then

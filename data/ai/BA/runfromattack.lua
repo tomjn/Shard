@@ -1,6 +1,5 @@
 require "common"
 
-
 local DebugEnabled = false
 
 local function EchoDebug(inStr)
@@ -20,6 +19,15 @@ function RunFromAttackBehaviour:Init()
 	self.name = self.unit:Internal():Name()
 	self.isCommander = commanderList[self.name]
 	self.mobile = not unitTable[self.name].isBuilding
+	self.isScout = scoutList[self.name]
+	if self.isCommander then
+		self.threshold = 0.25
+	elseif self.isScout then
+		self.threshold = 1
+	elseif self.mobile then
+		self.threshold = 1.5
+	end
+	-- any threat whatsoever will trigger for buildings
 	EchoDebug("RunFromAttackBehaviour: added to unit "..self.name)
 end
 
@@ -44,15 +52,7 @@ function RunFromAttackBehaviour:Update()
 		if f % 30 == 0 then
 			-- run away preemptively from positions within range of enemy weapons, and notify defenders that the unit is in danger
 			local unit = self.unit:Internal()
-			local threshold
-			if self.isCommander then
-				threshold = 0.35
-			elseif self.mobile then
-				threshold = 1.5
-			else
-				threshold = nil -- any threat whatsoever will trigger for buildings
-			end
-			local safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, threshold)
+			local safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, self.threshold)
 			if safe then
 				self.underfire = false
 				self.unit:ElectBehaviour()
@@ -132,10 +132,12 @@ end
 function RunFromAttackBehaviour:UnitDamaged(unit,attacker)
 	if unit:Internal():ID() == self.unit:Internal():ID() then
 		if not self.underfire then
-			self.underfire = true
-			self.lastAttackedFrame = game:Frame()
-			ai.defendhandler:Danger(self)
-			self.unit:ElectBehaviour()
+			if unit:Internal():GetHealth() < unit:Internal():GetMaxHealth() * 0.8 then
+				self.underfire = true
+				self.lastAttackedFrame = game:Frame()
+				if not self.isScout then ai.defendhandler:Danger(self) end
+				self.unit:ElectBehaviour()
+			end
 		end
 	end
 end

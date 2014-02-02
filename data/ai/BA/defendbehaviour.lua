@@ -70,61 +70,53 @@ function DefendBehaviour:Update()
 	if self.active then
 		local f = game:Frame()
 		if math.mod(f,60) == 0 then
-			if self.target ~= nil or self.targetPos ~= nil then
-				local targetPos
-				if self.target ~= nil then
-					if self.target.unit ~= nil then
-						local targetUnit = self.target.unit:Internal()
-						if targetUnit ~= nil then
-							targetPos = targetUnit:GetPosition()
-						end
-					end
-				end
-				if targetPos == nil then targetPos = self.targetPos end
-				if targetPos ~= nil then
-					local unitPos = unit:GetPosition()
-					local dist = Distance(unitPos, targetPos)
-					if dist > self.guardDistance + 30 or dist < self.guardDistance - 30 then
-						local guardPos = RandomAway(targetPos, self.guardDistance, false, self.guardAngle)
-						unit:Move(guardPos)
-					end
-				end
-			end
-			--[[
 			if self.target ~= nil then
-				self.moving = nil
-				self.patroling = nil
-				if self.guarding ~= self.target then
-					local floats = api.vectorFloat()
-	    			floats:push_back(self.target)
-					self.unit:Internal():ExecuteCustomCommand(CMD_GUARD, floats)
-					self.guarding = self.target
+				local targetUnit
+				if self.target.unit ~= nil then
+					targetUnit = self.target.unit:Internal()
 				end
-			elseif self.targetPos ~= nil then
-				self.guarding = nil
-				if self.patroling == nil or self.patroling.x ~= self.targetPos.x or self.patroling.z ~= self.targetPos.z then
-					local right = api.Position()
-					right.x = self.targetPos.x + 100
-					right.y = self.targetPos.y
-					right.z = self.targetPos.z
-					if self.moving == nil or self.moving.x ~= right.x or self.moving.z ~= right.z then
-						self.unit:Internal():Move(right)
-						self.moving = right
+				if targetUnit ~= nil then
+					local targetPos
+					local safe = true
+					if self.targetPos == nil then
+						-- for mobile units
+						targetPos = targetUnit:GetPosition()
 					else
-						local dist = Distance(self.unit:Internal():GetPosition(), right)
-						EchoDebug(dist)
-						if dist < 200 then
-							local floats = api.vectorFloat()
-							floats:push_back(self.targetPos.x - 200)
-							floats:push_back(self.targetPos.y)
-							floats:push_back(self.targetPos.z)
-							self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats)
-							self.patroling = self.targetPos
+						-- for buildings
+						targetPos = self.targetPos
+						safe = ai.targethandler:IsSafePosition(targetPos, targetUnit)
+					end
+					if targetPos ~= nil then
+						local unitPos = unit:GetPosition()
+						local dist = Distance(unitPos, targetPos)
+						if dist > self.guardDistance + 500 then
+							if self.guarding ~= self.target.id then
+								-- move toward defendees that are far away with guard order
+								local floats = api.vectorFloat()
+				    			floats:push_back(self.target.id)
+								self.unit:Internal():ExecuteCustomCommand(CMD_GUARD, floats)
+								self.guarding = self.target.id
+							end
+						elseif not safe then
+							self.guarding = nil
+							if dist < self.guardDistance + 350 then
+								-- just keep going after enemies near buildings
+							else
+								-- move back to the building at a slightly more generous distance if we're too far away
+								local guardPos = RandomAway(targetPos, self.guardDistance + 100, false, self.guardAngle)
+								unit:Move(guardPos)
+							end
+						else
+							self.guarding = nil
+							if dist > self.guardDistance + 45 or dist < self.guardDistance - 15 then
+								-- keep near mobile units and buildings not yet in danger
+								local guardPos = RandomAway(targetPos, self.guardDistance, false, self.guardAngle)
+								unit:Move(guardPos)
+							end
 						end
 					end
 				end
 			end
-			]]--
 		end
 		self.unit:ElectBehaviour()
 	end
@@ -136,7 +128,7 @@ function DefendBehaviour:Assign(defendee, angle)
 		self.targetPos = nil
 	else
 		self.target = defendee.behaviour
-		self.targetPos = defendee.position
+		self.targetPos = defendee.position -- this is nil for non-building defendees
 		self.guardDistance = defendee.guardDistance
 		if angle == nil then angle = math.random() * twicePi end
 		self.guardAngle = angle
@@ -161,8 +153,6 @@ function DefendBehaviour:Activate()
 	self.target = nil
 	self.targetPos = nil
 	self.guarding = nil
-	self.moving = nil
-	self.patroling = nil
 	ai.defendhandler:AddDefender(self)
 	self:SetMoveState()
 end
@@ -173,8 +163,6 @@ function DefendBehaviour:Deactivate()
 	self.target = nil
 	self.targetPos = nil
 	self.guarding = nil
-	self.moving = nil
-	self.patroling = nil
 	ai.defendhandler:RemoveDefender(self)
 end
 

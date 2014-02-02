@@ -315,12 +315,11 @@ function DefendHandler:Danger(behaviour)
 	end
 	-- if it's not a defendee, make it one
 	local uname = behaviour.name
-	local defendee = { priority = threatenedPriority, threatened = game:Frame(), defenders = {}, guardDistance = self:GetGuardDistance(uname) }
+	local defendee = { behaviour = behaviour, priority = threatenedPriority, threatened = game:Frame(), defenders = {}, guardDistance = self:GetGuardDistance(uname) }
 	if unitTable[uname].buildOptions then defendee.scrambleForMe = true end
 	if unitTable[uname].isBuilding then
 		defendee.position = behaviour.initialLocation
 	else
-		defendee.behaviour = behaviour
 		defendee.uid = behaviour.id
 	end
 	table.insert(self.defendees, defendee)
