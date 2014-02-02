@@ -10,12 +10,12 @@ local function EchoDebug(inStr)
 end
 
 function IsScout(unit)
-	for i,name in ipairs(scoutList) do
-		if name == unit:Internal():Name() then
-			return true
-		end
+	local unitName = unit:Internal():Name()
+	if scoutList[unitName] then
+		return true
+	else
+		return false
 	end
-	return false
 end
 
 ScoutBehaviour = class(Behaviour)

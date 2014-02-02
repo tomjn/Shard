@@ -12,7 +12,7 @@ end
 -- local factoryPriority = 3
 local threatenedPriority = 4
 local techLevelPriority = 1
-local commanderPriority = 2
+local commanderPriority = 1.5
 
 DefendHandler = class(Module)
 
@@ -47,7 +47,7 @@ function DefendHandler:AddDefendee(behaviour)
 		priority = priority + commanderPriority
 	end
 	if priority ~= 0 then
-		table.insert(self.defendees, {uid = behaviour.id, behaviour = behaviour, priority = priority, threatened = nil})
+		table.insert(self.defendees, { uid = behaviour.id, behaviour = behaviour, priority = priority, threatened = nil, defenders = {}, guardDistance = self:GetGuardDistance(un) })
 		self.totalPriority = self.totalPriority + priority
 		self:AssignAll()
 	end
@@ -125,13 +125,17 @@ function DefendHandler:AssignAll()
 	end
 	local notDefended = {}
 	for i, defendee in pairs(self.defendees) do
+		defendee.defenders = {}
 		local number = math.floor(defendee.priority * defendersPerPriority)
 		if number ~= 0 and #defendersToAssign ~= 0 then
 			local defendeePos = defendee.position
 			if defendeePos == nil then 
 				if defendee.behaviour ~= nil then
 					if defendee.behaviour.unit ~= nil then
-						defendeePos = defendee.behaviour.unit:Internal():GetPosition()
+						defendeeUnit = defendee.behaviour.unit:Internal()
+						if defendeeUnit ~= nil then
+							defendeePos = defendeeUnit:GetPosition()
+						end
 					end
 				end
 			end
@@ -166,7 +170,8 @@ function DefendHandler:AssignAll()
 			local n = 0
 			for dist, dfndbehaviour in pairsByKeys(bydistance) do
 				if n < number then
-					dfndbehaviour:Assign(defendee)
+					-- dfndbehaviour:Assign(defendee)
+					table.insert(defendee.defenders, dfndbehaviour)
 					table.insert(defendersToRemove, dfndbehaviour)
 				else
 					break
@@ -182,9 +187,23 @@ function DefendHandler:AssignAll()
 			local defendee = self.defendees[i]
 			if #defendersToAssign ~= 0 then
 				local dfndbehaviour = table.remove(defendersToAssign)
-				dfndbehaviour:Assign(defendee)
+				-- dfndbehaviour:Assign(defendee)
+				table.insert(defendee.defenders, dfndbehaviour)
 			else
 				break
+			end
+		end
+	end
+	-- find angles for each defender
+	for i, defendee in pairs(self.defendees) do
+		local divisor = #defendee.defenders
+		if divisor > 0 then
+			local angleAdd = twicePi / divisor
+			local angle = math.random() * twicePi
+			for nothing, dfndbehaviour in pairs(defendee.defenders) do
+				dfndbehaviour:Assign(defendee, angle)
+				angle = angle + angleAdd
+				if angle > twicePi then angle = angle - twicePi end
 			end
 		end
 	end
@@ -285,6 +304,7 @@ function DefendHandler:Danger(behaviour)
 	if behaviour.unit == nil then return end
 	if behaviour.name == nil then behaviour.name = behaviour.unit:Internal():Name() end
 	if behaviour.id == nil then behaviour.id = behaviour.unit:Internal():ID() end
+	EchoDebug(behaviour.name .. " in danger")
 	for i, defendee in pairs(self.defendees) do
 		if defendee.uid == behaviour.id then
 			if not defendee.threatened then
@@ -297,15 +317,19 @@ function DefendHandler:Danger(behaviour)
 		end
 	end
 	-- if it's not a defendee, make it one
-	local defendee = {priority = threatenedPriority, threatened = game:Frame()}
 	local uname = behaviour.name
+	local defendee = { behaviour = behaviour, priority = threatenedPriority, threatened = game:Frame(), defenders = {}, guardDistance = self:GetGuardDistance(uname) }
 	if unitTable[uname].buildOptions then defendee.scrambleForMe = true end
 	if unitTable[uname].isBuilding then
-		defendee.position = defendeeUnit:GetPosition()
+		defendee.position = behaviour.initialLocation
 	else
-		defendee.behaviour = behaviour
 		defendee.uid = behaviour.id
 	end
 	table.insert(self.defendees, defendee)
 	self.totalPriority = self.totalPriority + threatenedPriority
+end
+
+function DefendHandler:GetGuardDistance(unitName)
+	local utable = unitTable[unitName]
+	return (math.max(utable.xsize, utable.zsize) * 4) + 100
 end

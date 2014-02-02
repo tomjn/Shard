@@ -7,6 +7,9 @@ cos = math.cos
 sin = math.sin
 atan2 = math.atan2
 
+local quadX = { -1, 1, -1, 1 }
+local quadZ = { -1, -1, 1, 1 }
+
 function RandomAway(pos, dist, opposite, angle)
 	if angle == nil then angle = random() * twicePi end
 	local away = api.Position()
@@ -76,6 +79,20 @@ function RectsOverlap(rectA, rectB)
            rectB.x1 < rectA.x2 and
            rectA.z1 < rectB.z2 and
            rectB.z1 < rectA.z2
+end
+
+function GetQuadrants(position, distance)
+	if position == nil then return end
+	if distance == nil then distance = 100 end
+	local quadrants = { }
+	for n = 1, 4 do
+		local new = api.Position()
+		new.y = position.y
+		new.x = position.x + (distance * quadX[n])
+		new.z = position.z + (distance * quadZ[n])
+		table.insert(quadrants, new)
+	end
+	return quadrants
 end
 
 function pairsByKeys(t, f)

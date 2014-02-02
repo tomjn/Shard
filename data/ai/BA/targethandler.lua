@@ -66,6 +66,7 @@ local vulnerableHealth = 200
 local wreckMult = 100
 local vulnerableReclaimDistMod = 100
 local badCellThreat = 300
+local attackDistMult = 0.5 -- between 0 and 1, the lower number, the less distance matters
 
 local factoryValue = 1000
 local conValue = 300
@@ -918,30 +919,44 @@ function TargetHandler:GetBestAttackCell(representative)
 	local bestThreatCell
 	local bestThreat = 0
 	local name = representative:Name()
+	local rpos = representative:GetPosition()
 	local longrange = unitTable[name].groundRange > 1000
 	local mtype = unitTable[name].mtype
 	if mtype ~= "sub" and longrange then longrange = true end
+	local possibilities = {}
+	local highestDist = 0
+	local lowestDist = 100000
 	for i, cell in pairs(cellList) do
 		if cell.pos then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) or longrange then
 				local value, threat = CellValueThreat(name, cell)
-				if value > 750 then
-					value = 0 - threat
-					if value > bestValue then
-						bestValueCell = cell
-						bestValue = value
-					end
-				elseif value > 0 then
-					value = 0 - threat
-					if value > bestAnyValue then
-						bestAnyValueCell = cell
-						bestAnyValue = value
-					end
-				elseif threat > bestThreat then
-					bestThreatCell = cell
-					bestThreat = threat
-				end
+				local dist = Distance(rpos, cell.pos)
+				if dist > highestDist then highestDist = dist end
+				if dist < lowestDist then lowestDist = dist end
+				table.insert(possibilities, { cell = cell, value = value, threat = threat, dist = dist })
 			end
+		end
+	end
+	local distRange = highestDist - lowestDist
+	for i, pb in pairs(possibilities) do
+		local fraction = 1.5 - ((pb.dist - lowestDist) / distRange)
+		local value = pb.value * fraction
+		local threat = pb.threat
+		if pb.value > 750 then
+			value = 0 - threat
+			if value > bestValue then
+				bestValueCell = pb.cell
+				bestValue = value
+			end
+		elseif pb.value > 0 then
+			value = 0 - threat
+			if value > bestAnyValue then
+				bestAnyValueCell = pb.cell
+				bestAnyValue = value
+			end
+		elseif threat > bestThreat then
+			bestThreatCell = pb.cell
+			bestThreat = threat
 		end
 	end
 	local best
@@ -1162,7 +1177,7 @@ function TargetHandler:IsBombardPosition(position, unitName)
 	local px, pz = GetCellPosition(position)
 	local radius = unitTable[unitName].groundRange
 	local groundValue, groundThreat = CheckInRadius(px, pz, radius, "ground")
-	if groundValue + groundThreat > Value(unitName) * 2 then
+	if groundValue + groundThreat > Value(unitName) * 1.5 then
 		return true
 	else
 		return false
