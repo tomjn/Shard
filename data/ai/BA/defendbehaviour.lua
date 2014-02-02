@@ -64,9 +64,33 @@ function DefendBehaviour:UnitIdle(unit)
 end
 
 function DefendBehaviour:Update()
+	if self.unit == nil then return end
+	local unit = self.unit:Internal()
+	if unit == nil then return end
 	if self.active then
 		local f = game:Frame()
 		if math.mod(f,60) == 0 then
+			if self.target ~= nil or self.targetPos ~= nil then
+				local targetPos
+				if self.target ~= nil then
+					if self.target.unit ~= nil then
+						local targetUnit = self.target.unit:Internal()
+						if targetUnit ~= nil then
+							targetPos = targetUnit:GetPosition()
+						end
+					end
+				end
+				if targetPos == nil then targetPos = self.targetPos end
+				if targetPos ~= nil then
+					local unitPos = unit:GetPosition()
+					local dist = Distance(unitPos, targetPos)
+					if dist > self.guardDistance + 30 or dist < self.guardDistance - 30 then
+						local guardPos = RandomAway(targetPos, self.guardDistance, false, self.guardAngle)
+						unit:Move(guardPos)
+					end
+				end
+			end
+			--[[
 			if self.target ~= nil then
 				self.moving = nil
 				self.patroling = nil
@@ -100,18 +124,22 @@ function DefendBehaviour:Update()
 					end
 				end
 			end
+			]]--
 		end
 		self.unit:ElectBehaviour()
 	end
 end
 
-function DefendBehaviour:Assign(defendee)
+function DefendBehaviour:Assign(defendee, angle)
 	if defendee == nil then
 		self.target = nil
 		self.targetPos = nil
 	else
-		self.target = defendee.uid
+		self.target = defendee.behaviour
 		self.targetPos = defendee.position
+		self.guardDistance = defendee.guardDistance
+		if angle == nil then angle = math.random() * twicePi end
+		self.guardAngle = angle
 	end
 end
 

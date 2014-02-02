@@ -18,6 +18,7 @@ function RunFromAttackBehaviour:Init()
 	-- this is where we will retreat
 	self.initialLocation = self.unit:Internal():GetPosition()
 	self.name = self.unit:Internal():Name()
+	self.isCommander = commanderList[self.name]
 	self.mobile = not unitTable[self.name].isBuilding
 	EchoDebug("RunFromAttackBehaviour: added to unit "..self.name)
 end
@@ -43,19 +44,23 @@ function RunFromAttackBehaviour:Update()
 		if f % 30 == 0 then
 			-- run away preemptively from positions within range of enemy weapons, and notify defenders that the unit is in danger
 			local unit = self.unit:Internal()
-			local safe
-			if commanderList[self.name] then
-				safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 0.3)
+			local threshold
+			if self.isCommander then
+				threshold = 0.35
+			elseif self.mobile then
+				threshold = 1.5
 			else
-				safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 2)
+				threshold = nil -- any threat whatsoever will trigger for buildings
 			end
+			local safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, threshold)
 			if safe then
 				self.underfire = false
 				self.unit:ElectBehaviour()
 			else
+				EchoDebug(self.name .. " is not safe")
 				self.underfire = true
 				self.lastAttackedFrame = game:Frame()
-				ai.defendhandler:Danger(unit)
+				ai.defendhandler:Danger(self)
 				self.unit:ElectBehaviour()
 			end
 		end
@@ -129,7 +134,7 @@ function RunFromAttackBehaviour:UnitDamaged(unit,attacker)
 		if not self.underfire then
 			self.underfire = true
 			self.lastAttackedFrame = game:Frame()
-			ai.defendhandler:Danger(unit:Internal())
+			ai.defendhandler:Danger(self)
 			self.unit:ElectBehaviour()
 		end
 	end
