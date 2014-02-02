@@ -132,7 +132,10 @@ function DefendHandler:AssignAll()
 			if defendeePos == nil then 
 				if defendee.behaviour ~= nil then
 					if defendee.behaviour.unit ~= nil then
-						defendeePos = defendee.behaviour.unit:Internal():GetPosition()
+						defendeeUnit = defendee.behaviour.unit:Internal()
+						if defendeeUnit ~= nil then
+							defendeePos = defendeeUnit:GetPosition()
+						end
 					end
 				end
 			end

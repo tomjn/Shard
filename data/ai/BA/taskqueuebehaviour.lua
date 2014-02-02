@@ -680,7 +680,7 @@ function TaskQueueBehaviour:ProgressQueue()
 		if type(value) == "table" then
 			-- not using this
 		else
-			if bigPlasmaList[value] or littlePlasmaList[value] then DebugEnabled = true end -- debugging plasma
+			-- if bigPlasmaList[value] or littlePlasmaList[value] then DebugEnabled = true end -- debugging plasma
 			local p
 			if value == FactoryUnitName then
 				-- build the best factory this builder can build
@@ -736,7 +736,7 @@ function TaskQueueBehaviour:ProgressQueue()
 					game:SendToConsole(self.name .. " cannot build:"..value..", couldnt grab the unit type from the engine")
 				end
 			end
-			DebugEnabled = false -- debugging plasma
+			-- DebugEnabled = false -- debugging plasma
 			if success then
 				if self.isFactory then
 					if not self.outmodedTechLevel then

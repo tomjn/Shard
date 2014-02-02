@@ -276,59 +276,64 @@ end
 function DoSomethingForTheEconomy(self)
 	local Energy = game:GetResourceByName("Energy")
 	local extraE = Energy.income - Energy.usage
+	local highEnergy = Energy.reserves > Energy.capacity * 0.9
+	local lowEnergy = Energy.reserves < Energy.capacity * 0.1
 	local Metal = game:GetResourceByName("Metal")
 	local extraM = Metal.income - Metal.usage
+	local highMetal= Metal.reserves > Metal.capacity * 0.9
+	local lowMetal = Metal.reserves < Metal.capacity * 0.1
 	local isWater = unitTable[self.unit:Internal():Name()].needsWater
 	local unitName = DummyUnitName
 	-- maybe we need conversion?
-	if extraE > 60 and extraM < 0 and Energy.income > 300 then
+	if extraE > 80 and highEnergy and lowMetal and extraM < 0 and Energy.income > 300 then
+		local converterLimit = math.min(math.floor(Energy.income / 200), 8)
 		if isWater then
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("corfmkr", 8)
+				unitName = BuildWithLimitedNumber("corfmkr", converterLimit)
 			else
-				unitName = BuildWithLimitedNumber("armfmkr", 8)
+				unitName = BuildWithLimitedNumber("armfmkr", converterLimit)
 			end		
 		else
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("cormakr", 8)
+				unitName = BuildWithLimitedNumber("cormakr", converterLimit)
 			else
-				unitName = BuildWithLimitedNumber("armmakr", 8)
+				unitName = BuildWithLimitedNumber("armmakr", converterLimit)
 			end
 		end
 	end
 	-- maybe we need storage?
 	if unitName == DummyUnitName then
 		-- energy storage
-		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 100 then
+		if extraE > 150 and highEnergy and not lowMetal then
 			if isWater then
 				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("coruwes", 3)
+					unitName = BuildWithLimitedNumber("coruwes", 2)
 				else
-					unitName = BuildWithLimitedNumber("armuwes", 3)
+					unitName = BuildWithLimitedNumber("armuwes", 2)
 				end	
 			else
 				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("corestor", 3)
+					unitName = BuildWithLimitedNumber("corestor", 2)
 				else
-					unitName = BuildWithLimitedNumber("armestor", 3)
+					unitName = BuildWithLimitedNumber("armestor", 2)
 				end
 			end
 		end
 	end
 	if unitName == DummyUnitName then
 		-- metal storage
-		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 3 then
+		if extraM > 5 and highMetal and highEnergy then
 			if isWater then
 				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("coruwms", 3)
+					unitName = BuildWithLimitedNumber("coruwms", 2)
 				else
-					unitName = BuildWithLimitedNumber("armuwms", 3)
+					unitName = BuildWithLimitedNumber("armuwms", 2)
 				end	
 			else
 				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("cormstor", 3)
+					unitName = BuildWithLimitedNumber("cormstor", 2)
 				else
-					unitName = BuildWithLimitedNumber("armmstor", 3)
+					unitName = BuildWithLimitedNumber("armmstor", 2)
 				end
 			end
 		end
@@ -342,31 +347,36 @@ end
 function DoSomethingAdvancedForTheEconomy(self)
 	local Energy = game:GetResourceByName("Energy")
 	local extraE = Energy.income - Energy.usage
+	local highEnergy = Energy.reserves > Energy.capacity * 0.9
+	local lowEnergy = Energy.reserves < Energy.capacity * 0.1
 	local Metal = game:GetResourceByName("Metal")
 	local extraM = Metal.income - Metal.usage
+	local highMetal= Metal.reserves > Metal.capacity * 0.9
+	local lowMetal = Metal.reserves < Metal.capacity * 0.1
 	local unitName = self.unit:Internal():Name()
 	local isWater = unitTable[unitName].needsWater or seaplaneConList[unitName]
 	local unitName = DummyUnitName
 	-- maybe we need conversion?
-	if extraE > 600 and extraM < 0 and Energy.income > 2000 then
+	if extraE > 800 and highEnergy and lowMetal and extraM < 0 and Energy.income > 2000 then
+		local converterLimit = math.floor(Energy.income / 800)
 		if isWater then
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("armuwmmm", Energy.income / 1000)
+				unitName = BuildWithLimitedNumber("armuwmmm", converterLimit)
 			else
-				unitName = BuildWithLimitedNumber("armuwmmm", Energy.income / 1000)
+				unitName = BuildWithLimitedNumber("armuwmmm", converterLimit)
 			end		
 		else
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("cormmkr", Energy.income / 1000)
+				unitName = BuildWithLimitedNumber("cormmkr", converterLimit)
 			else
-				unitName = BuildWithLimitedNumber("armmmkr", Energy.income / 1000)
+				unitName = BuildWithLimitedNumber("armmmkr", converterLimit)
 			end
 		end
 	end
 	-- maybe we need storage?
 	if unitName == DummyUnitName then
 		-- energy storage
-		if Energy.reserves >= 0.9 * Energy.capacity and extraE > 1000 then
+		if extraE > 1500 and highEnergy and not lowMetal then
 			if ai.mySide == CORESideName then
 				unitName = BuildWithLimitedNumber("coruwadves", 1)
 			else
@@ -376,7 +386,7 @@ function DoSomethingAdvancedForTheEconomy(self)
 	end
 	if unitName == DummyUnitName then
 		-- metal storage
-		if Metal.reserves >= 0.9 * Metal.capacity and extraM > 10 then
+		if extraM > 25 and highMetal and highEnergy then
 			if ai.mySide == CORESideName then
 				unitName = BuildWithLimitedNumber("coruwadvms", 1)
 			else
@@ -2041,7 +2051,7 @@ local anyAdvConUnit = {
 	BuildExtraHeavyAA,
 	BuildMohoGeo,
 	BuildMohoMex,
-	DoSomethingAdvancedForTheEconomy,
+	-- DoSomethingAdvancedForTheEconomy,
 }
 
 local anyConSeaplane = {
@@ -2051,7 +2061,7 @@ local anyConSeaplane = {
 	BuildAdvancedSonar,
 	BuildHeavyTorpedo,
 	BuildAppropriateFactory,
-	DoSomethingAdvancedForTheEconomy,
+	-- DoSomethingAdvancedForTheEconomy,
 }
 
 local anyAdvConSub = {
@@ -2060,7 +2070,7 @@ local anyAdvConSub = {
 	BuildUWFusion,
 	BuildAdvancedSonar,
 	BuildHeavyTorpedo,
-	DoSomethingAdvancedForTheEconomy,
+	-- DoSomethingAdvancedForTheEconomy,
 }
 
 local anyNavalEngineer = {
