@@ -1,5 +1,5 @@
 require "maphandler"
-require "buildhandler"
+require "buildsitehandler"
 require "counthandler"
 require "unithandler"
 require "attackhandler"
@@ -12,5 +12,6 @@ require "scouthandler"
 require "assisthandler"
 require "defendhandler"
 require "turtlehandler"
+require "econhandler"
 
-modules = { Sleep, MapHandler, AttackHandler, BomberHandler, RaidHandler, BuildSiteHandler, CountHandler, LosHandler, TargetHandler, ScoutHandler, AssistHandler, DefendHandler, TurtleHandler, UnitHandler }
+modules = { Sleep, MapHandler, EconHandler, AttackHandler, BomberHandler, RaidHandler, BuildSiteHandler, CountHandler, LosHandler, TargetHandler, ScoutHandler, AssistHandler, DefendHandler, TurtleHandler, UnitHandler }

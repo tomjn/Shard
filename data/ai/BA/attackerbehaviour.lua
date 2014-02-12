@@ -59,7 +59,9 @@ function AttackerBehaviour:UnitDead(unit)
 end
 
 function AttackerBehaviour:UnitIdle(unit)
-
+	if unit.engineID == self.unit.engineID then
+		self.idle = true
+	end
 end
 
 function AttackerBehaviour:Attack(pos, realClose)
@@ -78,6 +80,7 @@ function AttackerBehaviour:Attack(pos, realClose)
 		if self.active then
 			self.unit:Internal():Move(self.target)
 		end
+		self.idle = nil
 		self.unit:ElectBehaviour()
 	end
 end
@@ -115,6 +118,7 @@ function AttackerBehaviour:Congregate(pos)
 			end
 			ordered = true
 		end
+		self.idle = nil
 		self.unit:ElectBehaviour()
 	end
 	return ordered
@@ -124,6 +128,7 @@ function AttackerBehaviour:Free()
 	self.attacking = false
 	self.congregating = false
 	self.target = nil
+	self.idle = nil
 	self.unit:ElectBehaviour()
 end
 

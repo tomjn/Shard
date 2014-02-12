@@ -346,20 +346,21 @@ end
 function BuildSiteHandler:UnitCreated(unit)
 	local unitName = unit:Name()
 	local position = unit:GetPosition()
+	local unitID = unit:ID()
 	local planned = false
 	for i, plan in pairs(self.plans) do
 		if plan.unitName == unitName and PositionWithinRect(position, plan) then
 			if plan.resurrect then
 				-- so that bootbehaviour will hold it in place while it gets repaired
 				EchoDebug("resurrection of " .. unitName .. " begun")
-				self.resurrectionRepair[unit:ID()] = plan.behaviour
+				self.resurrectionRepair[unitID] = plan.behaviour
 			else
 				EchoDebug(plan.behaviour.name .. " began constructing " .. unitName)
 				if unitTable[unitName].isBuilding then
 					-- so that oversized factory lane rectangles will overlap with existing buildings
-					self:DontBuildRectangle(plan.x1, plan.z1, plan.x2, plan.z2, unit:ID())
+					self:DontBuildRectangle(plan.x1, plan.z1, plan.x2, plan.z2, unitID)
+					ai.turtlehandler:PlanCreated(plan, unitID)
 				end
-				local unitID = unit:ID()
 				-- tell the builder behaviour that construction has begun
 				plan.behaviour:ConstructionBegun(unitID, plan.unitName, plan.position)
 				-- pass on to the table of what we're actually building
@@ -372,10 +373,11 @@ function BuildSiteHandler:UnitCreated(unit)
 		end
 	end
 	if not planned and unitTable[unitName].isBuilding then
-		-- for when we're restarting the AI
+		-- for when we're restarting the AI, or other contingency
 		local rect = { position = position, unitName = unitName }
 		self:CalculateRect(rect)
-		self:DontBuildRectangle(rect.x1, rect.z1, rect.x2, rect.z2, unit:ID())
+		self:DontBuildRectangle(rect.x1, rect.z1, rect.x2, rect.z2, unitID)
+		ai.turtlehandler:NewUnit(unitName, position, unitID)
 	end
 	self:PlotAllDebug()
 end
@@ -467,12 +469,12 @@ function BuildSiteHandler:CalculateFactoryLane(rect)
 	local outZ = unitTable[unitName].zsize * 4
 	rect.x1 = position.x - outX
 	rect.x2 = position.x + outX
+	local tall = outZ * 7
 	local sides = factoryExitSides[unitName]
 	if sides == 1 then
 		rect.z1 = position.z - outZ
-		rect.z2 = position.z + outZ * 5
+		rect.z2 = position.z + tall
 	elseif sides >= 2 then
-		local tall = outZ * 5
 		rect.z1 = position.z - tall
 		rect.z2 = position.z + tall
 	else
@@ -488,8 +490,10 @@ function BuildSiteHandler:NewPlan(unitName, position, behaviour, resurrect)
 		EchoDebugPlans(behaviour.name .. " plans to build " .. unitName .. " at " .. position.x .. ", " .. position.z)
 	end
 	local plan = {unitName = unitName, position = position, behaviour = behaviour, resurrect = resurrect}
-	-- positions are in the center of units, so outX and outZ are half the footprint size
 	self:CalculateRect(plan)
+	if not resurrect and unitTable[unitName].isBuilding then
+		ai.turtlehandler:NewUnit(unitName, position, plan)
+	end
 	table.insert(self.plans, plan)
 	self:PlotAllDebug()
 end
@@ -497,6 +501,9 @@ end
 function BuildSiteHandler:ClearMyPlans(behaviour)
 	for i, plan in pairs(self.plans) do
 		if plan.behaviour == behaviour then
+			if not plan.resurrect and unitTable[plan.unitName].isBuilding then
+				ai.turtlehandler:PlanCancelled(plan)
+			end
 			table.remove(self.plans, i)
 		end
 	end

@@ -108,50 +108,56 @@ end
 function AttackHandler:ReTarget()
 	local f = game:Frame()
 	for is, squad in pairs(self.squads) do
-		if f > squad.lastReTarget + 450 then
-			squad.lastReTarget = f
-			local representative
-			for iu, member in pairs(squad.members) do
-				if member ~= nil then
-					if member.unit ~= nil then
-						representative = member.unit:Internal()
-						if representative ~= nil then
-							break
+		if f > squad.lastReTarget + 300 then
+			if squad.idle or squad.reachedTarget then
+				if squad.idle or f > squad.reachedTarget + 900 then
+					local representative
+					for iu, member in pairs(squad.members) do
+						if member ~= nil then
+							if member.unit ~= nil then
+								representative = member.unit:Internal()
+								if representative ~= nil then
+									break
+								end
+							end
 						end
 					end
-				end
-			end
-			if squad.buildingIDs ~= nil then
-				self:IDsWeAreNotAttacking(squad.buildingIDs)
-			end
-			if representative == nil then
-				self.attackSent[squad.mtype] = 0
-				table.remove(self.squads, is)
-			else
-				-- find a target
-				local bestCell = ai.targethandler:GetBestAttackCell(representative)
-				if bestCell == nil then
-					squad.notarget = squad.notarget + 1
-					if squad.target == nil or squad.notarget > 3 then
-						-- if no target found initially, or no target for the last three targetting checks, disassemble and recruit the squad
-						for iu, member in pairs(squad.members) do
-							self:AddRecruit(member)
-						end
+					if squad.buildingIDs ~= nil then
+						self:IDsWeAreNotAttacking(squad.buildingIDs)
+					end
+					if representative == nil then
 						self.attackSent[squad.mtype] = 0
 						table.remove(self.squads, is)
+					else
+						-- find a target
+						local bestCell = ai.targethandler:GetBestAttackCell(representative)
+						if bestCell == nil then
+							-- squad.notarget = squad.notarget + 1
+							-- if squad.target == nil or squad.notarget > 3 then
+								-- if no target found initially, or no target for the last three targetting checks, disassemble and recruit the squad
+								for iu, member in pairs(squad.members) do
+									self:AddRecruit(member)
+								end
+								self.attackSent[squad.mtype] = 0
+								table.remove(self.squads, is)
+							-- end
+						else
+							squad.target = bestCell.pos
+							self:IDsWeAreAttacking(bestCell.buildingIDs, squad.mtype)
+							squad.buildingIDs = bestCell.buildingIDs
+							squad.notarget = 0
+							squad.reachedTarget = nil
+						end
 					end
-				else
-					squad.target = bestCell.pos
-					self:IDsWeAreAttacking(bestCell.buildingIDs, squad.mtype)
-					squad.buildingIDs = bestCell.buildingIDs
-					squad.notarget = 0
 				end
 			end
+			squad.lastReTarget = f
 		end
 	end
 end
 
 function AttackHandler:DoMovement()
+	local f = game:Frame()
 	for is, squad in pairs(self.squads) do
 		-- get a representative and midpoint
 		local representative
@@ -188,9 +194,11 @@ function AttackHandler:DoMovement()
 			local congDist = sqrt(pi * totalSize) * 2
 			local stragglers = 0
 			local damaged = 0
+			local idle = 0
 			local maxRange = 0
 			for iu, member in pairs(squad.members) do
 				if member.damaged then damaged = damaged + 1 end
+				if member.idle then idle = idle + 1 end
 				if member.range > maxRange then maxRange = member.range end
 				local unit = member.unit:Internal()
 				local upos = unit:GetPosition()
@@ -239,13 +247,21 @@ function AttackHandler:DoMovement()
 			local congregate = false
 			EchoDebug("attack squad of " .. #squad.members .. " members, " .. stragglers .. " stragglers")
 			local tenth = math.ceil(#squad.members * 0.1)
+			local half = math.ceil(#squad.members * 0.5)
 			if stragglers >= tenth and damaged < tenth then -- don't congregate if we're being shot
 				congregate = true
 			end
 			local twiceMaxRange = maxRange * 2
 			local distToTarget = Distance(midPos, squad.target)
+			local reached = distToTarget < twiceMaxRange
+			if reached then
+				squad.reachedTarget = f
+			else
+				squad.reachedTarget = nil
+			end
+			squad.idle = idle > half
 			local realClose = false
-			if stragglers < math.ceil(#squad.members * 0.5) and distToTarget < twiceMaxRange then
+			if stragglers < half and squad.reachedTarget then
 				congregate = false
 				realClose = true
 			end

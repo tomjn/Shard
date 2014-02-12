@@ -123,8 +123,7 @@ function CheckForMapControl()
 		end
 		
 		lastSiegeCheckFrame = f
-		local Metal = game:GetResourceByName("Metal")
-		if Metal.reserves < 0.5 * Metal.capacity and ai.wreckCount > 0 then
+		if ai.Metal.reserves < 0.5 * ai.Metal.capacity and ai.wreckCount > 0 then
 			ai.needToReclaim = true
 		else
 			ai.needToReclaim = false
@@ -138,18 +137,17 @@ function CheckForMapControl()
 		local couldAttack = ai.couldAttack >= 1 or ai.couldBomb >= 1
 		local bombingTooExpensive = ai.bomberhandler:GetCounter() == maxBomberCounter
 		local attackTooExpensive = attackCounter == maxAttackCounter
-		local plentyOfCombatUnits = ai.combatCount > attackCounter * 0.9
 		local controlMetalSpots = ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
-		local needUpgrade = plentyOfCombatUnits or couldAttack or bombingTooExpensive or attackTooExpensive
-		local lotsOfMetal = Metal.income > 25 or controlMetalSpots
+		local needUpgrade = couldAttack or bombingTooExpensive or attackTooExpensive
+		local lotsOfMetal = ai.Metal.income > 25 or controlMetalSpots
 
 		EchoDebug(ai.totalEnemyThreat .. " " .. ai.totalEnemyImmobileThreat .. " " .. ai.totalEnemyMobileThreat)
 		-- build siege units if the enemy is turtling, if a lot of our attackers are getting destroyed, or if we control over 40% of the metal spots
 		needSiege = (ai.totalEnemyImmobileThreat > ai.totalEnemyMobileThreat * 3.5 and ai.totalEnemyImmobileThreat > 50000) or attackCounter >= siegeAttackCounter or controlMetalSpots
-		ai.needAdvanced = (Metal.income > 10 or controlMetalSpots) and ai.factories > 0 and (needUpgrade or lotsOfMetal)
+		ai.needAdvanced = (ai.Metal.income > 10 or controlMetalSpots) and ai.factories > 0 and (needUpgrade or lotsOfMetal)
 		ai.needExperimental = false
 		ai.needNukes = false
-		if Metal.income > 50 and ai.haveAdvFactory and needUpgrade and ai.enemyBasePosition then
+		if ai.Metal.income > 50 and ai.haveAdvFactory and needUpgrade and ai.enemyBasePosition then
 			if not ai.haveExpFactory then
 				for i, factory in pairs(ai.factoriesAtLevel[ai.maxFactoryLevel]) do
 					if ai.maphandler:MobilityNetworkHere("bot", factory.position) == ai.maphandler:MobilityNetworkHere("bot", ai.enemyBasePosition) then
@@ -161,10 +159,10 @@ function CheckForMapControl()
 			ai.needNukes = true
 		end
 		EchoDebug("need experimental? " .. tostring(ai.needExperimental) .. ", need nukes? " .. tostring(ai.needNukes) .. ", have advanced? " .. tostring(ai.haveAdvFactory) .. ", need upgrade? " .. tostring(needUpgrade) .. ", have enemy base position? " .. tostring(ai.enemyBasePosition))
-		EchoDebug("metal income: " .. Metal.income .. "  combat units: " .. ai.combatCount)
+		EchoDebug("metal income: " .. ai.Metal.income .. "  combat units: " .. ai.combatCount)
 		EchoDebug("have advanced? " .. tostring(ai.haveAdvFactory) .. " have experimental? " .. tostring(ai.haveExpFactory))
 		EchoDebug("need advanced? " .. tostring(ai.needAdvanced) .. "  need experimental? " .. tostring(ai.needExperimental))
-		EchoDebug("need advanced? " .. tostring(ai.needAdvanced) .. ", need upgrade? " .. tostring(needUpgrade) .. ", have attacked enough? " .. tostring(couldAttack) .. " (" .. ai.couldAttack .. "), have " .. ai.factories .. " factories, " .. math.floor(Metal.income) .. " metal income")
+		EchoDebug("need advanced? " .. tostring(ai.needAdvanced) .. ", need upgrade? " .. tostring(needUpgrade) .. ", have attacked enough? " .. tostring(couldAttack) .. " (" .. ai.couldAttack .. "), have " .. ai.factories .. " factories, " .. math.floor(ai.Metal.income) .. " metal income")
 	end
 end
 
@@ -248,8 +246,7 @@ end
 
 function BuildWindSolarIfNeeded()
 	-- check if we need power
-	local res = game:GetResourceByName("Energy")
-	if res.income < res.usage then
+	if ai.Energy.extra < 0 then
 		retVal = WindSolar
 		EchoDebug("BuildWindSolarIfNeeded: income "..res.income..", usage "..res.usage..", building more energy")
 	else
@@ -274,19 +271,17 @@ end
 
 -- build conversion or storage
 function DoSomethingForTheEconomy(self)
-	local Energy = game:GetResourceByName("Energy")
-	local extraE = Energy.income - Energy.usage
-	local highEnergy = Energy.reserves > Energy.capacity * 0.9
-	local lowEnergy = Energy.reserves < Energy.capacity * 0.1
-	local Metal = game:GetResourceByName("Metal")
-	local extraM = Metal.income - Metal.usage
-	local highMetal= Metal.reserves > Metal.capacity * 0.9
-	local lowMetal = Metal.reserves < Metal.capacity * 0.1
+	local extraE = ai.Energy.income - ai.Energy.usage
+	local highEnergy = ai.Energy.reserves > ai.Energy.capacity * 0.9
+	local lowEnergy = ai.Energy.reserves < ai.Energy.capacity * 0.1
+	local extraM = ai.Metal.income - ai.Metal.usage
+	local highMetal= ai.Metal.reserves > ai.Metal.capacity * 0.9
+	local lowMetal = ai.Metal.reserves < ai.Metal.capacity * 0.1
 	local isWater = unitTable[self.unit:Internal():Name()].needsWater
 	local unitName = DummyUnitName
 	-- maybe we need conversion?
-	if extraE > 80 and highEnergy and lowMetal and extraM < 0 and Energy.income > 300 then
-		local converterLimit = math.min(math.floor(Energy.income / 200), 8)
+	if extraE > 80 and highEnergy and lowMetal and extraM < 0 and ai.Energy.income > 300 then
+		local converterLimit = math.min(math.floor(ai.Energy.income / 200), 8)
 		if isWater then
 			if ai.mySide == CORESideName then
 				unitName = BuildWithLimitedNumber("corfmkr", converterLimit)
@@ -345,20 +340,18 @@ end
 
 -- build advanced conversion or storage
 function DoSomethingAdvancedForTheEconomy(self)
-	local Energy = game:GetResourceByName("Energy")
-	local extraE = Energy.income - Energy.usage
-	local highEnergy = Energy.reserves > Energy.capacity * 0.9
-	local lowEnergy = Energy.reserves < Energy.capacity * 0.1
-	local Metal = game:GetResourceByName("Metal")
-	local extraM = Metal.income - Metal.usage
-	local highMetal= Metal.reserves > Metal.capacity * 0.9
-	local lowMetal = Metal.reserves < Metal.capacity * 0.1
+	local extraE = ai.Energy.income - ai.Energy.usage
+	local highEnergy = ai.Energy.reserves > ai.Energy.capacity * 0.9
+	local lowEnergy = ai.Energy.reserves < ai.Energy.capacity * 0.1
+	local extraM = ai.Metal.income - ai.Metal.usage
+	local highMetal= ai.Metal.reserves > ai.Metal.capacity * 0.9
+	local lowMetal = ai.Metal.reserves < ai.Metal.capacity * 0.1
 	local unitName = self.unit:Internal():Name()
 	local isWater = unitTable[unitName].needsWater or seaplaneConList[unitName]
 	local unitName = DummyUnitName
 	-- maybe we need conversion?
-	if extraE > 800 and highEnergy and lowMetal and extraM < 0 and Energy.income > 2000 then
-		local converterLimit = math.floor(Energy.income / 800)
+	if extraE > 800 and highEnergy and lowMetal and extraM < 0 and ai.Energy.income > 2000 then
+		local converterLimit = math.floor(ai.Energy.income / 800)
 		if isWater then
 			if ai.mySide == CORESideName then
 				unitName = BuildWithLimitedNumber("armuwmmm", converterLimit)
