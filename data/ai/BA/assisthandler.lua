@@ -34,10 +34,9 @@ function AssistHandler:Update()
 	local f = game:Frame()
 	if f > self.lastAllocation + 1800 then
 		self.lastAllocation = f
-		local Metal = game:GetResourceByName("Metal")
-		if Metal.reserves > Metal.capacity * 0.33 then
+		if ai.Metal.full > 0.33 then
 			ai.nonAssistantsPerName = math.max(ai.nonAssistantsPerName - 1, 2)
-		elseif Metal.reserves < math.min(Metal.income * 2, Metal.capacity * 0.1) then
+		elseif ai.Metal.tics < 2 or ai.Metal.full < 0.1 then
 			ai.nonAssistantsPerName = math.min(ai.nonAssistantsPerName + 1, ConUnitPerTypeLimit)
 			for fi, asstbehaviour in pairs(self.free) do
 				if ai.IDByName[asstbehaviour.id] <= ai.nonAssistantsPerName then

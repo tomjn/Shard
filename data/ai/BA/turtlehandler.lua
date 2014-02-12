@@ -59,45 +59,87 @@ end
 
 function TurtleHandler:Init()
 	self.turtles = {} -- zones to protect
-	self.looseOrgans = {} -- things to protect not yet in a protected zone
 	self.shells = {} -- defense buildings, shields, and jamming
+	self.planned = {}
 	self.totalPriority = 0
 end
 
-function TurtleHandler:UnitCreated(unit)
-	local un = unit:Name()
-	local ut = unitTable[un]
+-- received from buildsitehandler
+-- also applies to plans, in which case the plan is the unitID
+function TurtleHandler:NewUnit(unitName, position, unitID)
+	local ut = unitTable[unitName]
 	if ut.isBuilding then
-		local upos = unit:GetPosition()
-		local uid = unit:ID()
-		if ut.isWeapon and not ut.buildOptions and not antinukeList[un] and not nukeList[un] and not bigPlasmaList[un] then
-			self:AddDefense(upos, uid, un)
+		if ut.isWeapon and not ut.buildOptions and not antinukeList[unitName] and not nukeList[unitName] and not bigPlasmaList[unitName] then
+			self:AddDefense(position, unitID, unitName)
 		else
-			if antinukeList[un] then
-				self:AddShell(upos, uid, un, 1, "antinuke", 72000)
-			elseif shieldList[un] then
-				self:AddShell(upos, uid, un, 1, "shield", 450)
+			if antinukeList[unitName] then
+				self:AddShell(position, unitID, unitName, 1, "antinuke", 72000)
+			elseif shieldList[unitName] then
+				self:AddShell(position, unitID, unitName, 1, "shield", 450)
 			elseif ut.jammerRadius ~= 0 then
-				self:AddShell(upos, uid, un, 1, "jam", ut.jammerRadius)
+				self:AddShell(position, unitID, unitName, 1, "jam", ut.jammerRadius)
 			elseif ut.radarRadius ~= 0 then
-				self:AddShell(upos, uid, un, 1, "radar", ut.radarRadius * 0.67)
+				self:AddShell(position, unitID, unitName, 1, "radar", ut.radarRadius * 0.67)
 			elseif ut.sonarRadius ~= 0 then
-				self:AddShell(upos, uid, un, 1, "sonar", ut.sonarRadius * 0.67)
+				self:AddShell(position, unitID, unitName, 1, "sonar", ut.sonarRadius * 0.67)
 			end
-			self:AddOrgan(upos, uid, un)
+			self:AddOrgan(position, unitID, unitName)
+		end
+	end
+end
+
+-- received from buildsitehandler
+function TurtleHandler:PlanCreated(plan, unitID)
+	local found = false
+	local unitName = plan.unitName
+	local ut = unitTable[unitName]
+	if ut.isBuilding then
+		if ut.isWeapon or shieldList[unitName] then
+			for si, shell in pairs(self.shells) do
+				if shell.unitID == plan then
+					shell.unitID = unitID
+					found = true
+					break
+				end
+			end
+		else
+			for ti, turtle in pairs(self.turtles) do
+				for oi, organ in pairs(turtle.organs) do
+					if organ.unitID == plan then
+						organ.unitID = unitID
+						found = true
+						break
+					end
+				end
+				if found then break end
+			end
+		end
+	end
+	return found
+end
+
+-- received from buildsitehandler
+function TurtleHandler:PlanCancelled(plan)
+	local unitName = plan.unitName
+	local ut = unitTable[unitName]
+	if ut.isBuilding then
+		if ut.isWeapon or shieldList[unitName] then
+			self:RemoveShell(plan)
+		else
+			self:RemoveOrgan(plan)
 		end
 	end
 end
 
 function TurtleHandler:UnitDead(unit)
-	local un = unit:Name()
-	local ut = unitTable[un]
-	local uid = unit:ID()
+	local unitName = unit:Name()
+	local ut = unitTable[unitName]
+	local unitID = unit:ID()
 	if ut.isBuilding then
-		if ut.isWeapon or shieldList[un] then
-			self:RemoveShell(uid)
+		if ut.isWeapon or shieldList[unitName] then
+			self:RemoveShell(unitID)
 		else
-			self:RemoveOrgan(uid)
+			self:RemoveOrgan(unitID)
 		end
 	end
 end
@@ -134,7 +176,7 @@ function TurtleHandler:AddOrgan(position, unitID, unitName)
 		priority = priority + (ut.metalCost / 1000)
 	end
 	-- create the organ
-	local organ = { priority = priority, position = position, uid = unitID }
+	local organ = { priority = priority, position = position, unitID = unitID }
 	-- find a turtle to attach to
 	local nearestDist = maxOrganDistance
 	local nearestTurtle
@@ -163,12 +205,12 @@ function TurtleHandler:AddOrgan(position, unitID, unitName)
 	self:PlotAllDebug()
 end
 
-function TurtleHandler:RemoveOrgan(uid)
+function TurtleHandler:RemoveOrgan(unitID)
 	local foundOrgan = false
 	local emptyTurtle = false
 	for ti, turtle in pairs(self.turtles) do
 		for oi, organ in pairs(turtle.organs) do
-			if organ.uid == uid then
+			if organ.unitID == unitID then
 				turtle.priority = turtle.priority - organ.priority
 				self.totalPriority = self.totalPriority - organ.priority
 				table.remove(turtle.organs, oi)
@@ -313,23 +355,23 @@ function TurtleHandler:AddTurtle(position, water, priority)
 	return turtle
 end
 
-function TurtleHandler:AddDefense(position, uid, unitName)
+function TurtleHandler:AddDefense(position, unitID, unitName)
 	local ut = unitTable[unitName]
 	-- effective defense ranges are less than actual ranges, because if a building is just inside a weapon range, it's not defended
 	local defense = ut.metalCost
 	if ut.groundRange ~= 0 then
-		self:AddShell(position, uid, unitName, defense, "ground", ut.groundRange * 0.5)
+		self:AddShell(position, unitID, unitName, defense, "ground", ut.groundRange * 0.5)
 	end
 	if ut.airRange ~= 0 then
-		self:AddShell(position, uid, unitName, defense, "air", ut.airRange * 0.5)
+		self:AddShell(position, unitID, unitName, defense, "air", ut.airRange * 0.5)
 	end
 	if ut.submergedRange ~= 0 then
-		self:AddShell(position, uid, unitName, defense, "submerged", ut.submergedRange * 0.5)
+		self:AddShell(position, unitID, unitName, defense, "submerged", ut.submergedRange * 0.5)
 	end
 end
 
-function TurtleHandler:AddShell(position, uid, uname, value, layer, radius)
-	local shell = {position = position, uid = uid, uname = uname, value = value, layer = layer, radius = radius, attachments = {}}
+function TurtleHandler:AddShell(position, unitID, uname, value, layer, radius)
+	local shell = {position = position, unitID = unitID, uname = uname, value = value, layer = layer, radius = radius, attachments = {}}
 	local nearestDist = radius * 3
 	local nearestLimb
 	local attached = false
@@ -360,9 +402,9 @@ function TurtleHandler:AddShell(position, uid, uname, value, layer, radius)
 	self:PlotAllDebug()
 end
 
-function TurtleHandler:RemoveShell(uid)
+function TurtleHandler:RemoveShell(unitID)
 	for si, shell in pairs(self.shells) do
-		if shell.uid == uid then
+		if shell.unitID == unitID then
 			for li, limb in pairs(shell.attachments) do
 				self:Detach(limb, shell)
 			end

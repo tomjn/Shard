@@ -11,23 +11,21 @@ end
 
 local CMD_GUARD = 25
 
-local Energy, Metal, extraEnergy, extraMetal, energyTooLow, energyOkay, metalTooLow, metalOkay, metalBelowHalf, metalAboveHalf, notEnoughCombats, farTooFewCombats
+local extraEnergy, extraMetal, energyTooLow, energyOkay, metalTooLow, metalOkay, metalBelowHalf, metalAboveHalf, notEnoughCombats, farTooFewCombats
 
 local function GetEcon()
-	Energy = game:GetResourceByName("Energy")
-	Metal = game:GetResourceByName("Metal")
-	extraEnergy = Energy.income - Energy.usage
-	extraMetal = Metal.income - Metal.usage
-	local enoughMetalReserves = math.min(Metal.income, Metal.capacity * 0.1)
-	local lotsMetalReserves = math.min(Metal.income * 10, Metal.capacity * 0.5)
-	local enoughEnergyReserves = math.min(Energy.income * 2, Energy.capacity * 0.25)
-	-- local lotsEnergyReserves = math.min(Energy.income * 3, Energy.capacity * 0.5)
-	energyTooLow = Energy.reserves < enoughEnergyReserves or Energy.income < 40
-	energyOkay = Energy.reserves >= enoughEnergyReserves and Energy.income >= 40
-	metalTooLow = Metal.reserves < enoughMetalReserves
-	metalOkay = Metal.reserves >= enoughMetalReserves
-	metalBelowHalf = Metal.reserves < lotsMetalReserves
-	metalAboveHalf = Metal.reserves >= lotsMetalReserves
+	extraEnergy = ai.Energy.income - ai.Energy.usage
+	extraMetal = ai.Metal.income - ai.Metal.usage
+	local enoughMetalReserves = math.min(ai.Metal.income, ai.Metal.capacity * 0.1)
+	local lotsMetalReserves = math.min(ai.Metal.income * 10, ai.Metal.capacity * 0.5)
+	local enoughEnergyReserves = math.min(ai.Energy.income * 2, ai.Energy.capacity * 0.25)
+	-- local lotsEnergyReserves = math.min(ai.Energy.income * 3, ai.Energy.capacity * 0.5)
+	energyTooLow = ai.Energy.reserves < enoughEnergyReserves or ai.Energy.income < 40
+	energyOkay = ai.Energy.reserves >= enoughEnergyReserves and ai.Energy.income >= 40
+	metalTooLow = ai.Metal.reserves < enoughMetalReserves
+	metalOkay = ai.Metal.reserves >= enoughMetalReserves
+	metalBelowHalf = ai.Metal.reserves < lotsMetalReserves
+	metalAboveHalf = ai.Metal.reserves >= lotsMetalReserves
 	local attackCounter = ai.attackhandler:GetCounter()
 	notEnoughCombats = ai.combatCount < attackCounter * 0.6
 	farTooFewCombats = ai.combatCount < attackCounter * 0.2
@@ -39,8 +37,8 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 	if value == nil then return DummyUnitName end
 	if value == DummyUnitName then return DummyUnitName end
 	EchoDebug(value .. " (before econ filter)")
-	-- EchoDebug("Energy: " .. Energy.reserves .. " " .. Energy.capacity .. " " .. Energy.income .. " " .. Energy.usage)
-	-- EchoDebug("Metal: " .. Metal.reserves .. " " .. Metal.capacity .. " " .. Metal.income .. " " .. Metal.usage)
+	-- EchoDebug("ai.Energy: " .. ai.Energy.reserves .. " " .. ai.Energy.capacity .. " " .. ai.Energy.income .. " " .. ai.Energy.usage)
+	-- EchoDebug("ai.Metal: " .. ai.Metal.reserves .. " " .. ai.Metal.capacity .. " " .. ai.Metal.income .. " " .. ai.Metal.usage)
 	if nanoTurretList[value] then
 		-- nano turret
 		EchoDebug(" nano turret")
@@ -59,7 +57,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 		if unitTable[value].extractsMetal > 0 then
 			-- metal extractor
 			EchoDebug("  mex")
-			if energyTooLow and Metal.income > 3 then
+			if energyTooLow and ai.Metal.income > 3 then
 				value = DummyUnitName
 			end
 		elseif value == "corwin" or value == "armwin" or value == "cortide" or value == "armtide" or (unitTable[value].totalEnergyOut > 0 and not unitTable[value].buildOptions) then
@@ -69,13 +67,13 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 				-- big energy plant
 				EchoDebug("   big energy plant")
 				-- don't build big energy plants until we have the resources to do so
-				if energyOkay or metalTooLow or Energy.income < 400 or Metal.income < 35 then
+				if energyOkay or metalTooLow or ai.Energy.income < 400 or ai.Metal.income < 35 then
 					value = DummyUnitName
 				end
-				if self.name == "coracv" and value == "corfus" and Energy.income > 4000 then
+				if self.name == "coracv" and value == "corfus" and ai.Energy.income > 4000 then
 					-- build advanced fusion
 					value = "cafus"
-				elseif self.name == "armacv" and value == "armfus" and Energy.income > 4000 then
+				elseif self.name == "armacv" and value == "armfus" and ai.Energy.income > 4000 then
 					-- build advanced fusion
 					value = "aafus"
 				end
@@ -94,7 +92,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 			-- factory
 			EchoDebug("  factory")
 			EchoDebug(ai.factories)
-			if ai.factories - ai.outmodedFactories <= 0 and metalOkay and energyOkay and Metal.income > 3 and Metal.reserves > unitTable[value].metalCost * 0.7 then
+			if ai.factories - ai.outmodedFactories <= 0 and metalOkay and energyOkay and ai.Metal.income > 3 and ai.Metal.reserves > unitTable[value].metalCost * 0.7 then
 				EchoDebug("   first factory")
 				-- build the first factory
 			elseif advFactories[value] and metalOkay and energyOkay then
@@ -104,12 +102,12 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 			else
 				if ai.couldAttack >= 1 or ai.couldBomb >= 1 then
 					-- other factory after attack
-					if metalTooLow or Metal.income < (ai.factories - ai.outmodedFactories) * 8 or energyTooLow or (ai.needAdvanced and not ai.haveAdvFactory) then
+					if metalTooLow or ai.Metal.income < (ai.factories - ai.outmodedFactories) * 8 or energyTooLow or (ai.needAdvanced and not ai.haveAdvFactory) then
 						value = DummyUnitName
 					end
 				else
 					-- other factory before attack more stringent
-					if metalBelowHalf or Metal.income < (ai.factories - ai.outmodedFactories) * 12 or energyTooLow or (ai.needAdvanced and not ai.haveAdvFactory) then
+					if metalBelowHalf or ai.Metal.income < (ai.factories - ai.outmodedFactories) * 12 or energyTooLow or (ai.needAdvanced and not ai.haveAdvFactory) then
 						value = DummyUnitName
 					end
 				end
@@ -119,16 +117,16 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 			EchoDebug("  defense")
 			if bigPlasmaList[value] or nukeList[value] then
 				-- long-range plasma and nukes aren't really defense
-				if metalTooLow or energyTooLow or Metal.income < 35 or ai.factories == 0 or notEnoughCombats then
+				if metalTooLow or energyTooLow or ai.Metal.income < 35 or ai.factories == 0 or notEnoughCombats then
 					value = DummyUnitName
 				end
 			elseif littlePlasmaList[value] then
 				-- plasma turrets need units to back them up
-				if metalTooLow or energyTooLow or Metal.income < 10 or ai.factories == 0 or notEnoughCombats then
+				if metalTooLow or energyTooLow or ai.Metal.income < 10 or ai.factories == 0 or notEnoughCombats then
 					value = DummyUnitName
 				end
 			else
-				if metalTooLow or Metal.income < (unitTable[value].metalCost / 35) + 2 or energyTooLow or ai.factories == 0 then
+				if metalTooLow or ai.Metal.income < (unitTable[value].metalCost / 35) + 2 or energyTooLow or ai.factories == 0 then
 					value = DummyUnitName
 				end
 			end
@@ -141,7 +139,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 		else
 			-- other building
 			EchoDebug("  other building")
-			if notEnoughCombats or metalTooLow or energyTooLow or Energy.income < 200 or Metal.income < 8 or ai.factories == 0 then
+			if notEnoughCombats or metalTooLow or energyTooLow or ai.Energy.income < 200 or ai.Metal.income < 8 or ai.factories == 0 then
 				value = DummyUnitName
 			end
 		end
@@ -160,7 +158,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 					end
 				elseif ai.nameCount[value] == 1 then
 					-- build another fairly easily
-					if metalTooLow or energyTooLow or Metal.income < 18 or (farTooFewCombats and not self.outmodedFactory) then
+					if metalTooLow or energyTooLow or ai.Metal.income < 18 or (farTooFewCombats and not self.outmodedFactory) then
 						value = DummyUnitName
 					end
 				else
@@ -172,12 +170,12 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 				-- build at least one of each type
 			elseif assistList[value] then
 				-- build enough assistants
-				if metalBelowHalf or energyTooLow or ai.assistCount > Metal.income * 0.125 then
+				if metalBelowHalf or energyTooLow or ai.assistCount > ai.Metal.income * 0.125 then
 					value = DummyUnitName
 				end
 			elseif value == "corcv" and ai.nameCount["coracv"] ~= 0 and ai.nameCount["coracv"] ~= nil and (ai.nameCount["coralab"] == 0 or ai.nameCount["coralab"] == nil) then
 				-- core doesn't have consuls, so treat lvl1 con vehicles like assistants, if there are no other alternatives
-				if metalBelowHalf or energyTooLow or ai.conCount > Metal.income * 0.15 then
+				if metalBelowHalf or energyTooLow or ai.conCount > ai.Metal.income * 0.15 then
 					value = DummyUnitName
 				end
 			else
@@ -484,10 +482,7 @@ function TaskQueueBehaviour:BestFactory()
 		for i, factoryName in pairs(factoryNames) do
 			local buildMe = true
 			local isAdvanced = advFactories[factoryName]
-			local isExperimental = expFactories[factoryName] or leadsToExpFactories[factoryName]
-			
-			-- if isExperimental or ai.needExperimental then DebugEnabled = true end
-			
+			local isExperimental = expFactories[factoryName] or leadsToExpFactories[factoryName]			
 			if ai.needAdvanced and not ai.haveAdvFactory then
 				if not isAdvanced then buildMe = false end
 			end
@@ -500,7 +495,15 @@ function TaskQueueBehaviour:BestFactory()
 			if not ai.needExperimental then
 				if expFactories[factoryName] then buildMe = false end
 			end
-			if buildMe and ai.nameCount[factoryName] == 0 then
+			--[[
+			-- this probably isn't a good idea, there are better ways to use up excess metal
+			if ai.Metal.income > 10 and ai.Metal.extra > 5 and ai.Metal.full > 0.9 then
+				-- don't include built factories if we've got tons of metal
+				-- if we include factories we already have, this algo will tend to spit out subpar factories
+				if ai.nameCount[factoryName] > 0 then buildMe = false end
+			end
+			]]--
+			if buildMe then
 				local utype = game:GetTypeByName(factoryName)
 				local builderPos = builder:GetPosition()
 				local p
@@ -551,10 +554,20 @@ function TaskQueueBehaviour:BestFactory()
 									EchoDebug(factoryName .. " " .. mtype .. " has enough spots (" .. numberOfSpots .. ") and a score of " .. score .. " (" .. spotPercentage .. " " .. dist .. ")")
 									if score > bestScore then
 										local okay = true
-										if mtype == "veh" then
-											if ai.maphandler:OutmodedFactoryHere("veh", builderPos) and not ai.maphandler:OutmodedFactoryHere("bot", builderPos) then
-												-- don't build a not very useful vehicle plant if a bot factory can be built instead
-												okay = false
+										if okay then
+											if mtype == "veh" then
+												if ai.maphandler:OutmodedFactoryHere("veh", builderPos) and not ai.maphandler:OutmodedFactoryHere("bot", builderPos) then
+													-- don't build a not very useful vehicle plant if a bot factory can be built instead
+													okay = false
+												end
+											end
+										end
+										if okay then
+											if mtype == "bot" and not ai.needExperimental then
+												-- don't built a bot lab senselessly to slow us down
+												if not ai.maphandler:OutmodedFactoryHere("veh", builderPos) and (ai.nameCount["armvp"] >= 1 or ai.nameCount["corvp"] >= 1) then
+													okay = false
+												end
 											end
 										end
 										if okay then
@@ -572,7 +585,10 @@ function TaskQueueBehaviour:BestFactory()
 			-- DebugEnabled = false
 		end
 	end
-	if bestName ~= nil then EchoDebug("best factory: " .. bestName) end
+	if bestName ~= nil then
+		if ai.nameCount[bestName] > 0 then return nil, nil end
+		EchoDebug("best factory: " .. bestName)
+	end
 	return bestPos, bestName
 end
 
@@ -588,7 +604,7 @@ function TaskQueueBehaviour:GetQueue()
 	end
 	self.outmodedTechLevel = false
 	if outmodedTaskqueues[self.name] ~= nil and not got then
-		if self.isFactory and unitTable[self.name].techLevel < ai.maxFactoryLevel and Metal.reserves < Metal.capacity * 0.95 then
+		if self.isFactory and unitTable[self.name].techLevel < ai.maxFactoryLevel and ai.Metal.reserves < ai.Metal.capacity * 0.95 then
 			-- stop buidling lvl1 attackers if we have a lvl2, unless we're about to waste metal, in which case use it up
 			q = outmodedTaskqueues[self.name]
 			got = true
