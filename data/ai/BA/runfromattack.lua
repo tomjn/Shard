@@ -73,7 +73,7 @@ function RunFromAttackBehaviour:Activate()
 	-- can we move at all?
 	if self.mobile then
 		-- run to the most defended base location
-		local salvation = ai.turtlehandler:MostTurtled(self.unit:Internal(), nil, true)
+		local salvation = ai.turtlehandler:MostTurtled(self.unit:Internal(), nil, nil, true)
 		if salvation == nil then
 			-- if no turtle, find the nearest combat unit
 			salvation = self:NearestCombat()

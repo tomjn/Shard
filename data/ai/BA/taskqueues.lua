@@ -130,8 +130,8 @@ function CheckForMapControl()
 		end
 		AAUnitPerTypeLimit = math.ceil(ai.turtlehandler:GetTotalPriority() / 4)
 		heavyPlasmaLimit = math.ceil(ai.combatCount / 10)
-		nukeLimit = math.ceil(ai.combatCount / 24)
-		tacticalNukeLimit = math.ceil(ai.combatCount / 20)
+		nukeLimit = math.ceil(ai.combatCount / 50)
+		tacticalNukeLimit = math.ceil(ai.combatCount / 40)
 
 		local attackCounter = ai.attackhandler:GetCounter()
 		local couldAttack = ai.couldAttack >= 1 or ai.couldBomb >= 1
@@ -2035,7 +2035,7 @@ local anyAdvConUnit = {
 	BuildLvl2Plasma,
 	BuildTachyon,
 	BuildHeavyPlasma,
-	BuildTacticalNuke,
+	-- BuildTacticalNuke,
 	BuildFusion,
 	BuildAdvancedRadar,
 	BuildLvl2Jammer,

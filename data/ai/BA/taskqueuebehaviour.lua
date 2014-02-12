@@ -416,7 +416,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 	elseif nukeList[value] or bigPlasmaList[value] or littlePlasmaList[value] then
 		-- bombarders
 		EchoDebug("seeking bombard build spot")
-		local turtlePosList = ai.turtlehandler:MostTurtled(builder, value)
+		local turtlePosList = ai.turtlehandler:MostTurtled(builder, value, value)
 		if turtlePosList then
 			EchoDebug("got sorted turtle list")
 			if #turtlePosList ~= 0 then
@@ -452,7 +452,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		end
 	elseif unitTable[value].isBuilding then
 		-- buildings in defended positions
-		local turtlePosList = ai.turtlehandler:MostTurtled(builder)
+		local turtlePosList = ai.turtlehandler:MostTurtled(builder, value)
 		if turtlePosList then
 			if #turtlePosList ~= 0 then
 				for i, turtlePos in ipairs(turtlePosList) do
@@ -508,7 +508,7 @@ function TaskQueueBehaviour:BestFactory()
 				local builderPos = builder:GetPosition()
 				local p
 				EchoDebug("looking for most turtled position for " .. factoryName)
-				local turtlePosList = ai.turtlehandler:MostTurtled(builder)
+				local turtlePosList = ai.turtlehandler:MostTurtled(builder, factoryName)
 				if turtlePosList then
 					if #turtlePosList ~= 0 then
 						for i, turtlePos in ipairs(turtlePosList) do

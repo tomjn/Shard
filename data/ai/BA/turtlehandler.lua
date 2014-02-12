@@ -36,7 +36,7 @@ local layerMod = {
 }
 
 local missingFactoryDefenseDistance = 1500 -- if a turtle with a factory has no defense, subtract this much from distance
-local modDistance = 1.25
+local modDistance = 1
 
 local factoryPriority = 4 -- added to tech level. above this priority allows two of the same type of defense tower.
 
@@ -46,6 +46,39 @@ local outpostPriority = 2
 local exteriorLayer = { ground = 1, submerged = 1 }
 local interiorLayer = { air = 1, antinuke = 1, shield = 1, jam = 1, radar = 1, sonar = 1 }
 local hurtyLayer = { ground = 1, submerged = 1, air = 1 }
+
+local function Priority(unitName)
+	local priority = 0
+	local ut = unitTable[unitName]
+	if turtleList[unitName] then
+		priority = turtleList[unitName]
+	elseif antinukeList[unitName] then
+		priority = 2
+	elseif shieldList[unitName] then
+		priority = 2
+	else
+		if ut.buildOptions then
+			priority = priority + factoryPriority + ut.techLevel
+		end
+		if ut.extractsMetal > 0 then
+			priority = priority + (ut.extractsMetal * 1000)
+		end
+		if ut.totalEnergyOut > 0 then
+			priority = priority + (ut.totalEnergyOut / 200)
+		end
+		if ut.jammerRadius > 0 then
+			priority = priority + (ut.jammerRadius / 700)
+		end
+		if ut.radarRadius > 0 then
+			priority = priority + (ut.radarRadius / 3500)
+		end
+		if ut.sonarRadius > 0 then
+			priority = priority + (ut.sonarRadius / 2400)
+		end
+		priority = priority + (ut.metalCost / 1000)
+	end
+	return priority
+end
 
 TurtleHandler = class(Module)
 
@@ -146,35 +179,8 @@ end
 
 function TurtleHandler:AddOrgan(position, unitID, unitName)
 	-- calculate priority
-	local priority = 0
+	local priority = Priority(unitName)
 	local ut = unitTable[unitName]
-	if turtleList[unitName] then
-		priority = turtleList[unitName]
-	elseif antinukeList[unitName] then
-		priority = 2
-	elseif shieldList[unitName] then
-		priority = 2
-	else
-		if ut.buildOptions then
-			priority = priority + factoryPriority + ut.techLevel
-		end
-		if ut.extractsMetal > 0 then
-			priority = priority + (ut.extractsMetal * 1000)
-		end
-		if ut.totalEnergyOut > 0 then
-			priority = priority + (ut.totalEnergyOut / 200)
-		end
-		if ut.jammerRadius > 0 then
-			priority = priority + (ut.jammerRadius / 700)
-		end
-		if ut.radarRadius > 0 then
-			priority = priority + (ut.radarRadius / 3500)
-		end
-		if ut.sonarRadius > 0 then
-			priority = priority + (ut.sonarRadius / 2400)
-		end
-		priority = priority + (ut.metalCost / 1000)
-	end
 	-- create the organ
 	local organ = { priority = priority, position = position, unitID = unitID }
 	-- find a turtle to attach to
@@ -542,7 +548,9 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
 	end
 end
 
-function TurtleHandler:MostTurtled(builder, bombard, oneOnly)
+function TurtleHandler:MostTurtled(builder, unitName, bombard, oneOnly)
+	local modDist = modDistance
+	if unitName then modDist = modDist * Priority(unitName) end
 	if builder == nil then return end
 	EchoDebug("checking for most turtled from " .. builder:Name() .. ", bombard: " .. tostring(bombard))
 	local position = builder:GetPosition()
@@ -560,7 +568,7 @@ function TurtleHandler:MostTurtled(builder, bombard, oneOnly)
 				EchoDebug("turtled: " .. mod .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
 				if mod ~= 0 then
 					local dist = Distance(position, turtle.position)
-					dist = dist - (mod * modDistance * 2)
+					dist = dist - (mod * modDist)
 					EchoDebug("distance: " .. dist)
 					if oneOnly then
 						if dist < bestDist then

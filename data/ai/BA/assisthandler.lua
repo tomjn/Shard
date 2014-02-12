@@ -39,6 +39,7 @@ function AssistHandler:Update()
 		elseif ai.Metal.tics < 2 or ai.Metal.full < 0.1 then
 			ai.nonAssistantsPerName = math.min(ai.nonAssistantsPerName + 1, ConUnitPerTypeLimit)
 			for fi, asstbehaviour in pairs(self.free) do
+				if ai.IDByName[asstbehaviour.id] == nil then self:AssignIDByName(asstbehaviour) end
 				if ai.IDByName[asstbehaviour.id] <= ai.nonAssistantsPerName then
 					ai.nonAssistant[asstbehaviour.id] = true
 					asstbehaviour.unit:ElectBehaviour()

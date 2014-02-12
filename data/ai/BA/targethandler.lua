@@ -70,7 +70,8 @@ local attackDistMult = 0.5 -- between 0 and 1, the lower number, the less distan
 
 local factoryValue = 1000
 local conValue = 300
-local techValue = 100
+local techValue = 50
+local energyOutValue = 2
 local minNukeValue = factoryValue + techValue + 500
 
 local feintRepeatMod = 25
@@ -146,7 +147,7 @@ local function Value(unitName)
 		val = val + 800000 * utable.extractsMetal
 	end
 	if utable.totalEnergyOut > 0 then
-		val = val + utable.totalEnergyOut
+		val = val + (utable.totalEnergyOut * energyOutValue)
 	end
 	return val
 end
@@ -1309,4 +1310,8 @@ function TargetHandler:RaiderHere(raidbehaviour)
 		end
 	end
 	self.raiderCounted[raidbehaviour.id] = true -- reset with UpdateMap()
+end
+
+function TargetHandler:UnitValue(unitName)
+	return Value(unitName)
 end
