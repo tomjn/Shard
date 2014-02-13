@@ -126,19 +126,14 @@ function ReclaimBehaviour:Reclaim()
 			end
 			if vulnerable ~= nil then
 				EchoDebug("reclaiming enemy...")
-				self.unit:Internal():Reclaim(vulnerable)
+				CustomCommand(self.unit:Internal(), CMD_RECLAIM, {vulnerable.unitID})
 			elseif self.targetResurrection ~= nil and not self.resurrecting then
 				EchoDebug("resurrecting...")
 				local resPosition = self.targetResurrection:GetPosition()
 				local unitName = featureTable[self.targetResurrection:Name()].unitName
 				EchoDebug(unitName)
-				local floats = api.vectorFloat()
 				--floats:push_back(self.targetResurrection:ID())
-				floats:push_back(resPosition.x)
-				floats:push_back(resPosition.y)
-				floats:push_back(resPosition.z)
-				floats:push_back(15) 
-				self.unit:Internal():ExecuteCustomCommand(CMD_RESURRECT, floats)
+				CustomCommand(self.unit:Internal(), CMD_RESURRECT, {resPosition.x, resPosition.y, resPosition.z, 15})
 				ai.buildsitehandler:NewPlan(unitName, self.targetResurrection:GetPosition(), self, true)
 				self.resurrecting = true
 			else

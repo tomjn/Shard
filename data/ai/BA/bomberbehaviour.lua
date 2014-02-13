@@ -5,8 +5,6 @@ function IsBomber(unit)
 	return (bomberList[tmpName] or 0) > 0
 end
 
-local CMD_ATTACK = 20
-
 BomberBehaviour = class(Behaviour)
 
 function BomberBehaviour:Init()
@@ -61,11 +59,10 @@ function BomberBehaviour:BombTarget(target)
 	if target ~= nil then
 		pos = target:GetPosition()
 		if pos ~= nil then
-			self.target = target.engineID
+			self.target = target.unitID
 			self.bombing = true
 			self.lastOrderFrame = game:Frame()
 			if self.active then
-				--self.unit:Internal():Attack(pos)
 				self:BombPosition(pos)
 				self.targetpos = pos
 			end
@@ -90,7 +87,7 @@ function BomberBehaviour:Activate()
 	self.active = true
 	if self.target then
 		self.lastOrderFrame = game:Frame()
-		self.unit:Internal():Attack(self.target)
+		CustomCommand(self.unit:Internal(), CMD_ATTACK, {self.target})
 		self.target = nil
 		self.targetpos = nil
 	else

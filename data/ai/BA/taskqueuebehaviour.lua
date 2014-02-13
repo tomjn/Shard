@@ -734,7 +734,8 @@ function TaskQueueBehaviour:ProgressQueue()
 							if utype ~= nil and p ~= nil then
 								if type(value) == "table" and value[1] == "ReclaimEnemyMex" then
 									EchoDebug("reclaiming enemy mex...")
-									success = self.unit:Internal():Reclaim(value[2])
+									--  success = self.unit:Internal():Reclaim(value[2])
+									success = CustomCommand(self.unit:Internal(), CMD_RECLAIM, {value[2].unitID})
 									value = value[1]
 								else
 									local helpValue = self:GetHelp(value, p)

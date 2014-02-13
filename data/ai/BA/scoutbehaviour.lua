@@ -82,7 +82,7 @@ function ScoutBehaviour:Update()
 				end
 			end
 			if attackTarget and not self.attacking then
-				unit:Attack(attackTarget)
+				CustomCommand(unit, CMD_ATTACK, {attackTarget.unitID})
 				self.target = nil
 				self.evading = false
 				self.attacking = true

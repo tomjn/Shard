@@ -8,11 +8,6 @@ local function EchoDebug(inStr)
 	end
 end
 
-local CMD_MOVE_STATE = 50
-local MOVESTATE_HOLDPOS = 0
-local MOVESTATE_MANEUVER = 1
-local MOVESTATE_ROAM = 2
-
 function IsAttacker(unit)
 	local uname = unit:Internal():Name()
 	for i,name in ipairs(attackerlist) do

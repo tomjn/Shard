@@ -86,12 +86,12 @@ function RaiderBehaviour:RaidCell(cell)
 			else
 				self.unitTarget = cell.airTarget
 			end
-			EchoDebug("air raid target: " .. tostring(self.unitTarget))
+			EchoDebug("air raid target: " .. tostring(self.unitTarget.unitName))
 		end
 		if self.active then
 			if self.mtype == "air" then
 				if self.unitTarget ~= nil then
-					self.unit:Internal():Attack(self.unitTarget)
+					CustomCommand(self.unit:Internal(), CMD_ATTACK, {self.unitTarget.unitID})
 				end
 			else
 				self.unit:Internal():Move(self.target)
@@ -116,7 +116,7 @@ function RaiderBehaviour:Activate()
 	if self.target then
 		if self.mtype == "air" then
 			if self.unitTarget ~= nil then
-				self.unit:Internal():Attack(self.unitTarget)
+				CustomCommand(self.unit:Internal(), CMD_ATTACK, {self.unitTarget.unitID})
 			end
 		else
 			self.unit:Internal():Move(self.target)
@@ -157,7 +157,7 @@ function RaiderBehaviour:Update()
 				attackTarget = ai.targethandler:NearbyVulnerable(unit)
 			end
 			if attackTarget then
-				unit:Attack(attackTarget)
+				CustomCommand(unit, CMD_ATTACK, {attackTarget.unitID})
 			else
 				-- evade enemies on the way to the target, if possible
 				if self.target ~= nil then
@@ -176,7 +176,7 @@ function RaiderBehaviour:Update()
 						-- return to course to target after evading
 						if self.mtype == "air" then
 							if self.unitTarget ~= nil then
-								self.unit:Internal():Attack(self.unitTarget)
+								CustomCommand(self.unit:Internal(), CMD_ATTACK, {self.unitTarget.unitID})
 							end
 						else
 							self.unit:Internal():Move(self.target)

@@ -82,11 +82,11 @@ end
 
 function LosHandler:Init()
 	self.losGrid = {}
-	self.knownEnemies = {}
+	ai.knownEnemies = {}
 	self.knownWrecks = {}
-	self.ghosts = {}
-	self.enemyNames = {}
 	ai.wreckCount = 0
+	ai.enemyList = {}
+	ai.blips = {}
 	self:Update()
 end
 
@@ -105,6 +105,9 @@ function LosHandler:Update()
 		ai.friendlyCount = #ownUnits
 		self.losGrid = {}
 		ai.friendlyCount = 0
+		-- note: this could be more effecient by using a behaviour
+		-- if the unit is a building, we know it's LOS contribution forever
+		-- if the unit moves, the behaviours can be polled rather than GetFriendlies()
 		local ownUnits = game:GetFriendlies()
 		if ownUnits ~= nil then
 			ai.friendlyCount = table.getn(ownUnits)
@@ -128,18 +131,23 @@ function LosHandler:Update()
 				end
 			end
 		end
-		-- update enemy jamming
+		-- update enemy jamming and populate list of enemies
 		local enemies = game:GetEnemies()
 		if enemies ~= nil then
-			for _, e in pairs(enemies) do
-				local utable = unitTable[e:Name()]
+			local tracking
+			local enemyList = {}
+			for i, e in pairs(enemies) do
+				local uname = e:Name()
+				local utable = unitTable[uname]
+				local upos = e:GetPosition()
 				if utable.jammerRadius > 0 then
-					local upos = e:GetPosition()
 					self:FillCircle(upos.x, upos.z, utable.jammerRadius, 1, true)
 				end
+				-- so that we only have to poll GetEnemies() once
+				table.insert(enemyList, { unitName = uname, position = upos, unitID = e:ID(), cloaked = e:IsCloaked(), beingBuilt = e:IsBeingBuilt(), health = e:GetHealth(), los = 0 })
 			end
 			-- update known enemies
-			self:UpdateEnemies()
+			self:UpdateEnemies(enemyList)
 		end
 		-- update known wrecks
 		self:UpdateWrecks()
@@ -147,72 +155,71 @@ function LosHandler:Update()
 	end
 end
 
-function LosHandler:UpdateEnemies()
-	local enemies = game:GetEnemies()
-	if enemies == nil then return end
-	if #enemies == 0 then return end
+function LosHandler:UpdateEnemies(enemyList)
+	if enemyList == nil then return end
+	if #enemyList == 0 then return end
 	-- game:SendToConsole("updating known enemies")
 	local known = {}
 	local exists = {}
-	if self.knownEnemies == nil then self.knownEnemies = {} end
-	for i, e  in pairs(enemies) do
-		if e ~= nil then
-			local id = e:ID()
-			local ename = e:Name()
-			self.enemyNames[id] = ename
-			local pos = e:GetPosition()
-			exists[id] = pos
-			if not e:IsCloaked() then
-				local lt = self:AllLos(pos)
-				local los = 0
-				local persist = false
-				local underWater = (unitTable[ename].mtype == "sub")
-				if underWater then
-					if lt[3] then
-						-- sonar
-						los = 2
-					end
-				else 
-					if lt[1] and not lt[2] and not unitTable[ename].stealth then
-						los = 1
-					elseif lt[2] then
-						los = 2
-					elseif lt[4] and unitTable[ename].mtype == "air" then
-						-- air los
-						los = 2
-					end
+	for i, e  in pairs(enemyList) do
+		local id = e.unitID
+		local ename = e.unitName
+		local pos = e.position
+		exists[id] = pos
+		if not e.cloaked then
+			local lt = self:AllLos(pos)
+			local los = 0
+			local persist = false
+			local underWater = (unitTable[ename].mtype == "sub")
+			if underWater then
+				if lt[3] then
+					-- sonar
+					los = 2
 				end
-				if los == 0 and unitTable[ename].isBuilding then
-					-- don't remove from knownenemies if it's a building that was once seen
-					persist = true
-				elseif los == 1 then
-					-- don't remove from knownenemies if it's a now blip
-					persist = true
-				elseif los == 2 then
-					known[id] = los
-					self.knownEnemies[id] = los
+			else 
+				if lt[1] and not lt[2] and not unitTable[ename].stealth then
+					los = 1
+				elseif lt[2] then
+					los = 2
+				elseif lt[4] and unitTable[ename].mtype == "air" then
+					-- air los
+					los = 2
 				end
-				if persist == true then
-					if self.knownEnemies[id] ~= nil then
-						if self.knownEnemies[id] == 2 then
-							known[id] = self.knownEnemies[id]
-						end
+			end
+			if los == 0 and unitTable[ename].isBuilding then
+				-- don't remove from knownenemies if it's a building that was once seen
+				persist = true
+			elseif los == 1 then
+				-- don't remove from knownenemies if it's a now blip
+				persist = true
+			elseif los == 2 then
+				known[id] = los
+				ai.knownEnemies[id] = e
+				e.los = los
+			end
+			if persist == true then
+				if ai.knownEnemies[id] ~= nil then
+					if ai.knownEnemies[id].los == 2 then
+						known[id] = ai.knownEnemies[id].los
 					end
 				end
-				if los == 1 then
-					self.knownEnemies[id] = los
-					known[id] = los
-				end
-				if self.knownEnemies[id] ~= nil and DebugEnabled then
-					if known[id] == 2 and self.knownEnemies[id] == 2 then PlotDebug(pos.x, pos.z, "known") end
-				end
+			end
+			if los == 1 then
+				ai.knownEnemies[id] = e
+				e.los = los
+				known[id] = los
+			end
+			if ai.knownEnemies[id] ~= nil and DebugEnabled then
+				if known[id] == 2 and ai.knownEnemies[id].los == 2 then PlotDebug(pos.x, pos.z, "known") end
 			end
 		end
 	end
 	-- remove unit ghosts outside of radar range and building ghosts if they don't exist
 	-- this is cheating a little bit, because dead units outside of sight will automatically be removed
+	-- also populate moving blips (whether in radar or in sight) for analysis
+	local blips = {}
 	local f = game:Frame()
-	for id, los in pairs(self.knownEnemies) do
+	for id, e in pairs(ai.knownEnemies) do
 		if not exists[id] then
 			-- enemy died
 			if ai.IDsWeAreAttacking[id] then
@@ -221,31 +228,41 @@ function LosHandler:UpdateEnemies()
 			if ai.IDsWeAreRaiding[id] then
 				ai.raidhandler:TargetDied(ai.IDsWeAreRaiding[id])
 			end
-			local uname = self.enemyNames[id]
-			EchoDebug("enemy " .. uname .. " died!")	
-			local mtypes = WhatUnitHurts(uname)
+			EchoDebug("enemy " .. e.unitName .. " died!")	
+			local mtypes = WhatUnitHurts(e.unitName)
 			for i, mtype in pairs(mtypes) do
 				ai.raidhandler:NeedMore(mtype)
 				ai.attackhandler:NeedLess(mtype)
 				if mtype == "air" then ai.bomberhandler:NeedLess() end
 			end
-			self.knownEnemies[id] = nil
-			self.ghosts[id] = nil
-		elseif not known[id] then			
-			self.knownEnemies[id] = nil
-			if not self.ghosts[id] then
-				self.ghosts[id] = { frame = f, position = exists[id] }
+			ai.knownEnemies[id] = nil
+		elseif not known[id] then
+			if not e.ghost then
+				e.ghost = { frame = f, position = e.position }
+			else
+				-- expire ghost
+				if f > e.ghost.frame + 600 then
+					ai.knownEnemies[id] = nil
+				end
 			end
 		else
-			self.ghosts[id] = nil
+			if not unitTable[e.unitName].isBuilding then
+				local count = true
+				if e.los == 2 then
+					-- if we know what kind of unit it is, only count as a potential threat blip if it's a hurty unit
+					-- air doesn't count because there are no buildings in the air
+					local threatLayers = UnitThreatRangeLayers(e.unitName)
+					if threatLayers.ground.threat == 0 and threatLayers.submerged.threat == 0 then
+						count = false
+					end
+				end
+				if count then table.insert(blips, e) end
+			end
+			e.ghost = nil
 		end
 	end
-	-- expire ghosts
-	for id, g in pairs(self.ghosts) do
-		if f > g.frame + 900 then
-			self.ghosts[id] = nil
-		end
-	end
+	-- send blips off for analysis
+	ai.tacticalhandler:NewEnemyPositions(blips)
 end
 
 function LosHandler:UpdateWrecks()
@@ -403,8 +420,8 @@ end
 
 function LosHandler:IsKnownEnemy(unit)
 	local id = unit:ID()
-	if self.knownEnemies[id] then
-		return self.knownEnemies[id]
+	if ai.knownEnemies[id] then
+		return ai.knownEnemies[id].los
 	else
 		return 0
 	end
@@ -421,9 +438,10 @@ end
 
 function LosHandler:GhostPosition(unit)
 	local id = unit:ID()
-	if self.ghosts[id] then
-		return self.ghosts[id].position
-	else
-		return nil
+	if ai.knownEnemies[id] then
+		if ai.knownEnemies[id].ghost then
+			return ai.knownEnemies[id].position
+		end
 	end
+	return nil
 end

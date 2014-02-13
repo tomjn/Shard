@@ -6,6 +6,20 @@ twicePi = pi * 2
 cos = math.cos
 sin = math.sin
 atan2 = math.atan2
+floor = math.floor
+ceil = math.ceil
+abs = math.abs
+
+CMD_ATTACK = 20
+CMD_RECLAIM = 90
+CMD_GUARD = 25
+CMD_MOVE_STATE = 50
+MOVESTATE_HOLDPOS = 0
+MOVESTATE_MANEUVER = 1
+MOVESTATE_ROAM = 2
+
+local layerNames = {"ground", "air", "submerged"}
+local unitThreatLayers = {}
 
 local quadX = { -1, 1, -1, 1 }
 local quadZ = { -1, -1, 1, 1 }
@@ -46,6 +60,22 @@ function ManhattanDistance(pos1,pos2)
 	local yd = math.abs(pos1.z-pos2.z)
 	local dist = xd + yd
 	return dist
+end
+
+function ApplyVector(x, z, vx, vz, frames)
+	if frames == nil then frames = 30 end
+	return ConstrainToMap(x + (vx *frames), z + (vz * frames))
+end
+
+function AngleDist(angle1, angle2)
+	return abs((angle1 + 180 -  angle2) % 360 - 180)
+	-- Spring.Echo(math.floor(angleDist * 57.29), math.floor(high * 57.29), math.floor(low * 57.29))
+end
+
+function AngleAtoB(x1, z1, x2, z2)
+	local dx = x2 - x1
+	local dz = z2 - z1
+	return atan2(-dz, dx)
 end
 
 function CheckRect(rect)
@@ -107,4 +137,70 @@ function pairsByKeys(t, f)
     end
   end
   return iter
+end
+
+function CustomCommand(unit, cmdID, cmdParams)
+	local floats = api.vectorFloat()
+	for i = 1, #cmdParams do
+		floats:push_back(cmdParams[i])
+	end
+	return unit:ExecuteCustomCommand(cmdID, floats)
+end
+
+function ThreatRange(unitName, groundAirSubmerged, enemy)
+	local threatLayers = unitThreatLayers[unitName]
+	if groundAirSubmerged ~= nil and threatLayers ~= nil then
+		local layer = threatLayers[groundAirSubmerged]
+		if layer ~= nil then
+			return layer.threat, layer.range
+		end
+	end
+	if antinukeList[unitName] or nukeList[unitName] or bigPlasmaList[unitName] or shieldList[unitName] then
+		return 0, 0
+	end
+	local utable = unitTable[unitName]
+	if groundAirSubmerged == nil then
+		if utable.groundRange > utable.airRange and utable.groundRange > utable.submergedRange then
+			groundAirSubmerged = "ground"
+		elseif utable.airRange > utable.groundRange and utable.airRange > utable.submergedRange then
+			groundAirSubmerged = "air"
+		elseif utable.submergedRange > utable.groundRange and utable.submergedRange > utable.airRange then
+			groundAirSubmerged = "submerged"
+		end
+	end
+	if threatLayers ~= nil then
+		local layer = threatLayers[groundAirSubmerged]
+		if layer ~= nil then
+			return layer.threat, layer.range
+		end
+	end
+	local threat = 0
+	local range = 0
+	if groundAirSubmerged == "ground" and (utable.mtype ~= "air" or not enemy) then -- air units ignored because they move too fast for their position to matter for ground threat calculations. however our own air units need to count
+		range = utable.groundRange
+	elseif groundAirSubmerged == "air" then
+		range = utable.airRange
+	elseif groundAirSubmerged == "submerged" then
+		range = utable.submergedRange
+	end
+	if range > 0 and threat == 0 then
+		threat = utable.metalCost
+	end
+	-- double the threat if it's a building (buildings are more bang for your buck)
+	if threat > 0 and utable.isBuilding then threat = threat + threat end
+	if unitThreatLayers[unitName] == nil then unitThreatLayers[unitName] = {} end
+	unitThreatLayers[unitName][groundAirSubmerged] = { threat = threat, range = range }
+	return threat, range
+end
+
+function UnitThreatRangeLayers(unitName)
+	local threatLayers = unitThreatLayers[unitName]
+	if threatLayers then return threatLayers end
+	threatLayers = {}
+	for i, layerName in pairs(layerNames) do
+		local threat, range = ThreatRange(unitName, layerName)
+		threatLayers[layerName] = { threat = threat, range = range }
+	end
+	unitThreatLayers[unitName] = threatLayers
+	return threatLayers
 end

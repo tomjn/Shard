@@ -76,6 +76,8 @@ local minNukeValue = factoryValue + techValue + 500
 
 local feintRepeatMod = 25
 
+local unitValue = {}
+
 local enemyAlreadyCounted = {}
 local currentEnemyThreatCount = 0
 local currentEnemyImmobileThreatCount = 0
@@ -99,38 +101,9 @@ local function NewCell(px, pz)
 	return newcell
 end
 
-local function ThreatRange(unitName, groundAirSubmerged, enemy)
-	if antinukeList[unitName] or nukeList[unitName] or bigPlasmaList[unitName] or shieldList[unitName] then
-		return 0, 0
-	end
-	local utable = unitTable[unitName]
-	if groundAirSubmerged == nil then
-		if utable.groundRange > utable.airRange and utable.groundRange > utable.submergedRange then
-			groundAirSubmerged = "ground"
-		elseif utable.airRange > utable.groundRange and utable.airRange > utable.submergedRange then
-			groundAirSubmerged = "air"
-		elseif utable.submergedRange > utable.groundRange and utable.submergedRange > utable.airRange then
-			groundAirSubmerged = "submerged"
-		end
-	end
-	local threat = 0
-	local range = 0
-	if groundAirSubmerged == "ground" and (utable.mtype ~= "air" or not enemy) then -- air units ignored because they move too fast for their position to matter for ground threat calculations. however our own air units need to count
-		range = utable.groundRange
-	elseif groundAirSubmerged == "air" then
-		range = utable.airRange
-	elseif groundAirSubmerged == "submerged" then
-		range = utable.submergedRange
-	end
-	if range > 0 and threat == 0 then
-		threat = utable.metalCost
-	end
-	-- double the threat if it's a building (buildings are more bang for your buck)
-	if threat > 0 and utable.isBuilding then threat = threat + threat end
-	return threat, range
-end
-
 local function Value(unitName)
+	local v = unitValue[unitName]
+	if v then return v end
 	local utable = unitTable[unitName]
 	if not utable then return 0 end
 	local val = utable.metalCost + (utable.techLevel * techValue)
@@ -149,6 +122,7 @@ local function Value(unitName)
 	if utable.totalEnergyOut > 0 then
 		val = val + (utable.totalEnergyOut * energyOutValue)
 	end
+	unitValue[unitName] = val
 	return val
 end
 
@@ -368,15 +342,15 @@ local function CheckInRadius(cx, cz, radius, groundAirSubmerged)
 	return value, threat
 end
 
-local function CountEnemyThreat(e, threat)
-	if not enemyAlreadyCounted[e] then
+local function CountEnemyThreat(unitID, unitName, threat)
+	if not enemyAlreadyCounted[unitID] then
 		currentEnemyThreatCount = currentEnemyThreatCount + threat
-		if unitTable[e:Name()].isBuilding then
+		if unitTable[unitName].isBuilding then
 			currentEnemyImmobileThreatCount = currentEnemyImmobileThreatCount + threat
 		else
 			currentEnemyMobileThreatCount = currentEnemyMobileThreatCount + threat
 		end
-		enemyAlreadyCounted[e] = true
+		enemyAlreadyCounted[unitID] = true
 	end
 end
 
@@ -482,26 +456,17 @@ end
 
 local function UpdateEnemies()
 	ai.enemyMexSpots = {}
-	local enemies = game:GetEnemies()
-	if enemies == nil then return end
-	if #enemies == 0 then return end
-
-	-- figure out where all the enemies are!
+	-- where is/are the party/parties tonight?
 	local highestValue = minNukeValue
 	local highestValueCell
-	for i, e in pairs(enemies) do
-		local los = ai.loshandler:IsKnownEnemy(e)
-		local ghost = ai.loshandler:GhostPosition(e)
-		local name = e:Name()
+	for i, e in pairs(ai.knownEnemies) do
+		local los = e.los
+		local ghost = e.ghost
+		local name = e.unitName
 		-- only count those we know about and that aren't being built
-		if (los ~= 0 or ghost) and not e:IsBeingBuilt() then
+		if (los ~= 0 or ghost) and not e.beingBuilt then
 			local pos
-			if ghost then
-				EchoDebug("using ghost position")
-				pos = ghost 
-			else
-				pos = e:GetPosition()
-			end
+			if ghost then pos = ghost.position else pos = e.position end
 			local px, pz = GetCellPosition(pos)
 			if cells[px] == nil then
 				cells[px] = {}
@@ -521,23 +486,23 @@ local function UpdateEnemies()
 					FillCircle(px, pz, baseUnitRange, "submerged", baseUnitThreat)
 				end
 			elseif los == 2 then
-				DangerCheck(name, e:ID())
+				DangerCheck(name, e.unitID)
 				local value = Value(name)
 				if unitTable[name].extractsMetal ~= 0 then
 					table.insert(ai.enemyMexSpots, { position = pos, unit = e })
 				end
 				if unitTable[name].isBuilding then
-					table.insert(cell.buildingIDs, e:ID())
+					table.insert(cell.buildingIDs, e.unitID)
 				end
 				for i, groundAirSubmerged in pairs(threatTypes) do
 					local threat, range = ThreatRange(name, groundAirSubmerged, true)
 					-- EchoDebug(name .. " " .. groundAirSubmerged .. " " .. threat .. " " .. range)
 					if threat ~= 0 then
 						FillCircle(px, pz, range, groundAirSubmerged, threat)
-						CountEnemyThreat(e, threat)
+						CountEnemyThreat(e.unitID, name, threat)
 					elseif unitTable[name].mtype ~= "air" then
 						-- for those times when you need to attack the unit itself, not the ground
-						local health = e:GetHealth()
+						local health = e.health
 						local mtype = unitTable[name].mtype
 						if groundAirSubmerged == "ground" then
 							if mtype ~= "air" and mtype ~= "sub" then
@@ -566,7 +531,7 @@ local function UpdateEnemies()
 								local gt, gr = ThreatRange(name, "ground", true)
 								if gt > 0 then
 									if cell.disarmTarget then
-										local ogt, ogr = ThreatRange(cell.disarmTarget:Name(), "ground", true)
+										local ogt, ogr = ThreatRange(cell.disarmTarget.unitName, "ground", true)
 										if gt > ogt then
 											cell.disarmTarget = e
 										end
@@ -609,52 +574,6 @@ local function UpdateEnemies()
 		ai.enemyBasePosition = nil
 	end
 end
-
---[[
-local function UpdateFriendlies()
-	ai.totalFriendlyThreat = 0
-	local friendlies = game:GetFriendlies()
-	if friendlies == nil then return end
-	if #friendlies == 0 then return end
-	-- figure out where all the friendlies are!
-	for i, f in pairs(friendlies) do
-		local name = f:Name()
-		local pos = f:GetPosition()
-		local px, pz = GetCellPosition(pos)
-		if cells[px] == nil then
-			cells[px] = {}
-		end
-		if cells[px][pz] == nil then
-			cells[px][pz] = NewCell(px, pz)
-			table.insert(cellList, cells[px][pz])
-		end
-		cell = cells[px][pz]
-		cell.friendlyValue = cell.friendlyValue + Value(name)
-		if unitTable[name].isBuilding then
-			cell.friendlyBuildings = cell.friendlyBuildings + 1
-		end
-		local threat, range = ThreatRange(name)
-		-- EchoDebug(name .. " " .. groundAirSubmerged .. " " .. threat .. " " .. range)
-		if threat ~= 0 then
-			ai.totalFriendlyThreat = ai.totalFriendlyThreat + threat
-			if not unitTable[name].isBuilding then
-				local mtype = unitTable[name].mtype
-				-- count mobile combat units in cell
-				if mtype == "veh" or mtype == "bot" or mtype == "hov" or mtype == "amp" then
-					cell.friendlyLandCombats = cell.friendlyLandCombats + 1
-				end
-				if mtype == "air" then
-					cell.friendlyAirCombats = cell.friendlyAirCombats + 1
-				end
-				if mtype == "sub" or mtype == "shp" or mtype == "hov" or mtype == "amp" then
-					cell.friendlyWaterCombats = cell.friendlyWaterCombats + 1
-				end
-			end
-		end
-		if cell.pos == nil then cell.pos = pos end
-	end
-end
-]]--
 
 local function UpdateBadPositions()
 	local f = game:Frame()
@@ -741,17 +660,17 @@ local function UpdateDebug()
 	end
 end
 
+--[[
 function TargetHandler:UnitDamaged(unit, attacker)
 	-- even if the attacker can't be seen, human players know what weapons look like
 	-- but attacker is nil if it's an enemy unit, so this is useless
-	--[[
 	if attacker ~= nil then
 		local attackerName = attacker:Name()
 		local attackerID = attacker:ID()
 		DangerCheck(attackerName, attackerID)
 	end
-	]]--
 end
+]]--
 
 function TargetHandler:Init()
 	ai.enemyMexSpots = {}
@@ -1135,10 +1054,16 @@ function TargetHandler:WreckToResurrect(representative)
 			if w ~= nil then
 				local wname = w:Name()
 				if wname ~= nil then
-					local metalCost = unitTable[featureTable[wname].unitName].metalCost
-					if metalCost > bestMetalCost then
-						bestWreck = w
-						bestMetalCost = metalCost
+					local ft = featureTable[wname]
+					if ft ~= nil then
+						local ut = unitTable[ft.unitName]
+						if ut ~= nil then
+							local metalCost = ut.metalCost
+							if metalCost > bestMetalCost then
+								bestWreck = w
+								bestMetalCost = metalCost
+							end
+						end
 					end
 				end
 			end

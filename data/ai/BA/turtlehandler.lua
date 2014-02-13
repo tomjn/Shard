@@ -47,7 +47,11 @@ local exteriorLayer = { ground = 1, submerged = 1 }
 local interiorLayer = { air = 1, antinuke = 1, shield = 1, jam = 1, radar = 1, sonar = 1 }
 local hurtyLayer = { ground = 1, submerged = 1, air = 1 }
 
+local unitPriorities = {}
+
 local function Priority(unitName)
+	local p = unitPriorities[unitName]
+	if p then return p end
 	local priority = 0
 	local ut = unitTable[unitName]
 	if turtleList[unitName] then
@@ -77,6 +81,7 @@ local function Priority(unitName)
 		end
 		priority = priority + (ut.metalCost / 1000)
 	end
+	unitPriorities[unitName] = p
 	return priority
 end
 

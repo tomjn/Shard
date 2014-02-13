@@ -271,17 +271,15 @@ end
 
 -- build conversion or storage
 function DoSomethingForTheEconomy(self)
-	local extraE = ai.Energy.income - ai.Energy.usage
-	local highEnergy = ai.Energy.reserves > ai.Energy.capacity * 0.9
-	local lowEnergy = ai.Energy.reserves < ai.Energy.capacity * 0.1
-	local extraM = ai.Metal.income - ai.Metal.usage
-	local highMetal= ai.Metal.reserves > ai.Metal.capacity * 0.9
-	local lowMetal = ai.Metal.reserves < ai.Metal.capacity * 0.1
+	local highEnergy = ai.Energy.full > 0.9
+	local lowEnergy = ai.Energy.full < 0.1
+	local highMetal = ai.Metal.full > 0.9
+	local lowMetal = ai.Metal.full < 0.1
 	local isWater = unitTable[self.unit:Internal():Name()].needsWater
 	local unitName = DummyUnitName
 	-- maybe we need conversion?
-	if extraE > 80 and highEnergy and lowMetal and extraM < 0 and ai.Energy.income > 300 then
-		local converterLimit = math.min(math.floor(ai.Energy.income / 200), 8)
+	if ai.Energy.extra > 80 and highEnergy and lowMetal and ai.Metal.extra < 0 and ai.Energy.income > 300 then
+		local converterLimit = math.min(math.floor(ai.Energy.income / 200), 4)
 		if isWater then
 			if ai.mySide == CORESideName then
 				unitName = BuildWithLimitedNumber("corfmkr", converterLimit)
@@ -299,7 +297,7 @@ function DoSomethingForTheEconomy(self)
 	-- maybe we need storage?
 	if unitName == DummyUnitName then
 		-- energy storage
-		if extraE > 150 and highEnergy and not lowMetal then
+		if ai.Energy.extra > 150 and highEnergy and not lowMetal then
 			if isWater then
 				if ai.mySide == CORESideName then
 					unitName = BuildWithLimitedNumber("coruwes", 2)
@@ -317,7 +315,7 @@ function DoSomethingForTheEconomy(self)
 	end
 	if unitName == DummyUnitName then
 		-- metal storage
-		if extraM > 5 and highMetal and highEnergy then
+		if ai.Metal.extra > 5 and highMetal and highEnergy then
 			if isWater then
 				if ai.mySide == CORESideName then
 					unitName = BuildWithLimitedNumber("coruwms", 2)
@@ -340,18 +338,16 @@ end
 
 -- build advanced conversion or storage
 function DoSomethingAdvancedForTheEconomy(self)
-	local extraE = ai.Energy.income - ai.Energy.usage
-	local highEnergy = ai.Energy.reserves > ai.Energy.capacity * 0.9
-	local lowEnergy = ai.Energy.reserves < ai.Energy.capacity * 0.1
-	local extraM = ai.Metal.income - ai.Metal.usage
-	local highMetal= ai.Metal.reserves > ai.Metal.capacity * 0.9
-	local lowMetal = ai.Metal.reserves < ai.Metal.capacity * 0.1
+	local highEnergy = ai.Energy.full > 0.9
+	local lowEnergy = ai.Energy.full < 0.1
+	local highMetal = ai.Metal.full > 0.9
+	local lowMetal = ai.Metal.full < 0.1
 	local unitName = self.unit:Internal():Name()
 	local isWater = unitTable[unitName].needsWater or seaplaneConList[unitName]
 	local unitName = DummyUnitName
 	-- maybe we need conversion?
-	if extraE > 800 and highEnergy and lowMetal and extraM < 0 and ai.Energy.income > 2000 then
-		local converterLimit = math.floor(ai.Energy.income / 800)
+	if ai.Energy.extra > 800 and highEnergy and lowMetal and ai.Metal.extra < 0 and ai.Energy.income > 2000 then
+		local converterLimit = math.floor(ai.Energy.income / 1000)
 		if isWater then
 			if ai.mySide == CORESideName then
 				unitName = BuildWithLimitedNumber("armuwmmm", converterLimit)
@@ -366,10 +362,12 @@ function DoSomethingAdvancedForTheEconomy(self)
 			end
 		end
 	end
+	-- building big storage is a waste
+	--[[
 	-- maybe we need storage?
 	if unitName == DummyUnitName then
 		-- energy storage
-		if extraE > 1500 and highEnergy and not lowMetal then
+		if ai.Energy.extra > 1500 and highEnergy and not lowMetal then
 			if ai.mySide == CORESideName then
 				unitName = BuildWithLimitedNumber("coruwadves", 1)
 			else
@@ -379,7 +377,7 @@ function DoSomethingAdvancedForTheEconomy(self)
 	end
 	if unitName == DummyUnitName then
 		-- metal storage
-		if extraM > 25 and highMetal and highEnergy then
+		if ai.Metal.extra > 25 and highMetal and highEnergy then
 			if ai.mySide == CORESideName then
 				unitName = BuildWithLimitedNumber("coruwadvms", 1)
 			else
@@ -387,6 +385,7 @@ function DoSomethingAdvancedForTheEconomy(self)
 			end	
 		end
 	end
+	]]--
 
 	return unitName
 end
@@ -1207,47 +1206,6 @@ local function ConHover()
 		return BuildWithLimitedNumber("corch", ConUnitPerTypeLimit)
 	else
 		return BuildWithLimitedNumber("armch", ConUnitPerTypeLimit)
-	end
-end
-
--- how many of our own unitName there are in a radius around a position
-function CountOwnUnitsInRadius(unitName, pos, radius, maxCount)
-	local ownUnits = game:GetFriendlies()
-	local unitCount = 0
-	-- optimisation: there is always 0 null units on map
-	if unitName == DummyUnitName then
-		return 0
-	end
-	for _, u in pairs(ownUnits) do
-		if u:Name() == unitName then
-			local upos = u:GetPosition()
-			if Distance(pos, upos) < radius then
-				unitCount = unitCount + 1
-			end
-			-- optimisation: if the limit is already exceeded, don't count further
-			if unitCount >= maxCount then
-				break
-			end
-		end
-	end
-	return unitCount
-end
-
-local function CheckAreaLimit(unitName, builder, unitLimit, range)
-	-- this is special case, it means the unit will not be built anyway
-	if unitName == DummyUnitName then
-		return unitName
-	end
-	local pos = builder:GetPosition()
-	if range == nil then range = AreaCheckRange end
-	-- now check how many of the wanted unit is nearby
-	local NumberOfUnits = CountOwnUnitsInRadius(unitName, pos, range, unitLimit)
-	local AllowBuilding = NumberOfUnits < unitLimit
-	EchoDebug(""..unitName.." wanted, with range limit of "..unitLimit..", with "..NumberOfUnits.." already there. The check is: "..tostring(AllowBuilding))
-	if AllowBuilding then
-		return unitName
-	else
-		return DummyUnitName
 	end
 end
 
