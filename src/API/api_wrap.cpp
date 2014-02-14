@@ -2034,7 +2034,33 @@ static swig_lua_class *swig_std_string_bases[] = {0};
 static const char *swig_std_string_base_names[] = {0};
 static swig_lua_class _wrap_class_std_string = { "string", &SWIGTYPE_p_std__string,_wrap_new_string, swig_delete_string, swig_std_string_methods, swig_std_string_attributes, swig_std_string_bases, swig_std_string_base_names };
 
-static int _wrap_new_Position(lua_State* L) {
+static int _wrap_new_Position__SWIG_0(lua_State* L) {
+  int SWIG_arg = 0;
+  float arg1 ;
+  float arg2 ;
+  float arg3 ;
+  Position *result = 0 ;
+  
+  SWIG_check_num_args("Position::Position",3,3)
+  if(!lua_isnumber(L,1)) SWIG_fail_arg("Position::Position",1,"float");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("Position::Position",2,"float");
+  if(!lua_isnumber(L,3)) SWIG_fail_arg("Position::Position",3,"float");
+  arg1 = (float)lua_tonumber(L, 1);
+  arg2 = (float)lua_tonumber(L, 2);
+  arg3 = (float)lua_tonumber(L, 3);
+  result = (Position *)new Position(arg1,arg2,arg3);
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_Position,1); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_new_Position__SWIG_1(lua_State* L) {
   int SWIG_arg = 0;
   Position *result = 0 ;
   
@@ -2048,6 +2074,44 @@ static int _wrap_new_Position(lua_State* L) {
 fail:
   lua_error(L);
   return SWIG_arg;
+}
+
+
+static int _wrap_new_Position(lua_State* L) {
+  int argc;
+  int argv[4]={
+    1,2,3,4
+  };
+  
+  argc = lua_gettop(L);
+  if (argc == 0) {
+    return _wrap_new_Position__SWIG_1(L);
+  }
+  if (argc == 3) {
+    int _v;
+    {
+      _v = lua_isnumber(L,argv[0]);
+    }
+    if (_v) {
+      {
+        _v = lua_isnumber(L,argv[1]);
+      }
+      if (_v) {
+        {
+          _v = lua_isnumber(L,argv[2]);
+        }
+        if (_v) {
+          return _wrap_new_Position__SWIG_0(L);
+        }
+      }
+    }
+  }
+  
+  lua_pushstring(L,"Wrong arguments for overloaded function 'new_Position'\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    Position::Position(float,float,float)\n"
+    "    Position::Position()\n");
+  lua_error(L);return 0;
 }
 
 
@@ -6065,6 +6129,33 @@ fail:
 }
 
 
+static int _wrap_IGame_getUnitByID(lua_State* L) {
+  int SWIG_arg = 0;
+  IGame *arg1 = (IGame *) 0 ;
+  int arg2 ;
+  IUnit *result = 0 ;
+  
+  SWIG_check_num_args("IGame::getUnitByID",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IGame::getUnitByID",1,"IGame *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IGame::getUnitByID",2,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IGame,0))){
+    SWIG_fail_ptr("IGame_getUnitByID",1,SWIGTYPE_p_IGame);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  result = (IUnit *)(arg1)->getUnitByID(arg2);
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_IUnit,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static void swig_delete_IGame(void *obj) {
 IGame *arg1 = (IGame *) obj;
 delete arg1;
@@ -6092,6 +6183,7 @@ static swig_lua_method swig_IGame_methods[] = {
     {"GetResourceCount", _wrap_IGame_GetResourceCount}, 
     {"GetResourceByName", _wrap_IGame_GetResourceByName}, 
     {"Me", _wrap_IGame_Me}, 
+    {"getUnitByID", _wrap_IGame_getUnitByID}, 
     {0,0}
 };
 static swig_lua_attribute swig_IGame_attributes[] = {

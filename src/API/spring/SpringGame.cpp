@@ -245,7 +245,7 @@ SResourceData CSpringGame::GetResourceByName(std::string name){
 }
 
 IUnit* CSpringGame::getUnitByID( int unit_id ) {
-	return ai->getUnitByID( unit_id );
+	return ai->GetGame()->getUnitByID( unit_id );
 }
 
 /*void CSpringGame::removeUnit( IUnit* dead_unit ) {
