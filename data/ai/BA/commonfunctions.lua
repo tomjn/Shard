@@ -41,7 +41,7 @@ function RandomAway(pos, dist, opposite, angle)
 	local away = api.Position()
 	away.x = pos.x + dist * cos(angle)
 	away.z = pos.z - dist * sin(angle)
-	away.y = pos.y
+	away.y = pos.y + 0
 	if away.x < 1 then
 		away.x = 1
 	elseif away.x > ai.maxElmosX - 1 then
@@ -93,7 +93,7 @@ end
 function AngleAtoB(x1, z1, x2, z2)
 	local dx = x2 - x1
 	local dz = z2 - z1
-	return atan2(-dz, dx), dx, dz
+	return atan2(-dz, dx)
 end
 
 function CheckRect(rect)
@@ -127,20 +127,6 @@ function RectsOverlap(rectA, rectB)
            rectB.x1 < rectA.x2 and
            rectA.z1 < rectB.z2 and
            rectB.z1 < rectA.z2
-end
-
-function GetQuadrants(position, distance)
-	if position == nil then return end
-	if distance == nil then distance = 100 end
-	local quadrants = { }
-	for n = 1, 4 do
-		local new = api.Position()
-		new.y = position.y
-		new.x = position.x + (distance * quadX[n])
-		new.z = position.z + (distance * quadZ[n])
-		table.insert(quadrants, new)
-	end
-	return quadrants
 end
 
 function pairsByKeys(t, f)

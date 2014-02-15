@@ -72,38 +72,39 @@ function DefendBehaviour:Update()
 		if math.mod(f,60) == 0 then
 			if self.target == nil then return end
 			local targetPos = self.target.position or BehaviourPosition(self.target.behaviour)
+			if targetPos == nil then return end
+			local guardDistance = self.target.guardDistance
+			local guardPos = RandomAway(targetPos, guardDistance, false, self.guardAngle)
 			local safe = ai.defendhandler:DefendeeSafe(self.target)
-			if targetPos ~= nil then
-				local unitPos = unit:GetPosition()
-				local dist = Distance(unitPos, targetPos)
-				local behaviour = self.target.behaviour
-				local guardDistance = self.target.guardDistance
-				if dist > guardDistance + 500 and behaviour ~= nil then
-					if self.guarding ~= behaviour.id then
-						-- move toward mobile defendees that are far away with guard order
-						CustomCommand(self.unit:Internal(), CMD_GUARD, {behaviour.id})
-						self.guarding = behaviour.id
-					end
-				elseif not safe then
-					self.guarding = nil
-					if dist < guardDistance + 350 then
-						-- just keep going after enemies near turtles
-					else
-						-- move back to the turtle at a slightly more generous distance if we're too far away
-						local guardPos = RandomAway(targetPos, guardDistance + 50, false, self.guardAngle)
-						unit:Move(guardPos)
-					end
+			-- if targetPos.y > 100 then game:SendToConsole(targetPos.y .. " " .. type(self.target.behaviour)) end
+			local unitPos = unit:GetPosition()
+			local dist = Distance(unitPos, guardPos)
+			local behaviour = self.target.behaviour
+			if dist > 500 and behaviour ~= nil then
+				self.moving = nil
+				if self.guarding ~= behaviour.id then
+					-- move toward mobile defendees that are far away with guard order
+					CustomCommand(self.unit:Internal(), CMD_GUARD, {behaviour.id})
+					self.guarding = behaviour.id
+				end
+			elseif not safe then
+				self.guarding = nil
+				if dist < 250 and self.moving then
+					-- just keep going after enemies near turtles
 				else
-					self.guarding = nil
-					if dist > guardDistance + 25 or dist < guardDistance - 25 then
-						-- keep near mobile units and buildings not yet in danger
-						local guardPos = RandomAway(targetPos, guardDistance, false, self.guardAngle)
-						unit:Move(guardPos)
-					end
+					unit:Move(guardPos)
+					self.moving = true
+				end
+			else
+				self.guarding = nil
+				if dist > 25 then
+					-- keep near mobile units and buildings not yet in danger
+					unit:Move(guardPos)
+					self.moving = true
 				end
 			end
+			self.unit:ElectBehaviour()
 		end
-		self.unit:ElectBehaviour()
 	end
 end
 
@@ -113,6 +114,7 @@ function DefendBehaviour:Assign(defendee, angle)
 	else
 		self.target = defendee
 		self.guardAngle = angle or math.random() * twicePi
+		self.moving = nil
 	end
 end
 

@@ -11,7 +11,7 @@ end
 
 -- local factoryPriority = 3
 local threatenedPriority = 4
-local turtleThreatenedPriority = 8
+local turtleThreatenedPriority = 20
 local techLevelPriority = 1
 local commanderPriority = 1.5
 
@@ -41,8 +41,6 @@ function DefendHandler:AddDefendee(behaviour)
 	local utable = unitTable[un]
 	local priority = 0
 	priority = priority + utable.techLevel * techLevelPriority
-	-- if utable.isBuilding then
-	-- 	priority = priority + factoryPriority
 	if un == "corcom" or un == "armcom" then
 		priority = priority + commanderPriority
 	end
@@ -207,7 +205,6 @@ function DefendHandler:AssignAll()
 	-- find angles for each defender
 	for i, defendee in pairs(self.defendees) do
 		local divisor = #defendee.defenders
-		if defendee.behaviour == nil and divisor > 0 then game:SendToConsole("turtle defendee with " .. divisor) end
 		if divisor > 0 then
 			if defendee.behaviour ~= nil then
 				local angleAdd = twicePi / divisor

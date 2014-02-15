@@ -550,9 +550,9 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
 		local sorted = {}
 		for dist, pos in pairsByKeys(bydistance) do
 			local newpos = api.Position()
-			newpos.x = pos.x
-			newpos.z = pos.z
-			newpos.y = pos.y
+			newpos.x = pos.x+0
+			newpos.z = pos.z+0
+			newpos.y = pos.y+0
 			table.insert(sorted, newpos)
 		end
 		EchoDebug("outputting " .. #sorted .. " least turtles")
@@ -598,9 +598,9 @@ function TurtleHandler:MostTurtled(builder, unitName, bombard, oneOnly)
 	if oneOnly then
 		if best then
 			local newpos = api.Position()
-			newpos.x = best.x
-			newpos.z = best.z
-			newpos.y = best.y
+			newpos.x = best.x+0
+			newpos.z = best.z+0
+			newpos.y = best.y+0
 			return newpos
 		else
 			return nil
@@ -609,9 +609,9 @@ function TurtleHandler:MostTurtled(builder, unitName, bombard, oneOnly)
 		local sorted = {}
 		for dist, pos in pairsByKeys(bydistance) do
 			local newpos = api.Position()
-			newpos.x = pos.x
-			newpos.z = pos.z
-			newpos.y = pos.y
+			newpos.x = pos.x+0
+			newpos.z = pos.z+0
+			newpos.y = pos.y+0
 			table.insert(sorted, newpos)
 		end
 		EchoDebug("outputting " .. #sorted .. " most turtles")
@@ -624,8 +624,8 @@ function TurtleHandler:ResetThreatForecast()
 		-- ground air and submerged refer to what kind of weapon will hit the attacker
 		turtle.threatForecast = { ground = 0, air = 0, submerged = 0 }
 		turtle.threatForecastAngle = nil
-		turtle.threatForecastVX = nil
-		turtle.threatForecastVZ = nil
+		turtle.threatForecastX = nil
+		turtle.threatForecastZ = nil
 		turtle.threatForecastCount = 0
 	end
 end
@@ -634,20 +634,23 @@ function TurtleHandler:AddThreatVector(enemy, vx, vz)
 	local unitName = enemy.unitName
 	local threatLayers = UnitThreatRangeLayers(unitName)
 	local ex, ez = enemy.position.x, enemy.position.z
-	local px, pz = ApplyVector(ex, ez, vx, vz, 900)
+	local px, pz = ApplyVector(ex, ez, vx, vz, 1200)
 	local waterEnemy = unitTable[unitName].needsWater
 	local hurtsEnemy = WhatHurtsUnit(unitName)
-	local nearestAngleToEnemy, nearestAngleToPrediction
 	local nearestTurtle
 	local nearestDist = 100000
 	for ti, turtle in pairs(self.turtles) do
 		if turtle.water == waterEnemy then
 			local tx, tz = turtle.position.x, turtle.position.z
-			local angleToEnemy, vx, vz = AngleAtoB(tx, tz, ex, ez)
+			local dx, dz = ex - tx, ez - tz
+			local angleToEnemy = atan2(-dz, dx)
 			local angleToPrediction = AngleAtoB(tx, tz, px, pz)
+			-- local guardpos = RandomAway(turtle.position, turtle.size+100, false, angleToEnemy)
+			-- ai.tacticalhandler:PlotABDebug(turtle.position.x, turtle.position.z, guardpos.x, guardpos.z, "ENEMYANGLE")
+			-- ai.tacticalhandler:PlotABDebug(turtle.position.x, turtle.position.z, turtle.position.x+dx, turtle.position.z+dz, "ENEMYVECTOR")
 			local angleDist = AngleDist(angleToEnemy, angleToPrediction)
 			local threatened = false
-			if angleDist > 90 then
+			if angleDist > halfPi then
 				-- will the enemy be behind the turtle in 30 seconds?
 				threatened = true
 			else
@@ -668,8 +671,6 @@ function TurtleHandler:AddThreatVector(enemy, vx, vz)
 				if dist < nearestDist then
 					nearestTurtle = turtle
 					nearestDist = dist
-					nearestAngleToEnemy = angleToEnemy
-					nearestAngleToPrediction = angleToPrediction
 				end
 			end
 		end
@@ -681,30 +682,40 @@ function TurtleHandler:AddThreatVector(enemy, vx, vz)
 		for gas, yes in pairs(hurtsEnemy) do
 			turtle.threatForecast[gas] = turtle.threatForecast[gas] + threat
 		end
-		turtle.threatForecastCount = turtle.threatForecastCount + 1
 		if not hurtsEnemy.air then -- AA doesn't need to be along defensive lines
-			turtle.threatForecastVX = (turtle.threatForecastVX or 0) + dx
-			turtle.threatForecastVZ = (turtle.threatForecastVZ or 0) + dz
-			-- if turtle.threatForecastAngle > twicePi then turtle.threatForecastAngle = turtle.threatForecastAngle - twicePi end
-			-- if turtle.threatForecastAngle < 0 then turtle.threatForecastAngle = turtle.threatForecastAngle + twicePi end
+			turtle.threatForecastX = (turtle.threatForecastX or 0) + ex
+			turtle.threatForecastZ = (turtle.threatForecastZ or 0) + ez
+			turtle.threatForecastCount = turtle.threatForecastCount + 1
 		end
 	end
 end
 
 function TurtleHandler:AlertDangers()
+	local highestThreat = 0
+	local highestTurtle
 	for ti, turtle in pairs(self.turtles) do
-		if turtle.threatForecastVX ~= nil then
-			local vx = turtle.threatForecastVX / turtle.threatForecastCount
-			local vz = turtle.threatForecastVZ / turtle.threatForecastCount
-			turtle.threatForecastAngle = atan2(-vz, vx)
-		end
 		for gas, threat in pairs(turtle.threatForecast) do
 			if threat > turtle[gas] * 0.75 then
-				ai.defendhandler:Danger(nil, turtle)
-				ai.tacticalhandler:PlotPositionDebug(turtle.position, "TURTLEDANGER")
+				local ex = turtle.threatForecastX / turtle.threatForecastCount
+				local ez = turtle.threatForecastZ / turtle.threatForecastCount
+				turtle.threatForecastAngle = AngleAtoB(turtle.position.x, turtle.position.z, ex, ez)
+				local guardpos = RandomAway(turtle.position, turtle.size+100, false, turtle.threatForecastAngle)
+				ai.tacticalhandler:PlotABDebug(turtle.position.x, turtle.position.z, guardpos.x, guardpos.z, "GUARDANGLE")
+				-- game:SendToConsole(turtle.threatForecastAngle .. " " .. turtle.threatForecastCount)
+				if threat > highestThreat then
+					highestThreat = threat
+					highestTurtle = turtle
+				end
 				break
 			end
 		end
+	end
+	if highestTurtle ~= nil then
+		ai.defendhandler:Danger(nil, highestTurtle)
+		ai.tacticalhandler:PlotPositionDebug(highestTurtle.position, "DANGER")
+		ai.incomingThreat = highestThreat
+	else
+		ai.incomingThreat = 0
 	end
 end
 

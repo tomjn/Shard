@@ -65,6 +65,11 @@ function AttackHandler:UnitIdle(engineunit)
 end
 
 function AttackHandler:DraftSquads()
+	-- if ai.incomingThreat > 0 then game:SendToConsole(ai.incomingThreat .. " " .. (ai.battleCount + ai.breakthroughCount) * 75) end
+	if ai.incomingThreat > (ai.battleCount + ai.breakthroughCount) * 75 then
+		EchoDebug("not a good time to attack")
+		return
+	end -- do not attack if we're in trouble
 	local needtarget = {}
 	local f = game:Frame()
 	-- find which mtypes need targets

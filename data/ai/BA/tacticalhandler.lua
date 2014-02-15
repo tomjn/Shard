@@ -11,8 +11,8 @@ end
 
 local function PlotDebug(x1, z1, vx, vz, label)
 	if DebugEnabled then
-		local x2 = x1 + vx * 900
-		local z2 = z1 + vz * 900
+		local x2 = x1 + vx * 1200
+		local z2 = z1 + vz * 1200
 		debugPlotTacticalFile:write(ceil(x1) .. " " .. ceil(z1) .. " " .. ceil(x2) .. " " .. ceil(z2) .. " " .. label .. "\n")
 	end
 end
@@ -35,6 +35,7 @@ function TacticalHandler:Init()
 	self.lastKnownVectors = {}
 	self.unitSamples = {}
 	self.threatLayerNames = { "ground", "air", "submerged" }
+	ai.incomingThreat = 0
 end
 
 function TacticalHandler:NewEnemyPositions(positions)
@@ -86,7 +87,7 @@ function TacticalHandler:AverageSamples()
 		if e then
 			local vx, vz = self:AverageUnitSamples(samples)
 			self.lastKnownVectors[unitID] = { vx = vx, vz = vz } -- so that anyone using this unit table as a target will be able to lead a little
-			PlotDebug(e.position.x, e.position.z, vx, vz, unitID)
+			PlotDebug(e.position.x, e.position.z, vx, vz, "THREAT")
 			ai.turtlehandler:AddThreatVector(e, vx, vz)
 		end
 	end
@@ -116,5 +117,11 @@ end
 function TacticalHandler:PlotPositionDebug(position, label)
 	if DebugEnabled then
 		debugPlotTacticalFile:write(ceil(position.x) .. " " .. ceil(position.z) .. " " .. label .. "\n")
+	end
+end
+
+function TacticalHandler:PlotABDebug(x1, z1, x2, z2, label)
+	if DebugEnabled then
+		debugPlotTacticalFile:write(ceil(x1) .. " " .. ceil(z1) .. " " .. ceil(x2) .. " " .. ceil(z2) .. " " .. label .. "\n")
 	end
 end
