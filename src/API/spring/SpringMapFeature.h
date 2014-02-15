@@ -24,6 +24,7 @@ public:
 protected:
 	springai::OOAICallback* callback;
 	IGame* game;
+	springai::FeatureDef* def;
 };
 
 

@@ -7,9 +7,13 @@
 #include "AI/Wrappers/Cpp/src-generated/SkirmishAI.h"
 
 CSpringGame::CSpringGame(springai::OOAICallback* callback)
-: callback(callback){
+: callback(callback), datadirs(callback->GetDataDirs()),
+  economy(callback->GetEconomy()), resources(callback->GetResources()),
+  game(callback->GetGame()) {
 	ai = new CTestAI(this);
-	callback->GetCheats()->SetEnabled(true);
+	springai::Cheats* cheat = callback->GetCheats();
+	cheat->SetEnabled(true);
+	delete cheat;
 
 	std::vector<springai::UnitDef*> defs = callback->GetUnitDefs();
 	if(!defs.empty()){
@@ -28,6 +32,17 @@ CSpringGame::CSpringGame(springai::OOAICallback* callback)
 CSpringGame::~CSpringGame(){
 	delete ai;
 	delete map;
+	std::map<std::string,CSpringUnitType*>::iterator iter = definitions.begin();
+	while(iter != definitions.end()) {
+		delete iter->second;
+		++iter;
+	}
+	for (int i = 0; i < resources.size(); i += 1) {
+		delete resources[i];
+	}
+	delete datadirs;
+	delete economy;
+	delete game;
 }
 
 IMap* CSpringGame::Map(){
@@ -40,15 +55,15 @@ std::string CSpringGame::GameID(){
 }
 
 void CSpringGame::SendToConsole(std::string message){
-	callback->GetGame()->SendTextMessage(message.c_str(), 0);
+	game->SendTextMessage(message.c_str(), 0);
 }
 
 int CSpringGame::Frame(){
-	return callback->GetGame()->GetCurrentFrame();
+	return game->GetCurrentFrame();
 }
 
 bool CSpringGame::IsPaused(){
-	return callback->GetGame()->IsPaused();
+	return game->IsPaused();
 }
 
 
@@ -63,7 +78,7 @@ IUnitType* CSpringGame::GetTypeByName(std::string typeName){
 }
 
 const char* CSpringGame::ConfigFolderPath(){
-	return callback->GetDataDirs()->GetConfigDir();
+	return datadirs->GetConfigDir();
 }
 
 std::string CSpringGame::ReadFile(std::string filename){
@@ -92,7 +107,10 @@ IAI* CSpringGame::Me(){
 }
 
 std::string CSpringGame::GameName(){
-	return callback->GetMod()->GetShortName();
+	springai::Mod* mod = callback->GetMod();
+	std::string name = mod->GetShortName();
+	delete mod;
+	return name;
 }
 
 
@@ -111,7 +129,7 @@ bool CSpringGame::LocatePath(std::string& filename){
 	static const size_t absPath_sizeMax = 2048;
 	char absPath[absPath_sizeMax];
 	const bool dir = !filename.empty() && (*filename.rbegin() == '/' || *filename.rbegin() == '\\');
-	const bool located = callback->GetDataDirs()->LocatePath(absPath, absPath_sizeMax, filename.c_str(), false /*writable*/, false /*create*/, dir, false /*common*/);
+	const bool located = datadirs->LocatePath(absPath, absPath_sizeMax, filename.c_str(), false /*writable*/, false /*create*/, dir, false /*common*/);
 	if (located){
 		filename=absPath;
 	}
@@ -120,11 +138,18 @@ bool CSpringGame::LocatePath(std::string& filename){
 
 void CSpringGame::AddMarker(Position p,std::string label){
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
-	callback->GetMap()->GetDrawer()->AddPoint(pos, label.c_str());
+	springai::Map* map = callback->GetMap();
+	springai::Drawer* drawer = map->GetDrawer();
+	drawer->AddPoint(pos, label.c_str());
+	delete drawer;
+	delete map;
 }
 
 std::string CSpringGame::SendToContent(std::string data){
-	return callback->GetLua()->CallRules(data.c_str(), -1);
+	springai::Lua* lua = callback->GetLua();
+	std::string res = lua->CallRules(data.c_str(), -1);
+	delete lua;
+	return res;
 }
 
 
@@ -140,7 +165,11 @@ IUnitType* CSpringGame::ToIUnitType(springai::UnitDef* def){
 
 bool CSpringGame::HasEnemies(){
 	std::vector<springai::Unit*> enemies = callback->GetEnemyUnits();
-	return !enemies.empty();
+	bool result = !enemies.empty();
+	for (int i = 0; i < enemies.size(); i += 1) {
+		delete enemies[i];
+	}
+	return result;
 }
 
 std::vector<IUnit*> CSpringGame::GetEnemies(){
@@ -156,7 +185,11 @@ std::vector<IUnit*> CSpringGame::GetEnemies(){
 }
 bool CSpringGame::HasFriendlies(){
 	std::vector<springai::Unit*> friendlies = callback->GetFriendlyUnits();
-	return !friendlies.empty();
+	bool result = !friendlies.empty();
+	for (int i = 0; i < friendlies.size(); i += 1) {
+		delete friendlies[i];
+	}
+	return result;
 }
 std::vector<IUnit*> CSpringGame::GetFriendlies(){
 	std::vector<IUnit*> friendliesv;
@@ -171,7 +204,10 @@ std::vector<IUnit*> CSpringGame::GetFriendlies(){
 }
 
 int CSpringGame::GetTeamID(){
-	return callback->GetSkirmishAI()->GetTeamId();
+	springai::SkirmishAI* ai = callback->GetSkirmishAI();
+	int id = ai->GetTeamId();
+	delete ai;
+	return id;
 }
 
 std::vector<IUnit*> CSpringGame::GetUnits(){
@@ -189,9 +225,7 @@ std::vector<IUnit*> CSpringGame::GetUnits(){
 
 SResourceData CSpringGame::GetResource(int idx){
 	SResourceData res;
-	std::vector<springai::Resource*> resources = callback->GetResources();
 	if(!resources.empty()){
-
 		std::vector<springai::Resource*>::iterator i = resources.begin();
 		for(;i != resources.end();++i){
 			springai::Resource* r = *i;
@@ -199,10 +233,10 @@ SResourceData CSpringGame::GetResource(int idx){
 				res.id = r->GetResourceId();
 				res.name = r->GetName();
 				res.gameframe = this->Frame();
-				res.income = callback->GetEconomy()->GetIncome(r);
-				res.usage = callback->GetEconomy()->GetUsage(r);
-				res.capacity = callback->GetEconomy()->GetStorage(r);
-				res.reserves = callback->GetEconomy()->GetCurrent(r);
+				res.income = economy->GetIncome(r);
+				res.usage = economy->GetUsage(r);
+				res.capacity = economy->GetStorage(r);
+				res.reserves = economy->GetCurrent(r);
 				return res;
 			}
 		}
@@ -211,7 +245,6 @@ SResourceData CSpringGame::GetResource(int idx){
 }
 
 int CSpringGame::GetResourceCount(){
-	std::vector<springai::Resource*> resources = callback->GetResources();
 	if(resources.empty()){
 		return 0;
 	}else{
@@ -222,7 +255,6 @@ int CSpringGame::GetResourceCount(){
 
 SResourceData CSpringGame::GetResourceByName(std::string name){
 	SResourceData res;
-	std::vector<springai::Resource*> resources = callback->GetResources();
 	if(!resources.empty()){
 
 		std::vector<springai::Resource*>::iterator i = resources.begin();
@@ -233,10 +265,10 @@ SResourceData CSpringGame::GetResourceByName(std::string name){
 				res.name = rname;
 				res.id = r->GetResourceId();
 				res.gameframe = this->Frame();
-				res.income = callback->GetEconomy()->GetIncome(r);
-				res.usage = callback->GetEconomy()->GetUsage(r);
-				res.capacity = callback->GetEconomy()->GetStorage(r);
-				res.reserves = callback->GetEconomy()->GetCurrent(r);
+				res.income = economy->GetIncome(r);
+				res.usage = economy->GetUsage(r);
+				res.capacity = economy->GetStorage(r);
+				res.reserves = economy->GetCurrent(r);
 				return res;
 			}
 		}
