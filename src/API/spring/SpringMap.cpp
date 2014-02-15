@@ -11,7 +11,7 @@
 CSpringMap::CSpringMap(springai::OOAICallback* callback, CSpringGame* game)
 :	callback(callback),
 	game(game),
-	metal(NULL)	{
+	metal(NULL), map(callback->GetMap())	{
 
 	std::vector<springai::Resource*> resources = callback->GetResources();
 	if ( !resources.empty() ) {
@@ -23,6 +23,8 @@ CSpringMap::CSpringMap(springai::OOAICallback* callback, CSpringGame* game)
 			if(name == "Metal"){
 				this->metal = r;
 				break;
+			} else {
+				delete r;
 			}
 		}
 	}
@@ -37,6 +39,9 @@ CSpringMap::~CSpringMap(){
 	this->metalspots.clear();
 	game = NULL;
 	callback = NULL;
+	delete map;
+	map = NULL;
+	delete metal;
 }
 
 Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance){
@@ -49,7 +54,7 @@ Position CSpringMap::FindClosestBuildSiteFacing(IUnitType* t, Position builderPo
 	}
 	CSpringUnitType* ut = static_cast<CSpringUnitType*>(t);
 	const springai::AIFloat3 bPos(builderPos.x, builderPos.y, builderPos.z);
-	const springai::AIFloat3 pos = callback->GetMap()->FindClosestBuildSite(ut->GetUnitDef(), bPos, searchRadius, minimumDistance, facing);
+	const springai::AIFloat3 pos = map->FindClosestBuildSite(ut->GetUnitDef(), bPos, searchRadius, minimumDistance, facing);
 	Position p;
 	p.x = pos.x;
 	p.y = pos.y;
@@ -64,7 +69,7 @@ bool CSpringMap::CanBuildHere(IUnitType* t, Position p){
 bool CSpringMap::CanBuildHereFacing(IUnitType* t, Position p, int facing){
 	CSpringUnitType* ut = static_cast<CSpringUnitType*>(t);
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
-	return callback->GetMap()->IsPossibleToBuildAt( ut->GetUnitDef(), pos, facing );
+	return map->IsPossibleToBuildAt( ut->GetUnitDef(), pos, facing );
 }
 
 int CSpringMap::SpotCount(){
@@ -78,7 +83,7 @@ Position CSpringMap::GetSpot(int idx){
 std::vector<Position>& CSpringMap::GetMetalSpots(){
 	metal = this->GetMetalResource();
 	metalspots.clear();
-	std::vector<springai::AIFloat3> positions = callback->GetMap()->GetResourceMapSpotsPositions( metal );
+	std::vector<springai::AIFloat3> positions = map->GetResourceMapSpotsPositions( metal );
 	if ( !positions.empty() ) {
 		std::vector<springai::AIFloat3>::iterator j = positions.begin();
 		for(;j != positions.end();++j){
@@ -95,40 +100,40 @@ std::vector<Position>& CSpringMap::GetMetalSpots(){
 Position CSpringMap::MapDimensions(){
 	
 	Position p;
-	p.x = callback->GetMap()->GetWidth();
-	p.z = callback->GetMap()->GetHeight();
+	p.x = map->GetWidth();
+	p.z = map->GetHeight();
 	
 	return p;
 }
 
 std::string CSpringMap::MapName(){
-	return callback->GetMap()->GetName();
+	return map->GetName();
 }
 
 float CSpringMap::MaximumHeight(){
-	return callback->GetMap()->GetMaxHeight();
+	return map->GetMaxHeight();
 }
 
 float CSpringMap::MinimumHeight(){
-	return callback->GetMap()->GetMinHeight();
+	return map->GetMinHeight();
 }
 
 double CSpringMap::AverageWind(){
-	float minwind = callback->GetMap()->GetMinWind();
-	float maxwind = callback->GetMap()->GetMaxWind();
+	float minwind = map->GetMinWind();
+	float maxwind = map->GetMaxWind();
 	return (minwind+maxwind)/2;
 }
 
 double CSpringMap::MinimumWindSpeed(){
-	return callback->GetMap()->GetMinWind();
+	return map->GetMinWind();
 }
 
 double CSpringMap::MaximumWindSpeed(){
-	return callback->GetMap()->GetMaxWind();
+	return map->GetMaxWind();
 }
 
 double CSpringMap::TidalStrength(){
-	return callback->GetMap()->GetTidalStrength();
+	return map->GetTidalStrength();
 }
 
 

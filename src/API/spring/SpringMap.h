@@ -42,6 +42,7 @@ protected:
 	
 	std::vector<Position> metalspots;
 	springai::Resource* metal;
+	springai::Map* map;
 };
 
 #endif
