@@ -126,26 +126,6 @@ local function Value(unitName)
 	return val
 end
 
-local function WhatHurtsUnit(unitName, mtype)
-	if unitName then 
-		local ut = unitTable[unitName]
-		if ut then
-			mtype = ut.mtype
-		end
-	end
-	local hurts = {}
-	if mtype == "veh" or mtype == "bot" or mtype == "amp" or mtype == "hov" or mtype == "shp" then
-		hurts["ground"] = true
-	end
-	if mtype == "air" then
-		hurts["air"] = true
-	end
-	if mtype == "sub" or mtype == "shp" or mtype == "amp" then
-		hurts["submerged"] = true
-	end
-	return hurts
-end
-
 --[[
 local function WhereUnitGoes(unit)
 	local mtype = unitTable[unit:Name()].mtype

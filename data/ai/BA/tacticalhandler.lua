@@ -32,9 +32,9 @@ function TacticalHandler:Init()
 	self.lastAverageFrame = 0
 	self.lastPositions = {}
 	self.lastKnownPositions = {}
+	self.lastKnownVectors = {}
 	self.unitSamples = {}
 	self.threatLayerNames = { "ground", "air", "submerged" }
-	ai.enemyMovement = { x = 0, z = 0, vx = 0, vz = 0 }
 end
 
 function TacticalHandler:NewEnemyPositions(positions)
@@ -80,14 +80,41 @@ function TacticalHandler:AverageSamples()
 	local since = f - self.lastAverageFrame
 	if since < 300 then return end
 	if DebugEnabled then debugPlotTacticalFile = assert(io.open("debugtacticalplot",'w'), "Unable to write debugtacticalplot") end
+	ai.turtlehandler:ResetThreatForecast()
 	for unitID, samples in pairs(self.unitSamples) do
 		local e = self.lastKnownPositions[unitID]
 		if e then
 			local vx, vz = self:AverageUnitSamples(samples)
+			self.lastKnownVectors[unitID] = { vx = vx, vz = vz } -- so that anyone using this unit table as a target will be able to lead a little
 			PlotDebug(e.position.x, e.position.z, vx, vz, unitID)
+			ai.turtlehandler:AddThreatVector(e, vx, vz)
 		end
 	end
+	ai.turtlehandler:AlertDangers()
 	self.unitSamples = {}
 	self.lastAverageFrame = f
 	if DebugEnabled then debugPlotTacticalFile:close() end
+end
+
+-- for raider and other targetting export
+function TacticalHandler:PredictPosition(unitID, frames)
+	local vector = self.lastKnownVectors[unitID]
+	if vector == nil then return end
+	local e = self.lastKnownPositions[unitID]
+	if e == nil then return end
+	return ApplyVector(e.position.x, e.position.z, vector.vx, vector.vz, frames)
+end
+
+-- so our tables don't bloat
+function TacticalHandler:UnitDead(unit)
+	local unitID = unit:ID()
+	self.lastKnownPositions[unitID] = nil
+	self.lastKnownVectors[unitID] = nil
+	self.unitSamples[unitID] = nil
+end
+
+function TacticalHandler:PlotPositionDebug(position, label)
+	if DebugEnabled then
+		debugPlotTacticalFile:write(ceil(position.x) .. " " .. ceil(position.z) .. " " .. label .. "\n")
+	end
 end

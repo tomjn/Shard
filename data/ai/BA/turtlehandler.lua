@@ -99,6 +99,7 @@ function TurtleHandler:Init()
 	self.turtles = {} -- zones to protect
 	self.shells = {} -- defense buildings, shields, and jamming
 	self.planned = {}
+	self.turtlesByUnitID = {}
 	self.totalPriority = 0
 end
 
@@ -166,6 +167,7 @@ function TurtleHandler:PlanCancelled(plan)
 		else
 			self:RemoveOrgan(plan)
 		end
+		self.turtlesByUnitID[plan] = nil
 	end
 end
 
@@ -179,6 +181,7 @@ function TurtleHandler:UnitDead(unit)
 		else
 			self:RemoveOrgan(unitID)
 		end
+		self.turtlesByUnitID[unitID] = nil
 	end
 end
 
@@ -244,6 +247,7 @@ function TurtleHandler:RemoveOrgan(unitID)
 			end
 		end
 	end
+	self.turtlesByUnitID[unitID] = nil
 	self:PlotAllDebug()
 end
 
@@ -258,6 +262,7 @@ function TurtleHandler:Transplant(turtle, organ)
 		end
 	end
 	self.totalPriority = self.totalPriority + organ.priority
+	self.turtlesByUnitID[organ.unitID] = turtle
 end
 
 function TurtleHandler:Attach(limb, shell)
@@ -274,6 +279,7 @@ function TurtleHandler:Attach(limb, shell)
 	else
 		limb.nameCounts[shell.uname] = limb.nameCounts[shell.uname] + 1
 	end
+	self.turtlesByUnitID[shell.unitID] = turtle
 	table.insert(shell.attachments, limb)
 end
 
@@ -283,6 +289,7 @@ function TurtleHandler:Detach(limb, shell)
 	turtle.nameCounts[shell.uname] = turtle.nameCounts[shell.uname] - 1
 	limb[shell.layer] = limb[shell.layer] - shell.value
 	limb.nameCounts[shell.uname] = limb.nameCounts[shell.uname] - 1
+	self.turtlesByUnitID[shell.unitID] = nil
 end
 
 function TurtleHandler:InitializeInteriorLayers(limb)
@@ -612,8 +619,101 @@ function TurtleHandler:MostTurtled(builder, unitName, bombard, oneOnly)
 	end
 end
 
+function TurtleHandler:ResetThreatForecast()
+	for ti, turtle in pairs(self.turtles) do
+		-- ground air and submerged refer to what kind of weapon will hit the attacker
+		turtle.threatForecast = { ground = 0, air = 0, submerged = 0 }
+		turtle.threatForecastAngle = nil
+		turtle.threatForecastVX = nil
+		turtle.threatForecastVZ = nil
+		turtle.threatForecastCount = 0
+	end
+end
+
+function TurtleHandler:AddThreatVector(enemy, vx, vz)
+	local unitName = enemy.unitName
+	local threatLayers = UnitThreatRangeLayers(unitName)
+	local ex, ez = enemy.position.x, enemy.position.z
+	local px, pz = ApplyVector(ex, ez, vx, vz, 900)
+	local waterEnemy = unitTable[unitName].needsWater
+	local hurtsEnemy = WhatHurtsUnit(unitName)
+	local nearestAngleToEnemy, nearestAngleToPrediction
+	local nearestTurtle
+	local nearestDist = 100000
+	for ti, turtle in pairs(self.turtles) do
+		if turtle.water == waterEnemy then
+			local tx, tz = turtle.position.x, turtle.position.z
+			local angleToEnemy, vx, vz = AngleAtoB(tx, tz, ex, ez)
+			local angleToPrediction = AngleAtoB(tx, tz, px, pz)
+			local angleDist = AngleDist(angleToEnemy, angleToPrediction)
+			local threatened = false
+			if angleDist > 90 then
+				-- will the enemy be behind the turtle in 30 seconds?
+				threatened = true
+			else
+				-- will the enemy be in range of the turtle in 10 seconds?
+				local px2, pz2 = ApplyVector(ex, ez, vx, vz, 300)
+				local dist = DistanceXZ(tx, tz, px2, pz2)
+				if turtle.water then
+					if dist < threatLayers.submerged.range + turtle.size then
+						threatened = true
+					end
+				end
+				if dist < threatLayers.ground.range + turtle.size then
+					threatened = true
+				end
+			end
+			if threatened then
+				local dist = DistanceXZ(tx, tz, ex, ez)	
+				if dist < nearestDist then
+					nearestTurtle = turtle
+					nearestDist = dist
+					nearestAngleToEnemy = angleToEnemy
+					nearestAngleToPrediction = angleToPrediction
+				end
+			end
+		end
+	end
+	if nearestTurtle ~= nil then
+		local turtle = nearestTurtle
+		local threat = threatLayers.ground.threat
+		if turtle.water then threat = threat + threatLayers.submerged.threat end
+		for gas, yes in pairs(hurtsEnemy) do
+			turtle.threatForecast[gas] = turtle.threatForecast[gas] + threat
+		end
+		turtle.threatForecastCount = turtle.threatForecastCount + 1
+		if not hurtsEnemy.air then -- AA doesn't need to be along defensive lines
+			turtle.threatForecastVX = (turtle.threatForecastVX or 0) + dx
+			turtle.threatForecastVZ = (turtle.threatForecastVZ or 0) + dz
+			-- if turtle.threatForecastAngle > twicePi then turtle.threatForecastAngle = turtle.threatForecastAngle - twicePi end
+			-- if turtle.threatForecastAngle < 0 then turtle.threatForecastAngle = turtle.threatForecastAngle + twicePi end
+		end
+	end
+end
+
+function TurtleHandler:AlertDangers()
+	for ti, turtle in pairs(self.turtles) do
+		if turtle.threatForecastVX ~= nil then
+			local vx = turtle.threatForecastVX / turtle.threatForecastCount
+			local vz = turtle.threatForecastVZ / turtle.threatForecastCount
+			turtle.threatForecastAngle = atan2(-vz, vx)
+		end
+		for gas, threat in pairs(turtle.threatForecast) do
+			if threat > turtle[gas] * 0.75 then
+				ai.defendhandler:Danger(nil, turtle)
+				ai.tacticalhandler:PlotPositionDebug(turtle.position, "TURTLEDANGER")
+				break
+			end
+		end
+	end
+end
+
 function TurtleHandler:GetTotalPriority()
 	return self.totalPriority
+end
+
+function TurtleHandler:GetUnitTurtle(unitID)
+	return self.turtlesByUnitID[unitID]
 end
 
 function TurtleHandler:PlotAllDebug()

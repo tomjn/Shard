@@ -64,18 +64,16 @@ function defaultBehaviours(unit)
 				ai.advCons = 0
 			end
 			table.insert(b,TaskQueueBehaviour)
-			table.insert(b, RunFromAttackBehaviour)
 		else
 			table.insert(b,TaskQueueBehaviour)
 			if unitTable[un].isBuilding then
 				table.insert(b, FactoryRegisterBehaviour)
-				-- game:SendToConsole("factory register behaviour")
 			else
 				table.insert(b, AssistBehaviour)
 				table.insert(b, ReclaimBehaviour)
-				table.insert(b, RunFromAttackBehaviour)
 			end
 		end
+		table.insert(b, RunFromAttackBehaviour)
 	elseif IsReclaimer(unit) then
 		table.insert(b, ReclaimBehaviour)
 		table.insert(b, DefendBehaviour)

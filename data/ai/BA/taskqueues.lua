@@ -1770,20 +1770,6 @@ local function CheckMySideIfNeeded()
 	end
 end
 
-local function CheckForOwnUnit(name)
-	local ownUnits = game:GetFriendlies()
-	for _, u in pairs(ownUnits) do
-		local un = u:Name()
-		if un == name then
-			local ut = u:Team()
-			if ut == ownTeamID then
-				return true
-			end
-		end
-	end
-	return false
-end
-
 local function BuildAppropriateFactory()
 	return FactoryUnitName
 end

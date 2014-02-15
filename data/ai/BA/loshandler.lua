@@ -98,19 +98,13 @@ function LosHandler:Update()
 			debugPlotLosFile = assert(io.open("debuglosplot",'w'), "Unable to write debuglosplot")
 		end 
 		-- game:SendToConsole("updating los")
-		local ownUnits = game:GetFriendlies()
-		if ownUnits == nil then
-			ownUnits = {}
-		end
-		ai.friendlyCount = #ownUnits
 		self.losGrid = {}
-		ai.friendlyCount = 0
 		-- note: this could be more effecient by using a behaviour
 		-- if the unit is a building, we know it's LOS contribution forever
 		-- if the unit moves, the behaviours can be polled rather than GetFriendlies()
+		-- except for allies' units
 		local ownUnits = game:GetFriendlies()
 		if ownUnits ~= nil then
-			ai.friendlyCount = table.getn(ownUnits)
 			for _, unit in pairs(ownUnits) do
 				local uname = unit:Name()
 				local utable = unitTable[uname]

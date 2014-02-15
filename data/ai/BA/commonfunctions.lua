@@ -9,6 +9,8 @@ atan2 = math.atan2
 floor = math.floor
 ceil = math.ceil
 abs = math.abs
+min = math.min
+max = math.max
 
 CMD_ATTACK = 20
 CMD_RECLAIM = 90
@@ -18,11 +20,21 @@ MOVESTATE_HOLDPOS = 0
 MOVESTATE_MANEUVER = 1
 MOVESTATE_ROAM = 2
 
+local mapBuffer = 32
+
 local layerNames = {"ground", "air", "submerged"}
 local unitThreatLayers = {}
+local whatHurtsUnit = {}
+local whatHurtsMtype = {}
 
 local quadX = { -1, 1, -1, 1 }
 local quadZ = { -1, -1, 1, 1 }
+
+function ConstrainToMap(x, z)
+	x = max(min(x, ai.maxElmosX-mapBuffer), mapBuffer)
+	z = max(min(z, ai.maxElmosZ-mapBuffer), mapBuffer)
+	return x, z
+end
 
 function RandomAway(pos, dist, opposite, angle)
 	if angle == nil then angle = random() * twicePi end
@@ -55,6 +67,12 @@ function Distance(pos1,pos2)
 	return dist
 end
 
+function DistanceXZ(x1, z1, x2, z2)
+	local xd = x1 - x2
+	local zd = z1 - z2
+	return sqrt(xd*xd + zd*zd)
+end
+
 function ManhattanDistance(pos1,pos2)
 	local xd = math.abs(pos1.x-pos2.x)
 	local yd = math.abs(pos1.z-pos2.z)
@@ -75,7 +93,7 @@ end
 function AngleAtoB(x1, z1, x2, z2)
 	local dx = x2 - x1
 	local dz = z2 - z1
-	return atan2(-dz, dx)
+	return atan2(-dz, dx), dx, dz
 end
 
 function CheckRect(rect)
@@ -167,6 +185,9 @@ function ThreatRange(unitName, groundAirSubmerged, enemy)
 		elseif utable.submergedRange > utable.groundRange and utable.submergedRange > utable.airRange then
 			groundAirSubmerged = "submerged"
 		end
+		if groundAirSubmerged == nil then
+			return 0, 0
+		end
 	end
 	if threatLayers ~= nil then
 		local layer = threatLayers[groundAirSubmerged]
@@ -195,7 +216,9 @@ end
 
 function UnitThreatRangeLayers(unitName)
 	local threatLayers = unitThreatLayers[unitName]
-	if threatLayers then return threatLayers end
+	if threatLayers ~= nil then
+		if #threatLayers == 3 then return threatLayers end
+	end
 	threatLayers = {}
 	for i, layerName in pairs(layerNames) do
 		local threat, range = ThreatRange(unitName, layerName)
@@ -203,4 +226,35 @@ function UnitThreatRangeLayers(unitName)
 	end
 	unitThreatLayers[unitName] = threatLayers
 	return threatLayers
+end
+
+function WhatHurtsUnit(unitName, mtype)
+	local hurts = whatHurtsMtype[mtype] or whatHurtsUnit[unitName]
+	if hurts ~= nil then return hurts else hurts = {} end
+	if unitName then 
+		local ut = unitTable[unitName]
+		if ut then
+			mtype = ut.mtype
+		end
+	end
+	if mtype == "veh" or mtype == "bot" or mtype == "amp" or mtype == "hov" or mtype == "shp" then
+		hurts["ground"] = true
+	end
+	if mtype == "air" then
+		hurts["air"] = true
+	end
+	if mtype == "sub" or mtype == "shp" or mtype == "amp" then
+		hurts["submerged"] = true
+	end
+	if unitName then whatHurtsUnit[unitName] = hurts end
+	if mtype then whatHurtsMtype[mtype] = hurts end
+	return hurts
+end
+
+function BehaviourPosition(behaviour)
+	if behaviour == nil then return end
+	if behaviour.unit == nil then return end
+	local unit = behaviour.unit:Internal()
+	if unit == nil then return end
+	return unit:GetPosition()
 end
