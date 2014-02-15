@@ -1,10 +1,11 @@
 #include "spring_api.h"
 #include "AI/Wrappers/Cpp/src-generated/WrappResource.h"
+#include "AI/Wrappers/Cpp/src-generated/WrappWeaponMount.h"
 #include "ExternalAI/Interface/AISCommands.h" // for UNIT_COMMAND_BUILD_NO_FACING
 #include <vector>
 
 CSpringUnit::CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, IGame* game)
-: callback(callback), unit(u), dead(false), game(game){
+: callback(callback), unit(u), dead(false), game(game), def(u->GetDef()), buildoptions(def->GetBuildOptions()) {
 	if(u == 0){
 		throw std::runtime_error("springai::unit must never be null when passed into the constructor of a CSpringUnit object! Bad bad coder");
 	}
@@ -12,9 +13,15 @@ CSpringUnit::CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, IG
 }
 
 CSpringUnit::~CSpringUnit(){
+	delete unit;
 	unit = NULL;
 	callback = NULL;
 	//
+	delete def;
+	def = NULL;
+	for (int i = 0; i < buildoptions.size(); i += 1) {
+		delete buildoptions[i];
+	}
 }
 
 int CSpringUnit::ID(){
@@ -32,7 +39,7 @@ std::string CSpringUnit::Name(){
 	if (unit == NULL) {
 		return "";
 	}
-	springai::UnitDef* u = unit->GetDef();
+	springai::UnitDef* u = def;
 	if(u == NULL){
 		return "";
 	}
@@ -66,7 +73,9 @@ IUnitType* CSpringUnit::Type(){
 
 
 bool CSpringUnit::CanMove(){
-	return unit->GetDef()->IsAbleToMove();
+	if (def != NULL)
+		return def->IsAbleToMove();
+	return false;
 }
 
 bool CSpringUnit::CanDeploy(){
@@ -74,12 +83,17 @@ bool CSpringUnit::CanDeploy(){
 }
 
 bool CSpringUnit::CanBuild(){
-	return (unit->GetDef()->GetBuildOptions().size() > 0);
+	if (def != NULL) {
+		return (buildoptions.size() > 0);
+	}
+	return false;
 }
 
 
 bool CSpringUnit::CanAssistBuilding(IUnit* unit){
-	return this->unit->GetDef()->IsAbleToAssist();
+	if (def != NULL)
+		return def->IsAbleToAssist();
+	return false;
 }
 
 
@@ -260,7 +274,15 @@ float CSpringUnit::GetMaxHealth(){
 }
 
 int CSpringUnit::WeaponCount(){
-	return unit->GetDef()->GetWeaponMounts().size();
+	if (def != NULL) {
+		std::vector<springai::WeaponMount*> wm = def->GetWeaponMounts();
+		int n = wm.size();
+		for (int i = 0; i < wm.size(); i += 1) {
+			delete wm[i];
+		}
+		return n;
+	}
+	return 0;
 }
 
 float CSpringUnit::MaxWeaponsRange(){
@@ -274,10 +296,10 @@ bool CSpringUnit::CanBuild(IUnitType* t){
 	if(unit == 0){
 		return false;
 	}
-	if(unit->GetDef() == 0){
+	if(def == 0){
 		return false;
 	}
-	std::vector<springai::UnitDef*> options = unit->GetDef()->GetBuildOptions();
+	std::vector<springai::UnitDef*> options = buildoptions;
 	if(!options.empty()){
 		//
 		std::vector<springai::UnitDef*>::iterator i = options.begin();

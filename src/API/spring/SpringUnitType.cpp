@@ -12,14 +12,25 @@
 #include "SpringUnitType.h"
 
 CSpringUnitType::CSpringUnitType(CSpringGame* game, springai::OOAICallback* callback, springai::UnitDef* unitDef)
-: game(game), callback(callback), unitDef(unitDef){
+: game(game), callback(callback), unitDef(unitDef), 
+  resources(callback->GetResources()), weaponMounts(unitDef->GetWeaponMounts()) {
 	boptions = unitDef->GetBuildOptions();
 }
 
 CSpringUnitType::~CSpringUnitType(){
 	game = NULL;
 	callback = NULL;
+	delete unitDef; //same as in SpringUnit.cpp
 	unitDef = NULL;
+	for (int i = 0; i < resources.size(); i += 1) {
+		delete resources[i];
+	}
+	for (int i = 0; i < weaponMounts.size(); i += 1) {
+		delete weaponMounts[i];
+	}
+	for (int i = 0; i < boptions.size(); i += 1) {
+		delete boptions[i];
+	}
 }
 
 std::string CSpringUnitType::Name(){
@@ -31,7 +42,6 @@ float CSpringUnitType::ReclaimSpeed(){
 }
 
 float CSpringUnitType::ResourceCost(int idx){
-	std::vector<springai::Resource*> resources = callback->GetResources();
 	if(!resources.empty()){
 		std::vector<springai::Resource*>::iterator i = resources.begin();
 		for(;i != resources.end();++i){
@@ -54,18 +64,21 @@ float CSpringUnitType::GetMaxHealth(){
 }
 
 int CSpringUnitType::WeaponCount(){
-	return unitDef->GetWeaponMounts().size();
+	return weaponMounts.size();
 }
 
 float CSpringUnitType::MaxWeaponDamage(){
-	std::vector<springai::WeaponMount*> weaponMounts = unitDef->GetWeaponMounts();
 	if(!weaponMounts.empty()){
 		float output = 0;
 		std::vector<springai::WeaponMount*>::iterator i = weaponMounts.begin();
 		for(; i != weaponMounts.begin();++i){
 			springai::WeaponMount* m = *i;
-			float damage = *(m->GetWeaponDef()->GetDamage()->GetTypes().begin());
+			springai::WeaponDef* def = m->GetWeaponDef();
+			springai::Damage* d = def->GetDamage();
+			float damage = *(d->GetTypes().begin());
 			output += damage;
+			delete d;
+			delete def;
 		}
 		return output;
 	}
@@ -86,6 +99,7 @@ std::vector<IUnitType*> CSpringUnitType::BuildOptions(){
 			springai::UnitDef* u = *i;
 			IUnitType* ut = game->ToIUnitType(u);
 			options.push_back(ut);
+			delete u;
 		}
 	}
 	return options;

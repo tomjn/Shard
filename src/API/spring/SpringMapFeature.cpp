@@ -1,14 +1,16 @@
 #include "spring_api.h"
 
 CSpringMapFeature::CSpringMapFeature(springai::OOAICallback* callback, springai::Feature* f, IGame* game)
-:feature(f),callback(callback),game(game){
+:feature(f),callback(callback),game(game), def(f->GetDef()) {
 	//
 }
 
 CSpringMapFeature::~CSpringMapFeature(){
+	delete feature;
 	feature = NULL;
 	callback = NULL;
 	game = NULL;
+	delete def;
 }
 
 int CSpringMapFeature::ID(){
@@ -19,10 +21,10 @@ int CSpringMapFeature::ID(){
 }
 
 std::string CSpringMapFeature::Name(){
-	if ((feature == NULL) || (feature->GetDef()==NULL)) {
+	if ((feature == NULL) || (def==NULL)) {
 		return "";
 	}
-	return feature->GetDef()->GetName();
+	return def->GetName();
 }
 
 Position CSpringMapFeature::GetPosition(){
@@ -43,15 +45,16 @@ float CSpringMapFeature::ResourceValue(int idx){
 		for(;i != resources.end();++i){
 			springai::Resource* r = *i;
 			if(r->GetResourceId() == idx){
-				return feature->GetDef()->GetContainedResource(r);
+				return def->GetContainedResource(r);
 			}
+			delete r;
 		}
 	}
 	return -1;
 }
 
 bool CSpringMapFeature::Reclaimable(){
-	if (feature==NULL)
+	if (feature==NULL || def == NULL)
 		return false;
-	return feature->GetDef()->IsReclaimable();
+	return def->IsReclaimable();
 }

@@ -57,4 +57,8 @@ protected:
 	springai::OOAICallback* callback;
 	CTestAI* ai;
 	std::map<std::string,CSpringUnitType*> definitions;
+	springai::DataDirs* datadirs;
+	springai::Economy* economy;
+	std::vector<springai::Resource*> resources;
+	springai::Game* game;
 };
