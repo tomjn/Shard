@@ -34,7 +34,7 @@ end
 function RunFromAttackBehaviour:UnitBuilt(unit)
 	if unit:Internal():ID() == self.unit:Internal():ID() then
 		if self.mobile and not self.isScout then
-			ai.defendhandler:AddDefendee(self)
+			-- ai.defendhandler:AddDefendee(self) -- just testing 
 		end
 	end
 end

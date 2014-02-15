@@ -30,6 +30,7 @@ function DefendHandler:Init()
 	 self.defendees = {}
 	 self.scrambles = {}
 	 self.totalPriority = 0
+	 self.lastTurtleThreat = 0
 end
 
 function DefendHandler:AddDefendee(behaviour)
@@ -97,8 +98,9 @@ function DefendHandler:Update()
 					end
 				end
 			elseif defendee.threatened ~= nil then
-				-- defend threatened for thirty seconds after they've stopped being within range of fire or fired at
-				if f > defendee.threatened + 900 then
+				-- defend threatened for thirty seconds after they've stopped being threatened
+				if f > defendee.threatened + 900 or defendee.threatened < self.lastTurtleThreat - 45 then
+					self.totalPriority = self.totalPriority - defendee.priority
 					table.remove(self.defendees, i)
 					needReassign = true
 				else
@@ -195,7 +197,6 @@ function DefendHandler:AssignAll()
 			local defendee = self.defendees[i]
 			if #defendersToAssign ~= 0 then
 				local dfndbehaviour = table.remove(defendersToAssign)
-				-- dfndbehaviour:Assign(defendee)
 				table.insert(defendee.defenders, dfndbehaviour)
 			else
 				break
@@ -206,7 +207,7 @@ function DefendHandler:AssignAll()
 	for i, defendee in pairs(self.defendees) do
 		local divisor = #defendee.defenders
 		if divisor > 0 then
-			if defendee.behaviour ~= nil then
+			if defendee.angle == nil then
 				local angleAdd = twicePi / divisor
 				local angle = math.random() * twicePi
 				for nothing, dfndbehaviour in pairs(defendee.defenders) do
@@ -216,8 +217,11 @@ function DefendHandler:AssignAll()
 				end
 			else
 				local angle = defendee.angle
+				local d = -defendee.guardDistance
+				local dAdd = (defendee.guardDistance * 2) / divisor
 				for nothing, dfndbehaviour in pairs(defendee.defenders) do
-					dfndbehaviour:Assign(defendee, angle)
+					dfndbehaviour:Assign(defendee, angle, d)
+					d = d + dAdd
 				end
 			end
 		end
@@ -329,11 +333,12 @@ function DefendHandler:Danger(behaviour, turtle)
 		local threat = 500
 		if turtle.threatForecast then threat = turtle.threatForecast.ground + turtle.threatForecast.air + turtle.threatForecast.submerged end
 		local priority = turtleThreatenedPriority + turtle.priority + (threat / 100)
-		local defendee = { turtle = turtle, position = turtle.position, angle = turtle.threatForecastAngle, priority = priority, threatened = f, defenders = {}, guardDistance = turtle.size + 100 }
+		local defendee = { turtle = turtle, position = turtle.position, angle = turtle.threatForecastAngle, priority = priority, threatened = f, defenders = {}, guardDistance = turtle.size }
 		if turtle.priority > 4 then defendee.scrambleForMe = true end
 		EchoDebug("turtle danger! " .. priority)
 		table.insert(self.defendees, defendee)
 		self.totalPriority = self.totalPriority + priority
+		self.lastTurtleThreat = f
 		self:AssignAll()
 	end
 end

@@ -86,8 +86,12 @@ function ApplyVector(x, z, vx, vz, frames)
 end
 
 function AngleDist(angle1, angle2)
-	return abs((angle1 + 180 -  angle2) % 360 - 180)
+	return abs((angle1 + pi -  angle2) % twicePi - pi)
 	-- Spring.Echo(math.floor(angleDist * 57.29), math.floor(high * 57.29), math.floor(low * 57.29))
+end
+
+function AngleAdd(angle1, angle2)
+	return (angle1 + angle2) % twicePi
 end
 
 function AngleAtoB(x1, z1, x2, z2)
