@@ -54,6 +54,11 @@ public:
 	virtual IUnit* getUnitByID( int unit_id );
 	/*virtual void removeUnit( IUnit* dead_unit );*/
 protected:
+	//helper functions to managing unit vectors.
+	//vectors are updated at maximum once per frame.
+	//if unit vectors are required, best call "UpdateUnits" before.
+	virtual void FillUnitVector(std::vector<IUnit*> target, std::vector<springai::Unit*> source);
+	virtual void UpdateUnits();
 
 	CSpringMap* map;
 	springai::OOAICallback* callback;
@@ -63,4 +68,8 @@ protected:
 	springai::Economy* economy;
 	std::vector<springai::Resource*> resources;
 	springai::Game* game;
+	std::vector<IUnit*> friendlyUnits;
+	std::vector<IUnit*> teamUnits;
+	std::vector<IUnit*> enemyUnits;
+	int lastUnitUpdate;
 };

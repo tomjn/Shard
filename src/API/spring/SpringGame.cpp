@@ -9,7 +9,7 @@
 CSpringGame::CSpringGame(springai::OOAICallback* callback)
 : callback(callback), datadirs(callback->GetDataDirs()),
   economy(callback->GetEconomy()), resources(callback->GetResources()),
-  game(callback->GetGame()) {
+  game(callback->GetGame()), lastUnitUpdate(-1) {
 	ai = new CTestAI(this);
 	springai::Cheats* cheat = callback->GetCheats();
 	cheat->SetEnabled(true);
@@ -43,6 +43,18 @@ CSpringGame::~CSpringGame(){
 	delete datadirs;
 	delete economy;
 	delete game;
+	for (std::vector<IUnit*>::iterator i = friendlyUnits.begin(); i != friendlyUnits.end(); ++i) {
+		delete (*i);
+	}
+	friendlyUnits.clear();
+	for (std::vector<IUnit*>::iterator i = teamUnits.begin(); i != teamUnits.end(); ++i) {
+		delete (*i);
+	}
+	teamUnits.clear();
+	for (std::vector<IUnit*>::iterator i = enemyUnits.begin(); i != enemyUnits.end(); ++i) {
+		delete (*i);
+	}
+	enemyUnits.clear();
 }
 
 IMap* CSpringGame::Map(){
@@ -88,7 +100,7 @@ std::string CSpringGame::ReadFile(std::string filename){
 		//cerr << "Couldn't open input file" << endl;
 		return "";
 	}
-	
+
 	std::string s ="";
 
 	// create reader objects
@@ -163,44 +175,47 @@ IUnitType* CSpringGame::ToIUnitType(springai::UnitDef* def){
 	}
 }
 
-bool CSpringGame::HasEnemies(){
-	std::vector<springai::Unit*> enemies = callback->GetEnemyUnits();
-	bool result = !enemies.empty();
-	for (int i = 0; i < enemies.size(); i += 1) {
-		delete enemies[i];
+void CSpringGame::FillUnitVector(std::vector<IUnit*> target, std::vector<springai::Unit*> source)
+{
+	for (std::vector<IUnit*>::iterator i = target.begin(); i != target.end(); ++i) {
+		delete (*i);
 	}
-	return result;
+	target.clear();
+
+	std::vector<springai::Unit*>::iterator i = source.begin();
+	for(;i != source.end(); ++i){
+		CSpringUnit* unit = new CSpringUnit(callback,*i,this);
+		target.push_back(unit);
+	}
+}
+
+void CSpringGame::UpdateUnits()
+{
+	if (lastUnitUpdate != Frame())
+	{
+		FillUnitVector(enemyUnits, callback->GetEnemyUnits());
+		FillUnitVector(friendlyUnits, callback->GetFriendlyUnits());
+		FillUnitVector(friendlyUnits, callback->GetTeamUnits());
+		lastUnitUpdate = Frame();
+	}
+}
+
+bool CSpringGame::HasEnemies(){
+	UpdateUnits();
+	return !enemyUnits.empty();
 }
 
 std::vector<IUnit*> CSpringGame::GetEnemies(){
-	std::vector<IUnit*> enemiesv;
-	
-	std::vector<springai::Unit*> enemies = callback->GetEnemyUnits();
-	std::vector<springai::Unit*>::iterator i = enemies.begin();
-	for(;i != enemies.end(); ++i){
-		CSpringUnit* unit = new CSpringUnit(callback,*i,this);
-		enemiesv.push_back(unit);
-	}
-	return enemiesv;
+	UpdateUnits();
+	return enemyUnits;
 }
 bool CSpringGame::HasFriendlies(){
-	std::vector<springai::Unit*> friendlies = callback->GetFriendlyUnits();
-	bool result = !friendlies.empty();
-	for (int i = 0; i < friendlies.size(); i += 1) {
-		delete friendlies[i];
-	}
-	return result;
+	UpdateUnits();
+	return !friendlyUnits.empty();
 }
 std::vector<IUnit*> CSpringGame::GetFriendlies(){
-	std::vector<IUnit*> friendliesv;
-	
-	std::vector<springai::Unit*> friendlies = callback->GetFriendlyUnits();
-	std::vector<springai::Unit*>::iterator i = friendlies.begin();
-	for(;i != friendlies.end(); ++i){
-		CSpringUnit* unit = new CSpringUnit(callback,*i,this);
-		friendliesv.push_back(unit);
-	}
-	return friendliesv;
+	UpdateUnits();
+	return friendlyUnits;
 }
 
 int CSpringGame::GetTeamID(){
@@ -211,15 +226,8 @@ int CSpringGame::GetTeamID(){
 }
 
 std::vector<IUnit*> CSpringGame::GetUnits(){
-	std::vector<IUnit*> friendliesv;
-	std::vector<springai::Unit*> friendlies = callback->GetTeamUnits();
-	std::vector<springai::Unit*>::iterator i = friendlies.begin();
-	for(;i != friendlies.end(); ++i){
-		//this.getUnitByID( *i );
-		CSpringUnit* unit = new CSpringUnit(callback,*i,this);
-		friendliesv.push_back(unit);
-	}
-	return friendliesv;
+	UpdateUnits();
+	return teamUnits;
 }
 
 

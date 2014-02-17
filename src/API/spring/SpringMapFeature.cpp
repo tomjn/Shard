@@ -40,17 +40,18 @@ Position CSpringMapFeature::GetPosition(){
 
 float CSpringMapFeature::ResourceValue(int idx){
 	std::vector<springai::Resource*> resources = callback->GetResources();
+	float res = -1;
 	if(!resources.empty()){
 		std::vector<springai::Resource*>::iterator i = resources.begin();
 		for(;i != resources.end();++i){
 			springai::Resource* r = *i;
 			if(r->GetResourceId() == idx){
-				return def->GetContainedResource(r);
+				res = def->GetContainedResource(r);
 			}
 			delete r;
 		}
 	}
-	return -1;
+	return res;
 }
 
 bool CSpringMapFeature::Reclaimable(){

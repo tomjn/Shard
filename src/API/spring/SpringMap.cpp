@@ -29,7 +29,6 @@ CSpringMap::CSpringMap(springai::OOAICallback* callback, CSpringGame* game)
 		}
 	}
 
-	
 	if(metal){
 		this->GetMetalSpots();
 	}
@@ -42,6 +41,10 @@ CSpringMap::~CSpringMap(){
 	delete map;
 	map = NULL;
 	delete metal;
+	for (std::vector<IMapFeature*>::iterator i = mapFeatures.begin(); i != mapFeatures.end(); ++i) {
+		delete (*i);
+	}
+	mapFeatures.clear();
 }
 
 Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance){
@@ -98,11 +101,10 @@ std::vector<Position>& CSpringMap::GetMetalSpots(){
 }
 
 Position CSpringMap::MapDimensions(){
-	
 	Position p;
 	p.x = map->GetWidth();
 	p.z = map->GetHeight();
-	
+
 	return p;
 }
 
@@ -138,8 +140,11 @@ double CSpringMap::TidalStrength(){
 
 
 std::vector<IMapFeature*> CSpringMap::GetMapFeatures(){
-	std::vector< IMapFeature*> mapFeatures;
-	
+	for (std::vector<IMapFeature*>::iterator i = mapFeatures.begin(); i != mapFeatures.end(); ++i) {
+		delete (*i);
+	}
+	mapFeatures.clear();
+
 	std::vector<springai::Feature*> features = callback->GetFeatures();
 	std::vector<springai::Feature*>::iterator i = features.begin();
 	for(;i != features.end(); ++i){
@@ -151,8 +156,11 @@ std::vector<IMapFeature*> CSpringMap::GetMapFeatures(){
 
 std::vector<IMapFeature*> CSpringMap::GetMapFeaturesAt(Position p, double radius){
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
-	std::vector< IMapFeature*> mapFeatures;
-	
+	std::vector< IMapFeature*> mapFeatures;	for (std::vector<IMapFeature*>::iterator i = mapFeatures.begin(); i != mapFeatures.end(); ++i) {
+		delete (*i);
+	}
+	mapFeatures.clear();
+
 	std::vector<springai::Feature*> features = callback->GetFeaturesIn(pos,radius);
 	std::vector<springai::Feature*>::iterator i = features.begin();
 	for(;i != features.end(); ++i){
