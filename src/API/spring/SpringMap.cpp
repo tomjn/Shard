@@ -1,3 +1,4 @@
+
 #include "spring_api.h"
 
 #include <iterator>
@@ -11,7 +12,7 @@
 CSpringMap::CSpringMap(springai::OOAICallback* callback, CSpringGame* game)
 :	callback(callback),
 	game(game),
-	metal(NULL), map(callback->GetMap())	{
+	metal(NULL), map(callback->GetMap()), lastMapFeaturesUpdate(-1)	{
 
 	std::vector<springai::Resource*> resources = callback->GetResources();
 	if ( !resources.empty() ) {
@@ -138,36 +139,65 @@ double CSpringMap::TidalStrength(){
 	return map->GetTidalStrength();
 }
 
+std::vector<IMapFeature*>::iterator CSpringMap::GetMapFeatureIteratorById(int id) {
+	for (std::vector<IMapFeature*>::iterator i = mapFeatures.begin(); i != mapFeatures.end(); ++i) {
+		if ((*i)->ID() == id) {
+			return i;
+		}
+	}
+	return mapFeatures.end();
+}
+
+void CSpringMap::UpdateMapFeatures() {
+	std::vector<IMapFeature*> newMapFeatures;
+	if(lastMapFeaturesUpdate != game->Frame()) {
+		std::vector<springai::Feature*> features = callback->GetFeatures();
+		std::vector<springai::Feature*>::iterator i = features.begin();
+
+		for(;i != features.end(); ++i){
+			std::vector<IMapFeature*>::iterator obj = GetMapFeatureIteratorById((*i)->GetFeatureId());
+			if(obj != mapFeatures.end()) { //feature was already present, keep old object.
+				newMapFeatures.push_back(*obj);
+				mapFeatures.erase(obj); //remove from old map.
+			} else { //feature was not yet presend, add new one.
+				CSpringMapFeature* f = new CSpringMapFeature(callback,*i,game);
+				newMapFeatures.push_back(f);
+			}
+		}
+
+		//clear up old features that spring api did not deliver => they got deleted.
+		for(std::vector<IMapFeature*>::iterator i = mapFeatures.begin(); i != mapFeatures.end(); ++i) {
+			delete (*i);
+		}
+
+		mapFeatures = newMapFeatures;
+		lastMapFeaturesUpdate = game->Frame();
+	}
+}
 
 std::vector<IMapFeature*> CSpringMap::GetMapFeatures(){
-	for (std::vector<IMapFeature*>::iterator i = mapFeatures.begin(); i != mapFeatures.end(); ++i) {
-		delete (*i);
-	}
-	mapFeatures.clear();
-
-	std::vector<springai::Feature*> features = callback->GetFeatures();
-	std::vector<springai::Feature*>::iterator i = features.begin();
-	for(;i != features.end(); ++i){
-		CSpringMapFeature* f = new CSpringMapFeature(callback,*i,game);
-		mapFeatures.push_back(f);
-	}
+	UpdateMapFeatures();
 	return mapFeatures;
 }
 
 std::vector<IMapFeature*> CSpringMap::GetMapFeaturesAt(Position p, double radius){
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
-	std::vector< IMapFeature*> mapFeatures;	for (std::vector<IMapFeature*>::iterator i = mapFeatures.begin(); i != mapFeatures.end(); ++i) {
-		delete (*i);
-	}
-	mapFeatures.clear();
+	UpdateMapFeatures();
+	std::vector<IMapFeature*> results;
 
 	std::vector<springai::Feature*> features = callback->GetFeaturesIn(pos,radius);
 	std::vector<springai::Feature*>::iterator i = features.begin();
 	for(;i != features.end(); ++i){
-		CSpringMapFeature* f = new CSpringMapFeature(callback,*i,game);
-		mapFeatures.push_back(f);
+		std::vector<IMapFeature*>::iterator obj = GetMapFeatureIteratorById((*i)->GetFeatureId());
+		if(obj != mapFeatures.end()) {
+			results.push_back(*obj);
+		} else { //can this ever happen?
+			CSpringMapFeature* f = new CSpringMapFeature(callback,*i,game);
+			mapFeatures.push_back(f);
+			results.push_back(f);
+		}
 	}
-	return mapFeatures;
+	return results;
 }
 
 springai::Resource* CSpringMap::GetMetalResource(){

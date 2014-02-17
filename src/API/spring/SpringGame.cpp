@@ -175,17 +175,36 @@ IUnitType* CSpringGame::ToIUnitType(springai::UnitDef* def){
 	}
 }
 
-void CSpringGame::FillUnitVector(std::vector<IUnit*> target, std::vector<springai::Unit*> source)
+std::vector<IUnit*>::iterator CSpringGame::GetUnitIteratorById(std::vector<IUnit*>& v, int id)
 {
-	for (std::vector<IUnit*>::iterator i = target.begin(); i != target.end(); ++i) {
-		delete (*i);
+	for(std::vector<IUnit*>::iterator i = v.begin(); i != v.end(); ++i) {
+		if ((*i)->ID() == id) {
+			return i;
+		}
 	}
+	return v.end();
+}
+
+void CSpringGame::FillUnitVector(std::vector<IUnit*>& target, std::vector<springai::Unit*> source)
+{
+	std::vector<IUnit*> old = target;
 	target.clear();
 
 	std::vector<springai::Unit*>::iterator i = source.begin();
 	for(;i != source.end(); ++i){
-		CSpringUnit* unit = new CSpringUnit(callback,*i,this);
-		target.push_back(unit);
+		std::vector<IUnit*>::iterator obj = GetUnitIteratorById(old, (*i)->GetUnitId());
+		if (obj != old.end()) { //unit was already present.
+			target.push_back(*obj);
+			old.erase(obj); //remove from old objects.
+		} else { //new unit, create new object.
+			CSpringUnit* unit = new CSpringUnit(callback,*i,this);
+			target.push_back(unit);
+		}
+	}
+
+	//clean up remaining old objects.
+	for (std::vector<IUnit*>::iterator i = old.begin(); i != old.end(); ++i) {
+		delete (*i);
 	}
 }
 
@@ -195,7 +214,7 @@ void CSpringGame::UpdateUnits()
 	{
 		FillUnitVector(enemyUnits, callback->GetEnemyUnits());
 		FillUnitVector(friendlyUnits, callback->GetFriendlyUnits());
-		FillUnitVector(friendlyUnits, callback->GetTeamUnits());
+		FillUnitVector(teamUnits, callback->GetTeamUnits());
 		lastUnitUpdate = Frame();
 	}
 }
