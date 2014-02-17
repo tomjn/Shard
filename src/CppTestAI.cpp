@@ -65,6 +65,9 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 			// it might not have been given to us! Could have been given to another team
 			springai::Unit* unit = springai::WrappUnit::GetInstance(skirmishAIId, evt->unitId);
 			if(callback->GetSkirmishAI()->GetTeamId() == unit->GetTeam()){
+				if (aliveUnits[evt->unitId]) {
+					delete aliveUnits[evt->unitId];
+				}
 				CSpringUnit* u = new CSpringUnit(callback,unit,game);
 				aliveUnits[evt->unitId] = u;
 				game->Me()->UnitGiven(u);
@@ -79,6 +82,9 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 			}
 			springai::Unit* unit = springai::WrappUnit::GetInstance(skirmishAIId, evt->unit);
 			if(unit != NULL){
+				if (aliveUnits[evt->unit]) {
+					delete aliveUnits[evt->unit];
+				}
 				CSpringUnit* u = new CSpringUnit(callback,unit,game);
 				aliveUnits[evt->unit] = u;
 				game->Me()->UnitCreated(u);
@@ -95,9 +101,12 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 			if(aliveUnits.find(evt->unit) != aliveUnits.end()){
 				 u = aliveUnits[evt->unit];
 			}
-			if( u == 0){
+			if(u == 0){
 				springai::Unit* unit = springai::WrappUnit::GetInstance(skirmishAIId, evt->unit);
 				if(unit != NULL){
+					if (aliveUnits[evt->unit]) {
+						delete aliveUnits[evt->unit];
+					}
 					u = new CSpringUnit(callback,unit,game);
 					aliveUnits[evt->unit] = u;
 				}
