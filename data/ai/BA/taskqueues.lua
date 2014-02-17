@@ -123,11 +123,7 @@ function CheckForMapControl()
 		end
 		
 		lastSiegeCheckFrame = f
-		if ai.Metal.reserves < 0.5 * ai.Metal.capacity and ai.wreckCount > 0 then
-			ai.needToReclaim = true
-		else
-			ai.needToReclaim = false
-		end
+		ai.needToReclaim = ai.Metal.full < 0.5 and ai.wreckCount > 0
 		AAUnitPerTypeLimit = math.ceil(ai.turtlehandler:GetTotalPriority() / 4)
 		heavyPlasmaLimit = math.ceil(ai.combatCount / 10)
 		nukeLimit = math.ceil(ai.combatCount / 50)

@@ -129,12 +129,11 @@ function ReclaimBehaviour:Reclaim()
 				CustomCommand(self.unit:Internal(), CMD_RECLAIM, {vulnerable.unitID})
 			elseif self.targetResurrection ~= nil and not self.resurrecting then
 				EchoDebug("resurrecting...")
-				local resPosition = self.targetResurrection:GetPosition()
-				local unitName = featureTable[self.targetResurrection:Name()].unitName
+				local resPosition = self.targetResurrection.position
+				local unitName = featureTable[self.targetResurrection.featureName].unitName
 				EchoDebug(unitName)
-				--floats:push_back(self.targetResurrection:ID())
 				CustomCommand(self.unit:Internal(), CMD_RESURRECT, {resPosition.x, resPosition.y, resPosition.z, 15})
-				ai.buildsitehandler:NewPlan(unitName, self.targetResurrection:GetPosition(), self, true)
+				ai.buildsitehandler:NewPlan(unitName, resPosition, self, true)
 				self.resurrecting = true
 			else
 				EchoDebug("reclaiming area...")

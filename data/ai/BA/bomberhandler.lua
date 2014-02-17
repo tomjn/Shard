@@ -60,7 +60,6 @@ function BomberHandler:DoTargetting()
 			else
 				bombTarget = ai.targethandler:GetBestBomberTarget()
 			end
-
 			if bombTarget ~= nil then
 				EchoDebug("got target for " .. weapon)
 				for i,recruit in ipairs(recruits) do

@@ -83,10 +83,11 @@ end
 function LosHandler:Init()
 	self.losGrid = {}
 	ai.knownEnemies = {}
-	self.knownWrecks = {}
+	ai.knownWrecks = {}
 	ai.wreckCount = 0
 	ai.enemyList = {}
 	ai.blips = {}
+	ai.lastLOSUpdate = 0
 	self:Update()
 end
 
@@ -145,6 +146,7 @@ function LosHandler:Update()
 		end
 		-- update known wrecks
 		self:UpdateWrecks()
+		ai.lastLOSUpdate = f
 		if DebugEnabled then debugPlotLosFile:close() end
 	end
 end
@@ -261,24 +263,29 @@ end
 
 function LosHandler:UpdateWrecks()
 	local wrecks = game.map:GetMapFeatures()
-	if wrecks == nil then return end
-	if #wrecks == 0 then return end
+	if wrecks == nil then
+		ai.knownWrecks = {}
+		return
+	end
+	if #wrecks == 0 then
+		ai.knownWrecks = {}
+		return
+	end
 	-- game:SendToConsole("updating known wrecks")
 	local known = {}
-	if self.knownWrecks == nil then self.knownWrecks = {} end
-	for i, w  in pairs(wrecks) do
-		if w ~= nil then
-			local wname = w:Name()
+	for i, feature  in pairs(wrecks) do
+		if feature ~= nil then
+			local featureName = feature:Name()
 			-- only count features that aren't geovents and that are known to be reclaimable or guessed to be so
 			local okay = false
-			if wname ~= "geovent" then
-				if featureTable[wname] then
-					if featureTable[wname].reclaimable then
+			if featureName ~= "geovent" then -- don't get geo spots
+				if featureTable[featureName] then
+					if featureTable[featureName].reclaimable then
 						okay = true
 					end
 				else
 					for findString, metalValue in pairs(baseFeatureMetal) do
-						if string.find(wname, findString) then
+						if string.find(featureName, findString) then
 							okay = true
 							break
 						end
@@ -286,22 +293,22 @@ function LosHandler:UpdateWrecks()
 				end
 			end
 			if okay then
-				-- don't get geo spots
-				local pos = w:GetPosition()
-				local los = self:GroundLos(pos)
-				local id = w:ID()
+				local position = feature:GetPosition()
+				local los = self:GroundLos(position)
+				local id = feature:ID()
 				local persist = false
+				local wreck = { los = los, featureName = featureName, position = position }
 				if los == 0 or los == 1 then
 					-- don't remove from knownenemies if it was once seen
 					persist = true
 				elseif los == 2 then
-					known[id] = los
-					self.knownWrecks[id] = los
+					known[id] = true
+					ai.knownWrecks[id] = wreck
 				end
 				if persist == true then
-					if self.knownWrecks[id] ~= nil then
-						if self.knownWrecks[id] == 2 then
-							known[id] = self.knownWrecks[id]
+					if ai.knownWrecks[id] ~= nil then
+						if ai.knownWrecks[id].los == 2 then
+							known[id] = true
 						end
 					end
 				end
@@ -310,11 +317,11 @@ function LosHandler:UpdateWrecks()
 	end
 	ai.wreckCount = 0
 	-- remove wreck ghosts that aren't there anymore
-	for id, los in pairs(self.knownWrecks) do
+	for id, los in pairs(ai.knownWrecks) do
 		-- game:SendToConsole("known enemy " .. id .. " " .. los)
 		if known[id] == nil then
 			-- game:SendToConsole("removed")
-			self.knownWrecks[id] = nil
+			ai.knownWrecks[id] = nil
 		else
 			ai.wreckCount = ai.wreckCount + 1
 		end
@@ -423,8 +430,8 @@ end
 
 function LosHandler:IsKnownWreck(feature)
 	local id = feature:ID()
-	if self.knownWrecks[id] then
-		return self.knownWrecks[id]
+	if ai.knownWrecks[id] then
+		return ai.knownWrecks[id]
 	else
 		return 0
 	end

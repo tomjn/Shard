@@ -94,10 +94,19 @@ local badPositions = {}
 
 local dangers = {}
 
-local lastUpdateFrame = 0
-
 local function NewCell(px, pz)
-	local newcell = {value = 0, groundValue = 0, airValue = 0, submergedValue = 0, bomberValue = 0, torpedoBomberValue = 0, groundThreat = 0, airThreat = 0, submergedThreat = 0, buildingIDs = {}, bomberTargets = {}, torpedoBomberTargets = {}, resurrectables = {}, metal = 0, energy = 0, friendlyValue = 0, friendlyBuildings = 0, friendlyLandCombats = 0, friendlyAirCombats = 0, friendlyWaterCombats = 0, x = px, z = pz}
+	local values = {
+	ground = {ground = 0, air = 0, submerged = 0, value = 0},
+	air = {ground = 0, air = 0, submerged = 0, value = 0},
+	submerged = {ground = 0, air = 0, submerged = 0, value = 0},
+	} -- value to our units first to who can be hurt by those things, then to those who have those kinds of weapons
+	-- [GAS].value is just everything that doesn't hurt that kind of thing 
+	local targets = { ground = {}, air = {}, submerged = {}, } -- just one target for each [GAS][hurtGAS]
+	local vulnerables = { ground = {}, air = {}, submerged = {}, } -- just one vulnerable for each [GAS][hurtGAS]
+	local threat = { ground = 0, air = 0, submerged = 0 } -- threats (including buildings) by what they hurt
+	local response = { ground = 0, air = 0, submerged = 0 } -- count mobile threat by what can hurt it
+	local preresponse = { ground = 0, air = 0, submerged = 0 } -- count where mobile threat will probably be by what can hurt it 
+	local newcell = { value = 0, explosionValue = 0, values = values, threat = threat, response = response, buildingIDs = {}, targets = targets, vulnerables = vulnerables, resurrectables = {}, lastDisarmThreat = 0, metal = 0, energy = 0, x = px, z = pz }
 	return newcell
 end
 
@@ -143,44 +152,35 @@ local function WhereUnitGoes(unit)
 end
 ]]--
 
+-- need to change because: amphibs can't be hurt by non-submerged threats in water, and can't be hurt by anything but ground on land
 local function CellValueThreat(unitName, cell)
 	if cell == nil then return 0, 0 end
 	local gas
 	if unitName == "ALL" then
-		gas = {}
-		gas["ground"] = true
-		gas["air"] = true
-		gas["submerged"] = true
+		gas = { ground = true, air = true, submerged = true }
 		unitName = "nothing"
 	else
-		gas = WhatHurtsUnit(unitName)
+		gas = WhatHurtsUnit(unitName, nil, cell.pos)
 	end
+	local weapons = UnitWeaponLayerList(unitName)
 	local threat = 0
 	local value = 0
-	if gas["ground"] then
-		threat = threat + cell.groundThreat
-		value = value + cell.groundValue
-	end
-	if gas["air"] then
-		threat = threat + cell.airThreat
-		-- ground weapons can hurt gunships sometimes
-		if raiderList[unitName] and not raiderDisarms[unitName] then
-			threat = threat + cell.groundThreat * 0.1
+	local notThreat = 0
+	for GAS, yes in pairs(gas) do
+		if yes then
+			threat = threat + cell.threat[GAS]
+			for i, weaponGAS in pairs(weapons) do
+				value = value + cell.values[GAS][weaponGAS]
+			end
+		elseif raiderDisarms[unitName] then
+			notThreat = notThreat + cell.threat[GAS]
 		end
-		value = value + cell.airValue
 	end
-	if gas["submerged"] then
-		threat = threat + cell.submergedThreat
-		value = value + cell.submergedValue
+	if gas.air and raiderList[unitName] and not raiderDisarms[unitName] then
+		threat = threat + cell.threat.ground * 0.1
 	end
 	if raiderDisarms[unitName] then
-		local notThreat = 0
-		if not gas["ground"] then notThreat = notThreat + cell.groundThreat end
-		if not gas["air"] then notThreat = notThreat + cell.airThreat end
-		if not gas["submerged"] then notThreat = notThreat + cell.submergedThreat end
-		if notThreat == 0 then
-			value = 0
-		end
+		if notThreat == 0 then value = 0 end
 	end
 	return value, threat, gas
 end
@@ -198,6 +198,19 @@ local function GetCellHere(pos)
 	end
 end
 
+local function GetOrCreateCellHere(pos)
+	local px, pz = GetCellPosition(pos)
+	if cells[px] == nil then cells[px] = {} end
+	if cells[px][pz] == nil then
+		local cell = NewCell(px, pz)
+		cell.pos = pos
+		cells[px][pz] = cell
+		table.insert(cellList, cell)
+		return cell
+	end
+	return cells[px][pz]
+end
+
 function TargetHandler:Name()
 	return "TargetHandler"
 end
@@ -206,7 +219,7 @@ function TargetHandler:internalName()
 	return "targethandler"
 end
 
-local function HorizontalLine(x, z, tx, groundAirSubmerged, val)
+local function HorizontalLine(x, z, tx, threatResponse, groundAirSubmerged, val)
 	-- EchoDebug("horizontal line from " .. x .. " to " .. tx .. " along z " .. z .. " with value " .. val .. " in " .. groundAirSubmerged)
 	for ix = x, tx do
 		if cells[ix] == nil then cells[ix] = {} end
@@ -215,24 +228,18 @@ local function HorizontalLine(x, z, tx, groundAirSubmerged, val)
 			cells[ix][z] = NewCell(ix, z)
 			if DebugEnabled then table.insert(cellList, cells[ix][z]) end
 		end
-		if groundAirSubmerged == "ground" then
-			cells[ix][z].groundThreat = cells[ix][z].groundThreat + val
-		elseif groundAirSubmerged == "air" then
-			cells[ix][z].airThreat = cells[ix][z].airThreat + val
-		elseif groundAirSubmerged == "submerged" then
-			cells[ix][z].submergedThreat = cells[ix][z].submergedThreat + val
-		end
+		cells[ix][z][threatResponse][groundAirSubmerged] = cells[ix][z][threatResponse][groundAirSubmerged] + val
 	end
 end
 
-local function Plot4(cx, cz, x, z, groundAirSubmerged, val)
-	HorizontalLine(cx - x, cz + z, cx + x, groundAirSubmerged, val)
+local function Plot4(cx, cz, x, z, threatResponse, groundAirSubmerged, val)
+	HorizontalLine(cx - x, cz + z, cx + x, threatResponse, groundAirSubmerged, val)
 	if x ~= 0 and z ~= 0 then
-        HorizontalLine(cx - x, cz - z, cx + x, groundAirSubmerged, val)
+        HorizontalLine(cx - x, cz - z, cx + x, threatResponse, groundAirSubmerged, val)
     end
 end 
 
-local function FillCircle(cx, cz, radius, groundAirSubmerged, val)
+local function FillCircle(cx, cz, radius, threatResponse, groundAirSubmerged, val)
 	local radius = math.ceil(radius / cellElmos)
 	if radius > 0 then
 		local err = -radius
@@ -243,9 +250,9 @@ local function FillCircle(cx, cz, radius, groundAirSubmerged, val)
 	        err = err + z
 	        z = z + 1
 	        err = err + z
-	        Plot4(cx, cz, x, lastZ, groundAirSubmerged, val)
+	        Plot4(cx, cz, x, lastZ, threatResponse, groundAirSubmerged, val)
 	        if err >= 0 then
-	            if x ~= lastZ then Plot4(cx, cz, lastZ, x, groundAirSubmerged, val) end
+	            if x ~= lastZ then Plot4(cx, cz, lastZ, x, threatResponse, groundAirSubmerged, val) end
 	            err = err - x
 	            x = x - 1
 	            err = err - x
@@ -254,44 +261,38 @@ local function FillCircle(cx, cz, radius, groundAirSubmerged, val)
 	end
 end
 
-local function CheckHorizontalLine(x, z, tx, groundAirSubmerged)
+local function CheckHorizontalLine(x, z, tx, threatResponse, groundAirSubmerged)
 	-- EchoDebug("horizontal line from " .. x .. " to " .. tx .. " along z " .. z .. " in " .. groundAirSubmerged)
 	local value = 0
 	local threat = 0
 	for ix = x, tx do
 		if cells[ix] ~= nil then
 			if cells[ix][z] ~= nil then
-				if groundAirSubmerged == "ground" then
-					value = value + cells[ix][z].groundValue
-					threat = threat + cells[ix][z].groundThreat
-				elseif groundAirSubmerged == "air" then
-					value = value + cells[ix][z].airValue
-					threat = threat + cells[ix][z].airThreat
-				elseif groundAirSubmerged == "submerged" then
-					value = value + cells[ix][z].submergedValue
-					threat = threat + cells[ix][z].submergedThreat
-				end
+				local cell = cells[ix][z]
+				local value = cell.values[groundAirSubmerged].value -- can't hurt it
+				local threat = cell[threatResponse][groundAirSubmerged]
+				return value, threat
 			end
 		end
 	end
 	return value, threat
 end
 
-local function Check4(cx, cz, x, z, groundAirSubmerged)
+local function Check4(cx, cz, x, z, threatResponse, groundAirSubmerged)
 	local value = 0
 	local threat = 0
-	local v, t = CheckHorizontalLine(cx - x, cz + z, cx + x, groundAirSubmerged)
+	local v, t = CheckHorizontalLine(cx - x, cz + z, cx + x, threatResponse, groundAirSubmerged)
 	value = value + v
 	threat = threat + t
 	if x ~= 0 and z ~= 0 then
-        local v, t = CheckHorizontalLine(cx - x, cz - z, cx + x, groundAirSubmerged)
+        local v, t = CheckHorizontalLine(cx - x, cz - z, cx + x, threatResponse, groundAirSubmerged)
         value = value + v
         threat = threat + t
     end
     return value, threat
 end 
 
-local function CheckInRadius(cx, cz, radius, groundAirSubmerged)
+local function CheckInRadius(cx, cz, radius, threatResponse, groundAirSubmerged)
 	local radius = math.ceil(radius / cellElmos)
 	local value = 0
 	local threat = 0
@@ -304,12 +305,12 @@ local function CheckInRadius(cx, cz, radius, groundAirSubmerged)
 	        err = err + z
 	        z = z + 1
 	        err = err + z
-	        local v, t = Check4(cx, cz, x, lastZ, groundAirSubmerged)
+	        local v, t = Check4(cx, cz, x, lastZ, threatResponse, groundAirSubmerged)
 	        value = value + v
 	        threat = threat + t
 	        if err >= 0 then
 	            if x ~= lastZ then
-	            	local v, t = Check4(cx, cz, lastZ, x, groundAirSubmerged)
+	            	local v, t = Check4(cx, cz, lastZ, x, threatResponse, groundAirSubmerged)
 	            	value = value + v
 	       			threat = threat + t
 	            end
@@ -439,10 +440,13 @@ local function UpdateEnemies()
 	-- where is/are the party/parties tonight?
 	local highestValue = minNukeValue
 	local highestValueCell
-	for i, e in pairs(ai.knownEnemies) do
+	-- local mostThreatening = { ground = 0, air = 0, submerged = 0 }
+	-- local mostThreateningCells = { }
+	for unitID, e in pairs(ai.knownEnemies) do
 		local los = e.los
 		local ghost = e.ghost
 		local name = e.unitName
+		local ut = unitTable[name]
 		-- only count those we know about and that aren't being built
 		if (los ~= 0 or ghost) and not e.beingBuilt then
 			local pos
@@ -457,15 +461,16 @@ local function UpdateEnemies()
 			end
 			cell = cells[px][pz]
 			if los == 1 then
-				if unitTable[name].isBuilding then
+				if ut.isBuilding then
 					cell.value = cell.value + baseBuildingValue
 				else
 					-- if it moves, assume it's out to get you
-					FillCircle(px, pz, baseUnitRange, "ground", baseUnitThreat)
-					FillCircle(px, pz, baseUnitRange, "air", baseUnitThreat)
-					FillCircle(px, pz, baseUnitRange, "submerged", baseUnitThreat)
+					FillCircle(px, pz, baseUnitRange, "threat", "ground", baseUnitThreat)
+					FillCircle(px, pz, baseUnitRange, "threat", "air", baseUnitThreat)
+					FillCircle(px, pz, baseUnitRange, "threat", "submerged", baseUnitThreat)
 				end
 			elseif los == 2 then
+				local mtype = ut.mtype
 				DangerCheck(name, e.unitID)
 				local value = Value(name)
 				if unitTable[name].extractsMetal ~= 0 then
@@ -474,64 +479,33 @@ local function UpdateEnemies()
 				if unitTable[name].isBuilding then
 					table.insert(cell.buildingIDs, e.unitID)
 				end
-				for i, groundAirSubmerged in pairs(threatTypes) do
-					local threat, range = ThreatRange(name, groundAirSubmerged, true)
-					-- EchoDebug(name .. " " .. groundAirSubmerged .. " " .. threat .. " " .. range)
+				local hurtBy = WhatHurtsUnit(name)
+				local threatLayers = UnitThreatRangeLayers(name)
+				local threatToTurtles = threatLayers.ground.threat + threatLayers.submerged.threat
+				local maxRange = max(threatLayers.ground.range, threatLayers.submerged.range)
+				for groundAirSubmerged, layer in pairs(threatLayers) do
+					if threatToTurtles ~= 0 and hurtBy[groundAirSubmerged] then
+						FillCircle(px, pz, maxRange, "response", groundAirSubmerged, threatToTurtles)
+					end
+					local threat, range = layer.threat, layer.range
+					if mtype == "air" and groundAirSubmerged == "ground" or groundAirSubmerged == "submerged" then threat = 0 end -- because air units are pointless to run from
 					if threat ~= 0 then
-						FillCircle(px, pz, range, groundAirSubmerged, threat)
+						FillCircle(px, pz, range, "threat", groundAirSubmerged, threat)
 						CountEnemyThreat(e.unitID, name, threat)
-					elseif unitTable[name].mtype ~= "air" then
-						-- for those times when you need to attack the unit itself, not the ground
+					elseif mtype ~= "air" then -- air units are too hard to attack
 						local health = e.health
-						local mtype = unitTable[name].mtype
-						if groundAirSubmerged == "ground" then
-							if mtype ~= "air" and mtype ~= "sub" then
-								cell.groundTarget = e
-								if health < vulnerableHealth then
-									cell.groundVulnerable = e
-								end
-								cell.groundValue = cell.groundValue + value
+						for hurtGAS, hit in pairs(hurtBy) do
+							cell.values[groundAirSubmerged][hurtGAS] = cell.values[groundAirSubmerged][hurtGAS] + value
+							cell.targets[groundAirSubmerged][hurtGAS] = e
+							if health < vulnerableHealth then
+								cell.vulnerables[groundAirSubmerged][hurtGAS] = e
 							end
-						elseif groundAirSubmerged == "air" then
-							if mtype == "sub" then
-								table.insert(cell.torpedoBomberTargets, e)
-								cell.torpedoBomberValue = cell.torpedoBomberValue + value
-								if unitTable[name].bigExplosion then cell.torpedoBomberValue = cell.torpedoBomberValue + bomberExplosionValue end
-							else
-								if mtype == "shp" then
-									table.insert(cell.torpedoBomberTargets, e)
-									cell.torpedoBomberValue = cell.torpedoBomberValue + value
-									if unitTable[name].bigExplosion then cell.torpedoBomberValue = cell.torpedoBomberValue + bomberExplosionValue end
-								end
-								cell.airTarget = e
-								table.insert(cell.bomberTargets, e)
-								if health < vulnerableHealth then
-									cell.airVulnerable = e
-								end
-								local gt, gr = ThreatRange(name, "ground", true)
-								if gt > 0 then
-									if cell.disarmTarget then
-										local ogt, ogr = ThreatRange(cell.disarmTarget.unitName, "ground", true)
-										if gt > ogt then
-											cell.disarmTarget = e
-										end
-									else
-										cell.disarmTarget = e
-									end
-								end
-								cell.airValue = cell.airValue + value
-								cell.bomberValue = cell.bomberValue + value
-								if unitTable[name].bigExplosion then cell.bomberValue = cell.bomberValue + bomberExplosionValue end
-							end
-						elseif groundAirSubmerged == "submerged" then
-							if mtype == "sub" or mtype == "shp" then
-								cell.submergedTarget = e
-								if health < vulnerableHealth then
-									cell.submergedVulnerable = e
-								end
-								cell.submergedValue = cell.submergedValue + value
+							if groundAirSubmerged == "air" and hurtGAS == "ground" and threatLayers.ground.threat > cell.lastDisarmThreat then
+								cell.disarmTarget = e
+								cell.lastDisarmThreat = threatLayers.ground.threat
 							end
 						end
+						if ut.bigExplosion then cell.explosionValue = cell.explosionValue + bomberExplosionValue end
 					end
 				end
 				cell.value = cell.value + value
@@ -539,8 +513,7 @@ local function UpdateEnemies()
 					highestValue = cell.value
 					highestValueCell = cell
 				end
-			end
-			
+		end
 			-- we dont want to target the center of the cell encase its a ledge with nothing
 			-- on it etc so target this units position instead
 			cell.pos = pos
@@ -557,69 +530,42 @@ end
 
 local function UpdateBadPositions()
 	local f = game:Frame()
-	-- game:SendToConsole(f .. ": " .. #badPositions .. " bad positions before")
 	for i, r in pairs(badPositions) do
 		if cells[r.px] then
 			cell = cells[r.px][r.pz]
 			if cell then
-				if r.groundAirSubmerged == "ground" then
-					cell.groundThreat = cell.groundThreat + r.threat
-				elseif r.groundAirSubmerged == "air" then
-					cell.airThreat = cell.airThreat + r.threat
-				elseif  r.groundAirSubmerged == "submerged" then
-					cell.submergedThreat = cell.submergedThreat + r.threat
-				end
+				cell.threat[r.groundAirSubmerged] = cell.threat[r.groundAirSubmerged] + r.threat
 			end
 		end
 		if f > r.frame + r.duration then
 			-- remove bad positions after 1 minute
 			table.remove(badPositions, i)
-			-- game:SendToConsole("bad position #" .. i .. " removed")
 		end
 	end
-	-- game:SendToConsole(f .. ": " .. #badPositions .. " bad positions after")
 end
 
 local function UpdateWrecks()
 	-- figure out where all the wrecks are
-	local wrecks = map:GetMapFeatures()
-	if wrecks == nil then return end
-	if #wrecks == 0 then return end
-	for i, w in pairs(wrecks) do
-		if ai.loshandler:IsKnownWreck(w) then
-			-- will need to check if reclaimer can get to wreck later
-			-- ai.maphandler:UnitCanGoHere(representative, pos)
-			local pos = w:GetPosition()
-			-- EchoDebug("wreck position" .. pos.x .. " " .. pos.z)
-			local px, pz = GetCellPosition(pos)
-			if cells[px] == nil then
-				cells[px] = {}
-			end
-			if cells[px][pz] == nil then
-				cells[px][pz] = NewCell(px, pz)
-				table.insert(cellList, cells[px][pz])
-			end
-			cell = cells[px][pz]
-			if cell.pos == nil then
-				cell.pos = pos
-			end
-			local wname = w:Name()
-			local ftable = featureTable[wname]
-			if ftable ~= nil then
-				cell.metal = cell.metal + ftable.metal
-				cell.energy = cell.energy + ftable.energy
-				if ftable.unitName ~= nil then
-					local rut = unitTable[ftable.unitName]
-					if rut.isWeapon or rut.extractsMetal > 0 then
-						table.insert(cell.resurrectables, w)
-					end
+	for id, w in pairs(ai.knownWrecks) do
+		-- will need to check if reclaimer can get to wreck later
+		local pos = w.position
+		local cell = GetOrCreateCellHere(pos)
+		local wname = w.featureName
+		local ftable = featureTable[wname]
+		if ftable ~= nil then
+			cell.metal = cell.metal + ftable.metal
+			cell.energy = cell.energy + ftable.energy
+			if ftable.unitName ~= nil then
+				local rut = unitTable[ftable.unitName]
+				if rut.isWeapon or rut.extractsMetal > 0 then
+					table.insert(cell.resurrectables, w)
 				end
-			else
-				for findString, metalValue in pairs(baseFeatureMetal) do
-					if string.find(wname, findString) then
-						cell.metal = cell.metal + metalValue
-						break
-					end
+			end
+		else
+			for findString, metalValue in pairs(baseFeatureMetal) do
+				if string.find(wname, findString) then
+					cell.metal = cell.metal + metalValue
+					break
 				end
 			end
 		end
@@ -668,6 +614,7 @@ function TargetHandler:Init()
 	self.lastEnemyThreatUpdateFrame = 0
 	self.feints = {}
 	self.raiderCounted = {}
+	self.lastUpdateFrame = 0
 end
 
 function TargetHandler:Update()
@@ -691,7 +638,7 @@ function TargetHandler:AddBadPosition(position, mtype, threat, duration)
 	if threat == nil then threat = badCellThreat end
 	if duration == nil then duration = 1800 end
 	local px, pz = GetCellPosition(position)
-	local gas = WhatHurtsUnit(nil, mtype)
+	local gas = WhatHurtsUnit(nil, mtype, position)
 	local f = game:Frame()
 	for groundAirSubmerged, yes in pairs(gas) do
 		if yes then
@@ -699,7 +646,7 @@ function TargetHandler:AddBadPosition(position, mtype, threat, duration)
 			{
 				px = px,
 				pz = pz,
-				groundAirsSubmerged = groundAirSubmerged,
+				groundAirSubmerged = groundAirSubmerged,
 				frame = f,
 				threat = threat,
 				duration = duration,
@@ -710,8 +657,7 @@ function TargetHandler:AddBadPosition(position, mtype, threat, duration)
 end
 
 function TargetHandler:UpdateMap()
-	local f = game:Frame()
-	if f > lastUpdateFrame + 30 then
+	if ai.lastLOSUpdate > self.lastUpdateFrame then
 		self.raiderCounted = {}
 		cells = {}
 		cellList = {}
@@ -721,36 +667,33 @@ function TargetHandler:UpdateMap()
 		UpdateBadPositions()
 		UpdateWrecks()
 		UpdateDebug()
-		lastUpdateFrame = f
+		self.lastUpdateFrame = game:Frame()
 	end
 end
 
-local function CellVulnerable(cell, gas)
+local function CellVulnerable(cell, hurtByGAS, weaponsGAS)
 	if cell == nil then return end
-	-- check this cell
-	local vulnerable = nil
-	if not gas["ground"] and cell.groundVulnerable and cell.groundThreat == 0 then
-		vulnerable = cell.groundVulnerable
+	for GAS, yes in pairs(hurtByGAS) do
+		for i, wGAS in pairs(weaponsGAS) do
+			local vulnerable = cell.vulnerables[GAS][wGAS]
+			if vulnerable ~= nil then return vulnerable end
+		end
 	end
-	if vulnerable == nil and not gas["air"] and cell.airVulnerable and cell.airThreat == 0 then
-		vulnerable = cell.airVulnerable
-	end
-	if vulnerable == nil and not gas["submerged"] and cell.submergedVulnerable and cell.submergedThreat == 0 then
-		vulnerable = cell.submergedVulnerable
-	end
-	return vulnerable
 end
 
 function TargetHandler:NearbyVulnerable(unit)
 	if unit == nil then return end
 	self:UpdateMap()
-	local px, pz = GetCellPosition(unit:GetPosition())
-	local gas = WhatHurtsUnit(unit:Name())
+	local position = unit:GetPosition()
+	local px, pz = GetCellPosition(position)
+	local unitName = unit:Name()
+	local gas = WhatHurtsUnit(unitName, nil, position)
+	local weapons = UnitWeaponLayerList(unitName)
 	-- check this cell
 	local vulnerable = nil
 	if cells[px] ~= nil then
 		if cells[px][pz] ~= nil then
-			vulnerable = CellVulnerable(cells[px][pz], gas)
+			vulnerable = CellVulnerable(cells[px][pz], gas, weapons)
 		end
 	end
 	-- check adjacent cells
@@ -759,7 +702,7 @@ function TargetHandler:NearbyVulnerable(unit)
 			for iz = pz - 1, pz + 1 do
 				if cells[ix] ~= nil then
 					if cells[ix][iz] ~= nil then
-						vulnerable = CellVulnerable(cells[ix][iz], gas)
+						vulnerable = CellVulnerable(cells[ix][iz], gas, weapons)
 						if vulnerable then break end
 					end
 				end
@@ -933,14 +876,14 @@ function TargetHandler:GetBestBomberTarget(torpedo)
 	local best
 	local bestValue = 0
 	for i, cell in pairs(cellList) do
-		local value = 0
+		local value = cell.explosionValue
 		if torpedo then
-			value = cell.torpedoBomberValue
+			value = value + cell.values.air.submerged
 		else
-			value = cell.bomberValue
+			value = value + cell.values.air.ground
 		end
 		if value > 0 then
-			value = value - cell.airThreat
+			value = value - cell.threat.air
 			if value > bestValue then
 				best = cell
 				bestValue = value
@@ -952,12 +895,12 @@ function TargetHandler:GetBestBomberTarget(torpedo)
 		bestValue = 0
 		local targets
 		if torpedo then
-			targets = best.torpedoBomberTargets
+			targets = best.targets.air.submerged
 		else
-			targets = best.bomberTargets
+			targets = best.targets.air.ground
 		end
 		for i, e in pairs(targets) do
-			local name = e:Name()
+			local name = e.unitName
 			local value = Value(name)
 			if name then
 				if unitTable[name] then
@@ -990,7 +933,7 @@ function TargetHandler:GetBestReclaimCell(representative, lookForEnergy)
 				else
 					mod = cell.metal
 				end
-				local vulnerable = CellVulnerable(cell, gas)
+				local vulnerable = CellVulnerable(cell, gas, UnitWeaponLayerList(rname))
 				if vulnerable then mod = mod + vulnerableReclaimDistMod end
 				if mod > 0 then
 					local dist = Distance(rpos, cell.pos) - mod
@@ -1032,7 +975,7 @@ function TargetHandler:WreckToResurrect(representative)
 		local bestMetalCost = 0
 		for i, w in pairs(best.resurrectables) do
 			if w ~= nil then
-				local wname = w:Name()
+				local wname = w.featureName
 				if wname ~= nil then
 					local ft = featureTable[wname]
 					if ft ~= nil then
@@ -1055,17 +998,18 @@ function TargetHandler:WreckToResurrect(representative)
 end
 
 function TargetHandler:NearestVulnerableCell(representative)
-	if not representative then return end
+	if representative == nil then return end
 	self:UpdateMap()
 	local rpos = representative:GetPosition()
 	local rname = representative:Name()
 	local best
 	local bestDist = 99999
+	local weapons = UnitWeaponLayerList(rname)
 	for i, cell in pairs(cellList) do
 		local value, threat, gas = CellValueThreat(rname, cell)
 		if threat == 0 and cell.pos then
 			if ai.maphandler:UnitCanGoHere(representative, cell.pos) then
-				if cell.groundVulnerable or cell.airVulnerable or cell.submergedVulnerable then
+				if CellVulnerable(cell, gas, weapons) ~= nil then
 					local dist = Distance(rpos, cell.pos)
 					if dist < bestDist then
 						best = cell
@@ -1082,7 +1026,7 @@ function TargetHandler:IsBombardPosition(position, unitName)
 	self:UpdateMap()
 	local px, pz = GetCellPosition(position)
 	local radius = unitTable[unitName].groundRange
-	local groundValue, groundThreat = CheckInRadius(px, pz, radius, "ground")
+	local groundValue, groundThreat = CheckInRadius(px, pz, radius, "threat", "ground")
 	if groundValue + groundThreat > Value(unitName) * 1.5 then
 		return true
 	else
@@ -1215,8 +1159,4 @@ function TargetHandler:RaiderHere(raidbehaviour)
 		end
 	end
 	self.raiderCounted[raidbehaviour.id] = true -- reset with UpdateMap()
-end
-
-function TargetHandler:UnitValue(unitName)
-	return Value(unitName)
 end

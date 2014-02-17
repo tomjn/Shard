@@ -26,6 +26,7 @@ local layerNames = {"ground", "air", "submerged"}
 local unitThreatLayers = {}
 local whatHurtsUnit = {}
 local whatHurtsMtype = {}
+local unitWeaponLayers = {}
 
 local quadX = { -1, 1, -1, 1 }
 local quadZ = { -1, -1, 1, 1 }
@@ -155,7 +156,7 @@ function CustomCommand(unit, cmdID, cmdParams)
 	return unit:ExecuteCustomCommand(cmdID, floats)
 end
 
-function ThreatRange(unitName, groundAirSubmerged, enemy)
+function ThreatRange(unitName, groundAirSubmerged)
 	local threatLayers = unitThreatLayers[unitName]
 	if groundAirSubmerged ~= nil and threatLayers ~= nil then
 		local layer = threatLayers[groundAirSubmerged]
@@ -187,7 +188,7 @@ function ThreatRange(unitName, groundAirSubmerged, enemy)
 	end
 	local threat = 0
 	local range = 0
-	if groundAirSubmerged == "ground" and (utable.mtype ~= "air" or not enemy) then -- air units ignored because they move too fast for their position to matter for ground threat calculations. however our own air units need to count
+	if groundAirSubmerged == "ground" then
 		range = utable.groundRange
 	elseif groundAirSubmerged == "air" then
 		range = utable.airRange
@@ -218,7 +219,25 @@ function UnitThreatRangeLayers(unitName)
 	return threatLayers
 end
 
-function WhatHurtsUnit(unitName, mtype)
+function UnitWeaponLayerList(unitName)
+	local weaponLayers = unitWeaponLayers[unitName]
+	if weaponLayers then return weaponLayers end
+	weaponLayers = {}
+	local ut = unitTable[unitName]
+	if ut.groundRange > 0 then
+		table.insert(weaponLayers, "ground")
+	end
+	if ut.airRange > 0 then
+		table.insert(weaponLayers, "air")
+	end
+	if ut.submergedRange > 0 then
+		table.insert(weaponLayers, "submerged")
+	end
+	unitWeaponLayers[unitName] = weaponLayers
+	return weaponLayers
+end
+
+function WhatHurtsUnit(unitName, mtype, position)
 	local hurts = whatHurtsMtype[mtype] or whatHurtsUnit[unitName]
 	if hurts ~= nil then return hurts else hurts = {} end
 	if unitName then 
@@ -238,6 +257,15 @@ function WhatHurtsUnit(unitName, mtype)
 	end
 	if unitName then whatHurtsUnit[unitName] = hurts end
 	if mtype then whatHurtsMtype[mtype] = hurts end
+	if mtype == "amp" and position ~= nil then
+		-- special case: amphibious need to check whether underwater or not
+		local underwater = ai.maphandler:IsUnderWater(position)
+		if underwater then
+			return { ground = false, air = false, submerged = true}
+		else
+			return { ground = true, air = false, submerged = true }
+		end
+	end
 	return hurts
 end
 

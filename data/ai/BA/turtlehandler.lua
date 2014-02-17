@@ -643,6 +643,7 @@ function TurtleHandler:AddThreatVector(enemy, vx, vz)
 		if turtle.water == waterEnemy then
 			local tx, tz = turtle.position.x, turtle.position.z
 			local dx, dz = ex - tx, ez - tz
+			local distToEnemy = sqrt(dx*dx + dz+dz)
 			local angleToEnemy = atan2(-dz, dx)
 			local angleToPrediction = AngleAtoB(tx, tz, px, pz)
 			-- local guardpos = RandomAway(turtle.position, turtle.size+100, false, angleToEnemy)
@@ -658,19 +659,18 @@ function TurtleHandler:AddThreatVector(enemy, vx, vz)
 				local px2, pz2 = ApplyVector(ex, ez, vx, vz, 300)
 				local dist = DistanceXZ(tx, tz, px2, pz2)
 				if turtle.water then
-					if dist < threatLayers.submerged.range + turtle.size then
+					if dist < threatLayers.submerged.range + turtle.size or distToEnemy < threatLayers.submerged.range + turtle.size  then
 						threatened = true
 					end
 				end
-				if dist < threatLayers.ground.range + turtle.size then
+				if dist < threatLayers.ground.range + turtle.size or distToEnemy < threatLayers.ground.range + turtle.size then
 					threatened = true
 				end
 			end
 			if threatened then
-				local dist = DistanceXZ(tx, tz, ex, ez)	
-				if dist < nearestDist then
+				if distToEnemy < nearestDist then
 					nearestTurtle = turtle
-					nearestDist = dist
+					nearestDist = distToEnemy
 				end
 			end
 		end

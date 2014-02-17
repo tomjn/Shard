@@ -57,7 +57,7 @@ end
 
 function BomberBehaviour:BombTarget(target)
 	if target ~= nil then
-		pos = target:GetPosition()
+		local pos = target.position
 		if pos ~= nil then
 			self.target = target.unitID
 			self.bombing = true
