@@ -20,6 +20,11 @@ local savepositions = {}
 
 local minDefenseNetworkSize = 100000
 
+local function MapDataFilename()
+	local mapName = string.gsub(map:MapName(), "%W", "_")
+	return "cache/Shard-" .. game:GameName() .. "-" .. mapName .. ".lua"
+end
+
 local function serialize (o, keylist)
   if keylist == nil then keylist = "" end
   if type(o) == "number" then
@@ -103,9 +108,6 @@ local function PlotLineDebug(pos1, pos2)
 end
 
 MapHandler = class(Module)
-
-local sqrt = math.sqrt
-local MapDataPath = "AI/Skirmish/Shard/yuri2BA/BA/mapdata/"
 
 local function MiddleOfTwo(pos1, pos2)
 	local deltax = pos2.x - pos1.x
@@ -409,38 +411,40 @@ function MapHandler:internalName()
 end
 
 function MapHandler:SaveMapData()
-	local mdfilename = "cache/Shard-BA-" .. map:MapName() .. ".lua"
+	local mdfilename = MapDataFilename()
 	EchoDebug("saving map data to " .. mdfilename)
-	-- io.output(map:MapName() .. ".lua")
-	mapdatafile = assert(io.open(mdfilename,'w'), "Unable to write " .. mdfilename)
-	EchoData("ai.mobilityGridSize", ai.mobilityGridSize)
-	-- EchoData("ai.factoryListMap", ai.factoryListMap)
-	EchoData("ai.mobilityGridMaxX", ai.mobilityGridMaxX)
-	EchoData("ai.mobilityGridMaxZ", ai.mobilityGridMaxZ)
-	EchoData("ai.waterMap", ai.waterMap)
-	EchoData("ai.mapHasGeothermal", ai.mapHasGeothermal)
-	EchoData("ai.mobilityRatingFloor", ai.mobilityRatingFloor)
-	EchoData("ai.hasUWSpots", ai.hasUWSpots)
-	EchoData("ai.mobilityGridSizeHalf", ai.mobilityGridSizeHalf)
-	EchoData("ai.mobilityGridArea", ai.mobilityGridArea)
-	EchoData("ai.mobRating", ai.mobRating)
-	EchoData("ai.mobCount", ai.mobCount)
-	EchoData("ai.mobNetworks", ai.mobNetworks)
-	EchoData("ai.networkSize", ai.networkSize)
-	EchoData("ai.landMetalSpots", ai.landMetalSpots)
-	EchoData("ai.UWMetalSpots", ai.UWMetalSpots)
-	EchoData("ai.geoSpots", ai.geoSpots)
-	EchoData("ai.startLocations", ai.startLocations)
-	EchoData("ai.mobNetworkMetals", ai.mobNetworkMetals)
-	EchoData("ai.scoutSpots", ai.scoutSpots)
-	EchoData("ai.topology", ai.topology)
-	mapdatafile:close()
+	mapdatafile = io.open(mdfilename,'w')
+	if mapdatafile ~= nil then
+		EchoData("ai.mobilityGridSize", ai.mobilityGridSize)
+		EchoData("ai.mobilityGridMaxX", ai.mobilityGridMaxX)
+		EchoData("ai.mobilityGridMaxZ", ai.mobilityGridMaxZ)
+		EchoData("ai.waterMap", ai.waterMap)
+		EchoData("ai.mapHasGeothermal", ai.mapHasGeothermal)
+		EchoData("ai.mobilityRatingFloor", ai.mobilityRatingFloor)
+		EchoData("ai.hasUWSpots", ai.hasUWSpots)
+		EchoData("ai.mobilityGridSizeHalf", ai.mobilityGridSizeHalf)
+		EchoData("ai.mobilityGridArea", ai.mobilityGridArea)
+		EchoData("ai.mobRating", ai.mobRating)
+		EchoData("ai.mobCount", ai.mobCount)
+		EchoData("ai.mobNetworks", ai.mobNetworks)
+		EchoData("ai.networkSize", ai.networkSize)
+		EchoData("ai.landMetalSpots", ai.landMetalSpots)
+		EchoData("ai.UWMetalSpots", ai.UWMetalSpots)
+		EchoData("ai.geoSpots", ai.geoSpots)
+		EchoData("ai.startLocations", ai.startLocations)
+		EchoData("ai.mobNetworkMetals", ai.mobNetworkMetals)
+		EchoData("ai.scoutSpots", ai.scoutSpots)
+		EchoData("ai.topology", ai.topology)
+		mapdatafile:close()
+	else
+		EchoDebug("unable to write map data file " .. mdfilename)
+	end
 end
 
 function MapHandler:LoadMapData()
 	-- check for existing map data and load it
 	local dataloaded = false
-	local mdfilename = "cache/Shard-BA-" .. map:MapName() .. ".lua"
+	local mdfilename = MapDataFilename()
 	local mapdatafile = io.open(mdfilename ,"r")
 	if mapdatafile ~= nil then
 		mapdatafile:close()
