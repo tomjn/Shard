@@ -135,23 +135,6 @@ local function Value(unitName)
 	return val
 end
 
---[[
-local function WhereUnitGoes(unit)
-	local mtype = unitTable[unit:Name()].mtype
-	local law = {}
-	if mtype == "veh" or mtype == "bot" or mtype == "hov" or mtype == "amp" then
-		law["land"] = true
-	end
-	if mtype == "air" then
-		law["air"] = true
-	end
-	if mtype == "sub" or mtype == "shp" or mtype == "hov" or mtype == "amp" then
-		law["water"] = true
-	end
-	return law
-end
-]]--
-
 -- need to change because: amphibs can't be hurt by non-submerged threats in water, and can't be hurt by anything but ground on land
 local function CellValueThreat(unitName, cell)
 	if cell == nil then return 0, 0 end
@@ -440,8 +423,6 @@ local function UpdateEnemies()
 	-- where is/are the party/parties tonight?
 	local highestValue = minNukeValue
 	local highestValueCell
-	-- local mostThreatening = { ground = 0, air = 0, submerged = 0 }
-	-- local mostThreateningCells = { }
 	for unitID, e in pairs(ai.knownEnemies) do
 		local los = e.los
 		local ghost = e.ghost
@@ -572,6 +553,21 @@ local function UpdateWrecks()
 	end
 end
 
+local function UpdateFronts()
+	local highestCells = {}
+	local highestResponse = { ground = 0, air = 0, submerged = 0 }
+	for i = 1, #cellList do
+		local cell = cellList[i]
+		for groundAirSubmerged, response in pairs(cell.response) do
+			if response > highestResponse[groundAirSubmerged] then
+				highestResponse[groundAirSubmerged] = response
+				highestCells[groundAirSubmerged] = cell
+			end
+		end
+	end
+	ai.turtlehandler:FindFronts(highestCells)
+end
+
 local function UpdateDebug()
 	if DebugEnabled then 
 		debugPlotTargetFile = assert(io.open("debugtargetplot",'w'), "Unable to write debugtargetplot")
@@ -666,6 +662,7 @@ function TargetHandler:UpdateMap()
 		-- UpdateFriendlies()
 		UpdateBadPositions()
 		UpdateWrecks()
+		UpdateFronts()
 		UpdateDebug()
 		self.lastUpdateFrame = game:Frame()
 	end

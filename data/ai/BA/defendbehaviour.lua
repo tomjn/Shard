@@ -92,7 +92,7 @@ function DefendBehaviour:Update()
 				end
 			elseif not safe then
 				self.guarding = nil
-				if dist < 200 then
+				if dist < 300 then
 					-- just keep going after enemies near turtles
 				else
 					unit:Move(guardPos)

@@ -11,7 +11,7 @@ local function EchoDebug(inStr)
 end
 
 local function PlotPointDebug(x, z, label)
-	if label ~= "LIMB" then label = string.format("%.1f", label) end
+	if type(label) ~= "string" then label = string.format("%.1f", label) end
 	debugPlotTurtleFile:write(math.ceil(x) .. " " .. math.ceil(z) .. " " .. label .. "\n")
 end
 
@@ -230,6 +230,7 @@ function TurtleHandler:RemoveOrgan(unitID)
 				table.remove(turtle.organs, oi)
 				if #turtle.organs == 0 then
 					emptyTurtle = turtle
+					ai.defendhandler:RemoveDefendee(nil, turtle)
 					table.remove(self.turtles, ti)
 				end
 				foundOrgan = true
@@ -370,6 +371,7 @@ function TurtleHandler:AddTurtle(position, water, priority)
 	end
 	table.insert(self.turtles, turtle)
 	self.totalPriority = self.totalPriority + priority
+	ai.defendhandler:AddDefendee(nil, turtle)
 	return turtle
 end
 
@@ -699,9 +701,10 @@ function TurtleHandler:AlertDangers()
 				local ex = turtle.threatForecastX / turtle.threatForecastCount
 				local ez = turtle.threatForecastZ / turtle.threatForecastCount
 				turtle.threatForecastAngle = AngleAtoB(turtle.position.x, turtle.position.z, ex, ez)
-				local guardpos = RandomAway(turtle.position, turtle.size+100, false, turtle.threatForecastAngle)
-				ai.tacticalhandler:PlotABDebug(turtle.position.x, turtle.position.z, guardpos.x, guardpos.z, "GUARDANGLE")
-				-- game:SendToConsole(turtle.threatForecastAngle .. " " .. turtle.threatForecastCount)
+				if DebugEnabled then
+					local guardpos = RandomAway(turtle.position, turtle.size+100, false, turtle.threatForecastAngle)
+					ai.tacticalhandler:PlotABDebug(turtle.position.x, turtle.position.z, guardpos.x, guardpos.z, "GUARDANGLE")
+				end
 				if threat > highestThreat then
 					highestThreat = threat
 					highestTurtle = turtle
@@ -719,6 +722,35 @@ function TurtleHandler:AlertDangers()
 	end
 end
 
+function TurtleHandler:FindFronts(troublingCells)
+	local cell = troublingCells.ground
+	if cell == nil then return end
+	local nearestDist = 100000
+	local nearestTurtle
+	for ti, turtle in pairs(self.turtles) do
+		turtle.threatForecastAngle = nil
+		turtle.front = nil
+		if turtle.priority > 1 then
+			local dist = Distance(turtle.position, cell.pos)
+			if dist < nearestDist then
+				nearestDist = dist
+				nearestTurtle = turtle
+			end
+		end
+	end
+	if nearestTurtle ~= nil then
+		local turtle = nearestTurtle
+		turtle.threatForecastAngle = AngleAtoB(turtle.position.x, turtle.position.z, cell.pos.x, cell.pos.z)
+		turtle.front = true
+		ai.defendhandler:Danger(nil, turtle)
+		ai.incomingThreat = cell.response.ground
+		self:PlotAllDebug()
+	else
+		ai.incomingThreat = 0
+	end
+end
+
+
 function TurtleHandler:GetTotalPriority()
 	return self.totalPriority
 end
@@ -734,6 +766,9 @@ function TurtleHandler:PlotAllDebug()
 			PlotPointDebug(turtle.position.x, turtle.position.z, turtle.priority)
 			for li, limb in pairs(turtle.limbs) do
 				PlotPointDebug(limb.position.x, limb.position.z, "LIMB")
+			end
+			if turtle.front then
+				PlotPointDebug(turtle.position.x, turtle.position.z, "DANGER")
 			end
 		end
 		debugPlotTurtleFile:close()

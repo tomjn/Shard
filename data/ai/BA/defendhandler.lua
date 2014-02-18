@@ -30,34 +30,36 @@ function DefendHandler:Init()
 	 self.defendees = {}
 	 self.scrambles = {}
 	 self.totalPriority = 0
-	 self.lastTurtleThreat = 0
+	 self.lastAssignFrame = 0
 end
 
-function DefendHandler:AddDefendee(behaviour)
-	if behaviour == nil then return end
-	if behaviour.unit == nil then return end
-	if behaviour.name == nil then behaviour.name = behaviour.unit:Internal():Name() end
-	if behaviour.id == nil then behaviour.id = behaviour.unit:Internal():ID() end
-	local un = behaviour.name
-	local utable = unitTable[un]
+function DefendHandler:AddDefendee(behaviour, turtle)
 	local priority = 0
-	priority = priority + utable.techLevel * techLevelPriority
-	if un == "corcom" or un == "armcom" then
-		priority = priority + commanderPriority
+	local defendee
+	if behaviour ~= nil then
+		if behaviour.unit == nil then return end
+		if behaviour.name == nil then behaviour.name = behaviour.unit:Internal():Name() end
+		if behaviour.id == nil then behaviour.id = behaviour.unit:Internal():ID() end
+		local un = behaviour.name
+		local utable = unitTable[un]
+		priority = utable.techLevel * techLevelPriority
+		if commanderList[un] then priority = priority + commanderPriority end
+		defendee = { uid = behaviour.id, behaviour = behaviour, priority = priority, threatened = nil, defenders = {}, guardDistance = self:GetGuardDistance(un) }
+	elseif turtle ~= nil then
+		priority = 0
+		defendee = { turtle = turtle, position = turtle.position, priority = priority, threatened = f, defenders = {}, guardDistance = turtle.size, scrambleForMe = turtle.priority > 4 }
 	end
-	if priority ~= 0 then
-		table.insert(self.defendees, { uid = behaviour.id, behaviour = behaviour, priority = priority, threatened = nil, defenders = {}, guardDistance = self:GetGuardDistance(un) })
+	if defendee ~= nil then
+		table.insert(self.defendees, defendee)
 		self.totalPriority = self.totalPriority + priority
-		self:AssignAll()
+		self.needAssignment = true
 	end
 end
 
-function DefendHandler:UnitDead(unit)
-	-- local unit = u:Internal()
-	local uid = unit:ID()
+function DefendHandler:RemoveDefendee(behaviour, turtle)
 	for i, defendee in pairs(self.defendees) do
-		if uid == defendee.uid then
-			EchoDebug("defendee with id " .. uid .. " dead. there are " .. #self.defendees .. " defendees total")
+		-- either behaviour or turtle should be nil
+		if behaviour == defendee.behaviour and turtle == defendee.turtle then
 			for di, dfndbehaviour in pairs(self.defenders) do
 				if dfndbehaviour.target ~= nil then
 					if dfndbehaviour.target == uid then
@@ -68,7 +70,7 @@ function DefendHandler:UnitDead(unit)
 			self.totalPriority = self.totalPriority - defendee.priority
 			table.remove(self.defendees, i)
 			EchoDebug("defendee removed from table. there are " .. #self.defendees .. " defendees total")
-			self:AssignAll()
+			self.needAssignment = true
 			break
 		end
 	end
@@ -77,7 +79,6 @@ end
 function DefendHandler:Update()
 	local f = game:Frame()
 	if f % 30 == 0 then
-		local needReassign
 		local scrambleCalls = 0
 		for i, defendee in pairs(self.defendees) do
 			if defendee.behaviour ~= nil then
@@ -86,25 +87,28 @@ function DefendHandler:Update()
 						if not defendee.behaviour.underFire then
 							defendee.priority = defendee.priority - threatenedPriority
 							self.totalPriority = self.totalPriority - threatenedPriority
-							needReassign = true
+							defendee.threatened = nil
+							self.needAssignment = true
 						end
 					else
 						if defendee.behaviour.underFire then
 							defendee.priority = defendee.priority + threatenedPriority
 							self.totalPriority = self.totalPriority + threatenedPriority
-							defendee.threatened = true
-							needReassign = true
+							defendee.threatened = f
+							self.needAssignment = true
 						end
 					end
 				end
-			elseif defendee.threatened ~= nil then
-				-- defend threatened for thirty seconds after they've stopped being threatened
-				if f > defendee.threatened + 900 or defendee.threatened < self.lastTurtleThreat - 45 then
-					self.totalPriority = self.totalPriority - defendee.priority
-					table.remove(self.defendees, i)
-					needReassign = true
-				else
-					if defendee.scrambleForMe then scrambleCalls = scrambleCalls + 1 end
+			elseif defendee.turtle ~= nil then
+				if defendee.threatened ~= nil then
+					-- defend threatened for thirty seconds after they've stopped being threatened
+					if f > defendee.threatened + 450 then
+						self.totalPriority = self.totalPriority - defendee.priority
+						defendee.priority = 0
+						self.needAssignment = true
+					else
+						if defendee.scrambleForMe then scrambleCalls = scrambleCalls + 1 end
+					end
 				end
 			end
 		end
@@ -113,7 +117,12 @@ function DefendHandler:Update()
 		else
 			self:Unscramble()
 		end
-		if needReassign then self:AssignAll() end
+	end
+	if self.needAssignment and f > self.lastAssignFrame + 30 then
+		-- only actually reassign every second
+		self:AssignAll()
+		self.lastAssignFrame = f
+		self.needAssignment = nil
 	end
 end
 
@@ -206,6 +215,7 @@ function DefendHandler:AssignAll()
 	-- find angles for each defender
 	for i, defendee in pairs(self.defendees) do
 		local divisor = #defendee.defenders
+		-- if defendee.turtle ~= nil and divisor > 0 then game:SendToConsole("turtle with " .. divisor .. " of " .. #self.defenders) end
 		if divisor > 0 then
 			if defendee.angle == nil then
 				local angleAdd = twicePi / divisor
@@ -258,7 +268,7 @@ end
 function DefendHandler:AddDefender(dfndbehaviour)
 	if not self:IsDefender(dfndbehaviour) then
 		table.insert(self.defenders, dfndbehaviour)
-		self:AssignAll()
+		self.needAssignment = true
 	end
 end
 
@@ -266,7 +276,7 @@ function DefendHandler:RemoveDefender(dfndbehaviour)
 	for i, db in pairs(self.defenders) do
 		if db == dfndbehaviour then
 			table.remove(self.defenders, i)
-			self:AssignAll()
+			self.needAssignment = true
 			break
 		end
 	end
@@ -317,7 +327,7 @@ function DefendHandler:Unscramble()
 	end
 end
 
--- receive a signal that a building is threatened
+-- receive a signal that a building is threatened or a turtle is on the front
 function DefendHandler:Danger(behaviour, turtle)
 	local f = game:Frame()
 	if turtle == nil and behaviour ~= nil then turtle = ai.turtlehandler:GetUnitTurtle(behaviour.id) end
@@ -325,21 +335,26 @@ function DefendHandler:Danger(behaviour, turtle)
 		for i, defendee in pairs(self.defendees) do
 			if defendee.turtle == turtle then
 				defendee.threatened = f
-				EchoDebug("turtle already in danger! ")
+				if defendee.priority == 0 then
+					if turtle.front then
+						turtleThreatenedPriority = self.totalPriority+0
+						local priority = turtleThreatenedPriority
+						defendee.priority = priority
+						defendee.angle = turtle.threatForecastAngle
+						defendee.scrambleForMe = turtle.priority > 4
+						self.totalPriority = self.totalPriority + priority
+						self.needAssignment = true
+					else
+						local priority = turtle.priority
+						defendee.priority = priority
+						defendee.scrambleForMe = turtle.priority > 4
+						self.totalPriority = self.totalPriority + priority
+						self.needAssignment = true
+					end
+				end
 				return
 			end
 		end
-		-- if it's not already a defendee, make it one
-		local threat = 500
-		if turtle.threatForecast then threat = turtle.threatForecast.ground + turtle.threatForecast.air + turtle.threatForecast.submerged end
-		local priority = turtleThreatenedPriority + turtle.priority + (threat / 100)
-		local defendee = { turtle = turtle, position = turtle.position, angle = turtle.threatForecastAngle, priority = priority, threatened = f, defenders = {}, guardDistance = turtle.size }
-		if turtle.priority > 4 then defendee.scrambleForMe = true end
-		EchoDebug("turtle danger! " .. priority)
-		table.insert(self.defendees, defendee)
-		self.totalPriority = self.totalPriority + priority
-		self.lastTurtleThreat = f
-		self:AssignAll()
 	end
 end
 

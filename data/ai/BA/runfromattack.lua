@@ -32,15 +32,23 @@ function RunFromAttackBehaviour:Init()
 end
 
 function RunFromAttackBehaviour:UnitBuilt(unit)
-	if unit:Internal():ID() == self.unit:Internal():ID() then
+	if unit.engineID == self.unit.engineID then
 		if self.mobile and not self.isScout then
-			-- ai.defendhandler:AddDefendee(self) -- just testing 
+			ai.defendhandler:AddDefendee(self) -- just testing 
+		end
+	end
+end
+
+function RunFromAttackBehaviour:UnitDead(unit)
+	if unit.engineID == self.unit.engineID then
+		if self.mobile and not self.isScout then
+			ai.defendhandler:RemoveDefendee(self) -- just testing 
 		end
 	end
 end
 
 function RunFromAttackBehaviour:UnitIdle(unit)
-	if unit:Internal():ID() == self.unit:Internal():ID() then
+	if unit.engineID == self.unit.engineID then
 		if self:IsActive() then
 			self.underFire = false
 			self.unit:ElectBehaviour()
