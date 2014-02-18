@@ -29,6 +29,7 @@ function DefendHandler:Init()
 	 self.defenders = {}
 	 self.defendees = {}
 	 self.scrambles = {}
+	 self.hangers = {}
 	 self.totalPriority = 0
 	 self.lastAssignFrame = 0
 end
@@ -91,11 +92,24 @@ function DefendHandler:Update()
 							self.needAssignment = true
 						end
 					else
-						if defendee.behaviour.underFire then
-							defendee.priority = defendee.priority + threatenedPriority
-							self.totalPriority = self.totalPriority + threatenedPriority
-							defendee.threatened = f
+						if defendee.behaviour.withinTurtle then
+							defendee.prioritySnap = defendee.priority+0
+							self.totalPriority = self.totalPriority - defendee.priority
+							defendee.priority = 0
 							self.needAssignment = true
+						else
+							if defendee.prioritySnap ~= nil then
+								defendee.priority = defendee.prioritySnap
+								self.totalPriority = self.totalPriority + defendee.priority
+								defendee.prioritySnap = nil
+								self.needAssignment = true
+							end
+							if defendee.behaviour.underFire then
+								defendee.priority = defendee.priority + threatenedPriority
+								self.totalPriority = self.totalPriority + threatenedPriority
+								defendee.threatened = f
+								self.needAssignment = true
+							end
 						end
 					end
 				end
@@ -212,6 +226,17 @@ function DefendHandler:AssignAll()
 			end
 		end
 	end
+	-- assign siege units to hang around near the front
+	if self.frontDefendee ~= nil and self.frontDefendee.turtle.ground + self.frontDefendee.turtle.air + self.frontDefendee.turtle.submerged > 0 then
+		local defendee= self.frontDefendee
+		local d = -defendee.guardDistance * 0.5
+		local dAdd = defendee.guardDistance / #self.hangers
+		for i = 1, #self.hangers do
+			local dfndbehaviour = self.hangers[i]
+			dfndbehaviour:Assign(defendee, defendee.angle, d)
+			d = d + dAdd
+		end
+	end
 	-- find angles for each defender
 	for i, defendee in pairs(self.defendees) do
 		local divisor = #defendee.defenders
@@ -265,19 +290,45 @@ function DefendHandler:IsDefender(dfndbehaviour)
 	return false
 end
 
+function DefendHandler:IsFrontOnly(dfndbehaviour)
+	for i, db in pairs(self.hangers) do
+		if db == dfndbehaviour then
+			return true
+		end
+	end
+	return false
+end
+
 function DefendHandler:AddDefender(dfndbehaviour)
-	if not self:IsDefender(dfndbehaviour) then
-		table.insert(self.defenders, dfndbehaviour)
-		self.needAssignment = true
+	if dfndbehaviour.tough or dfndbehaviour.aa then
+		if not self:IsDefender(dfndbehaviour) then
+			table.insert(self.defenders, dfndbehaviour)
+			self.needAssignment = true
+		end
+	else
+		if not self:IsFrontOnly(dfndbehaviour) then
+			table.insert(self.hangers, dfndbehaviour)
+			self.needAssignment = true
+		end
 	end
 end
 
 function DefendHandler:RemoveDefender(dfndbehaviour)
-	for i, db in pairs(self.defenders) do
-		if db == dfndbehaviour then
-			table.remove(self.defenders, i)
-			self.needAssignment = true
-			break
+	if dfndbehaviour.tough or dfndbehaviour.aa then
+		for i, db in pairs(self.defenders) do
+			if db == dfndbehaviour then
+				table.remove(self.defenders, i)
+				self.needAssignment = true
+				return
+			end
+		end
+	else
+		for i, db in pairs(self.hangers) do
+			if db == dfndbehaviour then
+				table.remove(self.hangers, i)
+				self.needAssignment = true
+				return
+			end
 		end
 	end
 end
@@ -343,6 +394,7 @@ function DefendHandler:Danger(behaviour, turtle)
 						defendee.angle = turtle.threatForecastAngle
 						defendee.scrambleForMe = turtle.priority > 4
 						self.totalPriority = self.totalPriority + priority
+						self.frontDefendee = defendee
 						self.needAssignment = true
 					else
 						local priority = turtle.priority

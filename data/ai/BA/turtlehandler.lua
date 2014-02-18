@@ -750,6 +750,23 @@ function TurtleHandler:FindFronts(troublingCells)
 	end
 end
 
+function TurtleHandler:SafeWithinTurtle(position, unitName)
+	local gas = WhatHurtsUnit(unitName)
+	local cost = unitTable[unitName].metalCost
+	for i = 1, #self.turtles do
+		local turtle = self.turtles[i]
+		local safety = 0
+		for GAS, yes in pairs(gas) do safety = safety + turtle[GAS] end
+		if safety > cost then
+			local dist = Distance(position, turtle.position)
+			if dist < turtle.size + 100 then
+				return true
+			end
+		end
+	end
+	return false
+end
+
 
 function TurtleHandler:GetTotalPriority()
 	return self.totalPriority

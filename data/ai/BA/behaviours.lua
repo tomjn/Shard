@@ -81,10 +81,10 @@ function defaultBehaviours(unit)
 	else
 		if IsAttacker(unit) then
 			table.insert(b, AttackerBehaviour)
-			if battleList[un] or breakthroughList[un] then
+			-- if battleList[un] or breakthroughList[un] then
 				-- arty and merl don't make good defense
 				table.insert(b, DefendBehaviour)
-			end
+			-- end
 		end
 		if IsRaider(unit) then
 			table.insert(b, RaiderBehaviour)

@@ -68,7 +68,12 @@ function RunFromAttackBehaviour:Update()
 		if f % 30 == 0 then
 			-- run away preemptively from positions within range of enemy weapons, and notify defenders that the unit is in danger
 			local unit = self.unit:Internal()
-			local safe = ai.targethandler:IsSafePosition(unit:GetPosition(), unit, self.threshold)
+			if not self.mobile then
+				position = self.initialLocation
+			else
+				position = unit:GetPosition()
+			end
+			local safe = ai.targethandler:IsSafePosition(position, unit, self.threshold)
 			if safe then
 				self.underFire = false
 				self.unit:ElectBehaviour()
@@ -79,6 +84,7 @@ function RunFromAttackBehaviour:Update()
 				if not self.mobile then ai.defendhandler:Danger(self) end
 				self.unit:ElectBehaviour()
 			end
+			if self.mobile then self.withinTurtle = ai.turtlehandler:SafeWithinTurtle(position, self.name) end
 		end
 	end
 end
