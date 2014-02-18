@@ -62,6 +62,10 @@ bool CSpringUnit::IsAlly(int allyTeamId) {
 }
 
 bool CSpringUnit::IsCloaked(){
+	if (!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in IsCloaked");
+		return false;
+	}
 	return this->unit->IsCloaked();
 }
 
@@ -73,7 +77,6 @@ bool CSpringUnit::Forgotten(){
 	return false;
 }
 
-
 IUnitType* CSpringUnit::Type(){
 	return 0;
 }
@@ -82,6 +85,7 @@ IUnitType* CSpringUnit::Type(){
 bool CSpringUnit::CanMove(){
 	if (def != NULL)
 		return def->IsAbleToMove();
+	game->SendToConsole("shard-runtime warning: UnitDef was NULL in CanMove");
 	return false;
 }
 
@@ -93,6 +97,7 @@ bool CSpringUnit::CanBuild(){
 	if (def != NULL) {
 		return (buildoptions.size() > 0);
 	}
+	game->SendToConsole("shard-runtime warning: UnitDef was NULL in CanBuild");
 	return false;
 }
 
@@ -100,6 +105,7 @@ bool CSpringUnit::CanBuild(){
 bool CSpringUnit::CanAssistBuilding(IUnit* unit){
 	if (def != NULL)
 		return def->IsAbleToAssist();
+	game->SendToConsole("shard-runtime warning: UnitDef was NULL in CanAssistBuilding");
 	return false;
 }
 
@@ -123,24 +129,49 @@ bool CSpringUnit::CanBuildWhenNotDeployed(){
 
 
 void CSpringUnit::Wait(int timeout){
+	if (!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in Wait");
+		return;
+	}
+
 	this->unit->Wait(timeout);
 }
 
 void CSpringUnit::Stop(){
+	if (!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in Stop");
+		return;
+	}
+
 	this->unit->Stop();
 }
 
 void CSpringUnit::Move(Position p){
+	if (!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in Move");
+		return;
+	}
+
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
 	this->unit->MoveTo(pos);
 }
 
 void CSpringUnit::MoveAndFire(Position p){
+	if (!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in MoveAndFire");
+		return;
+	}
+
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
 	this->unit->Fight(pos);
 }
 
 bool CSpringUnit::Build(IUnitType* t){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in Build(IUnitType)");
+		return false;
+	}
+
 	Position p = this->GetPosition();
 	CSpringUnitType* type = static_cast<CSpringUnitType*>(t);
 	springai::UnitDef* ud = type->GetUnitDef();
@@ -195,6 +226,10 @@ bool CSpringUnit::Build(std::string typeName, Position p, int facing){
 }
 
 bool CSpringUnit::Build(IUnitType* t, Position p, int facing){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in Build(IUnitType, Position, int)");
+		return false;
+	}
 	if(t){
 		CSpringUnitType* st = static_cast<CSpringUnitType*>(t);
 		springai::UnitDef* ud = st->GetUnitDef();
@@ -216,30 +251,50 @@ bool CSpringUnit::Build(IUnitType* t, Position p, int facing){
 }
 
 bool CSpringUnit::Reclaim(IMapFeature* mapFeature){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in Reclaim(IMapFeature)");
+		return false;
+	}
 	springai::Feature* f = static_cast<CSpringMapFeature*>(mapFeature)->feature;
 	this->unit->ReclaimFeature(f);
 	return true;
 }
 
 bool CSpringUnit::AreaReclaim(Position p, double radius){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in AreaReclaim");
+		return false;
+	}
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
 	this->unit->ReclaimInArea(pos, radius);
 	return true;
 }
 
 bool CSpringUnit::Reclaim(IUnit* unit){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in Reclaim");
+		return false;
+	}
 	springai::Unit* u = static_cast<CSpringUnit*>(unit)->unit;
 	this->unit->ReclaimUnit(u);
 	return true;
 }
 
 bool CSpringUnit::Attack(IUnit* unit){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in Attack");
+		return false;
+	}
 	springai::Unit* u = static_cast<CSpringUnit*>(unit)->unit;
 	this->unit->Attack(u);
 	return true;
 }
 
 bool CSpringUnit::Repair(IUnit* unit){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in Repair");
+		return false;
+	}
 	springai::Unit* u = static_cast<CSpringUnit*>(unit)->unit;
 	this->unit->Repair(u);
 	return true;
@@ -253,6 +308,10 @@ bool CSpringUnit::Repair(IUnit* unit){
 [23:20:55] <[RoX]knorke> local CMD_JUMP = 38521
 */
 bool CSpringUnit::MorphInto(IUnitType* t){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in MorphInto");
+		return false;
+	}
 	std::vector<float> params_list;
 	unit->ExecuteCustomCommand(31210, params_list);
 	return true;
@@ -260,6 +319,10 @@ bool CSpringUnit::MorphInto(IUnitType* t){
 
 Position CSpringUnit::GetPosition(){
 	Position p;
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in GetPosition");
+		return p;
+	}
 	const springai::AIFloat3 pos = unit->GetPos();
 	p.x = pos.x;
 	p.y = pos.y;
@@ -269,14 +332,26 @@ Position CSpringUnit::GetPosition(){
 
 
 bool CSpringUnit::IsBeingBuilt(){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in IsBeingBuilt");
+		return false;
+	}
 	return unit->IsBeingBuilt();
 }
 
 float CSpringUnit::GetHealth(){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in GetHealth");
+		return 0.0f;
+	}
 	return unit->GetHealth();
 }
 
 float CSpringUnit::GetMaxHealth(){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in GetMaxHealth");
+		return 0.0f;
+	}
 	return unit->GetMaxHealth();
 }
 
@@ -293,6 +368,10 @@ int CSpringUnit::WeaponCount(){
 }
 
 float CSpringUnit::MaxWeaponsRange(){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in MaxWeaponsRange");
+		return 0.0f;
+	}
 	return unit->GetMaxRange();
 }
 
@@ -301,6 +380,7 @@ bool CSpringUnit::CanBuild(IUnitType* t){
 		return false;
 	}
 	if(unit == 0){
+		game->SendToConsole("shard-runtime warning: Unit was NULL in CanBuild");
 		return false;
 	}
 	if(def == 0){
@@ -334,5 +414,9 @@ SResourceTransfer CSpringUnit::GetResourceUsage(int idx){
 
 
 void CSpringUnit::ExecuteCustomCommand(int cmdId, std::vector<float> params_list, short options = 0, int timeOut = INT_MAX){
+	if (!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in ExecuteCustomCommand");
+		return;
+	}
 	this->unit->ExecuteCustomCommand(cmdId,params_list,options,timeOut);
 }
