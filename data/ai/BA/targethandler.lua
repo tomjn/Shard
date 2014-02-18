@@ -477,7 +477,13 @@ local function UpdateEnemies()
 						local health = e.health
 						for hurtGAS, hit in pairs(hurtBy) do
 							cell.values[groundAirSubmerged][hurtGAS] = cell.values[groundAirSubmerged][hurtGAS] + value
-							cell.targets[groundAirSubmerged][hurtGAS] = e
+							if cell.targets[groundAirSubmerged][hurtGAS] == nil then
+								cell.targets[groundAirSubmerged][hurtGAS] = e
+							else
+								if value > Value(cell.targets[groundAirSubmerged][hurtGAS].unitName) then
+									cell.targets[groundAirSubmerged][hurtGAS] = e
+								end
+							end
 							if health < vulnerableHealth then
 								cell.vulnerables[groundAirSubmerged][hurtGAS] = e
 							end
@@ -486,7 +492,16 @@ local function UpdateEnemies()
 								cell.lastDisarmThreat = threatLayers.ground.threat
 							end
 						end
-						if ut.bigExplosion then cell.explosionValue = cell.explosionValue + bomberExplosionValue end
+						if ut.bigExplosion then
+							cell.explosionValue = cell.explosionValue + bomberExplosionValue
+							if cell.explosiveTarget == nil then
+								cell.explosiveTarget = e
+							else
+								if value > Value(cell.explosiveTarget.unitName) then
+									cell.explosiveTarget = e
+								end
+							end
+						end
 					end
 				end
 				cell.value = cell.value + value
@@ -890,26 +905,15 @@ function TargetHandler:GetBestBomberTarget(torpedo)
 	if best then
 		local bestTarget
 		bestValue = 0
-		local targets
-		if torpedo then
-			targets = best.targets.air.submerged
-		else
-			targets = best.targets.air.ground
-		end
-		for i, e in pairs(targets) do
-			local name = e.unitName
-			local value = Value(name)
-			if name then
-				if unitTable[name] then
-					if unitTable[name].bigExplosion then value = value + bomberExplosionValue end
-				end
-			end
-			if value > bestValue then
-				bestTarget = e
-				bestValue = value
+		local target = best.explosiveTarget
+		if target == nil then
+			if torpedo then
+				target = best.targets.air.submerged
+			else
+				target = best.targets.air.ground
 			end
 		end
-		return bestTarget
+		return target
 	end
 end
 

@@ -26,6 +26,7 @@ function IsDefender(unit)
 end
 
 function DefendBehaviour:Init()
+	self.moving = {}
 	self.active = false
 	self.name = self.unit:Internal():Name()
 	self.mtype = unitTable[self.name].mtype
@@ -84,24 +85,24 @@ function DefendBehaviour:Update()
 			if self.perpendicular then
 				guardPos = RandomAway(guardPos, self.perpDist, false, self.perpendicular)
 			end
-			if dist > 500 and behaviour ~= nil then
-				if self.guarding ~= behaviour.id then
-					-- move toward mobile defendees that are far away with guard order
-					CustomCommand(self.unit:Internal(), CMD_GUARD, {behaviour.id})
-					self.guarding = behaviour.id
-				end
-			elseif not safe then
-				self.guarding = nil
-				if dist < 300 then
-					-- just keep going after enemies near turtles
-				else
+			if behaviour ~= nil then
+				if dist > 500 then
+					if self.guarding ~= behaviour.id then
+						-- move toward mobile defendees that are far away with guard order
+						CustomCommand(self.unit:Internal(), CMD_GUARD, {behaviour.id})
+						self.guarding = behaviour.id
+					end
+				elseif (not safe and dist > 300) or dist > 25 then
 					unit:Move(guardPos)
+					self.guarding = nil
 				end
+				self.moving = {}
 			else
 				self.guarding = nil
-				if dist > 25 then
-					-- keep near mobile units and buildings not yet in danger
+				if self.moving.x ~= targetPos.x or self.moving.z ~= targetPos.z then
 					unit:Move(guardPos)
+					self.moving.x = targetPos.x
+					self.moving.z = targetPos.z
 				end
 			end
 			self.unit:ElectBehaviour()
