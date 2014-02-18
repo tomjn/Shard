@@ -32,4 +32,6 @@ protected:
 	CSpringGame* game;
 	springai::OOAICallback* callback;
 	springai::UnitDef* unitDef;
+	std::vector<springai::Resource*> resources;
+	std::vector<springai::WeaponMount*> weaponMounts;
 };

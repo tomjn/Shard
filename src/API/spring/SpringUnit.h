@@ -80,4 +80,6 @@ protected:
 	springai::Unit* unit;
 	bool dead;
 	IGame* game;
+	springai::UnitDef* def;
+	std::vector<springai::UnitDef*> buildoptions;
 };

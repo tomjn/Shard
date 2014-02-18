@@ -33,15 +33,23 @@ public:
 
 	virtual bool CanBuildHere(IUnitType* t, Position pos);
 	virtual bool CanBuildHereFacing(IUnitType* t, Position pos,int facing);
-	
+
 	springai::Resource* GetMetalResource();
 
 protected:
+	std::vector<IMapFeature*>::iterator GetMapFeatureIteratorById(int id);
+	void UpdateMapFeatures();
+
 	springai::OOAICallback* callback;
 	CSpringGame* game;
-	
+
 	std::vector<Position> metalspots;
 	springai::Resource* metal;
+	springai::Map* map;
+	std::vector< IMapFeature*> mapFeatures;
+	int lastMapFeaturesUpdate;
 };
 
 #endif
+
+

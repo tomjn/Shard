@@ -35,10 +35,11 @@ public:
 	void PushIUnit(IUnit* unit);
 
 	static IAI* ai;
+	IGame* GetGame() const { return game; }
 protected:
 
 	swig_type_info* unittype;
 	bool LoadLuaFile(std::string filename);
+
 	IGame* game;
-	
 };

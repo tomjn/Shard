@@ -1,3 +1,4 @@
+
 #include "spring_api.h"
 
 #include <iterator>
@@ -11,7 +12,7 @@
 CSpringMap::CSpringMap(springai::OOAICallback* callback, CSpringGame* game)
 :	callback(callback),
 	game(game),
-	metal(NULL)	{
+	metal(NULL), map(callback->GetMap()), lastMapFeaturesUpdate(-1)	{
 
 	std::vector<springai::Resource*> resources = callback->GetResources();
 	if ( !resources.empty() ) {
@@ -23,11 +24,12 @@ CSpringMap::CSpringMap(springai::OOAICallback* callback, CSpringGame* game)
 			if(name == "Metal"){
 				this->metal = r;
 				break;
+			} else {
+				delete r;
 			}
 		}
 	}
 
-	
 	if(metal){
 		this->GetMetalSpots();
 	}
@@ -37,6 +39,13 @@ CSpringMap::~CSpringMap(){
 	this->metalspots.clear();
 	game = NULL;
 	callback = NULL;
+	delete map;
+	map = NULL;
+	delete metal;
+	for (std::vector<IMapFeature*>::iterator i = mapFeatures.begin(); i != mapFeatures.end(); ++i) {
+		delete (*i);
+	}
+	mapFeatures.clear();
 }
 
 Position CSpringMap::FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance){
@@ -49,7 +58,7 @@ Position CSpringMap::FindClosestBuildSiteFacing(IUnitType* t, Position builderPo
 	}
 	CSpringUnitType* ut = static_cast<CSpringUnitType*>(t);
 	const springai::AIFloat3 bPos(builderPos.x, builderPos.y, builderPos.z);
-	const springai::AIFloat3 pos = callback->GetMap()->FindClosestBuildSite(ut->GetUnitDef(), bPos, searchRadius, minimumDistance, facing);
+	const springai::AIFloat3 pos = map->FindClosestBuildSite(ut->GetUnitDef(), bPos, searchRadius, minimumDistance, facing);
 	Position p;
 	p.x = pos.x;
 	p.y = pos.y;
@@ -64,7 +73,7 @@ bool CSpringMap::CanBuildHere(IUnitType* t, Position p){
 bool CSpringMap::CanBuildHereFacing(IUnitType* t, Position p, int facing){
 	CSpringUnitType* ut = static_cast<CSpringUnitType*>(t);
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
-	return callback->GetMap()->IsPossibleToBuildAt( ut->GetUnitDef(), pos, facing );
+	return map->IsPossibleToBuildAt( ut->GetUnitDef(), pos, facing );
 }
 
 int CSpringMap::SpotCount(){
@@ -78,7 +87,7 @@ Position CSpringMap::GetSpot(int idx){
 std::vector<Position>& CSpringMap::GetMetalSpots(){
 	metal = this->GetMetalResource();
 	metalspots.clear();
-	std::vector<springai::AIFloat3> positions = callback->GetMap()->GetResourceMapSpotsPositions( metal );
+	std::vector<springai::AIFloat3> positions = map->GetResourceMapSpotsPositions( metal );
 	if ( !positions.empty() ) {
 		std::vector<springai::AIFloat3>::iterator j = positions.begin();
 		for(;j != positions.end();++j){
@@ -93,68 +102,102 @@ std::vector<Position>& CSpringMap::GetMetalSpots(){
 }
 
 Position CSpringMap::MapDimensions(){
-	
 	Position p;
-	p.x = callback->GetMap()->GetWidth();
-	p.z = callback->GetMap()->GetHeight();
-	
+	p.x = map->GetWidth();
+	p.z = map->GetHeight();
+
 	return p;
 }
 
 std::string CSpringMap::MapName(){
-	return callback->GetMap()->GetName();
+	return map->GetName();
 }
 
 float CSpringMap::MaximumHeight(){
-	return callback->GetMap()->GetMaxHeight();
+	return map->GetMaxHeight();
 }
 
 float CSpringMap::MinimumHeight(){
-	return callback->GetMap()->GetMinHeight();
+	return map->GetMinHeight();
 }
 
 double CSpringMap::AverageWind(){
-	float minwind = callback->GetMap()->GetMinWind();
-	float maxwind = callback->GetMap()->GetMaxWind();
+	float minwind = map->GetMinWind();
+	float maxwind = map->GetMaxWind();
 	return (minwind+maxwind)/2;
 }
 
 double CSpringMap::MinimumWindSpeed(){
-	return callback->GetMap()->GetMinWind();
+	return map->GetMinWind();
 }
 
 double CSpringMap::MaximumWindSpeed(){
-	return callback->GetMap()->GetMaxWind();
+	return map->GetMaxWind();
 }
 
 double CSpringMap::TidalStrength(){
-	return callback->GetMap()->GetTidalStrength();
+	return map->GetTidalStrength();
 }
 
+std::vector<IMapFeature*>::iterator CSpringMap::GetMapFeatureIteratorById(int id) {
+	for (std::vector<IMapFeature*>::iterator i = mapFeatures.begin(); i != mapFeatures.end(); ++i) {
+		if ((*i)->ID() == id) {
+			return i;
+		}
+	}
+	return mapFeatures.end();
+}
+
+void CSpringMap::UpdateMapFeatures() {
+	std::vector<IMapFeature*> newMapFeatures;
+	if(lastMapFeaturesUpdate != game->Frame()) {
+		std::vector<springai::Feature*> features = callback->GetFeatures();
+		std::vector<springai::Feature*>::iterator i = features.begin();
+
+		for(;i != features.end(); ++i){
+			std::vector<IMapFeature*>::iterator obj = GetMapFeatureIteratorById((*i)->GetFeatureId());
+			if(obj != mapFeatures.end()) { //feature was already present, keep old object.
+				newMapFeatures.push_back(*obj);
+				mapFeatures.erase(obj); //remove from old map.
+			} else { //feature was not yet presend, add new one.
+				CSpringMapFeature* f = new CSpringMapFeature(callback,*i,game);
+				newMapFeatures.push_back(f);
+			}
+		}
+
+		//clear up old features that spring api did not deliver => they got deleted.
+		for(std::vector<IMapFeature*>::iterator i = mapFeatures.begin(); i != mapFeatures.end(); ++i) {
+			delete (*i);
+		}
+
+		mapFeatures = newMapFeatures;
+		lastMapFeaturesUpdate = game->Frame();
+	}
+}
 
 std::vector<IMapFeature*> CSpringMap::GetMapFeatures(){
-	std::vector< IMapFeature*> mapFeatures;
-	
-	std::vector<springai::Feature*> features = callback->GetFeatures();
-	std::vector<springai::Feature*>::iterator i = features.begin();
-	for(;i != features.end(); ++i){
-		CSpringMapFeature* f = new CSpringMapFeature(callback,*i,game);
-		mapFeatures.push_back(f);
-	}
+	UpdateMapFeatures();
 	return mapFeatures;
 }
 
 std::vector<IMapFeature*> CSpringMap::GetMapFeaturesAt(Position p, double radius){
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
-	std::vector< IMapFeature*> mapFeatures;
-	
+	UpdateMapFeatures();
+	std::vector<IMapFeature*> results;
+
 	std::vector<springai::Feature*> features = callback->GetFeaturesIn(pos,radius);
 	std::vector<springai::Feature*>::iterator i = features.begin();
 	for(;i != features.end(); ++i){
-		CSpringMapFeature* f = new CSpringMapFeature(callback,*i,game);
-		mapFeatures.push_back(f);
+		std::vector<IMapFeature*>::iterator obj = GetMapFeatureIteratorById((*i)->GetFeatureId());
+		if(obj != mapFeatures.end()) {
+			results.push_back(*obj);
+		} else { //can this ever happen?
+			CSpringMapFeature* f = new CSpringMapFeature(callback,*i,game);
+			mapFeatures.push_back(f);
+			results.push_back(f);
+		}
 	}
-	return mapFeatures;
+	return results;
 }
 
 springai::Resource* CSpringMap::GetMetalResource(){
