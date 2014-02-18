@@ -1,3 +1,4 @@
+
 /*
 	Copyright (c) 2008 Robin Vobruba <hoijui.quaero@gmail.com>
 
@@ -62,15 +63,18 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: unitgiven evt->unit < 0");
 				break;
 			}
-			// it might not have been given to us! Could have been given to another team
-			springai::Unit* unit = springai::WrappUnit::GetInstance(skirmishAIId, evt->unitId);
-			if(callback->GetSkirmishAI()->GetTeamId() == unit->GetTeam()){
-				if (aliveUnits[evt->unitId]) {
-					delete aliveUnits[evt->unitId];
+			CSpringUnit* u = game->GetUnitById(evt->unitId);
+			if (!u) {
+				u = game->CreateUnit(evt->unitId);
+			}
+
+			if (u) {
+				// it might not have been given to us! Could have been given to another team
+				if(game->GetTeamID() == u->Team()){
+					game->Me()->UnitGiven(u);
 				}
-				CSpringUnit* u = new CSpringUnit(callback,unit,game);
-				aliveUnits[evt->unitId] = u;
-				game->Me()->UnitGiven(u);
+			} else {
+				game->SendToConsole("shard-runtime warning: unitgiven unit NULL");
 			}
 			break;
 		}
@@ -80,14 +84,11 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: unitcreated evt->unit < 0");
 				break;
 			}
-			springai::Unit* unit = springai::WrappUnit::GetInstance(skirmishAIId, evt->unit);
-			if(unit != NULL){
-				if (aliveUnits[evt->unit]) {
-					delete aliveUnits[evt->unit];
-				}
-				CSpringUnit* u = new CSpringUnit(callback,unit,game);
-				aliveUnits[evt->unit] = u;
+			CSpringUnit* u = game->CreateUnit(evt->unit);
+			if (u) {
 				game->Me()->UnitCreated(u);
+			} else {
+				game->SendToConsole("shard-runtime warning: unitcreated unit NULL");
 			}
 			break;
 		}
@@ -97,22 +98,14 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: unitfinished evt->unit < 0");
 				break;
 			}
-			CSpringUnit* u = 0;
-			if(aliveUnits.find(evt->unit) != aliveUnits.end()){
-				 u = aliveUnits[evt->unit];
-			}
+			CSpringUnit* u = game->GetUnitById(evt->unit);
 			if(u == 0){
-				springai::Unit* unit = springai::WrappUnit::GetInstance(skirmishAIId, evt->unit);
-				if(unit != NULL){
-					if (aliveUnits[evt->unit]) {
-						delete aliveUnits[evt->unit];
-					}
-					u = new CSpringUnit(callback,unit,game);
-					aliveUnits[evt->unit] = u;
-				}
+				u = game->CreateUnit(evt->unit);
 			}
 			if(u != 0){
 				game->Me()->UnitBuilt(u);
+			} else {
+				game->SendToConsole("shard-runtime warning: unitfinished unit NULL");
 			}
 			break;
 		}
@@ -122,12 +115,15 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: unitdestroyed evt->unit < 0");
 				break;
 			}
-			std::map<int, CSpringUnit* >::iterator i = aliveUnits.find(evt->unit);
-			if(i != aliveUnits.end()){
-				CSpringUnit* u = i->second;
+			CSpringUnit* u = game->GetUnitById(evt->unit);
+			if(!u) {
+				u = game->CreateUnit(evt->unit);
+			}
+			if(u){
 				game->Me()->UnitDead(u);
-				aliveUnits.erase(i);
-				delete u;
+				game->DestroyUnit(evt->unit);
+			} else {
+				game->SendToConsole("shard-runtime warning: unitdestroyed unit NULL");
 			}
 			break;
 		}
@@ -137,14 +133,25 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: enemydestroyed evt->unit < 0");
 				break;
 			}
-			std::map<int, CSpringUnit* >::iterator i = aliveUnits.find(evt->enemy);
-			if(i != aliveUnits.end()){
-				CSpringUnit* u = i->second;
-				// @TODO: Add enemy dead event
-				//game->Me()->UnitDead(u);
-				aliveUnits.erase(i);
-				delete u;
+			CSpringUnit* u = game->GetUnitById(evt->enemy);
+			if (!u) {
+				u = game->CreateUnit(evt->enemy);
 			}
+			/*if(u){
+				// @TODO: Add enemy dead event
+				game->Me()->UnitDead(u);
+			}*/
+			game->DestroyUnit(evt->enemy);
+			break;
+		}
+		case EVENT_ENEMY_CREATED: {
+			struct SEnemyCreatedEvent* evt = (struct SEnemyCreatedEvent*) data;
+			game->CreateUnit(evt->enemy);
+			break;
+		}
+		case EVENT_ENEMY_FINISHED: {
+			struct SEnemyFinishedEvent* evt = (struct SEnemyFinishedEvent*) data;
+			game->CreateUnit(evt->enemy);
 			break;
 		}
 		case EVENT_UNIT_DAMAGED: {
@@ -153,15 +160,25 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: unitdamaged evt->unit < 0");
 				break;
 			}
-			CSpringUnit* u = 0;
-			if (aliveUnits.find(evt->unit) != aliveUnits.end()){
-				u = aliveUnits[evt->unit];
+			CSpringUnit* u = game->GetUnitById(evt->unit);
+			if (!u) {
+				u = game->CreateUnit(evt->unit);
 			}
-			CSpringUnit* a = 0;
-			if (aliveUnits.find(evt->attacker) != aliveUnits.end()){
-				a = aliveUnits[evt->attacker];
+
+			//attacker is allowed to be -1 if attacker cannot be seen or determined.
+			CSpringUnit* a = NULL;
+			if (evt->attacker >= 0) {
+				a = game->GetUnitById(evt->attacker);
+				if (!a) {
+					game->CreateUnit(evt->attacker);
+				}
 			}
-			game->Me()->UnitDamaged(u,a);
+			if(u) {
+				game->Me()->UnitDamaged(u,a);
+			} else {
+				if (!u)
+					game->SendToConsole("shard-runtime warning: attacked unit not found.");
+			}
 			break;
 		}
 		case EVENT_UNIT_IDLE: {
@@ -170,8 +187,15 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: unitidle evt->unit < 0");
 				break;
 			}
-			CSpringUnit* u = aliveUnits[evt->unit];
-			game->Me()->UnitIdle(u);
+			CSpringUnit* u = game->GetUnitById(evt->unit);
+			if (!u) {
+				game->CreateUnit(evt->unit);
+			}
+			if (u) {
+				game->Me()->UnitIdle(u);
+			} else {
+				game->SendToConsole("shard-runtime warning: unitidle unit was NULL");
+			}
 			break;
 		}
 		case EVENT_UNIT_MOVE_FAILED: {
@@ -180,8 +204,15 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: SUnitMoveFailedEvent evt->unit < 0");
 				break;
 			}
-			CSpringUnit* u = aliveUnits[evt->unit];
-			game->Me()->UnitMoveFailed(u);
+			CSpringUnit* u = game->GetUnitById(evt->unit);
+			if (!u) {
+				u = game->CreateUnit(evt->unit);
+			}
+			if (u) {
+				game->Me()->UnitMoveFailed(u);
+			} else {
+				game->SendToConsole("shard-runtime warning: Did not now about move failed unit");
+			}
 			break;
 		}
 		default: {
@@ -194,12 +225,7 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 }
 
 CSpringUnit* cpptestai::CCppTestAI::getUnitByID( int unit_id ) {
-	std::map<int, CSpringUnit* >::iterator i = aliveUnits.find( unit_id );
-	if(i != aliveUnits.end()){
-		CSpringUnit* u = i->second;
-		return u;
-	}
-	return 0;
+	return game->GetUnitById(unit_id);
 }
 
 /*EVENT_NULL                         =  0,

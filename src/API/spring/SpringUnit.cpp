@@ -53,6 +53,14 @@ bool CSpringUnit::IsAlive(){
 	return dead;
 }
 
+bool CSpringUnit::IsAlly(int allyTeamId) {
+	if (!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in IsAlly");
+		return false;
+	}
+	return allyTeamId == unit->GetAllyTeam();
+}
+
 bool CSpringUnit::IsCloaked(){
 	return this->unit->IsCloaked();
 }

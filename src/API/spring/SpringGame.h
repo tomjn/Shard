@@ -4,6 +4,7 @@ class CSpringGame;
 
 #include "../../TestAI.h"
 #include "SpringMap.h"
+#include "SpringUnit.h"
 #include "SpringUnitType.h"
 #include "SpringMapFeature.h"
 
@@ -33,6 +34,10 @@ public:
 	virtual std::vector<IUnit*> GetFriendlies();
 	virtual std::vector<IUnit*> GetUnits();
 
+	virtual CSpringUnit* CreateUnit(int id);
+	virtual CSpringUnit* CreateUnit(springai::Unit* unit, bool addToVectors = true);
+	virtual void DestroyUnit(int id);
+	virtual CSpringUnit* GetUnitById(int id);
 
 	virtual IAI* Me();
 
@@ -51,15 +56,15 @@ public:
 
 	IUnitType* ToIUnitType(springai::UnitDef* def);
 
+	virtual void UpdateUnits();
+
 	virtual IUnit* getUnitByID( int unit_id );
 	/*virtual void removeUnit( IUnit* dead_unit );*/
 protected:
 	//helper functions to managing unit vectors.
 	//vectors are updated at maximum once per frame.
 	//if unit vectors are required, best call "UpdateUnits" before.
-	std::vector<IUnit*>::iterator GetUnitIteratorById(std::vector<IUnit*>& v, int id);
 	virtual void FillUnitVector(std::vector<IUnit*>& target, std::vector<springai::Unit*> source);
-	virtual void UpdateUnits();
 
 	CSpringMap* map;
 	springai::OOAICallback* callback;
@@ -69,6 +74,7 @@ protected:
 	springai::Economy* economy;
 	std::vector<springai::Resource*> resources;
 	springai::Game* game;
+	std::map<int,CSpringUnit*> aliveUnits;
 	std::vector<IUnit*> friendlyUnits;
 	std::vector<IUnit*> teamUnits;
 	std::vector<IUnit*> enemyUnits;

@@ -5,6 +5,7 @@
 
 #include "spring_api.h"
 #include "AI/Wrappers/Cpp/src-generated/SkirmishAI.h"
+#include "AI/Wrappers/Cpp/src-generated/WrappUnit.h"
 
 CSpringGame::CSpringGame(springai::OOAICallback* callback)
 : callback(callback), datadirs(callback->GetDataDirs()),
@@ -43,18 +44,9 @@ CSpringGame::~CSpringGame(){
 	delete datadirs;
 	delete economy;
 	delete game;
-	for (std::vector<IUnit*>::iterator i = friendlyUnits.begin(); i != friendlyUnits.end(); ++i) {
-		delete (*i);
+	for (std::map<int, CSpringUnit*>::iterator i = aliveUnits.begin(); i != aliveUnits.end(); ++i) {
+		delete i->second;
 	}
-	friendlyUnits.clear();
-	for (std::vector<IUnit*>::iterator i = teamUnits.begin(); i != teamUnits.end(); ++i) {
-		delete (*i);
-	}
-	teamUnits.clear();
-	for (std::vector<IUnit*>::iterator i = enemyUnits.begin(); i != enemyUnits.end(); ++i) {
-		delete (*i);
-	}
-	enemyUnits.clear();
 }
 
 IMap* CSpringGame::Map(){
@@ -175,46 +167,113 @@ IUnitType* CSpringGame::ToIUnitType(springai::UnitDef* def){
 	}
 }
 
-std::vector<IUnit*>::iterator CSpringGame::GetUnitIteratorById(std::vector<IUnit*>& v, int id)
-{
-	for(std::vector<IUnit*>::iterator i = v.begin(); i != v.end(); ++i) {
-		if ((*i)->ID() == id) {
-			return i;
-		}
+CSpringUnit* CSpringGame::CreateUnit(int id) {
+	if (id < 0) {
+		SendToConsole("shard-runtime warning: tried to create unit with id < 0");
+		return NULL;
 	}
-	return v.end();
+	springai::Unit* unit = springai::WrappUnit::GetInstance(callback->GetSkirmishAIId(), id);
+	if (unit) {
+		return CreateUnit(unit);
+	} else {
+		SendToConsole("shard-runtime warning: Could not create unit, WrappUnit returned NULL.");
+		return NULL;
+	}
+}
+
+
+CSpringUnit* CSpringGame::CreateUnit(springai::Unit* unit, bool addToVectors) {
+	std::map<int, CSpringUnit*>::iterator i = aliveUnits.find(unit->GetUnitId());
+	if (i == aliveUnits.end()) {
+		CSpringUnit* u = new CSpringUnit(callback, unit, this);
+		aliveUnits[unit->GetUnitId()] = u;
+
+		if (addToVectors) {
+			if (u->Team() == GetTeamID()) {
+				teamUnits.push_back(u);
+				friendlyUnits.push_back(u);
+			} else if (u->IsAlly(game->GetMyAllyTeam())) {
+				friendlyUnits.push_back(u);
+			} else {
+				enemyUnits.push_back(u);
+			}
+		}
+
+		return u;
+	} else {
+		delete unit;
+		return i->second;
+	}
+}
+
+void CSpringGame::DestroyUnit(int id) {
+	CSpringUnit* u = GetUnitById(id);
+	if (u) {
+		u->SetDead(true);
+	}
+}
+
+CSpringUnit* CSpringGame::GetUnitById(int id) {
+	if (id < 0) {
+		return NULL;
+	}
+
+	std::map<int, CSpringUnit*>::iterator i = aliveUnits.find(id);
+	if (i == aliveUnits.end()) {
+		return NULL;
+	} else {
+		return i->second;
+	}
 }
 
 void CSpringGame::FillUnitVector(std::vector<IUnit*>& target, std::vector<springai::Unit*> source)
 {
-	std::vector<IUnit*> old = target;
 	target.clear();
 
 	std::vector<springai::Unit*>::iterator i = source.begin();
 	for(;i != source.end(); ++i){
-		std::vector<IUnit*>::iterator obj = GetUnitIteratorById(old, (*i)->GetUnitId());
-		if (obj != old.end()) { //unit was already present.
-			target.push_back(*obj);
-			old.erase(obj); //remove from old objects.
-		} else { //new unit, create new object.
-			CSpringUnit* unit = new CSpringUnit(callback,*i,this);
+		if (!(*i)) {
+			continue;
+		}
+
+		CSpringUnit* unit = GetUnitById((*i)->GetUnitId());
+		if (!unit) {
+			unit = CreateUnit(*i, false);
+		} else {
+			delete (*i);
+		}
+
+		if (unit) {
 			target.push_back(unit);
 		}
-	}
-
-	//clean up remaining old objects.
-	for (std::vector<IUnit*>::iterator i = old.begin(); i != old.end(); ++i) {
-		delete (*i);
 	}
 }
 
 void CSpringGame::UpdateUnits()
 {
-	if (lastUnitUpdate != Frame())
+	if (lastUnitUpdate < Frame())
 	{
-		FillUnitVector(enemyUnits, callback->GetEnemyUnits());
+		/* deleting dead units seems not really necessary.
+		   Also the fillunitvector methods below will add them back again, anyways.
+		std::map<int, CSpringUnit*>::iterator i = aliveUnits.begin();
+		while(i != aliveUnits.end()) {
+			if (!i->second->IsAlive() && i->second->Died() < Frame() - 100) { //delete dead units after 100 frames.
+				i = aliveUnits.erase(i);
+			} else {
+				++i;
+			}
+		}*/
+
+		FillUnitVector(enemyUnits, callback->GetEnemyUnits()); //events about enemy unit seem to not reach us.
 		FillUnitVector(friendlyUnits, callback->GetFriendlyUnits());
 		FillUnitVector(teamUnits, callback->GetTeamUnits());
+
+		/*if (lastUnitUpdate % 500 == 0) {
+			std::stringstream msg;
+			msg << "Friendlies: " << friendlyUnits.size() << " Team: " << teamUnits.size() << " Enemies: " << enemyUnits.size();
+			SendToConsole(msg.str());
+		}*/
+
 		lastUnitUpdate = Frame();
 	}
 }
@@ -228,10 +287,12 @@ std::vector<IUnit*> CSpringGame::GetEnemies(){
 	UpdateUnits();
 	return enemyUnits;
 }
+
 bool CSpringGame::HasFriendlies(){
 	UpdateUnits();
 	return !friendlyUnits.empty();
 }
+
 std::vector<IUnit*> CSpringGame::GetFriendlies(){
 	UpdateUnits();
 	return friendlyUnits;
@@ -283,7 +344,6 @@ int CSpringGame::GetResourceCount(){
 SResourceData CSpringGame::GetResourceByName(std::string name){
 	SResourceData res;
 	if(!resources.empty()){
-
 		std::vector<springai::Resource*>::iterator i = resources.begin();
 		for(;i != resources.end();++i){
 			springai::Resource* r = *i;

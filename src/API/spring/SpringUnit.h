@@ -15,6 +15,7 @@ public:
 
 	virtual void SetDead(bool dead=true);
 	virtual bool IsAlive();
+	virtual bool IsAlly(int allyTeamId);
 
 	virtual bool IsCloaked();
 
