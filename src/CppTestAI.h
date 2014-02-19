@@ -34,7 +34,6 @@ private:
 	springai::OOAICallback* callback;
 	int skirmishAIId;
 	CSpringGame* game;
-	std::map<int,CSpringUnit*> aliveUnits;
 public:
 	CCppTestAI(springai::OOAICallback* callback);
 	~CCppTestAI();
