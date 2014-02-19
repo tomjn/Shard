@@ -5,9 +5,15 @@
 #include <vector>
 
 CSpringUnit::CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, IGame* game)
-: callback(callback), unit(u), dead(false), game(game), def(u->GetDef()), buildoptions(def->GetBuildOptions()) {
+: callback(callback), unit(u), dead(false), game(game) {
 	if(u == 0){
 		throw std::runtime_error("springai::unit must never be null when passed into the constructor of a CSpringUnit object! Bad bad coder");
+	}
+	def = u->GetDef();
+	if(def) {
+		buildoptions = def->GetBuildOptions();
+	} else {
+		game->SendToConsole("shard-runtime warning: UnitDef was NULL in CSpringUnit.");
 	}
 }
 
