@@ -159,7 +159,11 @@ void CSpringUnit::Move(Position p){
 	}
 
 	const springai::AIFloat3 pos(p.x, p.y, p.z);
-	this->unit->MoveTo(pos);
+	try {
+		this->unit->MoveTo(pos);
+	} catch (springai::CallbackAIException& e) {
+		game->SendToConsole(std::string("shard-runtime warning: Failed in MoveTo. Reason: ") + std::string(e.what()));
+	}
 }
 
 void CSpringUnit::MoveAndFire(Position p){
@@ -424,5 +428,9 @@ void CSpringUnit::ExecuteCustomCommand(int cmdId, std::vector<float> params_list
 		game->SendToConsole("shard-runtime warning: Unit was NULL in ExecuteCustomCommand");
 		return;
 	}
-	this->unit->ExecuteCustomCommand(cmdId,params_list,options,timeOut);
+	try {
+		this->unit->ExecuteCustomCommand(cmdId,params_list,options,timeOut);
+	} catch (springai::CallbackAIException& e) {
+		game->SendToConsole(std::string("shard-runtime warning: Failed to executeCustomCommand. Reason: ") + std::string(e.what()));
+	}
 }
