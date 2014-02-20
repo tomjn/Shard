@@ -224,6 +224,9 @@ function UnitWeaponLayerList(unitName)
 	if weaponLayers then return weaponLayers end
 	weaponLayers = {}
 	local ut = unitTable[unitName]
+	if not ut then
+		return weaponLayers
+	end
 	if ut.groundRange > 0 then
 		table.insert(weaponLayers, "ground")
 	end
