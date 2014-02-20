@@ -135,34 +135,18 @@ local function Value(unitName)
 	return val
 end
 
---[[
-local function WhereUnitGoes(unit)
-	local mtype = unitTable[unit:Name()].mtype
-	local law = {}
-	if mtype == "veh" or mtype == "bot" or mtype == "hov" or mtype == "amp" then
-		law["land"] = true
-	end
-	if mtype == "air" then
-		law["air"] = true
-	end
-	if mtype == "sub" or mtype == "shp" or mtype == "hov" or mtype == "amp" then
-		law["water"] = true
-	end
-	return law
-end
-]]--
-
 -- need to change because: amphibs can't be hurt by non-submerged threats in water, and can't be hurt by anything but ground on land
 local function CellValueThreat(unitName, cell)
 	if cell == nil then return 0, 0 end
-	local gas
+	local gas, weapons
 	if unitName == "ALL" then
 		gas = { ground = true, air = true, submerged = true }
+		weapons = { "ground", "air", "submerged" }
 		unitName = "nothing"
 	else
 		gas = WhatHurtsUnit(unitName, nil, cell.pos)
+		weapons = UnitWeaponLayerList(unitName)
 	end
-	local weapons = UnitWeaponLayerList(unitName)
 	local threat = 0
 	local value = 0
 	local notThreat = 0
@@ -440,8 +424,6 @@ local function UpdateEnemies()
 	-- where is/are the party/parties tonight?
 	local highestValue = minNukeValue
 	local highestValueCell
-	-- local mostThreatening = { ground = 0, air = 0, submerged = 0 }
-	-- local mostThreateningCells = { }
 	for unitID, e in pairs(ai.knownEnemies) do
 		local los = e.los
 		local ghost = e.ghost
@@ -496,7 +478,13 @@ local function UpdateEnemies()
 						local health = e.health
 						for hurtGAS, hit in pairs(hurtBy) do
 							cell.values[groundAirSubmerged][hurtGAS] = cell.values[groundAirSubmerged][hurtGAS] + value
-							cell.targets[groundAirSubmerged][hurtGAS] = e
+							if cell.targets[groundAirSubmerged][hurtGAS] == nil then
+								cell.targets[groundAirSubmerged][hurtGAS] = e
+							else
+								if value > Value(cell.targets[groundAirSubmerged][hurtGAS].unitName) then
+									cell.targets[groundAirSubmerged][hurtGAS] = e
+								end
+							end
 							if health < vulnerableHealth then
 								cell.vulnerables[groundAirSubmerged][hurtGAS] = e
 							end
@@ -505,7 +493,16 @@ local function UpdateEnemies()
 								cell.lastDisarmThreat = threatLayers.ground.threat
 							end
 						end
-						if ut.bigExplosion then cell.explosionValue = cell.explosionValue + bomberExplosionValue end
+						if ut.bigExplosion then
+							cell.explosionValue = cell.explosionValue + bomberExplosionValue
+							if cell.explosiveTarget == nil then
+								cell.explosiveTarget = e
+							else
+								if value > Value(cell.explosiveTarget.unitName) then
+									cell.explosiveTarget = e
+								end
+							end
+						end
 					end
 				end
 				cell.value = cell.value + value
@@ -570,6 +567,21 @@ local function UpdateWrecks()
 			end
 		end
 	end
+end
+
+local function UpdateFronts()
+	local highestCells = {}
+	local highestResponse = { ground = 0, air = 0, submerged = 0 }
+	for i = 1, #cellList do
+		local cell = cellList[i]
+		for groundAirSubmerged, response in pairs(cell.response) do
+			if response > highestResponse[groundAirSubmerged] then
+				highestResponse[groundAirSubmerged] = response
+				highestCells[groundAirSubmerged] = cell
+			end
+		end
+	end
+	ai.turtlehandler:FindFronts(highestCells)
 end
 
 local function UpdateDebug()
@@ -666,6 +678,7 @@ function TargetHandler:UpdateMap()
 		-- UpdateFriendlies()
 		UpdateBadPositions()
 		UpdateWrecks()
+		UpdateFronts()
 		UpdateDebug()
 		self.lastUpdateFrame = game:Frame()
 	end
@@ -893,26 +906,15 @@ function TargetHandler:GetBestBomberTarget(torpedo)
 	if best then
 		local bestTarget
 		bestValue = 0
-		local targets
-		if torpedo then
-			targets = best.targets.air.submerged
-		else
-			targets = best.targets.air.ground
-		end
-		for i, e in pairs(targets) do
-			local name = e.unitName
-			local value = Value(name)
-			if name then
-				if unitTable[name] then
-					if unitTable[name].bigExplosion then value = value + bomberExplosionValue end
-				end
-			end
-			if value > bestValue then
-				bestTarget = e
-				bestValue = value
+		local target = best.explosiveTarget
+		if target == nil then
+			if torpedo then
+				target = best.targets.air.submerged
+			else
+				target = best.targets.air.ground
 			end
 		end
-		return bestTarget
+		return target
 	end
 end
 

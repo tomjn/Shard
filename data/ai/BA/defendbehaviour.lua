@@ -17,8 +17,9 @@ DefendBehaviour = class(Behaviour)
 
 -- not does it defend, but is it a dedicated defender
 function IsDefender(unit)
+local un = unit:Internal():Name()
 	for i,name in ipairs(defenderList) do
-		if name == unit:Internal():Name() then
+		if name == un then
 			return true
 		end
 	end
@@ -26,8 +27,11 @@ function IsDefender(unit)
 end
 
 function DefendBehaviour:Init()
+	self.moving = {}
 	self.active = false
 	self.name = self.unit:Internal():Name()
+	self.tough = battleList[self.name] or breakthroughList[self.name]
+	self.aa = unitTable[self.name].airRange > 0
 	self.mtype = unitTable[self.name].mtype
 	for i, name in pairs(raiderList) do
 		if name == self.name then
@@ -75,6 +79,7 @@ function DefendBehaviour:Update()
 			if targetPos == nil then return end
 			targetPos.y = 0
 			local guardDistance = self.target.guardDistance
+			if not self.tough then guardDistance = guardDistance * 0.33 end
 			local guardPos = RandomAway(targetPos, guardDistance, false, self.guardAngle)
 			local safe = ai.defendhandler:DefendeeSafe(self.target)
 			-- if targetPos.y > 100 then game:SendToConsole(targetPos.y .. " " .. type(self.target.behaviour)) end
@@ -84,24 +89,29 @@ function DefendBehaviour:Update()
 			if self.perpendicular then
 				guardPos = RandomAway(guardPos, self.perpDist, false, self.perpendicular)
 			end
-			if dist > 500 and behaviour ~= nil then
-				if self.guarding ~= behaviour.id then
-					-- move toward mobile defendees that are far away with guard order
-					CustomCommand(self.unit:Internal(), CMD_GUARD, {behaviour.id})
-					self.guarding = behaviour.id
-				end
-			elseif not safe then
-				self.guarding = nil
-				if dist < 200 then
-					-- just keep going after enemies near turtles
-				else
+			if behaviour ~= nil then
+				if dist > 500 then
+					if self.guarding ~= behaviour.id then
+						-- move toward mobile defendees that are far away with guard order
+						CustomCommand(self.unit:Internal(), CMD_GUARD, {behaviour.id})
+						self.guarding = behaviour.id
+					end
+				elseif not safe then
+					if dist > 250 then
+						unit:Move(guardPos)
+						self.guarding = nil
+					end
+				elseif dist > 25 then
 					unit:Move(guardPos)
+					self.guarding = nil
 				end
+				self.moving = {}
 			else
 				self.guarding = nil
-				if dist > 25 then
-					-- keep near mobile units and buildings not yet in danger
+				if self.moving.x ~= targetPos.x or self.moving.z ~= targetPos.z then
 					unit:Move(guardPos)
+					self.moving.x = targetPos.x
+					self.moving.z = targetPos.z
 				end
 			end
 			self.unit:ElectBehaviour()

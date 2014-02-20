@@ -88,6 +88,7 @@ function LosHandler:Init()
 	ai.enemyList = {}
 	ai.blips = {}
 	ai.lastLOSUpdate = 0
+	ai.friendlyTeamID = {}
 	self:Update()
 end
 
@@ -104,9 +105,12 @@ function LosHandler:Update()
 		-- if the unit is a building, we know it's LOS contribution forever
 		-- if the unit moves, the behaviours can be polled rather than GetFriendlies()
 		-- except for allies' units
-		local ownUnits = game:GetFriendlies()
-		if ownUnits ~= nil then
-			for _, unit in pairs(ownUnits) do
+		local friendlies = game:GetFriendlies()
+		ai.friendlyTeamID = {}
+		ai.friendlyTeamID[game:GetTeamID()] = true
+		if friendlies ~= nil then
+			for _, unit in pairs(friendlies) do
+				ai.friendlyTeamID[unit:Team()] = true -- because I can't get allies' teamIDs directly
 				local uname = unit:Name()
 				local utable = unitTable[uname]
 				local upos = unit:GetPosition()

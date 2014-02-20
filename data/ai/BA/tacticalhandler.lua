@@ -1,6 +1,8 @@
 require "common"
 
-local DebugEnabled = true
+-- keeps track of where enemy units seem to be moving
+
+local DebugEnabled = false
 local debugPlotTacticalFile
 
 local function EchoDebug(inStr)
@@ -36,6 +38,7 @@ function TacticalHandler:Init()
 	self.unitSamples = {}
 	self.threatLayerNames = { "ground", "air", "submerged" }
 	ai.incomingThreat = 0
+	if DebugEnabled then debugPlotTacticalFile = assert(io.open("debugtacticalplot",'w'), "Unable to write debugtacticalplot") end
 end
 
 function TacticalHandler:NewEnemyPositions(positions)
@@ -80,21 +83,21 @@ function TacticalHandler:AverageSamples()
 	local f = game:Frame()
 	local since = f - self.lastAverageFrame
 	if since < 300 then return end
+	if DebugEnabled then debugPlotTacticalFile:close() end
 	if DebugEnabled then debugPlotTacticalFile = assert(io.open("debugtacticalplot",'w'), "Unable to write debugtacticalplot") end
-	ai.turtlehandler:ResetThreatForecast()
+	-- ai.turtlehandler:ResetThreatForecast()
 	for unitID, samples in pairs(self.unitSamples) do
 		local e = self.lastKnownPositions[unitID]
 		if e then
 			local vx, vz = self:AverageUnitSamples(samples)
 			self.lastKnownVectors[unitID] = { vx = vx, vz = vz } -- so that anyone using this unit table as a target will be able to lead a little
 			PlotDebug(e.position.x, e.position.z, vx, vz, "THREAT")
-			ai.turtlehandler:AddThreatVector(e, vx, vz)
+			-- ai.turtlehandler:AddThreatVector(e, vx, vz)
 		end
 	end
-	ai.turtlehandler:AlertDangers()
+	-- ai.turtlehandler:AlertDangers()
 	self.unitSamples = {}
 	self.lastAverageFrame = f
-	if DebugEnabled then debugPlotTacticalFile:close() end
 end
 
 -- for raider and other targetting export
