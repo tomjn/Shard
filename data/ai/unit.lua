@@ -88,6 +88,9 @@ function Unit:ActiveBehaviour()
 end
 
 function Unit:ElectBehaviour()
+	if self.behaviours == nil then --probably we are dead.
+		return
+	end
 	local bestbeh = nil
 	local bestscore = -1
 	if #self.behaviours > 0 then
