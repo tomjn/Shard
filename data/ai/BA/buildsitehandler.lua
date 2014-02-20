@@ -208,7 +208,7 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 		local searchPos = api.Position()
 		searchPos.x = position.x + searchRadius * math.sin(searchAngle)
 		searchPos.z = position.z + searchRadius * math.cos(searchAngle)
-		searchPos.y = position.y
+		searchPos.y = position.y + 0
 		-- EchoDebug(math.ceil(searchPos.x) .. ", " .. math.ceil(searchPos.z))
 		pos = map:FindClosestBuildSite(unitTypeToBuild, searchPos, searchRadius / 2, minDistance)
 	else
@@ -254,24 +254,24 @@ function BuildSiteHandler:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, pos
 	if direction == nil then direction = 1 end
 	if i == nil then i = 0 end
 	-- have to set it this way, otherwise both just point to the same set of data, and originalPosition doesn't stay the same
-	local originalPosition = api.Position()
-	originalPosition.x = position.x * 1
-	originalPosition.y = position.y * 1
-	originalPosition.z = position.z * 1
+	local searchPos = api.Position()
+	searchPos.x = position.x + 0
+	searchPos.y = position.y + 0
+	searchPos.z = position.z + 0
 
 	EchoDebug("new spiral search")
 	while segmentSize < 8 do
 		-- EchoDebug(i .. " " .. direction .. " " .. segmentSize .. " : " .. math.ceil(position.x) .. " " .. math.ceil(position.z))
 		if direction == 1 then
-			position.x = position.x + dist
+			searchPos.x = searchPos.x + dist
 		elseif direction == 2 then
-			position.z = position.z + dist
+			searchPos.z = searchPos.z + dist
 		elseif direction == 3 then
-			position.x = position.x - dist
+			searchPos.x = searchPos.x - dist
 		elseif direction == 4 then
-			position.z = position.z - dist
+			searchPos.z = searchPos.z - dist
 		end
-		pos = self:CheckBuildPos(position, unitTypeToBuild, builder, originalPosition)
+		pos = self:CheckBuildPos(searchPos, unitTypeToBuild, builder, position)
 		if pos ~= nil then break end
 		i = i + 1
 		if i == segmentSize then

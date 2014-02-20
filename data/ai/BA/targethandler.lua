@@ -138,14 +138,15 @@ end
 -- need to change because: amphibs can't be hurt by non-submerged threats in water, and can't be hurt by anything but ground on land
 local function CellValueThreat(unitName, cell)
 	if cell == nil then return 0, 0 end
-	local gas
+	local gas, weapons
 	if unitName == "ALL" then
 		gas = { ground = true, air = true, submerged = true }
+		weapons = { "ground", "air", "submerged" }
 		unitName = "nothing"
 	else
 		gas = WhatHurtsUnit(unitName, nil, cell.pos)
+		weapons = UnitWeaponLayerList(unitName)
 	end
-	local weapons = UnitWeaponLayerList(unitName)
 	local threat = 0
 	local value = 0
 	local notThreat = 0

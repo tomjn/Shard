@@ -217,7 +217,7 @@ function DefendHandler:AssignAll()
 	end
 	if #defendersToAssign ~= 0 then
 		for i, tf in pairs(notDefended) do
-			local defendee = self.defendees[i]
+			local defendee = self.frontDefendee or self.defendees[i]
 			if #defendersToAssign ~= 0 then
 				local dfndbehaviour = table.remove(defendersToAssign)
 				table.insert(defendee.defenders, dfndbehaviour)

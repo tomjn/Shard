@@ -1,5 +1,7 @@
 require "common"
 
+-- Sends units out of factories and holds units in place who are being repaired after resurrection
+
 BootBehaviour = class(Behaviour)
 
 local DebugEnabled = false
@@ -75,40 +77,41 @@ function BootBehaviour:Update()
 				self.factory = nil
 				self.unit:ElectBehaviour()
 			elseif self.active and self.lastOrderFrame and self.lastExitSide then
-				-- fifteen seconds after the first attempt, try a different side
-				if f > self.lastOrderFrame + 450 then
-					if self.factory.sides ~= 1 then
-						if self.factory.sides == 2 then
-							if self.lastExitSide == "south" then
-								self:ExitFactory("north")
-							elseif self.lastExitSide == "north" then
-								self:ExitFactory("south")
-							end
-						elseif self.factory.sides == 3 then
-							if self.lastExitSide == "south" then
-								self:ExitFactory("east")
-							elseif self.lastExitSide == "east" then
-								self:ExitFactory("west")
-							elseif self.lastExitSide == "west" then
-								self:ExitFactory("south")
-							end
-						elseif self.factory.sides == 4 then
-							if self.lastExitSide == "south" then
-								self:ExitFactory("north")
-							elseif self.lastExitSide == "north" then
-								self:ExitFactory("east")
-							elseif self.lastExitSide == "east" then
-								self:ExitFactory("west")
-							elseif self.lastExitSide == "west" then
-								self:ExitFactory("south")
-							end
+				-- twelve seconds after the first attempt, try a different side
+				-- if there's only one side, try it again
+				if f > self.lastOrderFrame + 360 then
+					if self.factory.sides == 1 then
+						self:ExitFactory("south")
+					elseif self.factory.sides == 2 then
+						if self.lastExitSide == "south" then
+							self:ExitFactory("north")
+						elseif self.lastExitSide == "north" then
+							self:ExitFactory("south")
+						end
+					elseif self.factory.sides == 3 then
+						if self.lastExitSide == "south" then
+							self:ExitFactory("east")
+						elseif self.lastExitSide == "east" then
+							self:ExitFactory("west")
+						elseif self.lastExitSide == "west" then
+							self:ExitFactory("south")
+						end
+					elseif self.factory.sides == 4 then
+						if self.lastExitSide == "south" then
+							self:ExitFactory("north")
+						elseif self.lastExitSide == "north" then
+							self:ExitFactory("east")
+						elseif self.lastExitSide == "east" then
+							self:ExitFactory("west")
+						elseif self.lastExitSide == "west" then
+							self:ExitFactory("south")
 						end
 					end
 				end
 			end
 		end
 	else
-		if f > self.lastInFactoryCheck + 150 then
+		if f > self.lastInFactoryCheck + 300 then
 			-- units (especially construction units) can still get stuck in factories long after they're built
 			self.lastInFactoryCheck = f
 			self:FindMyFactory()
@@ -185,7 +188,7 @@ function BootBehaviour:ExitFactory(side)
 		local u = self.unit:Internal()
 		local pos = self.factory.position
 		local out = api.Position()
-		out.x = pos.x
+		out.x = pos.x + 0
 		out.y = pos.y + outX
 		out.z = pos.z + outZ
 		if out.x > ai.maxElmosX - 1 then
