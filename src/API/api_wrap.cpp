@@ -6119,37 +6119,7 @@ fail:
 }
 
 
-static int _wrap_IGame_GetEnemies__SWIG_0(lua_State* L) {
-  int SWIG_arg = 0;
-  IGame *arg1 = (IGame *) 0 ;
-  bool arg2 ;
-  std::vector< IUnit * > result;
-  
-  SWIG_check_num_args("IGame::GetEnemies",2,2)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IGame::GetEnemies",1,"IGame *");
-  if(!lua_isboolean(L,2)) SWIG_fail_arg("IGame::GetEnemies",2,"bool");
-  
-  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IGame,0))){
-    SWIG_fail_ptr("IGame_GetEnemies",1,SWIGTYPE_p_IGame);
-  }
-  
-  arg2 = (lua_toboolean(L, 2)!=0);
-  result = (arg1)->GetEnemies(arg2);
-  {
-    std::vector< IUnit * > * resultptr = new std::vector< IUnit * >((const std::vector< IUnit * > &) result);
-    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_std__vectorT_IUnit_p_t,1); SWIG_arg++;
-  }
-  return SWIG_arg;
-  
-  if(0) SWIG_fail;
-  
-fail:
-  lua_error(L);
-  return SWIG_arg;
-}
-
-
-static int _wrap_IGame_GetEnemies__SWIG_1(lua_State* L) {
+static int _wrap_IGame_GetEnemies(lua_State* L) {
   int SWIG_arg = 0;
   IGame *arg1 = (IGame *) 0 ;
   std::vector< IUnit * > result;
@@ -6176,86 +6146,7 @@ fail:
 }
 
 
-static int _wrap_IGame_GetEnemies(lua_State* L) {
-  int argc;
-  int argv[3]={
-    1,2,3
-  };
-  
-  argc = lua_gettop(L);
-  if (argc == 1) {
-    int _v;
-    {
-      void *ptr;
-      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IGame, 0)) {
-        _v = 0;
-      } else {
-        _v = 1;
-      }
-    }
-    if (_v) {
-      return _wrap_IGame_GetEnemies__SWIG_1(L);
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    {
-      void *ptr;
-      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IGame, 0)) {
-        _v = 0;
-      } else {
-        _v = 1;
-      }
-    }
-    if (_v) {
-      {
-        _v = lua_isboolean(L,argv[1]);
-      }
-      if (_v) {
-        return _wrap_IGame_GetEnemies__SWIG_0(L);
-      }
-    }
-  }
-  
-  lua_pushstring(L,"Wrong arguments for overloaded function 'IGame_GetEnemies'\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    IGame::GetEnemies(bool)\n"
-    "    IGame::GetEnemies()\n");
-  lua_error(L);return 0;
-}
-
-
-static int _wrap_IGame_GetFriendlies__SWIG_0(lua_State* L) {
-  int SWIG_arg = 0;
-  IGame *arg1 = (IGame *) 0 ;
-  bool arg2 ;
-  std::vector< IUnit * > result;
-  
-  SWIG_check_num_args("IGame::GetFriendlies",2,2)
-  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IGame::GetFriendlies",1,"IGame *");
-  if(!lua_isboolean(L,2)) SWIG_fail_arg("IGame::GetFriendlies",2,"bool");
-  
-  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IGame,0))){
-    SWIG_fail_ptr("IGame_GetFriendlies",1,SWIGTYPE_p_IGame);
-  }
-  
-  arg2 = (lua_toboolean(L, 2)!=0);
-  result = (arg1)->GetFriendlies(arg2);
-  {
-    std::vector< IUnit * > * resultptr = new std::vector< IUnit * >((const std::vector< IUnit * > &) result);
-    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_std__vectorT_IUnit_p_t,1); SWIG_arg++;
-  }
-  return SWIG_arg;
-  
-  if(0) SWIG_fail;
-  
-fail:
-  lua_error(L);
-  return SWIG_arg;
-}
-
-
-static int _wrap_IGame_GetFriendlies__SWIG_1(lua_State* L) {
+static int _wrap_IGame_GetFriendlies(lua_State* L) {
   int SWIG_arg = 0;
   IGame *arg1 = (IGame *) 0 ;
   std::vector< IUnit * > result;
@@ -6279,55 +6170,6 @@ static int _wrap_IGame_GetFriendlies__SWIG_1(lua_State* L) {
 fail:
   lua_error(L);
   return SWIG_arg;
-}
-
-
-static int _wrap_IGame_GetFriendlies(lua_State* L) {
-  int argc;
-  int argv[3]={
-    1,2,3
-  };
-  
-  argc = lua_gettop(L);
-  if (argc == 1) {
-    int _v;
-    {
-      void *ptr;
-      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IGame, 0)) {
-        _v = 0;
-      } else {
-        _v = 1;
-      }
-    }
-    if (_v) {
-      return _wrap_IGame_GetFriendlies__SWIG_1(L);
-    }
-  }
-  if (argc == 2) {
-    int _v;
-    {
-      void *ptr;
-      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_IGame, 0)) {
-        _v = 0;
-      } else {
-        _v = 1;
-      }
-    }
-    if (_v) {
-      {
-        _v = lua_isboolean(L,argv[1]);
-      }
-      if (_v) {
-        return _wrap_IGame_GetFriendlies__SWIG_0(L);
-      }
-    }
-  }
-  
-  lua_pushstring(L,"Wrong arguments for overloaded function 'IGame_GetFriendlies'\n"
-    "  Possible C/C++ prototypes are:\n"
-    "    IGame::GetFriendlies(bool)\n"
-    "    IGame::GetFriendlies()\n");
-  lua_error(L);return 0;
 }
 
 
