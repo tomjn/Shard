@@ -860,9 +860,8 @@ function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignor
 	if enemyBaseCell and not ignoreValue then
 		local dist = Distance(position, enemyBaseCell.pos)
 		if dist < range then
-			local value, threat = CellValueThreat("ALL", cell)
-			local valuethreat = value + threat 
-			return enemyBaseCell, valuethreat
+			local value = cell.values.ground.ground + cell.values.air.ground + cell.values.submerged.ground
+			return enemyBaseCell, value + cell.response.ground
 		end
 	end
 	local best
@@ -871,10 +870,10 @@ function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignor
 	for i, cell in pairs(cellList) do
 		local dist = Distance(position, cell.pos)
 		if dist < range then
-			local value, threat = CellValueThreat("ALL", cell)
+			local value = cell.values.ground.ground + cell.values.air.ground + cell.values.submerged.ground
 			local valuethreat = 0
 			if not ignoreValue then valuethreat = valuethreat + value end
-			if not ignoreThreat then valuethreat = valuethreat + threat end
+			if not ignoreThreat then valuethreat = valuethreat + cell.response.ground end
 			if valuethreat > bestValueThreat then
 				best = cell
 				bestValueThreat = valuethreat
@@ -1042,11 +1041,12 @@ function TargetHandler:IsSafePosition(position, unit, threshold)
 	local uname = unit:Name()
 	if uname == nil then game:SendToConsole("nil unit name") end
 	local cell = GetCellHere(position)
+	if cell == nil then return 0, 0 end
 	local value, threat = CellValueThreat(uname, cell)
 	if threshold then
-		return threat < unitTable[uname].metalCost * threshold
+		return threat < unitTable[uname].metalCost * threshold, cell.response
 	else
-		return threat == 0
+		return threat == 0, cell.response
 	end
 end
 

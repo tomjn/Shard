@@ -230,7 +230,7 @@ function TurtleHandler:RemoveOrgan(unitID)
 				table.remove(turtle.organs, oi)
 				if #turtle.organs == 0 then
 					emptyTurtle = turtle
-					ai.defendhandler:RemoveDefendee(nil, turtle)
+					ai.defendhandler:RemoveWard(nil, turtle)
 					table.remove(self.turtles, ti)
 				end
 				foundOrgan = true
@@ -371,7 +371,7 @@ function TurtleHandler:AddTurtle(position, water, priority)
 	end
 	table.insert(self.turtles, turtle)
 	self.totalPriority = self.totalPriority + priority
-	ai.defendhandler:AddDefendee(nil, turtle)
+	ai.defendhandler:AddWard(nil, turtle)
 	return turtle
 end
 
@@ -723,30 +723,43 @@ function TurtleHandler:AlertDangers()
 end
 
 function TurtleHandler:FindFronts(troublingCells)
-	local cell = troublingCells.ground
-	if cell == nil then return end
-	local nearestDist = 100000
-	local nearestTurtle
-	for ti, turtle in pairs(self.turtles) do
-		turtle.threatForecastAngle = nil
-		turtle.front = nil
-		if turtle.priority > 1 then
-			local dist = Distance(turtle.position, cell.pos)
-			if dist < nearestDist then
-				nearestDist = dist
-				nearestTurtle = turtle
+	for landWater = 1, 2 do
+		local cell
+		if landWater == 1 then
+			cell = troublingCells.ground
+		else
+			cell = troublingCells.submerged
+		end
+		local water = landWater == 2
+		if cell ~= nil then
+			local nearestDist = 100000
+			local nearestTurtle
+			for ti, turtle in pairs(self.turtles) do
+				turtle.threatForecastAngle = nil
+				turtle.front = nil
+				if water == turtle.water then
+					if turtle.priority > 1 then
+						local dist = Distance(turtle.position, cell.pos)
+						if dist < nearestDist then
+							nearestDist = dist
+							nearestTurtle = turtle
+						end
+					end
+				end
+			end
+			if nearestTurtle ~= nil then
+				local turtle = nearestTurtle
+				turtle.threatForecastAngle = AngleAtoB(turtle.position.x, turtle.position.z, cell.pos.x, cell.pos.z)
+				turtle.front = true
+				local GAS
+				if landWater == 1 then GAS = "ground" else GAS = "submerged" end
+				ai.defendhandler:Danger(nil, turtle, GAS)
+				ai.incomingThreat = cell.response[GAS]
+				self:PlotAllDebug()
+			else
+				ai.incomingThreat = 0
 			end
 		end
-	end
-	if nearestTurtle ~= nil then
-		local turtle = nearestTurtle
-		turtle.threatForecastAngle = AngleAtoB(turtle.position.x, turtle.position.z, cell.pos.x, cell.pos.z)
-		turtle.front = true
-		ai.defendhandler:Danger(nil, turtle)
-		ai.incomingThreat = cell.response.ground
-		self:PlotAllDebug()
-	else
-		ai.incomingThreat = 0
 	end
 end
 

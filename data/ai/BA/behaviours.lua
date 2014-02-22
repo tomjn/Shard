@@ -3,7 +3,7 @@ require "taskqueuebehaviour"
 require "attackerbehaviour"
 require "raiderbehaviour"
 require "bomberbehaviour"
-require "runfromattack"
+require "wardbehaviour"
 require "mexupgradebehaviour"
 require "assistbehaviour"
 require "reclaimbehaviour"
@@ -34,11 +34,11 @@ function defaultBehaviours(unit)
 
 	if nanoTurretList[un] then
 		table.insert(b, AssistBehaviour)
-		table.insert(b, RunFromAttackBehaviour)
+		table.insert(b, WardBehaviour)
 	end
 
 	if unitTable[un].isBuilding then
-		table.insert(b, RunFromAttackBehaviour) --tells defending units to rush to threatened buildings
+		table.insert(b, WardBehaviour) --tells defending units to rush to threatened buildings
 		if nukeList[un] then
 			table.insert(b, NukeBehaviour)
 		elseif antinukeList[un] then
@@ -73,11 +73,11 @@ function defaultBehaviours(unit)
 				table.insert(b, ReclaimBehaviour)
 			end
 		end
-		table.insert(b, RunFromAttackBehaviour)
+		table.insert(b, WardBehaviour)
 	elseif IsReclaimer(unit) then
 		table.insert(b, ReclaimBehaviour)
 		table.insert(b, DefendBehaviour)
-		table.insert(b, RunFromAttackBehaviour)
+		table.insert(b, WardBehaviour)
 	else
 		if IsAttacker(unit) then
 			table.insert(b, AttackerBehaviour)
@@ -96,7 +96,7 @@ function defaultBehaviours(unit)
 		end
 		if IsScout(unit) then
 			table.insert(b, ScoutBehaviour)
-			table.insert(b, RunFromAttackBehaviour)
+			table.insert(b, WardBehaviour)
 		end
 		if IsDefender(unit) then
 			table.insert(b, DefendBehaviour)

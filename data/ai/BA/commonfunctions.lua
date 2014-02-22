@@ -27,6 +27,7 @@ local unitThreatLayers = {}
 local whatHurtsUnit = {}
 local whatHurtsMtype = {}
 local unitWeaponLayers = {}
+local unitWeaponMtypes = {}
 
 local quadX = { -1, 1, -1, 1 }
 local quadZ = { -1, -1, 1, 1 }
@@ -238,6 +239,32 @@ function UnitWeaponLayerList(unitName)
 	end
 	unitWeaponLayers[unitName] = weaponLayers
 	return weaponLayers
+end
+
+function UnitWeaponMtypeList(unitName)
+	if unitName == nil then return {} end
+	if unitName == DummyUnitName then return {} end
+	local mtypes = unitWeaponMtypes[unitName]
+	if mtypes then return mtypes end
+	local utable = unitTable[unitName]
+	mtypes = {}
+	if utable.groundRange > 0 then
+		table.insert(mtypes, "veh")
+		table.insert(mtypes, "bot")
+		table.insert(mtypes, "amp")
+		table.insert(mtypes, "hov")
+		table.insert(mtypes, "shp")
+	end
+	if utable.airRange > 0 then
+		table.insert(mtypes, "air")
+	end
+	if utable.submergedRange > 0 then
+		table.insert(mtypes, "sub")
+		table.insert(mtypes, "shp")
+		table.insert(mtypes, "amp")
+	end
+	unitWeaponMtypes[unitName] = mtypes
+	return mtypes
 end
 
 function WhatHurtsUnit(unitName, mtype, position)

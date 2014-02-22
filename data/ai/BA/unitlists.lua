@@ -44,7 +44,7 @@ mobilityEffeciencyMultiplier = {
 	shp = 1,
 	bot = 0.9,
 	sub = 0.9,
-	hov = 0.65,
+	hov = 0.7,
 	amp = 0.4,
 	air = 0.55,
 }
@@ -549,7 +549,7 @@ FactoryUnitName = "buildfactory"
 UWMetalSpotCheckUnit = "coruwmex"
 
 mobUnitName = {}
-mobUnitName["veh"] = "armflash"
+mobUnitName["veh"] = "armllt" -- this looks wrong, but it gives us a better picture of where vehicles can go
 mobUnitName["bot"] = "corck"
 mobUnitName["amp"] = "cormuskrat"
 mobUnitName["hov"] = "corsh"
