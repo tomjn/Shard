@@ -85,6 +85,7 @@ CTestAI::CTestAI(IGame* game)
 	luaopen_api(this->L);
 	
 	unittype = SWIG_TypeQuery(this->L,"IUnit *");
+	damagePtr = SWIG_TypeQuery(this->L, "IDamage::Ptr *");
 	// Push in our IGame pointer
 	swig_type_info* type = SWIG_TypeQuery(this->L,"IGame *");
 	SWIG_NewPointerObj(this->L,game,type,0);
@@ -238,12 +239,14 @@ void CTestAI::UnitMoveFailed(IUnit* unit){
 	}
 }
 
-void CTestAI::UnitDamaged(IUnit* unit, IUnit* attacker){
+void CTestAI::UnitDamaged(IUnit* unit, IUnit* attacker, IDamage::Ptr damage){
 	lua_getglobal(this->L, "ai");
 	lua_getfield(this->L, -1, "UnitDamaged");
 	lua_getglobal(this->L, "ai");
 	SWIG_NewPointerObj(this->L,unit,unittype,0);
 	SWIG_NewPointerObj(this->L,attacker,unittype,0);
+	IDamage::Ptr* ptrptr = new IDamage::Ptr(damage);
+	SWIG_NewPointerObj(this->L,ptrptr,damagePtr,1);
 	if(lua_isfunction(this->L,-4)){
 		lua_epcall(this->L, 3);
 	}

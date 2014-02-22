@@ -67,7 +67,7 @@ function LowEnergyBehaviour:UnitDead(unit)
 	--
 end
 
-function LowEnergyBehaviour:UnitDamaged(unit,attacker)
+function LowEnergyBehaviour:UnitDamaged(unit,attacker,damage)
 
 end
 

@@ -62,11 +62,11 @@ function UnitHandler:UnitDead(engineunit)
 	self.myUnits[engineunit:ID()] = nil
 end
 
-function UnitHandler:UnitDamaged(engineunit,attacker)
+function UnitHandler:UnitDamaged(engineunit,attacker,damage)
 	local u = self:AIRepresentation(engineunit)
 	local a = self:AIRepresentation(attacker)
 	for k,v in pairs(self.myUnits) do
-		v:UnitDamaged(u,a)
+		v:UnitDamaged(u,a,damage)
 	end
 end
 

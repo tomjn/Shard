@@ -599,7 +599,7 @@ local function UpdateDebug()
 end
 
 --[[
-function TargetHandler:UnitDamaged(unit, attacker)
+function TargetHandler:UnitDamaged(unit, attacker,damage)
 	-- even if the attacker can't be seen, human players know what weapons look like
 	-- but attacker is nil if it's an enemy unit, so this is useless
 	if attacker ~= nil then

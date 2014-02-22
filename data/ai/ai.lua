@@ -88,15 +88,16 @@ function AI:UnitIdle(engineunit)
 	end
 end
 
-function AI:UnitDamaged(engineunit,engineattacker)
+function AI:UnitDamaged(engineunit,engineattacker,enginedamage)
 	if self.gameend == true then
 		return
 	end
 	if engineunit == nil then
 		return
 	end
+	game:SendToConsole("UnitDamage for " .. enginedamage:Damage())
 	for i,m in ipairs(self.modules) do
-		m:UnitDamaged(engineunit,engineattacker)
+		m:UnitDamaged(engineunit,engineattacker,enginedamage)
 	end
 end
 

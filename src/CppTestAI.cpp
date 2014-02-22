@@ -160,6 +160,8 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				game->SendToConsole("shard-runtime warning: unitdamaged evt->unit < 0");
 				break;
 			}
+			CSpringDamage::Ptr damage(new CSpringDamage(game, callback, evt));
+
 			CSpringUnit* u = game->GetUnitById(evt->unit);
 			if (!u) {
 				u = game->CreateUnit(evt->unit);
@@ -174,7 +176,7 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 				}
 			}
 			if(u) {
-				game->Me()->UnitDamaged(u,a);
+				game->Me()->UnitDamaged(u,a,damage);
 			} else {
 				if (!u)
 					game->SendToConsole("shard-runtime warning: attacked unit not found.");

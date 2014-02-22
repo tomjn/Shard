@@ -61,9 +61,9 @@ function Unit:UnitDead(unit)
 end
 
 
-function Unit:UnitDamaged(unit,attacker)
+function Unit:UnitDamaged(unit,attacker,damage)
 	for k,v in pairs(self.behaviours) do
-		v:UnitDamaged(unit,attacker)
+		v:UnitDamaged(unit,attacker,damage)
 	end
 end
 

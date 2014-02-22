@@ -49,7 +49,7 @@ function EngineerTurretBehaviour:UnitDead(unit)
 	--
 end
 
-function EngineerTurretBehaviour:UnitDamaged(unit,attacker)
+function EngineerTurretBehaviour:UnitDamaged(unit,attacker,damage)
 	if unit:Internal():ID() == self.unit:Internal():ID() then
 		if not self:IsActive() then
 			self.underfire = true

@@ -28,7 +28,7 @@ public:
 
 	virtual void UnitGiven(IUnit* unit);
 
-	virtual void UnitDamaged(IUnit* unit, IUnit* attacker);
+	virtual void UnitDamaged(IUnit* unit, IUnit* attacker, IDamage::Ptr damage);
 	
 	lua_State *L;
 
@@ -39,6 +39,7 @@ public:
 protected:
 
 	swig_type_info* unittype;
+	swig_type_info* damagePtr;
 	bool LoadLuaFile(std::string filename);
 
 	IGame* game;
