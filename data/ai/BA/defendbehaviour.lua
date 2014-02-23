@@ -17,7 +17,7 @@ DefendBehaviour = class(Behaviour)
 
 -- not does it defend, but is it a dedicated defender
 function IsDefender(unit)
-local un = unit:Internal():Name()
+	local un = unit:Internal():Name()
 	for i,name in ipairs(defenderList) do
 		if name == un then
 			return true
@@ -28,11 +28,23 @@ end
 
 function DefendBehaviour:Init()
 	self.moving = {}
+	self.unmoved = 0
+	self.lastPos = self.unit:Internal():GetPosition()
 	self.active = false
+	self.id = self.unit:Internal():ID()
 	self.name = self.unit:Internal():Name()
+	local ut = unitTable[self.name]
 	self.tough = battleList[self.name] or breakthroughList[self.name]
-	self.aa = unitTable[self.name].airRange > 0
+	self.isDefender = IsDefender(self.unit)
 	self.mtype = unitTable[self.name].mtype
+	-- defenders need to be sorted into only one type of weapon
+	if ut.groundRange > 0 then
+		self.hits = "ground"
+	elseif ut.submergedRange > 0 then
+		self.hits = "submerged"
+	elseif ut.airRange > 0 then
+		self.hits = "air"
+	end
 	for i, name in pairs(raiderList) do
 		if name == self.name then
 			EchoDebug(self.name .. " is scramble")
@@ -81,7 +93,7 @@ function DefendBehaviour:Update()
 			local guardDistance = self.target.guardDistance
 			if not self.tough then guardDistance = guardDistance * 0.33 end
 			local guardPos = RandomAway(targetPos, guardDistance, false, self.guardAngle)
-			local safe = ai.defendhandler:DefendeeSafe(self.target)
+			local safe = ai.defendhandler:WardSafe(self.target)
 			-- if targetPos.y > 100 then game:SendToConsole(targetPos.y .. " " .. type(self.target.behaviour)) end
 			local unitPos = unit:GetPosition()
 			local dist = Distance(unitPos, guardPos)
@@ -92,7 +104,7 @@ function DefendBehaviour:Update()
 			if behaviour ~= nil then
 				if dist > 500 then
 					if self.guarding ~= behaviour.id then
-						-- move toward mobile defendees that are far away with guard order
+						-- move toward mobile wards that are far away with guard order
 						CustomCommand(self.unit:Internal(), CMD_GUARD, {behaviour.id})
 						self.guarding = behaviour.id
 					end
@@ -108,22 +120,30 @@ function DefendBehaviour:Update()
 				self.moving = {}
 			else
 				self.guarding = nil
-				if self.moving.x ~= targetPos.x or self.moving.z ~= targetPos.z then
+				local boredNow = ai.targethandler:IsSafePosition(unitPos, unit)
+				if self.moving.x ~= targetPos.x or self.moving.z ~= targetPos.z or (self.unmoved > 5 and boredNow) or (not self.tough and dist > self.target.guardDistance) then
 					unit:Move(guardPos)
 					self.moving.x = targetPos.x
 					self.moving.z = targetPos.z
 				end
 			end
+			if self.lastPos.x == unitPos.x and self.lastPos.z == unitPos.z then
+				self.unmoved = self.unmoved + 1
+			else
+				self.unmoved = 0
+			end
+			self.lastPos = api.Position()
+			self.lastPos.x, self.lastPos.z = unitPos.x+0, unitPos.z+0
 			self.unit:ElectBehaviour()
 		end
 	end
 end
 
-function DefendBehaviour:Assign(defendee, angle, dist)
-	if defendee == nil then
+function DefendBehaviour:Assign(ward, angle, dist)
+	if ward == nil then
 		self.target = nil
 	else
-		self.target = defendee
+		self.target = ward
 		self.guardAngle = angle or math.random() * twicePi
 		if dist then
 			self.perpendicular = AngleAdd(angle, halfPi)

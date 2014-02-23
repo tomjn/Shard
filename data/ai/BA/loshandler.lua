@@ -57,29 +57,6 @@ function LosHandler:internalName()
 	return "loshandler"
 end
 
-local function WhatUnitHurts(unitName)
-	if unitName == nil then return {} end
-	if unitName == DummyUnitName then return {} end
-	local utable = unitTable[unitName]
-	local mtypes = {}
-	if utable.groundRange > 0 then
-		table.insert(mtypes, "veh")
-		table.insert(mtypes, "bot")
-		table.insert(mtypes, "amp")
-		table.insert(mtypes, "hov")
-		table.insert(mtypes, "shp")
-	end
-	if utable.airRange > 0 then
-		table.insert(mtypes, "air")
-	end
-	if utable.submergedRange > 0 then
-		table.insert(mtypes, "sub")
-		table.insert(mtypes, "shp")
-		table.insert(mtypes, "amp")
-	end
-	return mtypes
-end
-
 function LosHandler:Init()
 	self.losGrid = {}
 	ai.knownEnemies = {}
@@ -229,7 +206,7 @@ function LosHandler:UpdateEnemies(enemyList)
 				ai.raidhandler:TargetDied(ai.IDsWeAreRaiding[id])
 			end
 			EchoDebug("enemy " .. e.unitName .. " died!")	
-			local mtypes = WhatUnitHurts(e.unitName)
+			local mtypes = UnitWeaponMtypeList(e.unitName)
 			for i, mtype in pairs(mtypes) do
 				ai.raidhandler:NeedMore(mtype)
 				ai.attackhandler:NeedLess(mtype)

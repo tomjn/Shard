@@ -226,17 +226,20 @@ function TaskQueueBehaviour:Init()
 		self.isFactory = true
 		local upos = u:GetPosition()
 		self.position = upos
+		local outmoded = true
 		for i, mtype in pairs(factoryMobilities[self.name]) do
-			if mtype ~= nil then
-				if ai.maphandler:OutmodedFactoryHere(mtype, upos) then
-					self.outmodedFactory = true
-					ai.outmodedFactoryID[self.id] = true
-					ai.outmodedFactories = ai.outmodedFactories + 1
-					ai.outmodedFactories = 1
-					break
-				end
-				if mtype == "air" then self.isAirFactory = true end
+			if not ai.maphandler:OutmodedFactoryHere(mtype, upos) then
+				-- just one non-outmoded mtype will cause the factory to act normally
+				outmoded = false
 			end
+			if mtype == "air" then self.isAirFactory = true end
+		end
+		if outmoded then
+			EchoDebug("outmoded " .. self.name)
+			self.outmodedFactory = true
+			ai.outmodedFactoryID[self.id] = true
+			ai.outmodedFactories = ai.outmodedFactories + 1
+			ai.outmodedFactories = 1
 		end
 	end
 

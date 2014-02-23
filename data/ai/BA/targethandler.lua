@@ -569,19 +569,39 @@ local function UpdateWrecks()
 	end
 end
 
-local function UpdateFronts()
+local function UpdateFronts(number)
 	local highestCells = {}
-	local highestResponse = { ground = 0, air = 0, submerged = 0 }
-	for i = 1, #cellList do
-		local cell = cellList[i]
-		for groundAirSubmerged, response in pairs(cell.response) do
-			if response > highestResponse[groundAirSubmerged] then
-				highestResponse[groundAirSubmerged] = response
-				highestCells[groundAirSubmerged] = cell
+	local highestResponses = {}
+	for n = 1, number do
+		local highestCell = {}
+		local highestResponse = { ground = 0, air = 0, submerged = 0 }
+		for i = 1, #cellList do
+			local cell = cellList[i]
+			for groundAirSubmerged, response in pairs(cell.response) do
+				local okay = true
+				if n > 1 then
+					local highCell = highestCells[n-1][groundAirSubmerged]
+					if highCell ~= nil then
+						if cell == highCell then
+							okay = false
+						elseif response >= highestResponses[n-1][groundAirSubmerged] then
+							okay = false
+						else
+							local dist = DistanceXZ(highCell.x, highCell.z, cell.x, cell.z)
+							if dist < 2 then okay = false end
+						end
+					end
+				end
+				if okay and response > highestResponse[groundAirSubmerged] then
+					highestResponse[groundAirSubmerged] = response
+					highestCell[groundAirSubmerged] = cell
+				end
 			end
 		end
+		highestResponses[n] = highestResponse
+		highestCells[n] = highestCell
 	end
-	ai.turtlehandler:FindFronts(highestCells)
+	ai.defendhandler:FindFronts(highestCells)
 end
 
 local function UpdateDebug()
@@ -678,7 +698,7 @@ function TargetHandler:UpdateMap()
 		-- UpdateFriendlies()
 		UpdateBadPositions()
 		UpdateWrecks()
-		UpdateFronts()
+		UpdateFronts(3)
 		UpdateDebug()
 		self.lastUpdateFrame = game:Frame()
 	end
@@ -860,9 +880,8 @@ function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignor
 	if enemyBaseCell and not ignoreValue then
 		local dist = Distance(position, enemyBaseCell.pos)
 		if dist < range then
-			local value, threat = CellValueThreat("ALL", cell)
-			local valuethreat = value + threat 
-			return enemyBaseCell, valuethreat
+			local value = cell.values.ground.ground + cell.values.air.ground + cell.values.submerged.ground
+			return enemyBaseCell, value + cell.response.ground
 		end
 	end
 	local best
@@ -871,10 +890,10 @@ function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignor
 	for i, cell in pairs(cellList) do
 		local dist = Distance(position, cell.pos)
 		if dist < range then
-			local value, threat = CellValueThreat("ALL", cell)
+			local value = cell.values.ground.ground + cell.values.air.ground + cell.values.submerged.ground
 			local valuethreat = 0
 			if not ignoreValue then valuethreat = valuethreat + value end
-			if not ignoreThreat then valuethreat = valuethreat + threat end
+			if not ignoreThreat then valuethreat = valuethreat + cell.response.ground end
 			if valuethreat > bestValueThreat then
 				best = cell
 				bestValueThreat = valuethreat
@@ -1042,11 +1061,12 @@ function TargetHandler:IsSafePosition(position, unit, threshold)
 	local uname = unit:Name()
 	if uname == nil then game:SendToConsole("nil unit name") end
 	local cell = GetCellHere(position)
+	if cell == nil then return 0, 0 end
 	local value, threat = CellValueThreat(uname, cell)
 	if threshold then
-		return threat < unitTable[uname].metalCost * threshold
+		return threat < unitTable[uname].metalCost * threshold, cell.response
 	else
-		return threat == 0
+		return threat == 0, cell.response
 	end
 end
 

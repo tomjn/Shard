@@ -4,19 +4,21 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("RunFromAttackBehaviour: " .. inStr)
+		game:SendToConsole("WardBehaviour: " .. inStr)
 	end
 end
 
-RunFromAttackBehaviour = class(Behaviour)
+WardBehaviour = class(Behaviour)
 
-function RunFromAttackBehaviour:Init()
+function WardBehaviour:Init()
 	self.active = false
 	self.underFire = false
 	self.lastAttackedFrame = game:Frame()
 	self.initialLocation = self.unit:Internal():GetPosition()
 	self.name = self.unit:Internal():Name()
 	self.id = self.unit:Internal():ID()
+	self.mtype = unitTable[self.name].mtype
+	self.water = self.mtype == "sub" or self.mtype == "shp" or self.mtype == "amp" -- can be hurt by submerged weapons
 	self.isCommander = commanderList[self.name]
 	self.mobile = not unitTable[self.name].isBuilding and not nanoTurretList[self.name] -- for some reason nano turrets are not buildings
 	self.isScout = scoutList[self.name]
@@ -28,26 +30,26 @@ function RunFromAttackBehaviour:Init()
 		self.threshold = 1.5
 	end
 	-- any threat whatsoever will trigger for buildings
-	EchoDebug("RunFromAttackBehaviour: added to unit "..self.name)
+	EchoDebug("WardBehaviour: added to unit "..self.name)
 end
 
-function RunFromAttackBehaviour:UnitBuilt(unit)
+function WardBehaviour:UnitBuilt(unit)
 	if unit.engineID == self.unit.engineID then
 		if self.mobile and not self.isScout then
-			ai.defendhandler:AddDefendee(self) -- just testing 
+			ai.defendhandler:AddWard(self) -- just testing 
 		end
 	end
 end
 
-function RunFromAttackBehaviour:UnitDead(unit)
+function WardBehaviour:UnitDead(unit)
 	if unit.engineID == self.unit.engineID then
 		if self.mobile and not self.isScout then
-			ai.defendhandler:RemoveDefendee(self) -- just testing 
+			ai.defendhandler:RemoveWard(self) -- just testing 
 		end
 	end
 end
 
-function RunFromAttackBehaviour:UnitIdle(unit)
+function WardBehaviour:UnitIdle(unit)
 	if unit.engineID == self.unit.engineID then
 		if self:IsActive() then
 			self.underFire = false
@@ -56,7 +58,7 @@ function RunFromAttackBehaviour:UnitIdle(unit)
 	end
 end
 
-function RunFromAttackBehaviour:Update()
+function WardBehaviour:Update()
 	local f = game:Frame()
 
 	-- timeout on underFire condition
@@ -73,13 +75,15 @@ function RunFromAttackBehaviour:Update()
 			else
 				position = unit:GetPosition()
 			end
-			local safe = ai.targethandler:IsSafePosition(position, unit, self.threshold)
+			local safe, response = ai.targethandler:IsSafePosition(position, unit, self.threshold)
 			if safe then
 				self.underFire = false
+				self.response = nil
 				self.unit:ElectBehaviour()
 			else
 				EchoDebug(self.name .. " is not safe")
 				self.underFire = true
+				self.response = response
 				self.lastAttackedFrame = game:Frame()
 				if not self.mobile then ai.defendhandler:Danger(self) end
 				self.unit:ElectBehaviour()
@@ -89,8 +93,8 @@ function RunFromAttackBehaviour:Update()
 	end
 end
 
-function RunFromAttackBehaviour:Activate()
-	EchoDebug("RunFromAttackBehaviour: activated on unit "..self.name)
+function WardBehaviour:Activate()
+	EchoDebug("WardBehaviour: activated on unit "..self.name)
 
 	-- can we move at all?
 	if self.mobile then
@@ -107,11 +111,11 @@ function RunFromAttackBehaviour:Activate()
 		self.unit:Internal():Move(RandomAway(salvation,150))
 
 		self.active = true
-		EchoDebug("RunFromAttackBehaviour: unit ".. self.name .." runs away from danger")
+		EchoDebug("WardBehaviour: unit ".. self.name .." runs away from danger")
 	end
 end
 
-function RunFromAttackBehaviour:NearestCombat()
+function WardBehaviour:NearestCombat()
 	local best
 	local ownUnits = game:GetFriendlies()
 	local fleeing = self.unit:Internal()
@@ -121,7 +125,7 @@ function RunFromAttackBehaviour:NearestCombat()
 	local bestDistance = 10000
 	for i,unit in pairs(ownUnits) do
 		local un = unit:Name()
-		if unit:ID() ~= fid and un ~= "corcom" and un ~= "armcom" and not ai.defendhandler:IsDefendingMe(unit, fleeing) then
+		if unit:ID() ~= fid and un ~= "corcom" and un ~= "armcom" and not ai.defendhandler:IsDefendingMe(unit, self) then
 			if unitTable[un].isWeapon and (battleList[un] or breakthroughList[un]) and unitTable[un].metalCost > unitTable[fn].metalCost * 1.5 then
 				local upos = unit:GetPosition()
 				if ai.targethandler:IsSafePosition(upos, fleeing) and unit:GetHealth() > unit:GetMaxHealth() * 0.9 and ai.maphandler:UnitCanGetToUnit(fleeing, unit) and not unit:IsBeingBuilt() then
@@ -137,13 +141,13 @@ function RunFromAttackBehaviour:NearestCombat()
 	return best
 end
 
-function RunFromAttackBehaviour:Deactivate()
-	EchoDebug("RunFromAttackBehaviour: deactivated on unit "..self.name)
+function WardBehaviour:Deactivate()
+	EchoDebug("WardBehaviour: deactivated on unit "..self.name)
 	self.active = false
 	self.underFire = false
 end
 
-function RunFromAttackBehaviour:Priority()
+function WardBehaviour:Priority()
 	if self.underFire and self.mobile then
 		return 110
 	else
@@ -151,7 +155,7 @@ function RunFromAttackBehaviour:Priority()
 	end
 end
 
-function RunFromAttackBehaviour:UnitDamaged(unit,attacker)
+function WardBehaviour:UnitDamaged(unit,attacker)
 	if unit:Internal():ID() == self.unit:Internal():ID() then
 		if not self.underFire then
 			if unit:Internal():GetHealth() < unit:Internal():GetMaxHealth() * 0.8 then

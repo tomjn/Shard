@@ -26,6 +26,7 @@ end
 
 -- note: the attacker is always nil if it's on any team other than the AI's (not even allies register)
 -- note: unitdamaged will not be called on self-destruct
+--[[
 function DamageHandler:UnitDamaged(unit, attacker)
 	-- if unit ~= nil then game:SendToConsole(unit:Team() .. " attacked (" .. game:GetTeamID() .. ")") end
 	-- if attacker ~= nil then game:SendToConsole("by " .. attacker:Team() .. " (" .. game:GetTeamID() .. ")") end
@@ -45,6 +46,7 @@ function DamageHandler:UnitDamaged(unit, attacker)
 		self.lastHealth[unitID] = health
 	end
 end
+]]--
 
 function DamageHandler:UnitBuilt(unit)
 	local unitID = unit:ID()
