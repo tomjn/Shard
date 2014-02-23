@@ -169,21 +169,23 @@ function AttackHandler:DoMovement()
 		local totalx = 0
 		local totalz = 0
 		local totalSize = 0
-		for iu, member in pairs(squad.members) do
-			local unit
-			if member ~= nil then
-				if member.unit ~= nil then
-					unit = member.unit:Internal()
+		if squad.hasCongregated then
+			for iu, member in pairs(squad.members) do
+				local unit
+				if member ~= nil then
+					if member.unit ~= nil then
+						unit = member.unit:Internal()
+					end
 				end
-			end
-			if unit ~= nil then
-				if representative == nil then representative = unit end
-				local tmpPos = unit:GetPosition()
-				totalx = totalx + tmpPos.x
-				totalz = totalz + tmpPos.z
-				totalSize = totalSize + member.size
-			else 
-				table.remove(squad.members, iu)
+				if unit ~= nil then
+					if representative == nil then representative = unit end
+					local tmpPos = unit:GetPosition()
+					totalx = totalx + tmpPos.x
+					totalz = totalz + tmpPos.z
+					totalSize = totalSize + member.size
+				else 
+					table.remove(squad.members, iu)
+				end
 			end
 		end
 
@@ -192,10 +194,17 @@ function AttackHandler:DoMovement()
 			table.remove(self.squads, is)
 		else
 			-- determine distances from midpoint
-			local midPos = api.Position()
-			midPos.x = totalx / #squad.members
- 			midPos.z = totalz / #squad.members
-			midPos.y = 0
+			local midPos
+			if squad.hasCongregated then
+				midPos = api.Position()
+				midPos.x = totalx / #squad.members
+	 			midPos.z = totalz / #squad.members
+				midPos.y = 0
+			else
+				local representativeBehaviour = squad.members[#squad.members]
+				representative = representativeBehaviour.unit:Internal()
+				midPos = ai.frontPosition[representativeBehaviour.hits] or representative:GetPosition()
+			end
 			local congDist = sqrt(pi * totalSize) * 2
 			local stragglers = 0
 			local damaged = 0
@@ -282,6 +291,7 @@ function AttackHandler:DoMovement()
 						local ordered = member:Congregate(midPos)
 						if not ordered and squad.congregating then squad.congregating = false end
 					end
+					squad.hasCongregated = true
 				end
 				squad.attacking = nil
 				squad.close = nil

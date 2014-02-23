@@ -49,6 +49,7 @@ function DefendHandler:Init()
 	self.wardsByDefenderID = {}
 	self.defendersByID = {}
 	self.unitGuardDistances = {}
+	ai.frontPosition = {}
 end
 
 function DefendHandler:AddWard(behaviour, turtle)
@@ -73,7 +74,8 @@ function DefendHandler:AddWard(behaviour, turtle)
 		else
 			priority.ground = priority.air + 0
 		end
-		ward = { uid = behaviour.id, behaviour = behaviour, priority = priority, threatened = nil, defenders = {}, guardDistance = self:GetGuardDistance(un) }
+		local frontNumber = { ground = 0, air = 0, submerged = 0 }
+		ward = { uid = behaviour.id, behaviour = behaviour, priority = priority, frontNumber = frontNumber, threatened = nil, defenders = {}, guardDistance = self:GetGuardDistance(un) }
 	elseif turtle ~= nil then
 		priority.air = turtle.priority
 		if turtle.air > 0 then priority.air = priority.air + (turtle.air / 100) end
@@ -493,6 +495,74 @@ function DefendHandler:Unscramble()
 		end
 		self.scrambling = false
 	end
+end
+
+function DefendHandler:FindFronts(troublingCells)
+	local number = #troublingCells
+	for n = 1, number do
+		local tcells = troublingCells[n]
+		for GAS, cell in pairs(tcells) do
+			if GAS ~= "air" and cell ~= nil then
+				local water = GAS == "submerged"
+				local nearestMobileDist = 100000
+				local nearestMobile
+				local nearestTurtleDist = 100000
+				local nearestTurtle
+				for wi, ward in pairs(self.wards) do
+					if ward.behaviour ~= nil then
+						local behaviour = ward.behaviour
+						if water == behaviour.water then
+							local dist = Distance(behaviour.unit:Internal():GetPosition(), cell.pos)
+							if dist < nearestMobileDist then
+								nearestMobileDist = dist
+								nearestMobile = ward
+							end
+						end
+						if ward.frontNumber[GAS] > 0 then self:SetDangerZone(ward, 0, number, GAS) end
+					elseif n == 1 and ward.turtle ~= nil then
+						local turtle = ward.turtle
+						turtle.threatForecastAngle = nil
+						turtle.front = nil
+						if water == turtle.water then
+							if turtle.priority > 1 then
+								local dist = Distance(turtle.position, cell.pos)
+								if dist < nearestTurtleDist then
+									nearestTurtleDist = dist
+									nearestTurtle = ward
+								end
+							end
+						end
+					end
+				end
+				if n == 1 then
+					if nearestTurtle ~= nil then
+						local turtle = nearestTurtle.turtle
+						turtle.threatForecastAngle = AngleAtoB(turtle.position.x, turtle.position.z, cell.pos.x, cell.pos.z)
+						turtle.front = true
+						self:Danger(nil, turtle, GAS)
+						ai.incomingThreat = cell.response[GAS]
+						ai.frontPosition[GAS] = turtle.position
+					else
+						ai.incomingThreat = 0
+					end
+				end
+				if nearestMobile ~= nil then
+					self:SetDangerZone(nearestMobile, n, number, GAS)
+				end
+			end
+		end
+	end
+end
+
+function DefendHandler:SetDangerZone(ward, n, number, GAS)
+	local setPriority = ward.priority.air + 1 + (number - n)
+	local priorityDiff = setPriority - ward.priority[GAS]
+	if priorityDiff > 0 then
+		ward.priority[GAS] = setPriority
+		self.totalPriority[GAS] = self.totalPriority[GAS] + priorityDiff
+		self:MarkAllMtypesForAssignment(GAS)
+	end
+	ward.frontNumber[GAS] = n
 end
 
 -- receive a signal that a building is threatened or a turtle is on the front

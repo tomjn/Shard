@@ -569,19 +569,39 @@ local function UpdateWrecks()
 	end
 end
 
-local function UpdateFronts()
+local function UpdateFronts(number)
 	local highestCells = {}
-	local highestResponse = { ground = 0, air = 0, submerged = 0 }
-	for i = 1, #cellList do
-		local cell = cellList[i]
-		for groundAirSubmerged, response in pairs(cell.response) do
-			if response > highestResponse[groundAirSubmerged] then
-				highestResponse[groundAirSubmerged] = response
-				highestCells[groundAirSubmerged] = cell
+	local highestResponses = {}
+	for n = 1, number do
+		local highestCell = {}
+		local highestResponse = { ground = 0, air = 0, submerged = 0 }
+		for i = 1, #cellList do
+			local cell = cellList[i]
+			for groundAirSubmerged, response in pairs(cell.response) do
+				local okay = true
+				if n > 1 then
+					local highCell = highestCells[n-1][groundAirSubmerged]
+					if highCell ~= nil then
+						if cell == highCell then
+							okay = false
+						elseif response >= highestResponses[n-1][groundAirSubmerged] then
+							okay = false
+						else
+							local dist = DistanceXZ(highCell.x, highCell.z, cell.x, cell.z)
+							if dist < 2 then okay = false end
+						end
+					end
+				end
+				if okay and response > highestResponse[groundAirSubmerged] then
+					highestResponse[groundAirSubmerged] = response
+					highestCell[groundAirSubmerged] = cell
+				end
 			end
 		end
+		highestResponses[n] = highestResponse
+		highestCells[n] = highestCell
 	end
-	ai.turtlehandler:FindFronts(highestCells)
+	ai.defendhandler:FindFronts(highestCells)
 end
 
 local function UpdateDebug()
@@ -678,7 +698,7 @@ function TargetHandler:UpdateMap()
 		-- UpdateFriendlies()
 		UpdateBadPositions()
 		UpdateWrecks()
-		UpdateFronts()
+		UpdateFronts(3)
 		UpdateDebug()
 		self.lastUpdateFrame = game:Frame()
 	end

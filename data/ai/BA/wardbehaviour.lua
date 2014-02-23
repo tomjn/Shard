@@ -17,6 +17,8 @@ function WardBehaviour:Init()
 	self.initialLocation = self.unit:Internal():GetPosition()
 	self.name = self.unit:Internal():Name()
 	self.id = self.unit:Internal():ID()
+	self.mtype = unitTable[self.name].mtype
+	self.water = self.mtype == "sub" or self.mtype == "shp" or self.mtype == "amp" -- can be hurt by submerged weapons
 	self.isCommander = commanderList[self.name]
 	self.mobile = not unitTable[self.name].isBuilding and not nanoTurretList[self.name] -- for some reason nano turrets are not buildings
 	self.isScout = scoutList[self.name]

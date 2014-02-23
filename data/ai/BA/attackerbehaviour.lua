@@ -24,11 +24,19 @@ function AttackerBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
-	self.level = unitTable[self.name].techLevel - 1
+	local ut = unitTable[self.name]
+	self.level = ut.techLevel - 1
 	if self.level == 0 then self.level = 0.5 elseif self.level < 0 then self.level = 0.25 end
-	self.size = unitTable[self.name].xsize * unitTable[self.name].zsize * 16
-	self.range = math.max(unitTable[self.name].groundRange, unitTable[self.name].airRange, unitTable[self.name].submergedRange)
+	self.size = ut.xsize * ut.zsize * 16
+	self.range = math.max(ut.groundRange, ut.airRange, ut.submergedRange)
 	self.awayDistance = self.range * 0.9
+	if ut.groundRange > 0 then
+		self.hits = "ground"
+	elseif ut.submergedRange > 0 then
+		self.hits = "submerged"
+	elseif ut.airRange > 0 then
+		self.hits = "air"
+	end
 end
 
 function AttackerBehaviour:UnitBuilt(unit)
