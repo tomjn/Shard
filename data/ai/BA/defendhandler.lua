@@ -212,7 +212,7 @@ function DefendHandler:AssignAll(GAS, mtype) -- Ground Air Submerged (weapon), m
 	if #self.wards == 0 then 
 		-- if nothing to defend, make sure defenders aren't defending ghosts (this causes a crash)
 		EchoDebug("nothing to defend")
-		for di, dfndbehaviour in pairs(self.defenders) do
+		for di, dfndbehaviour in pairs(self.defenders[GAS][mtype]) do
 			dfndbehaviour:Assign(nil)
 			self.wardsByDefenderID[dfndbehaviour.id] = nil
 		end

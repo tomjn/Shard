@@ -828,11 +828,11 @@ end
 
 function MapHandler:OutmodedFactoryHere(mtype, position, network)
 	if mtype == "air" then return false end
-	if position then
+	if position and network == nil then
 		network = self:MobilityNetworkHere(mtype, position)
 	end
 	if network == nil then
-		return true
+		return false
 	else
 		if ai.networkSize[mtype][network] < ai.mobCount[mtype] * 0.67 and ai.mobNetworks[mtype] > 1 then
 	 		return true

@@ -28,6 +28,8 @@ end
 
 function DefendBehaviour:Init()
 	self.moving = {}
+	self.unmoved = 0
+	self.lastPos = self.unit:Internal():GetPosition()
 	self.active = false
 	self.id = self.unit:Internal():ID()
 	self.name = self.unit:Internal():Name()
@@ -118,12 +120,20 @@ function DefendBehaviour:Update()
 				self.moving = {}
 			else
 				self.guarding = nil
-				if self.moving.x ~= targetPos.x or self.moving.z ~= targetPos.z then
+				local boredNow = ai.targethandler:IsSafePosition(unitPos, unit)
+				if self.moving.x ~= targetPos.x or self.moving.z ~= targetPos.z or (self.unmoved > 5 and boredNow) or (not self.tough and dist > self.target.guardDistance) then
 					unit:Move(guardPos)
 					self.moving.x = targetPos.x
 					self.moving.z = targetPos.z
 				end
 			end
+			if self.lastPos.x == unitPos.x and self.lastPos.z == unitPos.z then
+				self.unmoved = self.unmoved + 1
+			else
+				self.unmoved = 0
+			end
+			self.lastPos = api.Position()
+			self.lastPos.x, self.lastPos.z = unitPos.x+0, unitPos.z+0
 			self.unit:ElectBehaviour()
 		end
 	end
