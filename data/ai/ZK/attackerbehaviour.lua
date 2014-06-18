@@ -1,0 +1,93 @@
+require "attackers"
+
+function IsAttacker(unit)
+	for i,name in ipairs(attackerlist) do
+		if name == unit:Internal():Name() then
+			return true
+		end
+	end
+	return false
+end
+
+AttackerBehaviour = class(Behaviour)
+
+function AttackerBehaviour:Init()
+	--game:SendToConsole("attacker!")
+end
+
+function AttackerBehaviour:UnitBuilt(unit)
+	if unit.engineID == self.unit.engineID then
+		self:SetMoveState()
+		self:SetFireState()
+		self.attacking = false
+		ai.attackhandler:AddRecruit(self)
+	end
+end
+
+
+function AttackerBehaviour:UnitDead(unit)
+	if unit.engineID == self.unit.engineID then
+		ai.attackhandler:RemoveRecruit(self)
+	end
+end
+
+function AttackerBehaviour:UnitIdle(unit)
+	if unit.engineID == self.unit.engineID then
+		self.attacking = false
+		ai.attackhandler:AddRecruit(self)
+	end
+end
+
+function AttackerBehaviour:AttackCell(cell)
+	p = api.Position()
+	p.x = cell.posx
+	p.z = cell.posz
+	p.y = 0
+	self.target = p
+	self.attacking = true
+	if self.active then
+		self.unit:Internal():MoveAndFire(self.target)
+	else
+		self.unit:ElectBehaviour()
+	end
+end
+
+function AttackerBehaviour:Priority()
+	if not self.attacking then
+		return 0
+	else
+		return 100
+	end
+end
+
+function AttackerBehaviour:Activate()
+	self.active = true
+	if self.target then
+		self.unit:Internal():MoveAndFire(self.target)
+		self.target = nil
+	else
+		--ai.attackhandler:AddRecruit(self)
+	end
+end
+
+
+
+function AttackerBehaviour:SetMoveState()
+	local CMD_MOVE_STATE = 50
+	local thisUnit = self.unit
+	if thisUnit then
+		local floats = api.vectorFloat()
+		floats:push_back(2)
+		thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
+	end
+end
+
+function AttackerBehaviour:SetFireState()
+	local CMD_FIRE_STATE = 45
+	local thisUnit = self.unit
+	if thisUnit then
+		local floats = api.vectorFloat()
+		floats:push_back(2)
+		thisUnit:Internal():ExecuteCustomCommand(CMD_FIRE_STATE, floats)
+	end
+end
