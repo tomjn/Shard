@@ -17,8 +17,7 @@ end
 
 function AttackerBehaviour:UnitBuilt(unit)
 	if unit.engineID == self.unit.engineID then
-		self:SetMoveState()
-		self:SetFireState()
+		self:SetInitialState()
 		self.attacking = false
 		ai.attackhandler:AddRecruit(self)
 	end
@@ -70,24 +69,16 @@ function AttackerBehaviour:Activate()
 	end
 end
 
-
-
-function AttackerBehaviour:SetMoveState()
+function AttackerBehaviour:SetInitialState()
+	local CMD_FIRE_STATE = 45
 	local CMD_MOVE_STATE = 50
+	local CMD_RETREAT = 34223
 	local thisUnit = self.unit
 	if thisUnit then
 		local floats = api.vectorFloat()
 		floats:push_back(2)
 		thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
-	end
-end
-
-function AttackerBehaviour:SetFireState()
-	local CMD_FIRE_STATE = 45
-	local thisUnit = self.unit
-	if thisUnit then
-		local floats = api.vectorFloat()
-		floats:push_back(2)
 		thisUnit:Internal():ExecuteCustomCommand(CMD_FIRE_STATE, floats)
+		thisUnit:Internal():ExecuteCustomCommand(CMD_RETREAT, floats)
 	end
 end

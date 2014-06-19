@@ -1,7 +1,5 @@
 -- require "taskqueues"
 require "commonfunctions"
-local DebugEnabled = false
-local CMD_PATROL = 15
 
 nanoTurretList = {
 	armnanotc = 1,
@@ -15,6 +13,9 @@ end
 
 local CMD_GUARD = 25
 local CMD_PATROL = 15
+local CMD_RETREAT_ZONE = 10001
+local CMD_SETHAVEN = CMD_RETREAT_ZONE
+local CMD_RETREAT = 34223
 
 AssistBehaviour = class(Behaviour)
 
