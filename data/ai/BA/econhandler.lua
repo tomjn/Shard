@@ -60,8 +60,16 @@ function EconHandler:Average()
 			ai[name][property] = ai[name][property] / totalSamples
 		end
 		ai[name].extra = ai[name].income - ai[name].usage
-		ai[name].full = ai[name].reserves / ai[name].capacity
-		ai[name].tics = ai[name].reserves / ai[name].income
+		if ai[name].capacity == 0 then
+			ai[name].full = math.inf
+		else
+			ai[name].full = ai[name].reserves / ai[name].capacity
+		end
+		if ai[name].income == 0 then
+			ai[name].tics = math.inf
+		else
+			ai[name].tics = ai[name].reserves / ai[name].income
+		end
 	end
 	if not self.hasData then self.hasData = true end
 	self.samples = {}
@@ -78,3 +86,4 @@ function EconHandler:DebugAll()
 		end
 	end
 end
+
