@@ -215,6 +215,12 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 			}
 			break;
 		}
+		case EVENT_LUA_MESSAGE: {
+			struct SLuaMessageEvent* evt = (struct SLuaMessageEvent*) data;
+			game->SendToConsole("Shard: Received the following LuaMessage:");
+			game->SendToConsole(evt->inData);
+			break;
+		}
 		default: {
 			break;
 		}
