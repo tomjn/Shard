@@ -85,6 +85,8 @@ CTestAI::CTestAI(IGame* game)
 	luaopen_api(this->L);
 	
 	unittype = SWIG_TypeQuery(this->L,"IUnit *");
+	iaitype = SWIG_TypeQuery(this->L,"IAI *");
+	
 	// Push in our IGame pointer
 	swig_type_info* type = SWIG_TypeQuery(this->L,"IGame *");
 	SWIG_NewPointerObj(this->L,game,type,0);
@@ -173,6 +175,16 @@ void CTestAI::GameEnd(){
 	lua_getglobal(this->L, "ai");
 	lua_getfield(this->L, -1, "GameEnd");
 	lua_getglobal(this->L, "ai");
+	if(lua_isfunction(this->L,-2)){
+		lua_epcall(this->L, 1);
+	}
+}
+
+void CTestAI::GameMessage(const char* text){
+	lua_getglobal(this->L, "ai");
+	lua_getfield(this->L, -1, "GameMessage");
+	lua_getglobal(this->L, "ai");
+	SWIG_NewPointerObj(this->L,text,iaitype,0);
 	if(lua_isfunction(this->L,-2)){
 		lua_epcall(this->L, 1);
 	}

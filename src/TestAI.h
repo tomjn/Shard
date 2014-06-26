@@ -19,6 +19,7 @@ public:
 	virtual void Init();
 	virtual void Update();
 	virtual void GameEnd();
+	virtual void GameMessage(const char* text);
 
 	virtual void UnitCreated(IUnit* unit);
 	virtual void UnitBuilt(IUnit* unit);

@@ -6,6 +6,7 @@ public:
 	virtual void Init()=0;
 	virtual void Update()=0;
 	virtual void GameEnd()=0;
+	virtual void GameMessage(const char* text)=0;
 
 	virtual void UnitCreated(IUnit* unit)=0;
 	virtual void UnitBuilt(IUnit* unit)=0;
