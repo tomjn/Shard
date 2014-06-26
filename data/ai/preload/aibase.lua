@@ -13,6 +13,9 @@ end
 function AIBase:GameEnd()
 end
 
+function AIBase:GameMessage(text)
+end
+
 function AIBase:UnitCreated(engineunit)
 end
 

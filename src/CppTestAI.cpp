@@ -217,7 +217,8 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 		}
 		case EVENT_LUA_MESSAGE: {
 			struct SLuaMessageEvent* evt = (struct SLuaMessageEvent*) data;
-			game->me()->GameMessage(evt->inData);
+			game->Me()->GameMessage(evt->inData);
+
 			break;
 		}
 		default: {

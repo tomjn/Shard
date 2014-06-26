@@ -23,6 +23,12 @@ function distance(pos1,pos2)
 	return dist
 end
 
+function MetalSpotHandler:GameMessage(zor)
+	-- check if message starts with METAL_SPOTS:
+	-- if so, deserialize JSON
+	-- and use it to substitute extant metal spots
+end
+
 function MetalSpotHandler:ClosestFreeSpot(unittype,position)
 	local pos = nil
 	local bestDistance = 10000
