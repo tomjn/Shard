@@ -215,6 +215,12 @@ int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 			}
 			break;
 		}
+		case EVENT_LUA_MESSAGE: {
+			struct SLuaMessageEvent* evt = (struct SLuaMessageEvent*) data;
+			game->Me()->GameMessage(evt->inData);
+
+			break;
+		}
 		default: {
 			break;
 		}

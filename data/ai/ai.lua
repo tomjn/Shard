@@ -36,6 +36,19 @@ function AI:Update()
 	end
 end
 
+function AI:GameMessage(text)
+	if self.gameend == true then
+		return
+	end
+	for i,m in ipairs(self.modules) do
+		if m == nil then
+			game:SendToConsole("nil module!")
+		else
+			m:GameMessage(text)
+		end
+	end
+end
+
 function AI:UnitCreated(engineunit)
 	if self.gameend == true then
 		return
