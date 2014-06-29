@@ -1,3 +1,5 @@
+require "json"
+
 MetalSpotHandler = class(Module)
 
 function MetalSpotHandler:Name()
@@ -23,10 +25,20 @@ function distance(pos1,pos2)
 	return dist
 end
 
-function MetalSpotHandler:GameMessage(zor)
-	-- check if message starts with METAL_SPOTS:
-	-- if so, deserialize JSON
-	-- and use it to substitute extant metal spots
+function MetalSpotHandler:GameMessage(message)
+	local headerLength = string.len("METAL_SPOTS:");
+	if (string.sub(message, 1, headerLength) == "METAL_SPOTS:") then
+		local content = string.sub(message,headerLength+1);
+		local spots = decode(content);
+		self.spots={}
+		for i,v in pairs(spots) do
+			local newpos = api.Position();
+			newpos.x = tonumber(v.x);
+			newpos.y = tonumber(v.y);
+			newpos.z = tonumber(v.z);
+			self.spots[i] = newpos;
+		end
+	end
 end
 
 function MetalSpotHandler:ClosestFreeSpot(unittype,position)
