@@ -86,7 +86,7 @@ local armcommander = {
 	"armwin",
 	"corrl",
 	"corrl",
-	"factorygunship",
+	"factoryvehicle",
 	"armwin",
 	"armwin",
 	"armwin",
@@ -124,22 +124,24 @@ local armcommander = {
 	"corrl",
 	"corrl",
 	"armestor",
+	"factorygunship",
 }
 taskqueues = {
 	commbasic = armcommander,
+	armcom1 = armcommander,
 	factorycloak = {
+	"armpw",
+	"armpw",
 	"armrectr",
 	"armpw",
 	"armpw",
 	"armpw",
+	"armpw",
+	"armpw",
+	"armpw",
+	"armpw",
+	"armpw",
 	"armrectr",
-	"armpw",
-	"armpw",
-	"armpw",
-	"armpw",
-	"armpw",
-	"armpw",
-	"armpw",
 	"armrock",
 	"armrectr",
 	"armrock",
@@ -149,6 +151,11 @@ taskqueues = {
 	"armrock",
 	"armrock",
 	"armzeus",
+	"armrock",
+	"armrock",
+	"armrock",
+	"armjeth",
+	"armsnipe"
 	},
 	factoryplane = {
 	"bomberdive",
@@ -193,10 +200,11 @@ taskqueues = {
 	"armwin",
 	"corrl",
 	"corrl",
-	"cordoom",
+	"corbhmth",
+	"factoryhover"
 	},
 	factorygunship = {
-	"corape",
+	"gunshipsupport",
 	"armbrawl",
 	},
 	factoryveh = {
@@ -204,5 +212,11 @@ taskqueues = {
 	"corraid",
 	"corlevlr",
 	"capturecar",
+	},
+	factoryhover = {
+	"corsh",
+	"hoverriot",
+	"hoverassault",
+	"armmanni",
 	},
 }
