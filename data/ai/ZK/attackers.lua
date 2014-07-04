@@ -23,7 +23,12 @@ attackerlist = {
 	"corlevlr",
 	"armpnix",
 	"bomberdive",
-	"corape",
+	"gunshipsupport",
 	"armzeus",
 	"fighter",
+	"armsnipe",
+	"hoverriot",
+	"hoverassault",
+	"nsaclash",
+	"armmanni"
 }
