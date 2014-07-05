@@ -79,6 +79,10 @@ function AttackerBehaviour:SetInitialState()
 		floats:push_back(2)
 		thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
 		thisUnit:Internal():ExecuteCustomCommand(CMD_FIRE_STATE, floats)
-		thisUnit:Internal():ExecuteCustomCommand(CMD_RETREAT, floats)
+		
+		local isHeavy = thisUnit:Internal():GetMaxHealth() >= 1250
+		if (isHeavy) then
+			thisUnit:Internal():ExecuteCustomCommand(CMD_RETREAT, floats)
+		end
 	end
 end

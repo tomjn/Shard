@@ -11,6 +11,15 @@ function TaskQueueBehaviour:Init()
 	end
 	
 	self.waiting = {}
+	local CMD_FIRE_STATE = 45
+	local CMD_MOVE_STATE = 50
+	local CMD_RETREAT = 34223
+	
+	local floats = api.vectorFloat()
+	floats:push_back(2)
+	u:ExecuteCustomCommand(CMD_MOVE_STATE, floats)
+	u:ExecuteCustomCommand(CMD_FIRE_STATE, floats)
+	u:ExecuteCustomCommand(CMD_RETREAT, floats)
 	
 end
 
