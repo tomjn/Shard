@@ -31,11 +31,13 @@ local function Destroyer()
 end
 
 local function StartFactory()
-	local r = math.random(0,1)
+	local r = math.random(0,2)
 	if r == 0 then
-			return "ebasefactory"
-		else
-			return "eminifac"
+		return "ebasefactory"
+	elseif r == 1 then
+		return "eamphibfac"
+	else
+		return "eminifac"
 	end
 end
 
@@ -51,19 +53,12 @@ local factory = {
    "elighttank3",
    "elighttank3",
    "eriottank2",
-
-    "eflametank",
    "elighttank3",
-    "eflametank",
    "elighttank3",
-    "eflametank",
    "eriottank2",
    "eengineer5",
    "eriottank2",
    "eheavytank3",
-   "emediumtank3",
-   "emediumtank3",
-   "emediumtank3",
    "eaatank",
    "eaatank",
    "eaatank",
@@ -75,37 +70,19 @@ local factory = {
    "eheavytank3",
    "eheavytank3",
    "eheavytank3",
-   "efatso2",
-   "efatso2",
-   "efatso2",
-   "efatso2",
-   "efatso2",
-   "emediumtank3",
    "eaatank",
-   "emediumtank3",
-   "emediumtank3",
-   "emediumtank3",
    "eengineer5",
-   "efatso2",
    "elighttank3",
-    "eflametank",
    "elighttank3",
    "eaatank",
-    "eflametank",
    "elighttank3",
    "eartytank",
-    "eflametank",
    "eriottank2",
    "eriottank2",
-   "efatso2",
-   "efatso2",
    "eartytank",
-   "efatso2",
    "eheavytank3",
    "emissiletank",
-   "efatso2",
    "emissiletank",
-   "efatso2",
    "emissiletank",
    { action="wait",frames=200},
 }
