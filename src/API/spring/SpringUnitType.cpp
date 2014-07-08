@@ -11,10 +11,14 @@
 #include "SpringGame.h"
 #include "SpringUnitType.h"
 
-CSpringUnitType::CSpringUnitType(CSpringGame* game, springai::OOAICallback* callback, springai::UnitDef* unitDef)
-: game(game), callback(callback), unitDef(unitDef), 
-  resources(callback->GetResources()), weaponMounts(unitDef->GetWeaponMounts()) {
-	boptions = unitDef->GetBuildOptions();
+CSpringUnitType::CSpringUnitType(CSpringGame* game, springai::OOAICallback* callback, springai::UnitDef* unitDef):
+	boptions(unitDef->GetBuildOptions()),
+	game(game),
+	callback(callback),
+	unitDef(unitDef),
+	resources(callback->GetResources()),
+	weaponMounts(unitDef->GetWeaponMounts())
+{
 }
 
 CSpringUnitType::~CSpringUnitType(){
