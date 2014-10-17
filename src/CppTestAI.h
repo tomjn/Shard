@@ -31,7 +31,7 @@ namespace cpptestai {
 class CCppTestAI {
 
 private:
-	springai::OOAICallback* callback;
+//	springai::OOAICallback* callback;
 	int skirmishAIId;
 	CSpringGame* game;
 public:
