@@ -155,7 +155,7 @@ function WardBehaviour:Priority()
 	end
 end
 
-function WardBehaviour:UnitDamaged(unit,attacker)
+function RunFromAttackBehaviour:UnitDamaged(unit,attacker,damage)
 	if unit:Internal():ID() == self.unit:Internal():ID() then
 		if not self.underFire then
 			if unit:Internal():GetHealth() < unit:Internal():GetMaxHealth() * 0.8 then

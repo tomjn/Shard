@@ -47,7 +47,7 @@ function CountHandler:InitializeNameCounts()
 	end
 end
 
-function CountHandler:UnitDamaged(unit, attacker)
+function CountHandler:UnitDamaged(unit, attacker,damage)
 	local aname = "nil"
 	if attacker then 
 		if attacker:Team() ~= game:GetTeamID() then

@@ -16,5 +16,5 @@ public:
 
 	virtual void UnitGiven(IUnit* unit)=0;
 
-	virtual void UnitDamaged(IUnit* unit, IUnit* attacker)=0;
+	virtual void UnitDamaged(IUnit* unit, IUnit* attacker, IDamage::Ptr damage)=0;
 };

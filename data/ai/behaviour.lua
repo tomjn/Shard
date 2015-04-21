@@ -18,7 +18,7 @@ end
 function Behaviour:UnitDead(unit)
 end
 
-function Behaviour:UnitDamaged(unit,attacker)
+function Behaviour:UnitDamaged(unit,attacker,damage)
 end
 
 function Behaviour:UnitIdle(unit)

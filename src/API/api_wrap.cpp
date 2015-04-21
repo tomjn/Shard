@@ -1880,23 +1880,28 @@ SWIG_Lua_dostring(lua_State *L, const char* str) {
 /* -------- TYPES TABLE (BEGIN) -------- */
 
 #define SWIGTYPE_p_IAI swig_types[0]
-#define SWIGTYPE_p_IGame swig_types[1]
-#define SWIGTYPE_p_IMap swig_types[2]
-#define SWIGTYPE_p_IMapFeature swig_types[3]
-#define SWIGTYPE_p_IUnit swig_types[4]
-#define SWIGTYPE_p_IUnitType swig_types[5]
-#define SWIGTYPE_p_Position swig_types[6]
-#define SWIGTYPE_p_SResourceData swig_types[7]
-#define SWIGTYPE_p_SResourceTransfer swig_types[8]
-#define SWIGTYPE_p_std__string swig_types[9]
-#define SWIGTYPE_p_std__vectorT_IMapFeature_p_t swig_types[10]
-#define SWIGTYPE_p_std__vectorT_IUnitType_p_t swig_types[11]
-#define SWIGTYPE_p_std__vectorT_IUnit_p_t swig_types[12]
-#define SWIGTYPE_p_std__vectorT_Position_t swig_types[13]
-#define SWIGTYPE_p_std__vectorT_float_t swig_types[14]
-#define SWIGTYPE_p_std__vectorT_int_t swig_types[15]
-static swig_type_info *swig_types[17];
-static swig_module_info swig_module = {swig_types, 16, 0, 0, 0, 0};
+#define SWIGTYPE_p_IDamage swig_types[1]
+#define SWIGTYPE_p_IGame swig_types[2]
+#define SWIGTYPE_p_IMap swig_types[3]
+#define SWIGTYPE_p_IMapFeature swig_types[4]
+#define SWIGTYPE_p_IUnit swig_types[5]
+#define SWIGTYPE_p_IUnitType swig_types[6]
+#define SWIGTYPE_p_Position swig_types[7]
+#define SWIGTYPE_p_Ptr swig_types[8]
+#define SWIGTYPE_p_SResourceData swig_types[9]
+#define SWIGTYPE_p_SResourceTransfer swig_types[10]
+#define SWIGTYPE_p_boost__shared_ptrT_IDamage_t swig_types[11]
+#define SWIGTYPE_p_boost__shared_ptrT_IUnit_t swig_types[12]
+#define SWIGTYPE_p_std__string swig_types[13]
+#define SWIGTYPE_p_std__vectorT_IMapFeature_p_t swig_types[14]
+#define SWIGTYPE_p_std__vectorT_IUnitType_p_t swig_types[15]
+#define SWIGTYPE_p_std__vectorT_IUnit_p_t swig_types[16]
+#define SWIGTYPE_p_std__vectorT_Position_t swig_types[17]
+#define SWIGTYPE_p_std__vectorT_float_t swig_types[18]
+#define SWIGTYPE_p_std__vectorT_int_t swig_types[19]
+#define SWIGTYPE_p_std__vectorT_std__string_t swig_types[20]
+static swig_type_info *swig_types[22];
+static swig_module_info swig_module = {swig_types, 21, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -3343,6 +3348,176 @@ static swig_lua_const_info swig_SResourceTransfer_cls_constants[] = {
 static swig_lua_class *swig_SResourceTransfer_bases[] = {0};
 static const char *swig_SResourceTransfer_base_names[] = {0};
 static swig_lua_class _wrap_class_SResourceTransfer = { "SResourceTransfer", &SWIGTYPE_p_SResourceTransfer,_wrap_new_SResourceTransfer, swig_delete_SResourceTransfer, swig_SResourceTransfer_methods, swig_SResourceTransfer_attributes, { "SResourceTransfer", swig_SResourceTransfer_cls_methods, swig_SResourceTransfer_cls_attributes, swig_SResourceTransfer_cls_constants }, swig_SResourceTransfer_bases, swig_SResourceTransfer_base_names };
+
+static int _wrap_IDamage_Damage(lua_State* L) {
+  int SWIG_arg = 0;
+  IDamage *arg1 = (IDamage *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("IDamage::Damage",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::Damage",1,"IDamage *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IDamage,0))){
+    SWIG_fail_ptr("IDamage_Damage",1,SWIGTYPE_p_IDamage);
+  }
+  
+  result = (float)(arg1)->Damage();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IDamage_Direction(lua_State* L) {
+  int SWIG_arg = 0;
+  IDamage *arg1 = (IDamage *) 0 ;
+  Position result;
+  
+  SWIG_check_num_args("IDamage::Direction",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::Direction",1,"IDamage *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IDamage,0))){
+    SWIG_fail_ptr("IDamage_Direction",1,SWIGTYPE_p_IDamage);
+  }
+  
+  result = (arg1)->Direction();
+  {
+    Position * resultptr = new Position((const Position &) result);
+    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_Position,1); SWIG_arg++;
+  }
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IDamage_DamageType(lua_State* L) {
+  int SWIG_arg = 0;
+  IDamage *arg1 = (IDamage *) 0 ;
+  std::string result;
+  
+  SWIG_check_num_args("IDamage::DamageType",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::DamageType",1,"IDamage *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IDamage,0))){
+    SWIG_fail_ptr("IDamage_DamageType",1,SWIGTYPE_p_IDamage);
+  }
+  
+  result = (arg1)->DamageType();
+  lua_pushlstring(L,(&result)->data(),(&result)->size()); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IDamage_WeaponType(lua_State* L) {
+  int SWIG_arg = 0;
+  IDamage *arg1 = (IDamage *) 0 ;
+  std::string result;
+  
+  SWIG_check_num_args("IDamage::WeaponType",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::WeaponType",1,"IDamage *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IDamage,0))){
+    SWIG_fail_ptr("IDamage_WeaponType",1,SWIGTYPE_p_IDamage);
+  }
+  
+  result = (arg1)->WeaponType();
+  lua_pushlstring(L,(&result)->data(),(&result)->size()); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IDamage_Attacker(lua_State* L) {
+  int SWIG_arg = 0;
+  IDamage *arg1 = (IDamage *) 0 ;
+  IUnit *result = 0 ;
+  
+  SWIG_check_num_args("IDamage::Attacker",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::Attacker",1,"IDamage *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IDamage,0))){
+    SWIG_fail_ptr("IDamage_Attacker",1,SWIGTYPE_p_IDamage);
+  }
+  
+  result = (IUnit *)(arg1)->Attacker();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_IUnit,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_IDamage_Effects(lua_State* L) {
+  int SWIG_arg = 0;
+  IDamage *arg1 = (IDamage *) 0 ;
+  SwigValueWrapper< std::vector< std::string > > result;
+  
+  SWIG_check_num_args("IDamage::Effects",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::Effects",1,"IDamage *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IDamage,0))){
+    SWIG_fail_ptr("IDamage_Effects",1,SWIGTYPE_p_IDamage);
+  }
+  
+  result = (arg1)->Effects();
+  {
+    std::vector< std::string > * resultptr = new std::vector< std::string >((const std::vector< std::string > &) result);
+    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_std__vectorT_std__string_t,1); SWIG_arg++;
+  }
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static void swig_delete_IDamage(void *obj) {
+IDamage *arg1 = (IDamage *) obj;
+delete arg1;
+}
+static swig_lua_method swig_IDamage_methods[] = {
+    {"Damage", _wrap_IDamage_Damage}, 
+    {"Direction", _wrap_IDamage_Direction}, 
+    {"DamageType", _wrap_IDamage_DamageType}, 
+    {"WeaponType", _wrap_IDamage_WeaponType}, 
+    {"Attacker", _wrap_IDamage_Attacker}, 
+    {"Effects", _wrap_IDamage_Effects}, 
+    {0,0}
+};
+static swig_lua_attribute swig_IDamage_attributes[] = {
+    {0,0,0}
+};
+static swig_lua_class *swig_IDamage_bases[] = {0};
+static const char *swig_IDamage_base_names[] = {0};
+static swig_lua_class _wrap_class_IDamage = { "IDamage", &SWIGTYPE_p_IDamage,0, swig_delete_IDamage, swig_IDamage_methods, swig_IDamage_attributes, swig_IDamage_bases, swig_IDamage_base_names };
 
 static int _wrap_IMapFeature_ID(lua_State* L) {
   int SWIG_arg = 0;
@@ -6900,11 +7075,14 @@ static int _wrap_IAI_UnitDamaged(lua_State* L) {
   IAI *arg1 = (IAI *) 0 ;
   IUnit *arg2 = (IUnit *) 0 ;
   IUnit *arg3 = (IUnit *) 0 ;
+  IDamage::Ptr arg4 ;
+  IDamage::Ptr *argp4 ;
   
-  SWIG_check_num_args("IAI::UnitDamaged",3,3)
+  SWIG_check_num_args("IAI::UnitDamaged",4,4)
   if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IAI::UnitDamaged",1,"IAI *");
   if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IAI::UnitDamaged",2,"IUnit *");
   if(!SWIG_isptrtype(L,3)) SWIG_fail_arg("IAI::UnitDamaged",3,"IUnit *");
+  if(!lua_isuserdata(L,4)) SWIG_fail_arg("IAI::UnitDamaged",4,"IDamage::Ptr");
   
   if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_IAI,0))){
     SWIG_fail_ptr("IAI_UnitDamaged",1,SWIGTYPE_p_IAI);
@@ -6920,7 +7098,13 @@ static int _wrap_IAI_UnitDamaged(lua_State* L) {
     SWIG_fail_ptr("IAI_UnitDamaged",3,SWIGTYPE_p_IUnit);
   }
   
-  (arg1)->UnitDamaged(arg2,arg3);
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,4,(void**)&argp4,SWIGTYPE_p_boost__shared_ptrT_IDamage_t,0))){
+    SWIG_fail_ptr("IAI_UnitDamaged",4,SWIGTYPE_p_boost__shared_ptrT_IDamage_t);
+  }
+  arg4 = *argp4;
+  
+  (arg1)->UnitDamaged(arg2,arg3,arg4);
   
   return SWIG_arg;
   
@@ -6965,6 +7149,1927 @@ static swig_lua_const_info swig_IAI_cls_constants[] = {
 static swig_lua_class *swig_IAI_bases[] = {0};
 static const char *swig_IAI_base_names[] = {0};
 static swig_lua_class _wrap_class_IAI = { "IAI", &SWIGTYPE_p_IAI,0, swig_delete_IAI, swig_IAI_methods, swig_IAI_attributes, { "IAI", swig_IAI_cls_methods, swig_IAI_cls_attributes, swig_IAI_cls_constants }, swig_IAI_bases, swig_IAI_base_names };
+
+static int _wrap_damagePtr___deref__(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IDamage > *arg1 = (boost::shared_ptr< IDamage > *) 0 ;
+  IDamage *result = 0 ;
+  
+  SWIG_check_num_args("boost::shared_ptr< IDamage >::operator ->",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("boost::shared_ptr< IDamage >::operator ->",1,"boost::shared_ptr< IDamage > const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t,0))){
+    SWIG_fail_ptr("damagePtr___deref__",1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t);
+  }
+  
+  result = (IDamage *)((boost::shared_ptr< IDamage > const *)arg1)->operator ->();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_IDamage,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_new_damagePtr(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IDamage > *result = 0 ;
+  
+  SWIG_check_num_args("boost::shared_ptr< IDamage >::shared_ptr",0,0)
+  result = (boost::shared_ptr< IDamage > *)new boost::shared_ptr< IDamage >();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_boost__shared_ptrT_IDamage_t,1); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_damagePtr_Damage(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IDamage > *arg1 = (boost::shared_ptr< IDamage > *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("IDamage::Damage",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::Damage",1,"boost::shared_ptr< IDamage > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t,0))){
+    SWIG_fail_ptr("damagePtr_Damage",1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t);
+  }
+  
+  result = (float)(*arg1)->Damage();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_damagePtr_Direction(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IDamage > *arg1 = (boost::shared_ptr< IDamage > *) 0 ;
+  Position result;
+  
+  SWIG_check_num_args("IDamage::Direction",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::Direction",1,"boost::shared_ptr< IDamage > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t,0))){
+    SWIG_fail_ptr("damagePtr_Direction",1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t);
+  }
+  
+  result = (*arg1)->Direction();
+  {
+    Position * resultptr = new Position((const Position &) result);
+    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_Position,1); SWIG_arg++;
+  }
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_damagePtr_DamageType(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IDamage > *arg1 = (boost::shared_ptr< IDamage > *) 0 ;
+  std::string result;
+  
+  SWIG_check_num_args("IDamage::DamageType",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::DamageType",1,"boost::shared_ptr< IDamage > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t,0))){
+    SWIG_fail_ptr("damagePtr_DamageType",1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t);
+  }
+  
+  result = (*arg1)->DamageType();
+  lua_pushlstring(L,(&result)->data(),(&result)->size()); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_damagePtr_WeaponType(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IDamage > *arg1 = (boost::shared_ptr< IDamage > *) 0 ;
+  std::string result;
+  
+  SWIG_check_num_args("IDamage::WeaponType",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::WeaponType",1,"boost::shared_ptr< IDamage > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t,0))){
+    SWIG_fail_ptr("damagePtr_WeaponType",1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t);
+  }
+  
+  result = (*arg1)->WeaponType();
+  lua_pushlstring(L,(&result)->data(),(&result)->size()); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_damagePtr_Attacker(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IDamage > *arg1 = (boost::shared_ptr< IDamage > *) 0 ;
+  IUnit *result = 0 ;
+  
+  SWIG_check_num_args("IDamage::Attacker",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::Attacker",1,"boost::shared_ptr< IDamage > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t,0))){
+    SWIG_fail_ptr("damagePtr_Attacker",1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t);
+  }
+  
+  result = (IUnit *)(*arg1)->Attacker();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_IUnit,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_damagePtr_Effects(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IDamage > *arg1 = (boost::shared_ptr< IDamage > *) 0 ;
+  SwigValueWrapper< std::vector< std::string > > result;
+  
+  SWIG_check_num_args("IDamage::Effects",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IDamage::Effects",1,"boost::shared_ptr< IDamage > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t,0))){
+    SWIG_fail_ptr("damagePtr_Effects",1,SWIGTYPE_p_boost__shared_ptrT_IDamage_t);
+  }
+  
+  result = (*arg1)->Effects();
+  {
+    std::vector< std::string > * resultptr = new std::vector< std::string >((const std::vector< std::string > &) result);
+    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_std__vectorT_std__string_t,1); SWIG_arg++;
+  }
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static void swig_delete_damagePtr(void *obj) {
+boost::shared_ptr< IDamage > *arg1 = (boost::shared_ptr< IDamage > *) obj;
+delete arg1;
+}
+static swig_lua_method swig_boost_shared_ptr_Sl_IDamage_Sg__methods[] = {
+    {"__deref__", _wrap_damagePtr___deref__}, 
+    {"Damage", _wrap_damagePtr_Damage}, 
+    {"Direction", _wrap_damagePtr_Direction}, 
+    {"DamageType", _wrap_damagePtr_DamageType}, 
+    {"WeaponType", _wrap_damagePtr_WeaponType}, 
+    {"Attacker", _wrap_damagePtr_Attacker}, 
+    {"Effects", _wrap_damagePtr_Effects}, 
+    {0,0}
+};
+static swig_lua_attribute swig_boost_shared_ptr_Sl_IDamage_Sg__attributes[] = {
+    {0,0,0}
+};
+static swig_lua_class *swig_boost_shared_ptr_Sl_IDamage_Sg__bases[] = {0};
+static const char *swig_boost_shared_ptr_Sl_IDamage_Sg__base_names[] = {0};
+static swig_lua_class _wrap_class_boost_shared_ptr_Sl_IDamage_Sg_ = { "damagePtr", &SWIGTYPE_p_boost__shared_ptrT_IDamage_t,_wrap_new_damagePtr, swig_delete_damagePtr, swig_boost_shared_ptr_Sl_IDamage_Sg__methods, swig_boost_shared_ptr_Sl_IDamage_Sg__attributes, swig_boost_shared_ptr_Sl_IDamage_Sg__bases, swig_boost_shared_ptr_Sl_IDamage_Sg__base_names };
+
+static int _wrap_unitPtr___deref__(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnit *result = 0 ;
+  
+  SWIG_check_num_args("boost::shared_ptr< IUnit >::operator ->",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("boost::shared_ptr< IUnit >::operator ->",1,"boost::shared_ptr< IUnit > const *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr___deref__",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (IUnit *)((boost::shared_ptr< IUnit > const *)arg1)->operator ->();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_IUnit,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_new_unitPtr(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *result = 0 ;
+  
+  SWIG_check_num_args("boost::shared_ptr< IUnit >::shared_ptr",0,0)
+  result = (boost::shared_ptr< IUnit > *)new boost::shared_ptr< IUnit >();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,1); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_ID(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  int result;
+  
+  SWIG_check_num_args("IUnit::ID",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::ID",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_ID",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (int)(*arg1)->ID();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Team(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  int result;
+  
+  SWIG_check_num_args("IUnit::Team",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Team",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Team",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (int)(*arg1)->Team();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Name(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  std::string result;
+  
+  SWIG_check_num_args("IUnit::Name",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Name",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Name",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (*arg1)->Name();
+  lua_pushlstring(L,(&result)->data(),(&result)->size()); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_IsAlive(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::IsAlive",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::IsAlive",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_IsAlive",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (bool)(*arg1)->IsAlive();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_IsCloaked(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::IsCloaked",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::IsCloaked",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_IsCloaked",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (bool)(*arg1)->IsCloaked();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Type(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnitType *result = 0 ;
+  
+  SWIG_check_num_args("IUnit::Type",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Type",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Type",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (IUnitType *)(*arg1)->Type();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_IUnitType,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_CanMove(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::CanMove",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::CanMove",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_CanMove",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (bool)(*arg1)->CanMove();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_CanDeploy(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::CanDeploy",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::CanDeploy",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_CanDeploy",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (bool)(*arg1)->CanDeploy();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_CanBuild__SWIG_0(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::CanBuild",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::CanBuild",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_CanBuild",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (bool)(*arg1)->CanBuild();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_CanBuild__SWIG_1(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnitType *arg2 = (IUnitType *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::CanBuild",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::CanBuild",1,"boost::shared_ptr< IUnit > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::CanBuild",2,"IUnitType *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_CanBuild",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("unitPtr_CanBuild",2,SWIGTYPE_p_IUnitType);
+  }
+  
+  result = (bool)(*arg1)->CanBuild(arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_CanBuild(lua_State* L) {
+  int argc;
+  int argv[3]={
+    1,2,3
+  };
+  
+  argc = lua_gettop(L);
+  if (argc == 1) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      return _wrap_unitPtr_CanBuild__SWIG_0(L);
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        void *ptr;
+        if (SWIG_isptrtype(L,argv[1])==0 || SWIG_ConvertPtr(L,argv[1], (void **) &ptr, SWIGTYPE_p_IUnitType, 0)) {
+          _v = 0;
+        } else {
+          _v = 1;
+        }
+      }
+      if (_v) {
+        return _wrap_unitPtr_CanBuild__SWIG_1(L);
+      }
+    }
+  }
+  
+  lua_pushstring(L,"Wrong arguments for overloaded function 'unitPtr_CanBuild'\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    IUnit::CanBuild()\n"
+    "    IUnit::CanBuild(IUnitType *)\n");
+  lua_error(L);return 0;
+}
+
+
+static int _wrap_unitPtr_IsBeingBuilt(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::IsBeingBuilt",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::IsBeingBuilt",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_IsBeingBuilt",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (bool)(*arg1)->IsBeingBuilt();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_CanAssistBuilding(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnit *arg2 = (IUnit *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::CanAssistBuilding",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::CanAssistBuilding",1,"boost::shared_ptr< IUnit > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::CanAssistBuilding",2,"IUnit *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_CanAssistBuilding",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("unitPtr_CanAssistBuilding",2,SWIGTYPE_p_IUnit);
+  }
+  
+  result = (bool)(*arg1)->CanAssistBuilding(arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_CanMoveWhenDeployed(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::CanMoveWhenDeployed",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::CanMoveWhenDeployed",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_CanMoveWhenDeployed",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (bool)(*arg1)->CanMoveWhenDeployed();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_CanFireWhenDeployed(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::CanFireWhenDeployed",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::CanFireWhenDeployed",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_CanFireWhenDeployed",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (bool)(*arg1)->CanFireWhenDeployed();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_CanBuildWhenDeployed(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::CanBuildWhenDeployed",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::CanBuildWhenDeployed",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_CanBuildWhenDeployed",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (bool)(*arg1)->CanBuildWhenDeployed();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_CanBuildWhenNotDeployed(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::CanBuildWhenNotDeployed",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::CanBuildWhenNotDeployed",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_CanBuildWhenNotDeployed",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (bool)(*arg1)->CanBuildWhenNotDeployed();
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Wait(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  int arg2 ;
+  
+  SWIG_check_num_args("IUnit::Wait",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Wait",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IUnit::Wait",2,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Wait",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  (*arg1)->Wait(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Stop(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  
+  SWIG_check_num_args("IUnit::Stop",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Stop",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Stop",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  (*arg1)->Stop();
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Move(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  Position arg2 ;
+  Position *argp2 ;
+  
+  SWIG_check_num_args("IUnit::Move",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Move",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isuserdata(L,2)) SWIG_fail_arg("IUnit::Move",2,"Position");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Move",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&argp2,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("unitPtr_Move",2,SWIGTYPE_p_Position);
+  }
+  arg2 = *argp2;
+  
+  (*arg1)->Move(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_MoveAndFire(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  Position arg2 ;
+  Position *argp2 ;
+  
+  SWIG_check_num_args("IUnit::MoveAndFire",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::MoveAndFire",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isuserdata(L,2)) SWIG_fail_arg("IUnit::MoveAndFire",2,"Position");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_MoveAndFire",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&argp2,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("unitPtr_MoveAndFire",2,SWIGTYPE_p_Position);
+  }
+  arg2 = *argp2;
+  
+  (*arg1)->MoveAndFire(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Build__SWIG_0(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnitType *arg2 = (IUnitType *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Build",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Build",1,"boost::shared_ptr< IUnit > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::Build",2,"IUnitType *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Build",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("unitPtr_Build",2,SWIGTYPE_p_IUnitType);
+  }
+  
+  result = (bool)(*arg1)->Build(arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Build__SWIG_1(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  std::string arg2 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Build",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Build",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isstring(L,2)) SWIG_fail_arg("IUnit::Build",2,"std::string");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Build",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  (&arg2)->assign(lua_tostring(L,2),lua_rawlen(L,2));
+  result = (bool)(*arg1)->Build(arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Build__SWIG_2(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  std::string arg2 ;
+  Position arg3 ;
+  Position *argp3 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Build",3,3)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Build",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isstring(L,2)) SWIG_fail_arg("IUnit::Build",2,"std::string");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::Build",3,"Position");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Build",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  (&arg2)->assign(lua_tostring(L,2),lua_rawlen(L,2));
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("unitPtr_Build",3,SWIGTYPE_p_Position);
+  }
+  arg3 = *argp3;
+  
+  result = (bool)(*arg1)->Build(arg2,arg3);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Build__SWIG_3(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnitType *arg2 = (IUnitType *) 0 ;
+  Position arg3 ;
+  Position *argp3 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Build",3,3)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Build",1,"boost::shared_ptr< IUnit > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::Build",2,"IUnitType *");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::Build",3,"Position");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Build",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("unitPtr_Build",2,SWIGTYPE_p_IUnitType);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("unitPtr_Build",3,SWIGTYPE_p_Position);
+  }
+  arg3 = *argp3;
+  
+  result = (bool)(*arg1)->Build(arg2,arg3);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Build__SWIG_4(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  std::string arg2 ;
+  Position arg3 ;
+  int arg4 ;
+  Position *argp3 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Build",4,4)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Build",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isstring(L,2)) SWIG_fail_arg("IUnit::Build",2,"std::string");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::Build",3,"Position");
+  if(!lua_isnumber(L,4)) SWIG_fail_arg("IUnit::Build",4,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Build",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  (&arg2)->assign(lua_tostring(L,2),lua_rawlen(L,2));
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("unitPtr_Build",3,SWIGTYPE_p_Position);
+  }
+  arg3 = *argp3;
+  
+  arg4 = (int)lua_tonumber(L, 4);
+  result = (bool)(*arg1)->Build(arg2,arg3,arg4);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Build__SWIG_5(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnitType *arg2 = (IUnitType *) 0 ;
+  Position arg3 ;
+  int arg4 ;
+  Position *argp3 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Build",4,4)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Build",1,"boost::shared_ptr< IUnit > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::Build",2,"IUnitType *");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::Build",3,"Position");
+  if(!lua_isnumber(L,4)) SWIG_fail_arg("IUnit::Build",4,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Build",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("unitPtr_Build",2,SWIGTYPE_p_IUnitType);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("unitPtr_Build",3,SWIGTYPE_p_Position);
+  }
+  arg3 = *argp3;
+  
+  arg4 = (int)lua_tonumber(L, 4);
+  result = (bool)(*arg1)->Build(arg2,arg3,arg4);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Build(lua_State* L) {
+  int argc;
+  int argv[5]={
+    1,2,3,4,5
+  };
+  
+  argc = lua_gettop(L);
+  if (argc == 2) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        void *ptr;
+        if (SWIG_isptrtype(L,argv[1])==0 || SWIG_ConvertPtr(L,argv[1], (void **) &ptr, SWIGTYPE_p_IUnitType, 0)) {
+          _v = 0;
+        } else {
+          _v = 1;
+        }
+      }
+      if (_v) {
+        return _wrap_unitPtr_Build__SWIG_0(L);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isstring(L,argv[1]);
+      }
+      if (_v) {
+        return _wrap_unitPtr_Build__SWIG_1(L);
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        void *ptr;
+        if (SWIG_isptrtype(L,argv[1])==0 || SWIG_ConvertPtr(L,argv[1], (void **) &ptr, SWIGTYPE_p_IUnitType, 0)) {
+          _v = 0;
+        } else {
+          _v = 1;
+        }
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_Position, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          return _wrap_unitPtr_Build__SWIG_3(L);
+        }
+      }
+    }
+  }
+  if (argc == 3) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isstring(L,argv[1]);
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_Position, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          return _wrap_unitPtr_Build__SWIG_2(L);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        void *ptr;
+        if (SWIG_isptrtype(L,argv[1])==0 || SWIG_ConvertPtr(L,argv[1], (void **) &ptr, SWIGTYPE_p_IUnitType, 0)) {
+          _v = 0;
+        } else {
+          _v = 1;
+        }
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_Position, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          {
+            _v = lua_isnumber(L,argv[3]);
+          }
+          if (_v) {
+            return _wrap_unitPtr_Build__SWIG_5(L);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isstring(L,argv[1]);
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_Position, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          {
+            _v = lua_isnumber(L,argv[3]);
+          }
+          if (_v) {
+            return _wrap_unitPtr_Build__SWIG_4(L);
+          }
+        }
+      }
+    }
+  }
+  
+  lua_pushstring(L,"Wrong arguments for overloaded function 'unitPtr_Build'\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    IUnit::Build(IUnitType *)\n"
+    "    IUnit::Build(std::string)\n"
+    "    IUnit::Build(std::string,Position)\n"
+    "    IUnit::Build(IUnitType *,Position)\n"
+    "    IUnit::Build(std::string,Position,int)\n"
+    "    IUnit::Build(IUnitType *,Position,int)\n");
+  lua_error(L);return 0;
+}
+
+
+static int _wrap_unitPtr_AreaReclaim(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  Position arg2 ;
+  double arg3 ;
+  Position *argp2 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::AreaReclaim",3,3)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::AreaReclaim",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isuserdata(L,2)) SWIG_fail_arg("IUnit::AreaReclaim",2,"Position");
+  if(!lua_isnumber(L,3)) SWIG_fail_arg("IUnit::AreaReclaim",3,"double");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_AreaReclaim",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&argp2,SWIGTYPE_p_Position,0))){
+    SWIG_fail_ptr("unitPtr_AreaReclaim",2,SWIGTYPE_p_Position);
+  }
+  arg2 = *argp2;
+  
+  arg3 = (double)lua_tonumber(L, 3);
+  result = (bool)(*arg1)->AreaReclaim(arg2,arg3);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Reclaim__SWIG_0(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IMapFeature *arg2 = (IMapFeature *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Reclaim",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Reclaim",1,"boost::shared_ptr< IUnit > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::Reclaim",2,"IMapFeature *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Reclaim",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IMapFeature,0))){
+    SWIG_fail_ptr("unitPtr_Reclaim",2,SWIGTYPE_p_IMapFeature);
+  }
+  
+  result = (bool)(*arg1)->Reclaim(arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Reclaim__SWIG_1(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnit *arg2 = (IUnit *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Reclaim",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Reclaim",1,"boost::shared_ptr< IUnit > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::Reclaim",2,"IUnit *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Reclaim",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("unitPtr_Reclaim",2,SWIGTYPE_p_IUnit);
+  }
+  
+  result = (bool)(*arg1)->Reclaim(arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Reclaim(lua_State* L) {
+  int argc;
+  int argv[3]={
+    1,2,3
+  };
+  
+  argc = lua_gettop(L);
+  if (argc == 2) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        void *ptr;
+        if (SWIG_isptrtype(L,argv[1])==0 || SWIG_ConvertPtr(L,argv[1], (void **) &ptr, SWIGTYPE_p_IMapFeature, 0)) {
+          _v = 0;
+        } else {
+          _v = 1;
+        }
+      }
+      if (_v) {
+        return _wrap_unitPtr_Reclaim__SWIG_0(L);
+      }
+    }
+  }
+  if (argc == 2) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        void *ptr;
+        if (SWIG_isptrtype(L,argv[1])==0 || SWIG_ConvertPtr(L,argv[1], (void **) &ptr, SWIGTYPE_p_IUnit, 0)) {
+          _v = 0;
+        } else {
+          _v = 1;
+        }
+      }
+      if (_v) {
+        return _wrap_unitPtr_Reclaim__SWIG_1(L);
+      }
+    }
+  }
+  
+  lua_pushstring(L,"Wrong arguments for overloaded function 'unitPtr_Reclaim'\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    IUnit::Reclaim(IMapFeature *)\n"
+    "    IUnit::Reclaim(IUnit *)\n");
+  lua_error(L);return 0;
+}
+
+
+static int _wrap_unitPtr_Attack(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnit *arg2 = (IUnit *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Attack",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Attack",1,"boost::shared_ptr< IUnit > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::Attack",2,"IUnit *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Attack",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("unitPtr_Attack",2,SWIGTYPE_p_IUnit);
+  }
+  
+  result = (bool)(*arg1)->Attack(arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_Repair(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnit *arg2 = (IUnit *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::Repair",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::Repair",1,"boost::shared_ptr< IUnit > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::Repair",2,"IUnit *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_Repair",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnit,0))){
+    SWIG_fail_ptr("unitPtr_Repair",2,SWIGTYPE_p_IUnit);
+  }
+  
+  result = (bool)(*arg1)->Repair(arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_MorphInto(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  IUnitType *arg2 = (IUnitType *) 0 ;
+  bool result;
+  
+  SWIG_check_num_args("IUnit::MorphInto",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::MorphInto",1,"boost::shared_ptr< IUnit > *");
+  if(!SWIG_isptrtype(L,2)) SWIG_fail_arg("IUnit::MorphInto",2,"IUnitType *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_MorphInto",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,2,(void**)&arg2,SWIGTYPE_p_IUnitType,0))){
+    SWIG_fail_ptr("unitPtr_MorphInto",2,SWIGTYPE_p_IUnitType);
+  }
+  
+  result = (bool)(*arg1)->MorphInto(arg2);
+  lua_pushboolean(L,(int)(result!=0)); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_GetPosition(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  Position result;
+  
+  SWIG_check_num_args("IUnit::GetPosition",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::GetPosition",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_GetPosition",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (*arg1)->GetPosition();
+  {
+    Position * resultptr = new Position((const Position &) result);
+    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_Position,1); SWIG_arg++;
+  }
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_GetHealth(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("IUnit::GetHealth",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::GetHealth",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_GetHealth",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (float)(*arg1)->GetHealth();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_GetMaxHealth(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("IUnit::GetMaxHealth",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::GetMaxHealth",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_GetMaxHealth",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (float)(*arg1)->GetMaxHealth();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_WeaponCount(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  int result;
+  
+  SWIG_check_num_args("IUnit::WeaponCount",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::WeaponCount",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_WeaponCount",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (int)(*arg1)->WeaponCount();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_MaxWeaponsRange(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  float result;
+  
+  SWIG_check_num_args("IUnit::MaxWeaponsRange",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::MaxWeaponsRange",1,"boost::shared_ptr< IUnit > *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_MaxWeaponsRange",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  result = (float)(*arg1)->MaxWeaponsRange();
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_GetResourceUsage(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  int arg2 ;
+  SResourceTransfer result;
+  
+  SWIG_check_num_args("IUnit::GetResourceUsage",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::GetResourceUsage",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IUnit::GetResourceUsage",2,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_GetResourceUsage",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  result = (*arg1)->GetResourceUsage(arg2);
+  {
+    SResourceTransfer * resultptr = new SResourceTransfer((const SResourceTransfer &) result);
+    SWIG_NewPointerObj(L,(void *) resultptr,SWIGTYPE_p_SResourceTransfer,1); SWIG_arg++;
+  }
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_ExecuteCustomCommand__SWIG_0(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  int arg2 ;
+  std::vector< float > arg3 ;
+  short arg4 ;
+  int arg5 ;
+  std::vector< float > *argp3 ;
+  
+  SWIG_check_num_args("IUnit::ExecuteCustomCommand",5,5)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",2,"int");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",3,"std::vector< float >");
+  if(!lua_isnumber(L,4)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",4,"short");
+  if(!lua_isnumber(L,5)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",5,"int");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_ExecuteCustomCommand",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_std__vectorT_float_t,0))){
+    SWIG_fail_ptr("unitPtr_ExecuteCustomCommand",3,SWIGTYPE_p_std__vectorT_float_t);
+  }
+  arg3 = *argp3;
+  
+  arg4 = (short)lua_tonumber(L, 4);
+  arg5 = (int)lua_tonumber(L, 5);
+  (*arg1)->ExecuteCustomCommand(arg2,arg3,arg4,arg5);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_ExecuteCustomCommand__SWIG_1(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  int arg2 ;
+  std::vector< float > arg3 ;
+  short arg4 ;
+  std::vector< float > *argp3 ;
+  
+  SWIG_check_num_args("IUnit::ExecuteCustomCommand",4,4)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",2,"int");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",3,"std::vector< float >");
+  if(!lua_isnumber(L,4)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",4,"short");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_ExecuteCustomCommand",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_std__vectorT_float_t,0))){
+    SWIG_fail_ptr("unitPtr_ExecuteCustomCommand",3,SWIGTYPE_p_std__vectorT_float_t);
+  }
+  arg3 = *argp3;
+  
+  arg4 = (short)lua_tonumber(L, 4);
+  (*arg1)->ExecuteCustomCommand(arg2,arg3,arg4);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_ExecuteCustomCommand__SWIG_2(lua_State* L) {
+  int SWIG_arg = 0;
+  boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) 0 ;
+  int arg2 ;
+  std::vector< float > arg3 ;
+  std::vector< float > *argp3 ;
+  
+  SWIG_check_num_args("IUnit::ExecuteCustomCommand",3,3)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",1,"boost::shared_ptr< IUnit > *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",2,"int");
+  if(!lua_isuserdata(L,3)) SWIG_fail_arg("IUnit::ExecuteCustomCommand",3,"std::vector< float >");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t,0))){
+    SWIG_fail_ptr("unitPtr_ExecuteCustomCommand",1,SWIGTYPE_p_boost__shared_ptrT_IUnit_t);
+  }
+  
+  arg2 = (int)lua_tonumber(L, 2);
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,3,(void**)&argp3,SWIGTYPE_p_std__vectorT_float_t,0))){
+    SWIG_fail_ptr("unitPtr_ExecuteCustomCommand",3,SWIGTYPE_p_std__vectorT_float_t);
+  }
+  arg3 = *argp3;
+  
+  (*arg1)->ExecuteCustomCommand(arg2,arg3);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_unitPtr_ExecuteCustomCommand(lua_State* L) {
+  int argc;
+  int argv[6]={
+    1,2,3,4,5,6
+  };
+  
+  argc = lua_gettop(L);
+  if (argc == 3) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isnumber(L,argv[1]);
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_std__vectorT_float_t, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          return _wrap_unitPtr_ExecuteCustomCommand__SWIG_2(L);
+        }
+      }
+    }
+  }
+  if (argc == 4) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isnumber(L,argv[1]);
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_std__vectorT_float_t, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          {
+            _v = lua_isnumber(L,argv[3]);
+          }
+          if (_v) {
+            return _wrap_unitPtr_ExecuteCustomCommand__SWIG_1(L);
+          }
+        }
+      }
+    }
+  }
+  if (argc == 5) {
+    int _v;
+    {
+      void *ptr;
+      if (SWIG_isptrtype(L,argv[0])==0 || SWIG_ConvertPtr(L,argv[0], (void **) &ptr, SWIGTYPE_p_boost__shared_ptrT_IUnit_t, 0)) {
+        _v = 0;
+      } else {
+        _v = 1;
+      }
+    }
+    if (_v) {
+      {
+        _v = lua_isnumber(L,argv[1]);
+      }
+      if (_v) {
+        {
+          void *ptr;
+          if (lua_isuserdata(L,argv[2])==0 || SWIG_ConvertPtr(L,argv[2], (void **) &ptr, SWIGTYPE_p_std__vectorT_float_t, 0)) {
+            _v = 0;
+          } else {
+            _v = 1;
+          }
+        }
+        if (_v) {
+          {
+            _v = lua_isnumber(L,argv[3]);
+          }
+          if (_v) {
+            {
+              _v = lua_isnumber(L,argv[4]);
+            }
+            if (_v) {
+              return _wrap_unitPtr_ExecuteCustomCommand__SWIG_0(L);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  lua_pushstring(L,"Wrong arguments for overloaded function 'unitPtr_ExecuteCustomCommand'\n"
+    "  Possible C/C++ prototypes are:\n"
+    "    IUnit::ExecuteCustomCommand(int,std::vector< float >,short,int)\n"
+    "    IUnit::ExecuteCustomCommand(int,std::vector< float >,short)\n"
+    "    IUnit::ExecuteCustomCommand(int,std::vector< float >)\n");
+  lua_error(L);return 0;
+}
+
+
+static void swig_delete_unitPtr(void *obj) {
+boost::shared_ptr< IUnit > *arg1 = (boost::shared_ptr< IUnit > *) obj;
+delete arg1;
+}
+static swig_lua_method swig_boost_shared_ptr_Sl_IUnit_Sg__methods[] = {
+    {"__deref__", _wrap_unitPtr___deref__}, 
+    {"ID", _wrap_unitPtr_ID}, 
+    {"Team", _wrap_unitPtr_Team}, 
+    {"Name", _wrap_unitPtr_Name}, 
+    {"IsAlive", _wrap_unitPtr_IsAlive}, 
+    {"IsCloaked", _wrap_unitPtr_IsCloaked}, 
+    {"Type", _wrap_unitPtr_Type}, 
+    {"CanMove", _wrap_unitPtr_CanMove}, 
+    {"CanDeploy", _wrap_unitPtr_CanDeploy}, 
+    {"CanBuild", _wrap_unitPtr_CanBuild}, 
+    {"IsBeingBuilt", _wrap_unitPtr_IsBeingBuilt}, 
+    {"CanAssistBuilding", _wrap_unitPtr_CanAssistBuilding}, 
+    {"CanMoveWhenDeployed", _wrap_unitPtr_CanMoveWhenDeployed}, 
+    {"CanFireWhenDeployed", _wrap_unitPtr_CanFireWhenDeployed}, 
+    {"CanBuildWhenDeployed", _wrap_unitPtr_CanBuildWhenDeployed}, 
+    {"CanBuildWhenNotDeployed", _wrap_unitPtr_CanBuildWhenNotDeployed}, 
+    {"Wait", _wrap_unitPtr_Wait}, 
+    {"Stop", _wrap_unitPtr_Stop}, 
+    {"Move", _wrap_unitPtr_Move}, 
+    {"MoveAndFire", _wrap_unitPtr_MoveAndFire}, 
+    {"Build", _wrap_unitPtr_Build}, 
+    {"AreaReclaim", _wrap_unitPtr_AreaReclaim}, 
+    {"Reclaim", _wrap_unitPtr_Reclaim}, 
+    {"Attack", _wrap_unitPtr_Attack}, 
+    {"Repair", _wrap_unitPtr_Repair}, 
+    {"MorphInto", _wrap_unitPtr_MorphInto}, 
+    {"GetPosition", _wrap_unitPtr_GetPosition}, 
+    {"GetHealth", _wrap_unitPtr_GetHealth}, 
+    {"GetMaxHealth", _wrap_unitPtr_GetMaxHealth}, 
+    {"WeaponCount", _wrap_unitPtr_WeaponCount}, 
+    {"MaxWeaponsRange", _wrap_unitPtr_MaxWeaponsRange}, 
+    {"GetResourceUsage", _wrap_unitPtr_GetResourceUsage}, 
+    {"ExecuteCustomCommand", _wrap_unitPtr_ExecuteCustomCommand}, 
+    {0,0}
+};
+static swig_lua_attribute swig_boost_shared_ptr_Sl_IUnit_Sg__attributes[] = {
+    {0,0,0}
+};
+static swig_lua_class *swig_boost_shared_ptr_Sl_IUnit_Sg__bases[] = {0};
+static const char *swig_boost_shared_ptr_Sl_IUnit_Sg__base_names[] = {0};
+static swig_lua_class _wrap_class_boost_shared_ptr_Sl_IUnit_Sg_ = { "unitPtr", &SWIGTYPE_p_boost__shared_ptrT_IUnit_t,_wrap_new_unitPtr, swig_delete_unitPtr, swig_boost_shared_ptr_Sl_IUnit_Sg__methods, swig_boost_shared_ptr_Sl_IUnit_Sg__attributes, swig_boost_shared_ptr_Sl_IUnit_Sg__bases, swig_boost_shared_ptr_Sl_IUnit_Sg__base_names };
 
 static int _wrap_new_vectorUnitTypes__SWIG_0(lua_State* L) {
   int SWIG_arg = 0;
@@ -9231,14 +11336,18 @@ static swig_lua_const_info swig_constants[] = {
 /* -------- TYPE CONVERSION AND EQUIVALENCE RULES (BEGIN) -------- */
 
 static swig_type_info _swigt__p_IAI = {"_p_IAI", "IAI *", 0, 0, (void*)&_wrap_class_IAI, 0};
+static swig_type_info _swigt__p_IDamage = {"_p_IDamage", "IDamage *", 0, 0, (void*)&_wrap_class_IDamage, 0};
 static swig_type_info _swigt__p_IGame = {"_p_IGame", "IGame *", 0, 0, (void*)&_wrap_class_IGame, 0};
 static swig_type_info _swigt__p_IMap = {"_p_IMap", "IMap *", 0, 0, (void*)&_wrap_class_IMap, 0};
 static swig_type_info _swigt__p_IMapFeature = {"_p_IMapFeature", "IMapFeature *", 0, 0, (void*)&_wrap_class_IMapFeature, 0};
 static swig_type_info _swigt__p_IUnit = {"_p_IUnit", "IUnit *", 0, 0, (void*)&_wrap_class_IUnit, 0};
 static swig_type_info _swigt__p_IUnitType = {"_p_IUnitType", "IUnitType *", 0, 0, (void*)&_wrap_class_IUnitType, 0};
 static swig_type_info _swigt__p_Position = {"_p_Position", "Position *", 0, 0, (void*)&_wrap_class_Position, 0};
+static swig_type_info _swigt__p_Ptr = {"_p_Ptr", "Ptr *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_SResourceData = {"_p_SResourceData", "SResourceData *", 0, 0, (void*)&_wrap_class_SResourceData, 0};
 static swig_type_info _swigt__p_SResourceTransfer = {"_p_SResourceTransfer", "SResourceTransfer *", 0, 0, (void*)&_wrap_class_SResourceTransfer, 0};
+static swig_type_info _swigt__p_boost__shared_ptrT_IDamage_t = {"_p_boost__shared_ptrT_IDamage_t", "boost::shared_ptr< IDamage > *|IDamage::Ptr *", 0, 0, (void*)&_wrap_class_boost_shared_ptr_Sl_IDamage_Sg_, 0};
+static swig_type_info _swigt__p_boost__shared_ptrT_IUnit_t = {"_p_boost__shared_ptrT_IUnit_t", "boost::shared_ptr< IUnit > *", 0, 0, (void*)&_wrap_class_boost_shared_ptr_Sl_IUnit_Sg_, 0};
 static swig_type_info _swigt__p_std__string = {"_p_std__string", "std::string *", 0, 0, (void*)&_wrap_class_std_string, 0};
 static swig_type_info _swigt__p_std__vectorT_IMapFeature_p_t = {"_p_std__vectorT_IMapFeature_p_t", "std::vector< IMapFeature * > *", 0, 0, (void*)&_wrap_class_std_vector_Sl_IMapFeature_Sm__Sg_, 0};
 static swig_type_info _swigt__p_std__vectorT_IUnitType_p_t = {"_p_std__vectorT_IUnitType_p_t", "std::vector< IUnitType * > *", 0, 0, (void*)&_wrap_class_std_vector_Sl_IUnitType_Sm__Sg_, 0};
@@ -9246,17 +11355,22 @@ static swig_type_info _swigt__p_std__vectorT_IUnit_p_t = {"_p_std__vectorT_IUnit
 static swig_type_info _swigt__p_std__vectorT_Position_t = {"_p_std__vectorT_Position_t", "std::vector< Position > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_float_t = {"_p_std__vectorT_float_t", "std::vector< float > *", 0, 0, (void*)&_wrap_class_std_vector_Sl_float_Sg_, 0};
 static swig_type_info _swigt__p_std__vectorT_int_t = {"_p_std__vectorT_int_t", "std::vector< int > *", 0, 0, (void*)&_wrap_class_std_vector_Sl_int_Sg_, 0};
+static swig_type_info _swigt__p_std__vectorT_std__string_t = {"_p_std__vectorT_std__string_t", "std::vector< std::string > *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
   &_swigt__p_IAI,
+  &_swigt__p_IDamage,
   &_swigt__p_IGame,
   &_swigt__p_IMap,
   &_swigt__p_IMapFeature,
   &_swigt__p_IUnit,
   &_swigt__p_IUnitType,
   &_swigt__p_Position,
+  &_swigt__p_Ptr,
   &_swigt__p_SResourceData,
   &_swigt__p_SResourceTransfer,
+  &_swigt__p_boost__shared_ptrT_IDamage_t,
+  &_swigt__p_boost__shared_ptrT_IUnit_t,
   &_swigt__p_std__string,
   &_swigt__p_std__vectorT_IMapFeature_p_t,
   &_swigt__p_std__vectorT_IUnitType_p_t,
@@ -9264,17 +11378,22 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__vectorT_Position_t,
   &_swigt__p_std__vectorT_float_t,
   &_swigt__p_std__vectorT_int_t,
+  &_swigt__p_std__vectorT_std__string_t,
 };
 
 static swig_cast_info _swigc__p_IAI[] = {  {&_swigt__p_IAI, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_IDamage[] = {  {&_swigt__p_IDamage, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IGame[] = {  {&_swigt__p_IGame, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IMap[] = {  {&_swigt__p_IMap, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IMapFeature[] = {  {&_swigt__p_IMapFeature, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IUnit[] = {  {&_swigt__p_IUnit, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_IUnitType[] = {  {&_swigt__p_IUnitType, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Position[] = {  {&_swigt__p_Position, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Ptr[] = {  {&_swigt__p_Ptr, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SResourceData[] = {  {&_swigt__p_SResourceData, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_SResourceTransfer[] = {  {&_swigt__p_SResourceTransfer, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_boost__shared_ptrT_IDamage_t[] = {  {&_swigt__p_boost__shared_ptrT_IDamage_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_boost__shared_ptrT_IUnit_t[] = {  {&_swigt__p_boost__shared_ptrT_IUnit_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__string[] = {  {&_swigt__p_std__string, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_IMapFeature_p_t[] = {  {&_swigt__p_std__vectorT_IMapFeature_p_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_IUnitType_p_t[] = {  {&_swigt__p_std__vectorT_IUnitType_p_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -9282,17 +11401,22 @@ static swig_cast_info _swigc__p_std__vectorT_IUnit_p_t[] = {  {&_swigt__p_std__v
 static swig_cast_info _swigc__p_std__vectorT_Position_t[] = {  {&_swigt__p_std__vectorT_Position_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_float_t[] = {  {&_swigt__p_std__vectorT_float_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_int_t[] = {  {&_swigt__p_std__vectorT_int_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_std__string_t[] = {  {&_swigt__p_std__vectorT_std__string_t, 0, 0, 0},{0, 0, 0, 0}};
 
 static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_IAI,
+  _swigc__p_IDamage,
   _swigc__p_IGame,
   _swigc__p_IMap,
   _swigc__p_IMapFeature,
   _swigc__p_IUnit,
   _swigc__p_IUnitType,
   _swigc__p_Position,
+  _swigc__p_Ptr,
   _swigc__p_SResourceData,
   _swigc__p_SResourceTransfer,
+  _swigc__p_boost__shared_ptrT_IDamage_t,
+  _swigc__p_boost__shared_ptrT_IUnit_t,
   _swigc__p_std__string,
   _swigc__p_std__vectorT_IMapFeature_p_t,
   _swigc__p_std__vectorT_IUnitType_p_t,
@@ -9300,6 +11424,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__vectorT_Position_t,
   _swigc__p_std__vectorT_float_t,
   _swigc__p_std__vectorT_int_t,
+  _swigc__p_std__vectorT_std__string_t,
 };
 
 

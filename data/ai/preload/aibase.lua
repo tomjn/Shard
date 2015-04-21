@@ -34,7 +34,7 @@ end
 function AIBase:UnitIdle(engineunit)
 end
 
-function AIBase:UnitDamaged(engineunit,attacker)
+function AIBase:UnitDamaged(engineunit,enginedamage)
 end
 function AIBase:UnitMoveFailed(engineunit)
 end

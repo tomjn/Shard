@@ -110,7 +110,7 @@ function MexUpgradeBehaviour:Priority()
 	end
 end
 
-function MexUpgradeBehaviour:UnitDamaged(unit,attacker)
+function MexUpgradeBehaviour:UnitDamaged(unit,attacker,damage)
 end
 
 function StartUpgradeProcess(self)

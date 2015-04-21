@@ -46,7 +46,7 @@ function AttackerBehaviour:UnitBuilt(unit)
 	end
 end
 
-function AttackerBehaviour:UnitDamaged(unit,attacker)
+function AttackerBehaviour:UnitDamaged(unit,attacker,damage)
 	if unit.engineID == self.unit.engineID then
 		self.damaged = game:Frame()
 	end

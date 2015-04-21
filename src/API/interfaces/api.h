@@ -8,6 +8,7 @@
 class Position;
 //class Resource;
 //class ResourceTransfer;
+class IDamage;
 class IMapFeature;
 class IMap;
 class IUnitType;
@@ -18,6 +19,7 @@ class IAI;
 #include "../Position.h"
 #include "ResourceData.h"
 #include "ResourceTransfer.h"
+#include "IDamage.h"
 #include "IMapFeature.h"
 #include "IMap.h"
 #include "IUnitType.h"

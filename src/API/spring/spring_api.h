@@ -28,7 +28,7 @@ class CSpringUnitType;
 class CSpringUnit;
 class CSpringGame;
 
-
+#include "SpringDamage.h"
 #include "SpringMapFeature.h"
 #include "SpringMap.h"
 #include "SpringUnitType.h"
