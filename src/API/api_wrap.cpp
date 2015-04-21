@@ -3515,9 +3515,18 @@ static swig_lua_method swig_IDamage_methods[] = {
 static swig_lua_attribute swig_IDamage_attributes[] = {
     {0,0,0}
 };
+static swig_lua_attribute swig_IDamage_cls_attributes[] = {
+    {0,0,0}
+};
+static swig_lua_method swig_IDamage_cls_methods[] = {
+    {0,0}
+};
+static swig_lua_const_info swig_IDamage_cls_constants[] = {
+    {0,0,0,0,0,0}
+};
 static swig_lua_class *swig_IDamage_bases[] = {0};
 static const char *swig_IDamage_base_names[] = {0};
-static swig_lua_class _wrap_class_IDamage = { "IDamage", &SWIGTYPE_p_IDamage,0, swig_delete_IDamage, swig_IDamage_methods, swig_IDamage_attributes, swig_IDamage_bases, swig_IDamage_base_names };
+static swig_lua_class _wrap_class_IDamage = { "IDamage", &SWIGTYPE_p_IDamage,0, swig_delete_IDamage, swig_IDamage_methods, swig_IDamage_attributes, { "IDamage", swig_IDamage_cls_methods, swig_IDamage_cls_attributes, swig_IDamage_cls_constants }, swig_IDamage_bases, swig_IDamage_base_names };
 
 static int _wrap_IMapFeature_ID(lua_State* L) {
   int SWIG_arg = 0;
@@ -7358,9 +7367,18 @@ static swig_lua_method swig_boost_shared_ptr_Sl_IDamage_Sg__methods[] = {
 static swig_lua_attribute swig_boost_shared_ptr_Sl_IDamage_Sg__attributes[] = {
     {0,0,0}
 };
+static swig_lua_attribute swig_boost_shared_ptr_Sl_IDamage_Sg__cls_attributes[] = {
+    {0,0,0}
+};
+static swig_lua_method swig_boost_shared_ptr_Sl_IDamage_Sg__cls_methods[] = {
+    {0,0}
+};
+static swig_lua_const_info swig_boost_shared_ptr_Sl_IDamage_Sg__cls_constants[] = {
+    {0,0,0,0,0,0}
+};
 static swig_lua_class *swig_boost_shared_ptr_Sl_IDamage_Sg__bases[] = {0};
 static const char *swig_boost_shared_ptr_Sl_IDamage_Sg__base_names[] = {0};
-static swig_lua_class _wrap_class_boost_shared_ptr_Sl_IDamage_Sg_ = { "damagePtr", &SWIGTYPE_p_boost__shared_ptrT_IDamage_t,_wrap_new_damagePtr, swig_delete_damagePtr, swig_boost_shared_ptr_Sl_IDamage_Sg__methods, swig_boost_shared_ptr_Sl_IDamage_Sg__attributes, swig_boost_shared_ptr_Sl_IDamage_Sg__bases, swig_boost_shared_ptr_Sl_IDamage_Sg__base_names };
+static swig_lua_class _wrap_class_boost_shared_ptr_Sl_IDamage_Sg_ = { "damagePtr", &SWIGTYPE_p_boost__shared_ptrT_IDamage_t,_wrap_new_damagePtr, swig_delete_damagePtr, swig_boost_shared_ptr_Sl_IDamage_Sg__methods, swig_boost_shared_ptr_Sl_IDamage_Sg__attributes, { "damagePtr", swig_boost_shared_ptr_Sl_IDamage_Sg__cls_methods, swig_boost_shared_ptr_Sl_IDamage_Sg__cls_attributes, swig_boost_shared_ptr_Sl_IDamage_Sg__cls_constants }, swig_boost_shared_ptr_Sl_IDamage_Sg__bases, swig_boost_shared_ptr_Sl_IDamage_Sg__base_names };
 
 static int _wrap_unitPtr___deref__(lua_State* L) {
   int SWIG_arg = 0;
@@ -7696,7 +7714,7 @@ static int _wrap_unitPtr_CanBuild(lua_State* L) {
     }
   }
   
-  lua_pushstring(L,"Wrong arguments for overloaded function 'unitPtr_CanBuild'\n"
+  SWIG_Lua_pusherrstring(L,"Wrong arguments for overloaded function 'unitPtr_CanBuild'\n"
     "  Possible C/C++ prototypes are:\n"
     "    IUnit::CanBuild()\n"
     "    IUnit::CanBuild(IUnitType *)\n");
@@ -8371,7 +8389,7 @@ static int _wrap_unitPtr_Build(lua_State* L) {
     }
   }
   
-  lua_pushstring(L,"Wrong arguments for overloaded function 'unitPtr_Build'\n"
+  SWIG_Lua_pusherrstring(L,"Wrong arguments for overloaded function 'unitPtr_Build'\n"
     "  Possible C/C++ prototypes are:\n"
     "    IUnit::Build(IUnitType *)\n"
     "    IUnit::Build(std::string)\n"
@@ -8537,7 +8555,7 @@ static int _wrap_unitPtr_Reclaim(lua_State* L) {
     }
   }
   
-  lua_pushstring(L,"Wrong arguments for overloaded function 'unitPtr_Reclaim'\n"
+  SWIG_Lua_pusherrstring(L,"Wrong arguments for overloaded function 'unitPtr_Reclaim'\n"
     "  Possible C/C++ prototypes are:\n"
     "    IUnit::Reclaim(IMapFeature *)\n"
     "    IUnit::Reclaim(IUnit *)\n");
@@ -9015,7 +9033,7 @@ static int _wrap_unitPtr_ExecuteCustomCommand(lua_State* L) {
     }
   }
   
-  lua_pushstring(L,"Wrong arguments for overloaded function 'unitPtr_ExecuteCustomCommand'\n"
+  SWIG_Lua_pusherrstring(L,"Wrong arguments for overloaded function 'unitPtr_ExecuteCustomCommand'\n"
     "  Possible C/C++ prototypes are:\n"
     "    IUnit::ExecuteCustomCommand(int,std::vector< float >,short,int)\n"
     "    IUnit::ExecuteCustomCommand(int,std::vector< float >,short)\n"
@@ -9067,9 +9085,18 @@ static swig_lua_method swig_boost_shared_ptr_Sl_IUnit_Sg__methods[] = {
 static swig_lua_attribute swig_boost_shared_ptr_Sl_IUnit_Sg__attributes[] = {
     {0,0,0}
 };
+static swig_lua_attribute swig_boost_shared_ptr_Sl_IUnit_Sg__cls_attributes[] = {
+    {0,0,0}
+};
+static swig_lua_method swig_boost_shared_ptr_Sl_IUnit_Sg__cls_methods[] = {
+    {0,0}
+};
+static swig_lua_const_info swig_boost_shared_ptr_Sl_IUnit_Sg__cls_constants[] = {
+    {0,0,0,0,0,0}
+};
 static swig_lua_class *swig_boost_shared_ptr_Sl_IUnit_Sg__bases[] = {0};
 static const char *swig_boost_shared_ptr_Sl_IUnit_Sg__base_names[] = {0};
-static swig_lua_class _wrap_class_boost_shared_ptr_Sl_IUnit_Sg_ = { "unitPtr", &SWIGTYPE_p_boost__shared_ptrT_IUnit_t,_wrap_new_unitPtr, swig_delete_unitPtr, swig_boost_shared_ptr_Sl_IUnit_Sg__methods, swig_boost_shared_ptr_Sl_IUnit_Sg__attributes, swig_boost_shared_ptr_Sl_IUnit_Sg__bases, swig_boost_shared_ptr_Sl_IUnit_Sg__base_names };
+static swig_lua_class _wrap_class_boost_shared_ptr_Sl_IUnit_Sg_ = { "unitPtr", &SWIGTYPE_p_boost__shared_ptrT_IUnit_t,_wrap_new_unitPtr, swig_delete_unitPtr, swig_boost_shared_ptr_Sl_IUnit_Sg__methods, swig_boost_shared_ptr_Sl_IUnit_Sg__attributes, { "unitPtr", swig_boost_shared_ptr_Sl_IUnit_Sg__cls_methods, swig_boost_shared_ptr_Sl_IUnit_Sg__cls_attributes, swig_boost_shared_ptr_Sl_IUnit_Sg__cls_constants }, swig_boost_shared_ptr_Sl_IUnit_Sg__bases, swig_boost_shared_ptr_Sl_IUnit_Sg__base_names };
 
 static int _wrap_new_vectorUnitTypes__SWIG_0(lua_State* L) {
   int SWIG_arg = 0;

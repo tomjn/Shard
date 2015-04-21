@@ -33,7 +33,7 @@
 #include <string>
 
 cpptestai::CCppTestAI::CCppTestAI(springai::OOAICallback* callback):
-//		callback(callback),
+		callback(callback),
 		skirmishAIId(callback != NULL ? callback->GetSkirmishAIId() : -1),
 		game(NULL)
 		{
