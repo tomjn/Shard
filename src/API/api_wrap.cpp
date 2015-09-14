@@ -1244,7 +1244,7 @@ SWIGINTERN int SWIG_Lua_add_namespace_details(lua_State* L, swig_lua_namespace* 
 
   /* clear stack - remove metatble */
   lua_pop(L,1);
-
+  return 0;
 }
 
 /* helper function. creates namespace table and add it to module table */
@@ -1275,6 +1275,7 @@ SWIGINTERN int SWIG_Lua_namespace_register(lua_State* L, swig_lua_namespace* ns)
 
   lua_setmetatable(L,-2); /* set metatable */
   lua_rawset(L,-3); /* add namespace to module table */
+  return 0;
 }
 /* -----------------------------------------------------------------------------
  * global variable support code: classes
