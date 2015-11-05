@@ -3,7 +3,7 @@ BehaviourFactory = class(AIBase)
 
 require "behaviours"
 function BehaviourFactory:Init()
-	
+	--
 end
 
 function BehaviourFactory:AddBehaviours(unit)
