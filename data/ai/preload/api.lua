@@ -5,14 +5,13 @@
 require "hooks"
 require "class"
 require "aibase"
-function shardify_unit_object( unit )
-	return unit
-end
 
 if Spring ~= nil then
+	require "spring_lua/unit"
 	require "spring_lua/game"
 	require "spring_lua/map"
 else
+	require "spring_native/unit"
 	require "spring_native/game"
 	require "spring_native/map"
 end
