@@ -43,132 +43,142 @@ end
 
 
 function ShardSpringUnit:Type()
-	return 0
+	return nil
 end
 
 
 function ShardSpringUnit:CanMove()
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:CanDeploy()
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:CanBuild()
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:IsBeingBuilt()
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:CanAssistBuilding(IUnit* unit) -- the unit that is under construction to help with
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:CanMoveWhenDeployed()
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:CanFireWhenDeployed()
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:CanBuildWhenDeployed()
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:CanBuildWhenNotDeployed()
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:Stop()
-	return 0
+	Spring.GiveOrderToUnit( self.id, CMD.STOP )
+	return true
 end
 
 
-function ShardSpringUnit:Move(Position p)
-	return 0
+function ShardSpringUnit:Move(p)
+	Spring.GiveOrderToUnit( self.id, CMD.MOVE, { p.x, p.y, p.z } )
+	return true
 end
 
 
-function ShardSpringUnit:MoveAndFire(Position p)
-	return 0
+function ShardSpringUnit:MoveAndFire(p)
+	Spring.GiveOrderToUnit( self.id, CMD.FIGHT, { p.x, p.y, p.z } )
+	return true
 end
 
 
-function ShardSpringUnit:Build(IUnitType* t)
-	return 0
+function ShardSpringUnit:Build(t) -- IUnitType*
+	return false
 end
 
 
-function ShardSpringUnit:Build(std::string typeName)
-	return 0
+function ShardSpringUnit:Build(typeName) -- std::string
+	return false
 end
 
 
-function ShardSpringUnit:Build(std::string typeName, Position p)
-	return 0
+function ShardSpringUnit:Build(typeName, p) -- std::string , Position
+	return false
 end
 
 
 function ShardSpringUnit:Build(IUnitType* t, Position p)
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:AreaReclaim(Position p, double radius)
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:Reclaim(IMapFeature* mapFeature)
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:Reclaim(IUnit* unit)
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:Attack(IUnit* unit)
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:Repair(IUnit* unit)
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:MorphInto(IUnitType* t)
-	return 0
+	return false
 end
 
 
 function ShardSpringUnit:GetPosition()
-	return 0
+	local bpx, bpy, bpz = Spring.GetUnitPosition(self.id)
+	return {
+		x=bpx,
+		y=bpy,
+		z=bpz
+	}
 end
 
 
 function ShardSpringUnit:GetHealth()
-	return 0
+	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
+	return health
 end
 
 
 function ShardSpringUnit:GetMaxHealth()
-	return 0
+	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
+	return maxHealth
 end
 
 
@@ -178,12 +188,12 @@ end
 
 
 function ShardSpringUnit:MaxWeaponsRange()
-	return 0
+	return Spring.GetUnitMaxRange(self.id)
 end
 
 
 function ShardSpringUnit:CanBuild(IUnitType* t)
-	return 0
+	return false
 end
 
 
