@@ -3,7 +3,8 @@ game = {}
 
 	-- prints 'message' to ingame chat console
 	function game:SendToConsole(message)
-		return game_engine:SendToConsole(message)
+		Spring.Echo( message )
+		return true
 	end
 
 	function game:Frame() -- returns int/game frame number
@@ -11,41 +12,43 @@ game = {}
 	end
 
 	function game:Test() -- debug
-		return game_engine:Test()
+		Spring.Echo( "Testing API" )
+		return true
 	end
 
 	function game:IsPaused() -- if the game is paused, returns true
-		--
-		return game_engine:IsPaused()
+		local _, _, paused = Spring.GetGameSpeed()
+		return paused
 	end
 
 	function game:GetTypeByName(typename) -- returns unittype
 		--
-		return game_engine:GetTypeByName(typename)
+		return nil
+		-- return game_engine:GetTypeByName(typename)
 	end
 
 
 	function game:ConfigFolderPath() -- returns string with path to the folder
 		--
-		return game_engine:ConfigFolderPath()
+		return "" --
+		-- return game_engine:ConfigFolderPath()
 	end
 
 	function game:ReadFile(filename) -- returns string with file contents
-		--
-		return game_engine:ReadFile(filename)
+		return VFS.LoadFile( filename )
 	end
 
 	function game:FileExists(filename) -- returns boolean
-		--
-		return game_engine:FileExists(filename)
+		return VFS.FileExists( filename )
 	end
 
 	function game:GetTeamID() -- returns boolean
-		--
-		return game_engine:GetTeamID()
+		return Spring.GetMyTeamID()
 	end
 
 	function game:GetEnemies()
+		return nil
+
 		local has_enemies = game_engine:HasEnemies()
 		if has_enemies ~= true then
 			return nil
@@ -63,6 +66,8 @@ game = {}
 	end
 
 	function game:GetUnits()
+		return nil
+
 		local fv = game_engine:GetUnits()
 		local f = {}
 		local i = 0
@@ -75,6 +80,8 @@ game = {}
 	end
 
 	function game:GetFriendlies()
+		return nil
+
 		local has_friendlies = game_engine:HasFriendlies()
 		if has_friendlies ~= true then
 			return nil
@@ -97,32 +104,34 @@ game = {}
 	end
 
 	function game:AddMarker(position,label) -- adds a marker
-		--
-		return game_engine:AddMarker(position,label)
+		Spring.MarkerAddPoint( position.x, position.y, position.z, label )
+		return true
 	end
 
 	function game:SendToContent(stringvar) -- returns a string passed from any lua gadgets
-		--
-		return game_engine:SendToContent(stringvar)
+		-- doesn't make a lot of sense if we're already in the lua environment, needs discussin
+		return false --game_engine:SendToContent(stringvar)
 	end
 
 	function game:GetResource(idx) --  returns a Resource object
-		return game_engine:GetResource(idx)
+		return false --game_engine:GetResource(idx)
 	end
 
 	function game:GetResourceCount() -- return the number of resources
-		return game_engine:GetResourceCount()
+		return 2 --game_engine:GetResourceCount()
 	end
 
 	function game:GetResourceByName(name) -- returns a Resource object, takes the name of the resource
-		return game_engine:GetResourceByName(name)
+		return "" --game_engine:GetResourceByName(name)
 	end
 
 	function game:GetUnitByID( unit_id ) -- returns a Shard unit when given an engine unit ID number
-		return game_engine:getUnitByID( unit_id )
+		return nil --game_engine:getUnitByID( unit_id )
 	end
 
 	function game:GetResources() -- returns a table of Resource objects, takes the name of the resource
+		return {}
+
 		local rcount = game_engine:GetResourceCount()
 		if(rcount > 0) then
 
