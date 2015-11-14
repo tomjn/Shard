@@ -132,6 +132,14 @@ function AI:GameEnd()
 		m:GameEnd()
 	end
 end
+
+function AI:AddModule( newmodule ) do
+	local internalname = newmodule:internalName()
+	self[internalname] = newmodule
+	table.insert(self.modules,newmodule)
+	newmodule:Init()
+end
+
 -- create and use an AI
 ai = AI()
 
