@@ -19,20 +19,24 @@ map = {}
 -- ###################
 
 	function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance) -- returns Position
-		-- needs spring gadget implementation
+		-- needs spring gadget implementation, perhaps https://github.com/spring1944/spring1944/blob/master/LuaRules/Gadgets/craig/buildsite.lua ?
 		return nil
 		-- return game_engine:Map():FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
 	end
 
 	function map:CanBuildHere(unittype,position) -- returns boolean
-		--
-		return game_engine:Map():CanBuildHere(unittype,position)
+		local unitName = unittype:Name()
+		local def = UnitDefNames[unitName]
+		local newX, newY, newZ = Spring.Pos2BuildPos(def.id, position.x, position.y, position.z)
+
+		local blocked = Spring.TestBuildOrder(def.id, newX, newY, newZ, 1) == 0
+		return ( not blocked )
 	end
 
 	function map:GetMapFeatures()
 		return nil
 
-		local fv = game_engine:Map():GetMapFeatures()
+		--[[local fv = game_engine:Map():GetMapFeatures()
 		local f = {}
 		local i = 0
 		while i  < fv:size() do
@@ -40,13 +44,13 @@ map = {}
 			i = i + 1
 		end
 		fv = nil
-		return f
+		return f]]--
 	end
 
 	function map:GetMapFeaturesAt(position,radius)
 		return nil
 
-		local m = game_engine:Map()
+		--[[local m = game_engine:Map()
 		local fv = m:GetMapFeaturesAt(position,radius)
 		local f = {}
 		local i = 0
@@ -55,27 +59,27 @@ map = {}
 			i = i + 1
 		end
 		fv = nil
-		return f
+		return f]]--
 	end
 
 	function map:SpotCount() -- returns the nubmer of metal spots
 		return 0
 
-		local m = game_engine:Map()
-		return m:SpotCount()
+		--local m = game_engine:Map()
+		--return m:SpotCount()
 	end
 
 	function map:GetSpot(idx) -- returns a Position for the given spot
 		return nil
 
-		local m = game_engine:Map()
-		return m:GetSpot(idx)
+		--local m = game_engine:Map()
+		--return m:GetSpot(idx)
 	end
 
 	function map:GetMetalSpots() -- returns a table of spot positions
 		return nil
 
-		--
+		--[[
 		local m = game_engine:Map()
 		local fv = game_engine:Map():GetMetalSpots()
 		local count = m:SpotCount()
@@ -85,8 +89,9 @@ map = {}
 			table.insert( f, m:GetSpot(i) )
 			i = i + 1
 		end
-		--fv = nil
+		fv = nil
 		return f
+		]]--
 	end
 
 	function map:MapDimensions() -- returns a Position holding the dimensions of the map
@@ -117,15 +122,15 @@ map = {}
 	function map:MaximumHeight() -- returns maximum map height
 		return 0
 
-		local m = game_engine:Map()
-		return m:MaximumHeight()
+		-- local m = game_engine:Map()
+		-- return m:MaximumHeight()
 	end
 
 	function map:MinimumHeight() -- returns minimum map height
 		return 0
 
-		local m = game_engine:Map()
-		return m:MinimumHeight()
+		-- local m = game_engine:Map()
+		-- return m:MinimumHeight()
 	end
 
 
