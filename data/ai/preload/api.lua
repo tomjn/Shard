@@ -16,6 +16,18 @@ else
 	require "spring_native/map"
 end
 
+function shard_include( file )
+	if type(file) ~= 'string' then
+		return nil
+	end
+	local ok, mod = pcall( require, game:GameName().."/"..file )
+	if ok then
+		return mod
+	else
+		require file
+	end
+end
+
 --}
 --[[
 {,
