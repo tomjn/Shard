@@ -73,7 +73,7 @@ function AttackHandler:DoTargetting()
 						table.insert(celllist,newcell)
 					end
 					cell = cells[px][pz]
-					cell.count = cell.count + 1
+					cell.count = cell.count + self:ScoreUnit(e)
 					
 					-- we dont want to target the center of the cell encase its a ledge with nothing
 					-- on it etc so target this units position instead
@@ -140,4 +140,25 @@ function AttackHandler:RemoveRecruit(attkbehaviour)
 		end
 	end
 	return false
+end
+
+-- How much is this unit worth?
+-- 
+-- Idea: add a table with hardcoded values,
+-- and use said values if a units found in
+-- that table to highlight strategic value
+function AttackHandler:ScoreUnit(unit)
+	local value = 1
+	local ut = unit:Type()
+	if ut:CanMove() then
+		if ut:CanBuild() then
+			value = value + 1
+		end
+	else
+		value = value + 1
+		if ut:CanBuild() then
+			value = value + 1
+		end
+	end
+	return value
 end
