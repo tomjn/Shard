@@ -14,38 +14,45 @@ function AttackHandler:Init()
 end
 
 function AttackHandler:Update()
-	local f = game:Frame()
-	if math.mod(f,6) == 0 then
+-- stagger targetting if multiple shards are in the game
+	local f = game:Frame() + game:GetTeamID() 
+	if math.mod(f,15) == 0 then
 		self:DoTargetting()
 	end
 end
 
-function AttackHandler:GameEnd()
-	--
-end
-
-function AttackHandler:UnitCreated(engineunit)
-	--
-end
-
-function AttackHandler:UnitBuilt(engineunit)
-	--
-end
-
 function AttackHandler:UnitDead(engineunit)
 	if engineunit:Team() == game:GetTeamID() then
-		self.counter = self.counter - 0.05
-		self.counter = math.max(self.counter,5)
+		self.counter = self.counter - 0.2
+		self.counter = math.max(self.counter,8)
+		-- try and clean up dead recruits where possible
+		for i,v in ipairs(self.recruits) do
+			if v.engineID == engineunit:ID() then
+				table.remove(self.recruits,i)
+				break
+			end
+		end
 	end
-end
-
-
-function AttackHandler:UnitIdle(engineunit)
-	--
 end
 
 function AttackHandler:DoTargetting()
 	if #self.recruits > self.counter then
+
+		--[[ try and catch invalid recruits and remove them, then reevaluate
+		local nrecruits = {}
+		for i,v in ipairs(self.recruits) do
+			if v.unit ~= nil then
+				table.insert(nrecruits,v)
+				break
+			end
+		end
+		self.recruits = nrecruits
+		if #nrecruits > self.counter then
+			
+		else
+			return
+		end]]--
+
 		-- find somewhere to attack
 		local cells = {}
 		local celllist = {}
@@ -60,10 +67,10 @@ function AttackHandler:DoTargetting()
 
 				if e ~= nil then
 					pos = e:GetPosition()
-					px = pos.x - math.fmod(pos.x,600)
-					pz = pos.z - math.fmod(pos.z,600)
-					px = px/600
-					pz = pz/600
+					px = pos.x - math.fmod(pos.x,400)
+					pz = pos.z - math.fmod(pos.z,400)
+					px = px/400
+					pz = pz/400
 					if cells[px] == nil then
 						cells[px] = {}
 					end
@@ -79,6 +86,9 @@ function AttackHandler:DoTargetting()
 					-- on it etc so target this units position instead
 					cell.posx = pos.x
 					cell.posz = pos.z
+
+					-- @TODO: The unit chosen may not be the best unit to target, ideally pick the
+					-- one closest to the average location of all units in that grid
 				end
 
 			end
@@ -103,6 +113,7 @@ function AttackHandler:DoTargetting()
 				end
 				
 				self.counter = self.counter + 0.2
+				self.counter = math.min(self.counter,20)
 				
 				-- remove all our recruits!
 				self.recruits = {}
@@ -119,7 +130,7 @@ end
 
 function AttackHandler:IsRecruit(attkbehaviour)
 	for i,v in ipairs(self.recruits) do
-		if v == attkbehaviour then
+		if v.engineID == attkbehaviour.engineID then
 			return true
 		end
 	end
@@ -127,6 +138,10 @@ function AttackHandler:IsRecruit(attkbehaviour)
 end
 
 function AttackHandler:AddRecruit(attkbehaviour)
+	if attkbehaviour.unit == nil then
+		game:SendToConsole( "null unit in attack beh found ")
+		return
+	end
 	if not self:IsRecruit(attkbehaviour) then
 		table.insert(self.recruits,attkbehaviour)
 	end
@@ -134,7 +149,7 @@ end
 
 function AttackHandler:RemoveRecruit(attkbehaviour)
 	for i,v in ipairs(self.recruits) do
-		if v == attkbehaviour then
+		if v.engineID == attkbehaviour.engineID then
 			table.remove(self.recruits,i)
 			return true
 		end
@@ -149,14 +164,14 @@ end
 -- that table to highlight strategic value
 function AttackHandler:ScoreUnit(unit)
 	local value = 1
-	local ut = unit:Type()
-	if ut:CanMove() then
-		if ut:CanBuild() then
+
+	if unit:CanMove() then
+		if unit:CanBuild() then
 			value = value + 1
 		end
 	else
 		value = value + 1
-		if ut:CanBuild() then
+		if unit:CanBuild() then
 			value = value + 1
 		end
 	end
