@@ -132,7 +132,7 @@ function AI:GameEnd()
 	end
 end
 
-function AI:AddModule( newmodule ) do
+function AI:AddModule( newmodule )
 	local internalname = newmodule:internalName()
 	self[internalname] = newmodule
 	table.insert(self.modules,newmodule)
