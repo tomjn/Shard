@@ -26,6 +26,7 @@ end
 
 function Behaviour:SetUnit(unit)
 	self.unit = unit
+	self.engineID = unit.engineID
 end
 
 
@@ -47,4 +48,12 @@ end
 
 function Behaviour:Passive()
 	return false
+end
+
+function Behaviour:UnitMoveFailed(unit)
+	self:UnitIdle(unit)
+end
+
+function Behaviour:OwnerDied()
+	return
 end
