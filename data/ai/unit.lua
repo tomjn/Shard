@@ -52,6 +52,7 @@ function Unit:UnitDead(unit)
 	if unit.engineID == self.engineID then
 		if self.behaviours then
 			for k,v in pairs(self.behaviours) do
+				self.behaviours[k]:OwnerDied()
 				self.behaviours[k] = nil
 			end
 			self.behaviours = nil

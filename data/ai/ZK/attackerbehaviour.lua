@@ -13,6 +13,7 @@ AttackerBehaviour = class(Behaviour)
 
 function AttackerBehaviour:Init()
 	--game:SendToConsole("attacker!")
+	self.dead = false
 end
 
 function AttackerBehaviour:UnitBuilt(unit)
@@ -25,9 +26,7 @@ end
 
 
 function AttackerBehaviour:UnitDead(unit)
-	if unit.engineID == self.unit.engineID then
-		ai.attackhandler:RemoveRecruit(self)
-	end
+	--
 end
 
 function AttackerBehaviour:UnitIdle(unit)
@@ -45,7 +44,8 @@ function AttackerBehaviour:AttackCell(cell)
 	self.target = p
 	self.attacking = true
 	if self.active then
-		self.unit:Internal():MoveAndFire(self.target)
+		local u = self.unit:Internal()
+		u:MoveAndFire(self.target)
 	else
 		self.unit:ElectBehaviour()
 	end
@@ -85,4 +85,11 @@ function AttackerBehaviour:SetInitialState()
 			thisUnit:Internal():ExecuteCustomCommand(CMD_RETREAT, floats)
 		end
 	end
+end
+
+function AttackerBehaviour:OwnerDead()
+	ai.attackhandler:RemoveRecruit(self)
+	self.attacking = nil
+	self.active = nil
+	self.unit = nil
 end

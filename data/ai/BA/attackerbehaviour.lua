@@ -53,12 +53,16 @@ function AttackerBehaviour:UnitDamaged(unit,attacker,damage)
 end
 
 function AttackerBehaviour:UnitDead(unit)
-	if unit.engineID == self.unit.engineID then
-		-- game:SendToConsole("attacker " .. self.name .. " died")
-		ai.attackhandler:NeedMore(self)
-		ai.attackhandler:RemoveRecruit(self)
-		ai.attackhandler:RemoveMember(self)
-	end
+	--
+end
+
+function AttackerBehaviour:OwnerDead()
+	self.attacking = nil
+	self.active = nil
+	self.unit = nil
+	ai.attackhandler:NeedMore(self)
+	ai.attackhandler:RemoveRecruit(self)
+	ai.attackhandler:RemoveMember(self)
 end
 
 function AttackerBehaviour:UnitIdle(unit)
