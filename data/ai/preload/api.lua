@@ -24,7 +24,7 @@ function shard_include( file )
 	if ok then
 		return mod
 	else
-		require file
+		require( file )
 	end
 end
 
