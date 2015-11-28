@@ -43,7 +43,8 @@ end
 
 
 function ShardSpringUnit:Type()
-	return nil
+	local name = self:Name()
+	return game:GetTypeByName( name )
 end
 
 
