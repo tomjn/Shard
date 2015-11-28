@@ -67,7 +67,7 @@ function ShardSpringUnit:IsBeingBuilt()
 end
 
 
-function ShardSpringUnit:CanAssistBuilding(IUnit* unit) -- the unit that is under construction to help with
+function ShardSpringUnit:CanAssistBuilding( unit )-- IUnit* unit) -- the unit that is under construction to help with
 	return false
 end
 
@@ -125,37 +125,37 @@ function ShardSpringUnit:Build(typeName, p) -- std::string , Position
 end
 
 
-function ShardSpringUnit:Build(IUnitType* t, Position p)
+function ShardSpringUnit:Build( type, position ) -- IUnitType* t, Position p)
 	return false
 end
 
 
-function ShardSpringUnit:AreaReclaim(Position p, double radius)
+function ShardSpringUnit:AreaReclaim( position, radius )--Position p, double radius)
 	return false
 end
 
 
-function ShardSpringUnit:Reclaim(IMapFeature* mapFeature)
+function ShardSpringUnit:Reclaim( feature )--IMapFeature* mapFeature)
 	return false
 end
 
 
-function ShardSpringUnit:Reclaim(IUnit* unit)
+function ShardSpringUnit:Reclaim( unit )
 	return false
 end
 
 
-function ShardSpringUnit:Attack(IUnit* unit)
+function ShardSpringUnit:Attack( unit )
 	return false
 end
 
 
-function ShardSpringUnit:Repair(IUnit* unit)
+function ShardSpringUnit:Repair( unit )
 	return false
 end
 
 
-function ShardSpringUnit:MorphInto(IUnitType* t)
+function ShardSpringUnit:MorphInto( type )
 	return false
 end
 
@@ -192,17 +192,17 @@ function ShardSpringUnit:MaxWeaponsRange()
 end
 
 
-function ShardSpringUnit:CanBuild(IUnitType* t)
+function ShardSpringUnit:CanBuild( type )
 	return false
 end
 
 
-function ShardSpringUnit:GetResourceUsage(int idx)
+function ShardSpringUnit:GetResourceUsage( idx )
 	return 0
 end
 
 
-function ShardSpringUnit:ExecuteCustomCommand( int cmdId, std::vector<float> params_list, short options = 0, int timeOut = INT_MAX )
+function ShardSpringUnit:ExecuteCustomCommand(  cmdId, params_list, options, timeOut )
 	return 0
 end
 --[[
