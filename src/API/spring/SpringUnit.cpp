@@ -84,7 +84,8 @@ bool CSpringUnit::Forgotten(){
 }
 
 IUnitType* CSpringUnit::Type(){
-	return 0;
+	IUnitType* t = game->ToIUnitType( def );
+	return t;
 }
 
 
