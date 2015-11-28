@@ -253,26 +253,10 @@ void CSpringGame::UpdateUnits()
 {
 	if (lastUnitUpdate < Frame())
 	{
-		/* deleting dead units seems not really necessary.
-		   Also the fillunitvector methods below will add them back again, anyways.
-		std::map<int, CSpringUnit*>::iterator i = aliveUnits.begin();
-		while(i != aliveUnits.end()) {
-			if (!i->second->IsAlive() && i->second->Died() < Frame() - 100) { //delete dead units after 100 frames.
-				i = aliveUnits.erase(i);
-			} else {
-				++i;
-			}
-		}*/
 
 		FillUnitVector(enemyUnits, callback->GetEnemyUnits()); //events about enemy unit seem to not reach us.
 		FillUnitVector(friendlyUnits, callback->GetFriendlyUnits());
 		FillUnitVector(teamUnits, callback->GetTeamUnits());
-
-		/*if (lastUnitUpdate % 500 == 0) {
-			std::stringstream msg;
-			msg << "Friendlies: " << friendlyUnits.size() << " Team: " << teamUnits.size() << " Enemies: " << enemyUnits.size();
-			SendToConsole(msg.str());
-		}*/
 
 		lastUnitUpdate = Frame();
 	}
