@@ -49,7 +49,7 @@ game = {}
 	function game:GetEnemies()
 		return nil
 
-		local has_enemies = game_engine:HasEnemies()
+		--[[local has_enemies = game_engine:HasEnemies()
 		if has_enemies ~= true then
 			return nil
 		else
@@ -62,13 +62,13 @@ game = {}
 			end
 			ev = nil
 			return e
-		end
+		end]]--
 	end
 
 	function game:GetUnits()
 		return nil
 
-		local fv = game_engine:GetUnits()
+		--[[local fv = game_engine:GetUnits()
 		local f = {}
 		local i = 0
 		while i  < fv:size() do
@@ -76,13 +76,13 @@ game = {}
 			i = i + 1
 		end
 		fv = nil
-		return f
+		return f]]--
 	end
 
 	function game:GetFriendlies()
 		return nil
 
-		local has_friendlies = game_engine:HasFriendlies()
+		--[[local has_friendlies = game_engine:HasFriendlies()
 		if has_friendlies ~= true then
 			return nil
 		else
@@ -95,7 +95,7 @@ game = {}
 			end
 			fv = nil
 			return f
-		end
+		end]]--
 	end
 
 	function game:GameName() -- returns the shortname of this game
@@ -132,7 +132,7 @@ game = {}
 	function game:GetResources() -- returns a table of Resource objects, takes the name of the resource
 		return {}
 
-		local rcount = game_engine:GetResourceCount()
+		--[[local rcount = game_engine:GetResourceCount()
 		if(rcount > 0) then
 
 			local resources = {}
@@ -146,5 +146,6 @@ game = {}
 			return resources
 		else
 			return nil
-		end
+		end]]--
 	end
+
