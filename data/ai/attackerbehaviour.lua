@@ -1,4 +1,4 @@
-require "attackers"
+shard_include( "attackers" )
 
 function IsAttacker(unit)
 	for i,name in ipairs(attackerlist) do
@@ -66,4 +66,12 @@ function AttackerBehaviour:Activate()
 	else
 		ai.attackhandler:AddRecruit(self)
 	end
+end
+
+
+function AttackerBehaviour:OwnerDead()
+	ai.attackhandler:RemoveRecruit(self)
+	self.attacking = nil
+	self.active = nil
+	self.unit = nil
 end
