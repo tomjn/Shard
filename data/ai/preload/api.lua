@@ -44,7 +44,7 @@ IUnit/ engine unit objects
 	void Forget() // makes the interface forget about this unit and cleanup
 	bool Forgotten() // for interface/debugging use
 
-	IUnitType* Type()
+	IUnitType* Type() -- not implemented, use game:GetTypeByName
 
 	bool CanMove()
 	bool CanDeploy()

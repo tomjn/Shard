@@ -1,8 +1,8 @@
-require "api"
-require "behaviourfactory"
-require "unit"
-require "module"
-require "modules"
+require "preload/api"
+shard_include("behaviourfactory")
+shard_include("unit")
+shard_include("module")
+shard_include("modules")
 
 AI = class(AIBase)
 
