@@ -1,8 +1,8 @@
 
-require "taskqueues"
-require "taskqueuebehaviour"
-require "attackerbehaviour"
-require "assistbehaviour"
+shard_include( "taskqueues" )
+shard_include( "taskqueuebehaviour" )
+shard_include( "attackerbehaviour" )
+shard_include( "assistbehaviour" )
 
 behaviours = {
 	commbasic = {
@@ -13,6 +13,7 @@ behaviours = {
 function defaultBehaviours(unit)
 	b = {}
 	u = unit:Internal()
+	table.insert(b, BootBehaviour )
 	if u:Name() == "armnanotc" then
 		table.insert(b,AssistBehaviour)
 	else
