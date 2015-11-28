@@ -1,12 +1,15 @@
-require "behaviour"
+shard_include( "behaviour" )
 BehaviourFactory = class(AIBase)
 
-require "behaviours"
+shard_include( "behaviours" )
 function BehaviourFactory:Init()
 	--
 end
 
 function BehaviourFactory:AddBehaviours(unit)
+	if unit == nil then
+		return
+	end
 	-- add behaviours here
 	-- unit:AddBehaviour(behaviour)
 	local b = behaviours[unit:Internal():Name()]
