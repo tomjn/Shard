@@ -4,7 +4,7 @@
 #include "ExternalAI/Interface/AISCommands.h" // for UNIT_COMMAND_BUILD_NO_FACING
 #include <vector>
 
-CSpringUnit::CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, IGame* game)
+CSpringUnit::CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, CSpringGame* game)
 : callback(callback), unit(u), dead(false), game(game) {
 	if(u == 0){
 		throw std::runtime_error("springai::unit must never be null when passed into the constructor of a CSpringUnit object! Bad bad coder");

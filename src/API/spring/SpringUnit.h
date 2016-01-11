@@ -6,7 +6,7 @@
 
 class CSpringUnit : public IUnit {
 public:
-	CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, IGame* game);
+	CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, CSpringGame* game);
 	virtual ~CSpringUnit();
 
 	virtual int ID();
@@ -80,7 +80,7 @@ protected:
 	springai::OOAICallback* callback;
 	springai::Unit* unit;
 	bool dead;
-	IGame* game;
+	CSpringGame* game;
 	springai::UnitDef* def;
 	std::vector<springai::UnitDef*> buildoptions;
 };
