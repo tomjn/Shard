@@ -13,52 +13,52 @@ public:
 	CSpringGame(springai::OOAICallback* callback);
 	virtual ~CSpringGame();
 
-	virtual IMap* Map();
+	virtual IMap* Map() override;
 
 	virtual std::string GameID();
-	virtual void SendToConsole(std::string message);
-	virtual int Frame();
-	virtual bool IsPaused();
+	virtual void SendToConsole(std::string message) override;
+	virtual int Frame() override;
+	virtual bool IsPaused() override;
 
-	virtual IUnitType* GetTypeByName(std::string typeName);
+	virtual IUnitType* GetTypeByName(std::string typeName) override;
 
-	virtual const char* ConfigFolderPath();
-	virtual std::string ReadFile(std::string filename);
-	virtual bool LocatePath(std::string& filename);
+	virtual const char* ConfigFolderPath() override;
+	virtual std::string ReadFile(std::string filename) override;
+	virtual bool LocatePath(std::string& filename) override;
 
-	virtual int GetTeamID();
+	virtual int GetTeamID() override;
 
-	virtual bool HasEnemies();
-	virtual bool HasFriendlies();
-	virtual std::vector<IUnit*> GetEnemies();
-	virtual std::vector<IUnit*> GetFriendlies();
-	virtual std::vector<IUnit*> GetUnits();
+	virtual bool HasEnemies() override;
+	virtual bool HasFriendlies() override;
+	virtual std::vector<IUnit*> GetEnemies() override;
+	virtual std::vector<IUnit*> GetFriendlies() override;
+	virtual std::vector<IUnit*> GetUnits() override;
 
 	virtual CSpringUnit* CreateUnit(int id);
 	virtual CSpringUnit* CreateUnit(springai::Unit* unit, bool addToVectors = true);
 	virtual void DestroyUnit(int id);
 	virtual CSpringUnit* GetUnitById(int id);
 
-	virtual IAI* Me();
+	virtual IAI* Me() override;
 
-	virtual std::string GameName();
+	virtual std::string GameName() override;
 
-	virtual bool FileExists(std::string filename);
+	virtual bool FileExists(std::string filename) override;
 
-	virtual void AddMarker(Position p,std::string label);
+	virtual void AddMarker(Position p,std::string label) override;
 
-	virtual std::string SendToContent(std::string data);
+	virtual std::string SendToContent(std::string data) override;
 
 
-	virtual SResourceData GetResource(int idx);
-	virtual int GetResourceCount();
-	virtual SResourceData GetResourceByName(std::string name);
+	virtual SResourceData GetResource(int idx) override;
+	virtual int GetResourceCount() override;
+	virtual SResourceData GetResourceByName(std::string name) override;
 
 	IUnitType* ToIUnitType(springai::UnitDef* def);
 
 	virtual void UpdateUnits();
 
-	virtual IUnit* getUnitByID( int unit_id );
+	virtual IUnit* getUnitByID( int unit_id ) override;
 	/*virtual void removeUnit( IUnit* dead_unit );*/
 protected:
 	//helper functions to managing unit vectors.

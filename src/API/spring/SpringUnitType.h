@@ -11,21 +11,21 @@ public:
 	CSpringUnitType(CSpringGame* game, springai::OOAICallback* callback, springai::UnitDef* unitDef);
 	virtual ~CSpringUnitType();
 
-	virtual std::string Name();
+	virtual std::string Name() override;
 
-	virtual float ReclaimSpeed();
-	virtual bool Extractor();
+	virtual float ReclaimSpeed() override;
+	virtual bool Extractor() override;
 
-	virtual float ResourceCost(int idx);
+	virtual float ResourceCost(int idx) override;
 
-	virtual float GetMaxHealth();
+	virtual float GetMaxHealth() override;
 
-	virtual int WeaponCount();
-	virtual float MaxWeaponDamage();
+	virtual int WeaponCount() override;
+	virtual float MaxWeaponDamage() override;
 
 	springai::UnitDef* GetUnitDef();
 
-	virtual std::vector<IUnitType*> BuildOptions();
+	virtual std::vector<IUnitType*> BuildOptions() override;
 	
 protected:
 	std::vector<springai::UnitDef*> boptions;

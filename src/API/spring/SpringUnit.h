@@ -9,71 +9,71 @@ public:
 	CSpringUnit(springai::OOAICallback* callback, springai::Unit* u, CSpringGame* game);
 	virtual ~CSpringUnit();
 
-	virtual int ID();
-	virtual int Team();
-	virtual std::string Name();
+	virtual int ID() override;
+	virtual int Team() override;
+	virtual std::string Name() override;
 
 	virtual void SetDead(bool dead=true);
-	virtual bool IsAlive();
+	virtual bool IsAlive() override;
 	virtual bool IsAlly(int allyTeamId);
 
-	virtual bool IsCloaked();
+	virtual bool IsCloaked() override;
 
 	virtual void Forget(); // makes the interface forget about this unit and cleanup
 	virtual bool Forgotten(); // for interface/debugging use
 	
-	virtual IUnitType* Type();
+	virtual IUnitType* Type() override;
 
-	virtual bool CanMove();
-	virtual bool CanDeploy();
-	virtual bool CanBuild();
+	virtual bool CanMove() override;
+	virtual bool CanDeploy() override;
+	virtual bool CanBuild() override;
 	
-	virtual bool CanAssistBuilding(IUnit* unit);
+	virtual bool CanAssistBuilding(IUnit* unit) override;
 
-	virtual bool CanMoveWhenDeployed();
-	virtual bool CanFireWhenDeployed();
-	virtual bool CanBuildWhenDeployed();
-	virtual bool CanBuildWhenNotDeployed();
+	virtual bool CanMoveWhenDeployed() override;
+	virtual bool CanFireWhenDeployed() override;
+	virtual bool CanBuildWhenDeployed() override;
+	virtual bool CanBuildWhenNotDeployed() override;
 	
-	virtual void Wait(int timeout);
+	virtual void Wait(int timeout) override;
 	
-	virtual void Stop();
-	virtual void Move(Position p);
-	virtual void MoveAndFire(Position p);
+	virtual void Stop() override;
+	virtual void Move(Position p) override;
+	virtual void MoveAndFire(Position p) override;
 
-	virtual bool Build(IUnitType* t);
-	virtual bool Build(std::string typeName);
-	virtual bool Build(std::string typeName, Position p);
-	virtual bool Build(IUnitType* t, Position p);
+	virtual bool Build(IUnitType* t) override;
+	virtual bool Build(std::string typeName) override;
+	virtual bool Build(std::string typeName, Position p) override;
+	virtual bool Build(IUnitType* t, Position p) override;
 
-	virtual bool Build(std::string typeName, Position p, int facing);
-	virtual bool Build(IUnitType* t, Position p, int facing);
+	virtual bool Build(std::string typeName, Position p, int facing) override;
+	virtual bool Build(IUnitType* t, Position p, int facing) override;
 
-	virtual bool AreaReclaim(Position p, double radius);
-	virtual bool Reclaim(IMapFeature* mapFeature);
-	virtual bool Reclaim(IUnit* unit);
-	virtual bool Attack(IUnit* unit);
-	virtual bool Repair(IUnit* unit);
-
-
-	virtual bool MorphInto(IUnitType* t);
+	virtual bool AreaReclaim(Position p, double radius) override;
+	virtual bool Reclaim(IMapFeature* mapFeature) override;
+	virtual bool Reclaim(IUnit* unit) override;
+	virtual bool Attack(IUnit* unit) override;
+	virtual bool Repair(IUnit* unit) override;
 
 
-	virtual Position GetPosition();
+	virtual bool MorphInto(IUnitType* t) override;
+
+
+	virtual Position GetPosition() override;
 	
-	virtual float GetHealth();
-	virtual float GetMaxHealth();
+	virtual float GetHealth() override;
+	virtual float GetMaxHealth() override;
 
-	virtual int WeaponCount();
+	virtual int WeaponCount() override;
 
-	virtual float MaxWeaponsRange();
+	virtual float MaxWeaponsRange() override;
 
-	virtual bool CanBuild(IUnitType* t);
-	virtual bool IsBeingBuilt();
+	virtual bool CanBuild(IUnitType* t) override;
+	virtual bool IsBeingBuilt() override;
 
-	virtual SResourceTransfer GetResourceUsage(int idx);
+	virtual SResourceTransfer GetResourceUsage(int idx) override;
 
-	virtual void ExecuteCustomCommand(int cmdId, std::vector<float> params_list, short options, int timeOut);
+	virtual void ExecuteCustomCommand(int cmdId, std::vector<float> params_list, short options, int timeOut) override;
 
 protected:
 	

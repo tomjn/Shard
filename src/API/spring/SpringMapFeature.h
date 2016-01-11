@@ -13,12 +13,12 @@ public:
 	CSpringMapFeature(springai::OOAICallback* callback, springai::Feature* f, IGame* game);
 	virtual ~CSpringMapFeature();
 
-	virtual int ID();
-	virtual std::string Name();
-	virtual Position GetPosition();
+	virtual int ID() override;
+	virtual std::string Name() override;
+	virtual Position GetPosition() override;
 
-	virtual float ResourceValue(int idx);
-	virtual bool Reclaimable();
+	virtual float ResourceValue(int idx) override;
+	virtual bool Reclaimable() override;
 
 	springai::Feature* feature;
 protected:

@@ -8,31 +8,31 @@ public:
 	virtual ~CSpringMap();
 
 
-	virtual std::string MapName();
+	virtual std::string MapName() override;
 
-	virtual int SpotCount();
-	virtual Position GetSpot(int idx);
-	virtual std::vector<Position>& GetMetalSpots();
+	virtual int SpotCount() override;
+	virtual Position GetSpot(int idx) override;
+	virtual std::vector<Position>& GetMetalSpots() override;
 
-	virtual Position MapDimensions();
+	virtual Position MapDimensions() override;
 
-	virtual std::vector<IMapFeature*> GetMapFeatures();
-	virtual std::vector<IMapFeature*> GetMapFeaturesAt(Position p, double radius);
+	virtual std::vector<IMapFeature*> GetMapFeatures() override;
+	virtual std::vector<IMapFeature*> GetMapFeaturesAt(Position p, double radius) override;
 
-	virtual double MinimumWindSpeed();
-	virtual double MaximumWindSpeed();
-	virtual double AverageWind();
+	virtual double MinimumWindSpeed() override;
+	virtual double MaximumWindSpeed() override;
+	virtual double AverageWind() override;
 
-	virtual float MaximumHeight();
-	virtual float MinimumHeight();
+	virtual float MaximumHeight() override;
+	virtual float MinimumHeight() override;
 
-	virtual double TidalStrength();
+	virtual double TidalStrength() override;
 
-	virtual Position FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance);
-	virtual Position FindClosestBuildSiteFacing(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance,int facing);
+	virtual Position FindClosestBuildSite(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance) override;
+	virtual Position FindClosestBuildSiteFacing(IUnitType* t, Position builderPos, double searchRadius, double minimumDistance,int facing) override;
 
-	virtual bool CanBuildHere(IUnitType* t, Position pos);
-	virtual bool CanBuildHereFacing(IUnitType* t, Position pos,int facing);
+	virtual bool CanBuildHere(IUnitType* t, Position pos) override;
+	virtual bool CanBuildHereFacing(IUnitType* t, Position pos,int facing) override;
 
 	springai::Resource* GetMetalResource();
 
