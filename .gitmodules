@@ -1,3 +1,3 @@
 [submodule "data/ai/EvoRTS"]
 	path = data/ai/EvoRTS
-	url = git@github.com:EvolutionRTS/Evolution-RTS-Shard.git
+	url = https://github.com/EvolutionRTS/Evolution-RTS-Shard.git
