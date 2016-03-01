@@ -20,7 +20,7 @@ end
 
 function EconHandler:Init()
 	self.resourceNames = { "Energy", "Metal" }
-	self.lastFrame = -16 -- so that it updates immediately even on the first frame
+	self.lastFrame = -17 -- so that it updates immediately even on the first frame
 	self.hasData = false -- so that it gets data immediately
 	self.samples = {}
 	ai.Energy = {}
