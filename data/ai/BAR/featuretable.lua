@@ -297,8 +297,8 @@ featureTable["armuwmex_dead"] = { reclaimable = true, blocking = true, unitName 
 featureTable["armuwmex_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 14, }
 featureTable["armuwmme_dead"] = { reclaimable = true, blocking = true, unitName = "armuwmme", energy = 0, metal = 391, }
 featureTable["armuwmme_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 156, }
-featureTable["armuwmmm_dead"] = { reclaimable = true, blocking = true, unitName = "armuwmmm", energy = 0, metal = 247, }
-featureTable["armuwmmm_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 99, }
+featureTable["armfmmm_dead"] = { reclaimable = true, blocking = true, unitName = "armfmmm", energy = 0, metal = 247, }
+featureTable["armfmmm_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 99, }
 featureTable["armuwms_dead"] = { reclaimable = true, blocking = true, unitName = "armuwms", energy = 0, metal = 234, }
 featureTable["armuwms_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 94, }
 featureTable["armvader_corpse"] = { reclaimable = true, blocking = true, unitName = "armvader", energy = 0, metal = 49, }
@@ -580,8 +580,8 @@ featureTable["coruwmex_dead"] = { reclaimable = true, blocking = true, unitName 
 featureTable["coruwmex_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 14, }
 featureTable["coruwmme_dead"] = { reclaimable = true, blocking = true, unitName = "coruwmme", energy = 0, metal = 550, }
 featureTable["coruwmme_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 220, }
-featureTable["coruwmmm_dead"] = { reclaimable = true, blocking = true, unitName = "coruwmmm", energy = 0, metal = 242, }
-featureTable["coruwmmm_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 97, }
+featureTable["corfmmm_dead"] = { reclaimable = true, blocking = true, unitName = "corfmmm", energy = 0, metal = 242, }
+featureTable["corfmmm_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 97, }
 featureTable["coruwms_dead"] = { reclaimable = true, blocking = true, unitName = "coruwms", energy = 0, metal = 228, }
 featureTable["coruwms_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 91, }
 featureTable["corvipe_dead"] = { reclaimable = true, blocking = true, unitName = "corvipe", energy = 0, metal = 380, }
