@@ -346,9 +346,9 @@ function DoSomethingAdvancedForTheEconomy(self)
 		local converterLimit = math.floor(ai.Energy.income / 1000)
 		if isWater then
 			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("armuwmmm", converterLimit)
+				unitName = BuildWithLimitedNumber("corfmmm", converterLimit)
 			else
-				unitName = BuildWithLimitedNumber("armuwmmm", converterLimit)
+				unitName = BuildWithLimitedNumber("armfmmm", converterLimit)
 			end		
 		else
 			if ai.mySide == CORESideName then
