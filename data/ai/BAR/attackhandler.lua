@@ -171,7 +171,7 @@ function AttackHandler:DoMovement()
 		local totalSize = 0
 		if squad.hasCongregated then
 			for iu, member in pairs(squad.members) do
-				local unit
+				
 				if member ~= nil then
 					if member.unit ~= nil then
 						unit = member.unit:Internal()
@@ -211,52 +211,65 @@ function AttackHandler:DoMovement()
 			local idle = 0
 			local maxRange = 0
 			for iu, member in pairs(squad.members) do
-				if member.damaged then damaged = damaged + 1 end
-				if member.idle then idle = idle + 1 end
-				if member.range > maxRange then maxRange = member.range end
 				local unit = member.unit:Internal()
-				local upos = unit:GetPosition()
-				local cdist = Distance(upos, midPos)
-				if cdist > congDist then
-					if member.straggler == nil then
-						member.straggler = 1
-					else
-						member.straggler = member.straggler + 1
-					end
-					if member.straggler > 20 then
-						-- remove from squad if the unit is taking longer than 40 seconds
-						EchoDebug("leaving slowpoke behind")
-						self:AddRecruit(member)
-						table.remove(squad.members, iu)
-					else
-						stragglers = stragglers + 1
-					end
-					if member.lastpos ~= nil and member.straggler ~= nil and member.straggler ~= 0 then
-						if math.abs(upos.x - member.lastpos.x) < 3 and math.abs(upos.z - member.lastpos.z) < 3 then
-							if member.stuck == nil then
-								member.stuck = 1
-							else
-								member.stuck = member.stuck + 1
-							end
-							if member.stuck > 5 then
-								-- remove from squad if the unit is pathfinder-stuck
-								EchoDebug("leaving stuck behind")
-								self:AddRecruit(member)
-								table.remove(squad.members, iu)
-							end
+				if unit ~= nil then
+					if member.damaged then damaged = damaged + 1 end
+					if member.idle then idle = idle + 1 end
+					if member.range > maxRange then maxRange = member.range end
+					
+					
+					
+					if unit == nil then DebugEnabled= true end
+					EchoDebug(tostring(member),tostring(member.unit),tostring(member.name),tostring(''))
+					if unit == nil then DebugEnabled= false end
+					local upos = unit:GetPosition()
+					local cdist = Distance(upos, midPos)
+					if cdist > congDist then
+						if member.straggler == nil then
+							member.straggler = 1
 						else
-							member.stuck = 0
+							member.straggler = member.straggler + 1
 						end
+						if member.straggler > 20 then
+							-- remove from squad if the unit is taking longer than 40 seconds
+							EchoDebug("leaving slowpoke behind")
+							self:AddRecruit(member)
+							table.remove(squad.members, iu)
+						else
+							stragglers = stragglers + 1
+						end
+						if member.lastpos ~= nil and member.straggler ~= nil and member.straggler ~= 0 then
+							if math.abs(upos.x - member.lastpos.x) < 3 and math.abs(upos.z - member.lastpos.z) < 3 then
+								if member.stuck == nil then
+									member.stuck = 1
+								else
+									member.stuck = member.stuck + 1
+								end
+								if member.stuck > 5 then
+									-- remove from squad if the unit is pathfinder-stuck
+									EchoDebug("leaving stuck behind")
+									self:AddRecruit(member)
+									table.remove(squad.members, iu)
+								end
+							else
+								member.stuck = 0
+							end
+						end
+					else
+						member.straggler = 0
 					end
+					if member.lastpos == nil then
+						member.lastpos = api.Position()
+						member.lastpos.y = 0
+					end
+					member.lastpos.x = upos.x
+					member.lastpos.z = upos.z
 				else
-					member.straggler = 0
+					EchoDebug("leaving ignote")
+					table.remove(squad.members, iu)
+					--print(tostring(squad.members[iu]))
+					--print(tostring(squad.members[member]))
 				end
-				if member.lastpos == nil then
-					member.lastpos = api.Position()
-					member.lastpos.y = 0
-				end
-				member.lastpos.x = upos.x
-				member.lastpos.z = upos.z
 			end
 			local congregate = false
 			EchoDebug("attack squad of " .. #squad.members .. " members, " .. stragglers .. " stragglers")
