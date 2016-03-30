@@ -32,7 +32,12 @@ function AI:Update()
 		self.team = game:GetTeamID()
 		local friends = game:GetFriendlies()
 		local enemies = game:GetEnemies()
-		self.playersCount = #friends+#enemies
+		if enemies then
+			self.playersCount = #friends + #enemies
+		else
+			self.playersCount = #friends
+		end		
+		
 	end
 
 	local updateTeam=frame % self.playersCount
