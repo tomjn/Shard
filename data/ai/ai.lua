@@ -26,23 +26,6 @@ function AI:Update()
 	if self.gameend == true then
 		return
 	end
-
-	local frame = game:Frame()
-	if frame == 0 then
-		self.team = game:GetTeamID()
-		local friends = game:GetFriendlies()
-		local enemies = game:GetEnemies()
-		if enemies then
-			self.playersCount = #friends + #enemies
-		else
-			self.playersCount = #friends
-		end		
-		
-	end
-
-	local updateTeam=frame % self.playersCount
-	if updateTeam ~= self.team then return end
-
 	for i,m in ipairs(self.modules) do
 		if m == nil then
 			game:SendToConsole("nil module!")
