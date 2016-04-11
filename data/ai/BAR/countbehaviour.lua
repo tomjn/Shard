@@ -1,4 +1,4 @@
-require "common"
+shard_include("common")
 
 CountBehaviour = class(Behaviour)
 

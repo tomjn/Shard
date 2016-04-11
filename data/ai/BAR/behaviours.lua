@@ -15,7 +15,7 @@ require "nukebehaviour"
 require "bombardbehaviour"
 require "bootbehaviour"
 require "countbehaviour"
-require "common"
+shard_include("common")
 
 
 behaviours = {
