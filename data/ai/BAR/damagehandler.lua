@@ -1,4 +1,4 @@
-require "common"
+shard_include("common")
 
 -- keeps track of hits to our units
 

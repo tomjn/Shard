@@ -1,4 +1,4 @@
-require "common"
+shard_include("common")
 
 -- keeps track of where enemy units seem to be moving
 
