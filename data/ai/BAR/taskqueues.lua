@@ -133,7 +133,7 @@ function CheckForMapControl()
 		local couldAttack = ai.couldAttack >= 1 or ai.couldBomb >= 1
 		local bombingTooExpensive = ai.bomberhandler:GetCounter() == maxBomberCounter
 		local attackTooExpensive = attackCounter == maxAttackCounter
-		local controlMetalSpots = ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
+		local controlMetalSpots = #ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
 		local needUpgrade = couldAttack or bombingTooExpensive or attackTooExpensive
 		local lotsOfMetal = ai.Metal.income > 25 or controlMetalSpots
 

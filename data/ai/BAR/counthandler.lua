@@ -29,7 +29,7 @@ function CountHandler:Init()
 	ai.lastNameCreated = {}
 	ai.lastNameFinished = {}
 	ai.lastNameDead = {}
-	ai.mexCount = 0
+	ai.mexCount = {}
 	ai.conCount = 0
 	ai.combatCount = 0
 	ai.battleCount = 0
