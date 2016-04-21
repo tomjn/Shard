@@ -785,6 +785,7 @@ function TaskQueueBehaviour:ProgressQueue()
 				self.target = nil
 				self.currentProject = nil
 				self.progress = true
+				self.failures = (self.failures or 0) + 1
 				local limit = 20
 				if self.queue then limit = #self.queue end
 				if self.failures > limit then
