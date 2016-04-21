@@ -633,6 +633,14 @@ function TaskQueueBehaviour:ConstructionComplete()
 end
 
 function TaskQueueBehaviour:Update()
+	if self.failOut then
+		local f = game:Frame()
+		if f > self.failOut + 300 then
+			-- game:SendToConsole("getting back to work " .. self.name .. " " .. self.id)
+			self.failOut = nil
+			self.failures = 0
+		end
+	end
 	if not self:IsActive() then
 		return
 	end
@@ -772,10 +780,19 @@ function TaskQueueBehaviour:ProgressQueue()
 				end
 				self.released = false
 				self.progress = false
+				self.failures = 0
 			else
 				self.target = nil
 				self.currentProject = nil
 				self.progress = true
+				self.failures = (self.failures or 0) + 1
+				local limit = 20
+				if self.queue then limit = #self.queue end
+				if self.failures > limit then
+					-- game:SendToConsole("taking a break after " .. limit .. " tries. " .. self.name .. " " .. self.id)
+					self.failOut = game:Frame()
+					self.unit:ElectBehaviour()
+				end
 			end
 		end
 	end
@@ -805,7 +822,9 @@ function TaskQueueBehaviour:Deactivate()
 end
 
 function TaskQueueBehaviour:Priority()
-	if self.currentProject == nil then
+	if self.failOut then
+		return 0
+	elseif self.currentProject == nil then
 		return 50
 	else
 		return 75
