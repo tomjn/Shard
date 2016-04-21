@@ -821,7 +821,9 @@ function TaskQueueBehaviour:Deactivate()
 end
 
 function TaskQueueBehaviour:Priority()
-	if self.currentProject == nil then
+	if self.failOut then
+		return 0
+	elseif self.currentProject == nil then
 		return 50
 	else
 		return 75
