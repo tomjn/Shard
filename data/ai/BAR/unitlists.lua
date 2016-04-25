@@ -35,6 +35,8 @@ factoryMobilities = {
 	asubpen = {"sub", "amp"},
 	corgant = {"bot"},
 	armshltx = {"bot"},
+	corgantuw = {"bot"},
+	armshltxuw = {"bot"},
 }
 
 -- for calculating what factories to build
@@ -88,6 +90,8 @@ factoryExitSides = {
 	asubpen = 4,
 	corgant = 1,
 	armshltx = 1,
+	corgantuw = 1,
+	armshltxuw = 1,
 }
 
 littlePlasmaList = {
@@ -124,6 +128,9 @@ mexUpgrade = {
 	armmex = "armmoho",
 	coruwmex = "coruwmme",
 	armuwmex = "armuwmme",
+	armamex = "armmoho",
+	corexp = "cormexp",
+	
 }
 
 -- these will be abandoned faster
@@ -195,6 +202,8 @@ advFactories = {
 expFactories = {
 	corgant = 1,
 	armshltx = 1,
+	corgantuw = 1,
+	armshltxuw = 1,
 }
 
 -- leads to experimental
@@ -203,6 +212,10 @@ leadsToExpFactories = {
 	armlab = 1,
 	coralab = 1,
 	armalab = 1,
+	corsy = 1,
+	armsy = 1,
+	corasy = 1,
+	armasy = 1,
 }
 
 -- sturdy, cheap units to be built in larger numbers than siege units
