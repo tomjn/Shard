@@ -1,4 +1,5 @@
 local map = {}
+map.metal = shard_include("spring_lua/metal")
 
 	-- function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
 	-- function map:CanBuildHere(unittype,position)
@@ -63,35 +64,23 @@ local map = {}
 	end
 
 	function map:SpotCount() -- returns the nubmer of metal spots
-		return 0
-
-		--local m = game_engine:Map()
-		--return m:SpotCount()
+		return #self.metal.spots
 	end
 
 	function map:GetSpot(idx) -- returns a Position for the given spot
-		return nil
-
-		--local m = game_engine:Map()
-		--return m:GetSpot(idx)
+		return self.metal.spots[idx]
 	end
 
 	function map:GetMetalSpots() -- returns a table of spot positions
-		return nil
-
-		--[[
-		local m = game_engine:Map()
-		local fv = game_engine:Map():GetMetalSpots()
-		local count = m:SpotCount()
+		local fv = self.metal.spots
+		local count = self:SpotCount()
 		local f = {}
 		local i = 0
 		while i  < count do
-			table.insert( f, m:GetSpot(i) )
+			table.insert( f, fv[i] )
 			i = i + 1
 		end
-		fv = nil
 		return f
-		]]--
 	end
 
 	function map:MapDimensions() -- returns a Position holding the dimensions of the map
