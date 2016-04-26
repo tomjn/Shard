@@ -97,19 +97,19 @@ end
 
 
 function ShardSpringUnit:Stop()
-	Spring.GiveOrderToUnit( self.id, CMD.STOP )
+	Spring.GiveOrderToUnit( self.id, CMD.STOP, {}, {} )
 	return true
 end
 
 
 function ShardSpringUnit:Move(p)
-	Spring.GiveOrderToUnit( self.id, CMD.MOVE, { p.x, p.y, p.z } )
+	Spring.GiveOrderToUnit( self.id, CMD.MOVE, { p.x, p.y, p.z }, {} )
 	return true
 end
 
 
 function ShardSpringUnit:MoveAndFire(p)
-	Spring.GiveOrderToUnit( self.id, CMD.FIGHT, { p.x, p.y, p.z } )
+	Spring.GiveOrderToUnit( self.id, CMD.FIGHT, { p.x, p.y, p.z }, {} )
 	return true
 end
 
@@ -120,12 +120,12 @@ function ShardSpringUnit:Build(t, p) -- IUnitType*
 		t = ai.game:GetTypeByName(t)
 	end
 	if not p then p = self:GetPosition() end
-	Spring.GiveOrderToUnit( self.id, -t:ID(), { p.x, p.y, p.z } )
+	Spring.GiveOrderToUnit( self.id, -t:ID(), { p.x, p.y, p.z }, {} )
 	return true
 end
 
 function ShardSpringUnit:AreaReclaim( p, radius )--Position p, double radius)
-	Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { p.x, p.y, p.z, radius } )
+	Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { p.x, p.y, p.z, radius }, {} )
 	return true
 end
 
@@ -133,21 +133,21 @@ end
 function ShardSpringUnit:Reclaim( thing )--IMapFeature* mapFeature)
 	if not thing then return end
 	if thing.className == "feature" then
-		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { thing:ID() + Game.maxUnits } )
+		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { thing:ID() + Game.maxUnits }, {} )
 	elseif thing.className == "unit" then
-		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { thing:ID() } )
+		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { thing:ID() }, {} )
 	end
 	return true
 end
 
 function ShardSpringUnit:Attack( unit )
-	Spring.GiveOrderToUnit( self.id, CMD.ATTACK, { unit:ID() } )
+	Spring.GiveOrderToUnit( self.id, CMD.ATTACK, { unit:ID() }, {} )
 	return true
 end
 
 
 function ShardSpringUnit:Repair( unit )
-	Spring.GiveOrderToUnit( self.id, CMD.REPAIR, { unit:ID() } )
+	Spring.GiveOrderToUnit( self.id, CMD.REPAIR, { unit:ID() }, {} )
 	return true
 end
 
@@ -210,6 +210,8 @@ end
 
 
 function ShardSpringUnit:ExecuteCustomCommand(  cmdId, params_list, options, timeOut )
+	params_list = params_list or {}
+	options = options or {}
 	if params_list and params_list.push_back then
 		-- handle fake vectorFloat object
 		params_list = params_list.values
