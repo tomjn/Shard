@@ -135,7 +135,7 @@ end
 
 
 function ShardSpringUnit:Reclaim( thing )--IMapFeature* mapFeature)
-	if not thing return end
+	if not thing then return end
 	if thing.className == "feature" then
 		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { thing:ID() + Game.maxUnits } )
 	elseif thing.className == "unit" then

@@ -18,6 +18,7 @@ function ShardSpringUnitType:CanMove()
 end
 
 function ShardSpringUnitType:CanDeploy()
+	-- what does deploy mean for Spring?
 	return false
 end
 
