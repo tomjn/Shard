@@ -29,6 +29,10 @@ function Behaviour:SetUnit(unit)
 	self.engineID = unit.engineID
 end
 
+function Behaviour:SetAI(ai)
+	self.ai = ai
+end
+
 
 function Behaviour:IsActive()
 	return self.active

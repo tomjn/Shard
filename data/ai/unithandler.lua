@@ -35,7 +35,7 @@ function UnitHandler:UnitCreated(engineunit)
 	u:Init()
 	if engineunit:Team() == game:GetTeamID() then
 		self.myUnits[engineunit:ID()] = u
-		self.behaviourFactory:AddBehaviours(u)
+		self.behaviourFactory:AddBehaviours(u, self.ai)
 	end
 	for k,v in pairs(self.myUnits) do
 		v:UnitCreated(u)
@@ -83,7 +83,7 @@ function UnitHandler:AIRepresentation(engineUnit)
 		u:SetEngineRepresentation(engineUnit)
 		u:Init()
 		if engineUnit:Team() == game:GetTeamID() then
-			self.behaviourFactory:AddBehaviours(u)
+			self.behaviourFactory:AddBehaviours(u, self.ai)
 			self.myUnits[engineUnit:ID()] = u
 		end
 	end

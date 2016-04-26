@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -19,6 +20,7 @@ function AssistHandler:internalName()
 end
 
 function AssistHandler:Init()
+	ai = self.ai
 	self.free = {}
 	self.working = {}
 	self.totalAssignments = 0

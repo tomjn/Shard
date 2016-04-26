@@ -1,8 +1,9 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
 local DebugEnabledPlans = false
 local debugPlotBuildFile
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -43,6 +44,7 @@ function BuildSiteHandler:internalName()
 end
 
 function BuildSiteHandler:Init()
+	ai = self.ai
 	local mapSize = map:MapDimensions()
 	ai.maxElmosX = mapSize.x * 8
 	ai.maxElmosZ = mapSize.z * 8

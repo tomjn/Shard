@@ -1,8 +1,9 @@
-require "common"
+shard_include "common"
 
 FactoryRegisterBehaviour = class(Behaviour)
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -11,6 +12,7 @@ local function EchoDebug(inStr)
 end
 
 function FactoryRegisterBehaviour:Init()
+	ai = self.ai
     self.name = self.unit:Internal():Name()
     self.id = self.unit:Internal():ID()
     self.position = self.unit:Internal():GetPosition() -- factories don't move

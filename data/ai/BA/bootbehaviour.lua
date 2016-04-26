@@ -1,10 +1,11 @@
-require "common"
+shard_include "common"
 
 -- Sends units out of factories and holds units in place who are being repaired after resurrection
 
 BootBehaviour = class(Behaviour)
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -16,6 +17,7 @@ local CMD_MOVE_STATE = 50
 local MOVESTATE_HOLDPOS = 0
 
 function BootBehaviour:Init()
+	ai = self.ai
 	self.id = self.unit:Internal():ID()
 	self.name = self.unit:Internal():Name()
 	self.mobile = not unitTable[self.name].isBuilding

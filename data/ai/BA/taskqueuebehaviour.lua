@@ -1,7 +1,8 @@
-require "common"
+shard_include "common"
 
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -207,6 +208,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 end
 
 function TaskQueueBehaviour:Init()
+	ai = self.ai
 	if ai.outmodedFactories == nil then ai.outmodedFactories = 0 end
 
 	GetEcon()

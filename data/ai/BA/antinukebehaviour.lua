@@ -1,8 +1,9 @@
-require "common"
+shard_include "common"
 
 AntinukeBehaviour = class(Behaviour)
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -13,6 +14,7 @@ end
 local CMD_STOCKPILE = 100
 
 function AntinukeBehaviour:Init()
+	ai = self.ai
     self.lastStockpileFrame = 0
     self.finished = false
 end

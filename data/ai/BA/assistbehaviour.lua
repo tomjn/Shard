@@ -1,7 +1,8 @@
--- require "taskqueues"
-require "common"
+-- shard_include "taskqueues"
+shard_include "common"
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -23,6 +24,7 @@ function AssistBehaviour:DoIAssist()
 end
 
 function AssistBehaviour:Init()
+	ai = self.ai
 	self.active = false
 	self.target = nil
 	-- keeping track of how many of each type of unit

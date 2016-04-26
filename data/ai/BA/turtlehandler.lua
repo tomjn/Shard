@@ -1,8 +1,9 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
 local DebugPlotEnabled = false
 local debugPlotTurtleFile
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -96,6 +97,7 @@ function TurtleHandler:internalName()
 end
 
 function TurtleHandler:Init()
+	ai = self.ai
 	self.turtles = {} -- zones to protect
 	self.shells = {} -- defense buildings, shields, and jamming
 	self.planned = {}

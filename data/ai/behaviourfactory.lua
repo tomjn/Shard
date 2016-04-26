@@ -6,7 +6,7 @@ function BehaviourFactory:Init()
 	--
 end
 
-function BehaviourFactory:AddBehaviours(unit)
+function BehaviourFactory:AddBehaviours(unit, ai)
 	if unit == nil then
 		return
 	end
@@ -19,6 +19,7 @@ function BehaviourFactory:AddBehaviours(unit)
 	for i,behaviour in ipairs(b) do
 		t = behaviour()
 		t:SetUnit(unit)
+		t:SetAI(ai)
 		t:Init()
 		unit:AddBehaviour(t)
 	end

@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -27,6 +28,7 @@ function IsDefender(unit)
 end
 
 function DefendBehaviour:Init()
+	ai = self.ai
 	self.moving = {}
 	self.unmoved = 0
 	self.lastPos = self.unit:Internal():GetPosition()

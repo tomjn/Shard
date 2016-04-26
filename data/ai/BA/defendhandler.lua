@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -33,6 +34,7 @@ function DefendHandler:internalName()
 end
 
 function DefendHandler:Init()
+	ai = self.ai
 	self.defenders = {}
 	self.wards = {}
 	self.scrambles = {}

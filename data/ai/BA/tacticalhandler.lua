@@ -1,9 +1,10 @@
-require "common"
+shard_include "common"
 
 -- keeps track of where enemy units seem to be moving
 
 local DebugEnabled = false
 local debugPlotTacticalFile
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -30,6 +31,7 @@ function TacticalHandler:internalName()
 end
 
 function TacticalHandler:Init()
+	ai = self.ai
 	self.lastPositionsFrame = 0
 	self.lastAverageFrame = 0
 	self.lastPositions = {}

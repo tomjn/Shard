@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -19,6 +20,7 @@ function CountHandler:internalName()
 end
 
 function CountHandler:Init()
+	ai = self.ai
 	ai.factories = 0
 	ai.maxFactoryLevel = 0
 	ai.factoriesAtLevel = {}

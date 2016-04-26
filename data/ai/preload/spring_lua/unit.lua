@@ -3,9 +3,12 @@ ShardSpringUnit = class(function(a)
    --
 end)
 
-
 function ShardSpringUnit:Init( id )
 	self.id = id
+end
+
+function ShardSpringUnit:Internal()
+	return self
 end
 
 function ShardSpringUnit:ID()
@@ -13,22 +16,22 @@ function ShardSpringUnit:ID()
 end
 
 function ShardSpringUnit:Team()
-	return 0
+	return Spring.GetUnitTeam(self.id)
 end
 
 
 function ShardSpringUnit:Name()
-	return 0
+	return UnitDefs[Spring.GetUnitDefID(self.id)].name
 end
 
 
 function ShardSpringUnit:IsAlive()
-	return true
+	return not Spring.GetUnitIsDead(self.id)
 end
 
 
 function ShardSpringUnit:IsCloaked()
-	return false
+	return Spring.GetUnitIsCloaked(self.id)
 end
 
 
@@ -43,8 +46,10 @@ end
 
 
 function ShardSpringUnit:Type()
+	local ai = Shard.AIsByTeamID[self:Team()]
+	if not ai return end
 	local name = self:Name()
-	return game:GetTypeByName( name )
+	return ai.game:GetTypeByName( name )
 end
 
 
@@ -262,10 +267,3 @@ IUnit/ engine unit objects
 
 	void ExecuteCustomCommand(int cmdId, std::vector<float> params_list, short options = 0, int timeOut = INT_MAX)
 --]]
-
-
-function shardify_unit( unit )
-	shardunit = ShardSpringUnit( unit )
-	shardunit:Init( unit )
-	return shardunit
-end

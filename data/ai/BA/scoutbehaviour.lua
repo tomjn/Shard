@@ -1,7 +1,8 @@
-require "common"
+shard_include "common"
 
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -21,6 +22,7 @@ end
 ScoutBehaviour = class(Behaviour)
 
 function ScoutBehaviour:Init()
+	ai = self.ai
 	self.evading = false
 	self.active = false
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())

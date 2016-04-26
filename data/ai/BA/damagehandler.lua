@@ -1,8 +1,9 @@
-require "common"
+shard_include "common"
 
 -- keeps track of hits to our units
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -21,6 +22,7 @@ function DamageHandler:internalName()
 end
 
 function DamageHandler:Init()
+	ai = self.ai
 	self.lastHealth = {}
 end
 

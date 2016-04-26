@@ -1,14 +1,3 @@
-ShardSpringLua = Spring and type(Spring) == "table" and VFS and type(VFS) == "table"
-if ShardSpringLua then
-	VFS.Include("luarules/gadgets/ai/preload/globals.lua")
-else
-	require "preload/globals"
-end
-shard_include("behaviourfactory")
-shard_include("unit")
-shard_include("module")
-shard_include("modules")
-
 local AI = class(AIBase)
 
 function AI:Init()

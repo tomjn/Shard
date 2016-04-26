@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -24,6 +25,7 @@ function AttackHandler:internalName()
 end
 
 function AttackHandler:Init()
+	ai = self.ai
 	self.recruits = {}
 	self.count = {}
 	self.squads = {}
@@ -215,48 +217,50 @@ function AttackHandler:DoMovement()
 				if member.idle then idle = idle + 1 end
 				if member.range > maxRange then maxRange = member.range end
 				local unit = member.unit:Internal()
-				local upos = unit:GetPosition()
-				local cdist = Distance(upos, midPos)
-				if cdist > congDist then
-					if member.straggler == nil then
-						member.straggler = 1
-					else
-						member.straggler = member.straggler + 1
-					end
-					if member.straggler > 20 then
-						-- remove from squad if the unit is taking longer than 40 seconds
-						EchoDebug("leaving slowpoke behind")
-						self:AddRecruit(member)
-						table.remove(squad.members, iu)
-					else
-						stragglers = stragglers + 1
-					end
-					if member.lastpos ~= nil and member.straggler ~= nil and member.straggler ~= 0 then
-						if math.abs(upos.x - member.lastpos.x) < 3 and math.abs(upos.z - member.lastpos.z) < 3 then
-							if member.stuck == nil then
-								member.stuck = 1
-							else
-								member.stuck = member.stuck + 1
-							end
-							if member.stuck > 5 then
-								-- remove from squad if the unit is pathfinder-stuck
-								EchoDebug("leaving stuck behind")
-								self:AddRecruit(member)
-								table.remove(squad.members, iu)
-							end
+				if unit then
+					local upos = unit:GetPosition()
+					local cdist = Distance(upos, midPos)
+					if cdist > congDist then
+						if member.straggler == nil then
+							member.straggler = 1
 						else
-							member.stuck = 0
+							member.straggler = member.straggler + 1
 						end
+						if member.straggler > 20 then
+							-- remove from squad if the unit is taking longer than 40 seconds
+							EchoDebug("leaving slowpoke behind")
+							self:AddRecruit(member)
+							table.remove(squad.members, iu)
+						else
+							stragglers = stragglers + 1
+						end
+						if member.lastpos ~= nil and member.straggler ~= nil and member.straggler ~= 0 then
+							if math.abs(upos.x - member.lastpos.x) < 3 and math.abs(upos.z - member.lastpos.z) < 3 then
+								if member.stuck == nil then
+									member.stuck = 1
+								else
+									member.stuck = member.stuck + 1
+								end
+								if member.stuck > 5 then
+									-- remove from squad if the unit is pathfinder-stuck
+									EchoDebug("leaving stuck behind")
+									self:AddRecruit(member)
+									table.remove(squad.members, iu)
+								end
+							else
+								member.stuck = 0
+							end
+						end
+					else
+						member.straggler = 0
 					end
-				else
-					member.straggler = 0
+					if member.lastpos == nil then
+						member.lastpos = api.Position()
+						member.lastpos.y = 0
+					end
+					member.lastpos.x = upos.x
+					member.lastpos.z = upos.z
 				end
-				if member.lastpos == nil then
-					member.lastpos = api.Position()
-					member.lastpos.y = 0
-				end
-				member.lastpos.x = upos.x
-				member.lastpos.z = upos.z
 			end
 			local congregate = false
 			EchoDebug("attack squad of " .. #squad.members .. " members, " .. stragglers .. " stragglers")

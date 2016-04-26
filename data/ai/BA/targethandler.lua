@@ -1,8 +1,9 @@
 
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
 local debugPlotTargetFile
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -631,6 +632,7 @@ end
 ]]--
 
 function TargetHandler:Init()
+	ai = self.ai
 	ai.enemyMexSpots = {}
 	currentEnemyThreatCount = 0
 	currentEnemyImmobileThreatCount = 0

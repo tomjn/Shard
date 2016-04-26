@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -19,6 +20,7 @@ function RaidHandler:internalName()
 end
 
 function RaidHandler:Init()
+	ai = self.ai
 	self.counter = {}
 	ai.raiderCount = {}
 	ai.IDsWeAreRaiding = {}

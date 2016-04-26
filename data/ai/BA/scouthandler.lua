@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -19,6 +20,7 @@ function ScoutHandler:internalName()
 end
 
 function ScoutHandler:Init()
+	ai = self.ai
 	self.spotsToScout = {}
 	self.lastCount = {}
 	self.sameCount = {}

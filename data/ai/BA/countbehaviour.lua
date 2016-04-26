@@ -1,8 +1,9 @@
-require "common"
+shard_include "common"
 
 CountBehaviour = class(Behaviour)
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -11,6 +12,7 @@ local function EchoDebug(inStr)
 end
 
 function CountBehaviour:Init()
+	ai = self.ai
 	self.finished = false
     self.name = self.unit:Internal():Name()
     self.id = self.unit:Internal():ID()

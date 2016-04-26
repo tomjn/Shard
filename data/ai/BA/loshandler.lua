@@ -1,8 +1,9 @@
 
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
 local debugPlotLosFile
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -58,6 +59,7 @@ function LosHandler:internalName()
 end
 
 function LosHandler:Init()
+	ai = self.ai
 	self.losGrid = {}
 	ai.knownEnemies = {}
 	ai.knownWrecks = {}

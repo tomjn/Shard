@@ -1,9 +1,10 @@
-require "common"
+shard_include "common"
 
 
 BombardBehaviour = class(Behaviour)
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -16,6 +17,7 @@ local CMD_ATTACK = 20
 local valueThreatThreshold = 1600 -- anything above this level of value+threat will be shot at even if the cannon isn't idle
 
 function BombardBehaviour:Init()
+	ai = self.ai
     self.lastFireFrame = 0
     local unit = self.unit:Internal()
     self.position = unit:GetPosition()

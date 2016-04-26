@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+local ai
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -11,6 +12,7 @@ end
 MexUpgradeBehaviour = class(Behaviour)
 
 function MexUpgradeBehaviour:Init()
+	ai = self.ai
 	self.active = false
 	self.mohoStarted = false
 	self.released = false

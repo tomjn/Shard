@@ -1,19 +1,3 @@
-local resourceIds = { "metal", "energy" }
-local resourceKeyAliases = {
-	currentLevel = "reserves",
-	storage = "capacity",
-	expense = "usage",
-}
-
-local function shardify_resource(luaResource)
-	local shardResource = {}
-	for key, value in pairs(luaResource) do
-		local newKey = resourceKeyAliases[key] or key
-		shardResource[newKey] = value
-	end
-	return shardResource
-end
-
 local game = {}
 	--game_engine
 
@@ -38,7 +22,7 @@ local game = {}
 	end
 
 	function game:GetTypeByName(typename) -- returns unittype
-		return shardify_unittype(UnitDefNames[typename].id)
+		return Shard:shardify_unittype(UnitDefNames[typename].id)
 	end
 
 
@@ -118,7 +102,7 @@ local game = {}
 	end
 
 	function game:GetResource(idx) --  returns a Resource object
-		return shardify_resource(Spring.GetTeamResources(self.ai.id, resourceIds[idx]))
+		return Shard:shardify_resource(Spring.GetTeamResources(self.ai.id, Shard.resourceIds[idx]))
 		-- return false --game_engine:GetResource(idx)
 	end
 
@@ -127,11 +111,11 @@ local game = {}
 	end
 
 	function game:GetResourceByName(name) -- returns a Resource object, takes the name of the resource
-		return shardify_resource(Spring.GetTeamResources(self.ai.id, name))
+		return Shard:shardify_resource(Spring.GetTeamResources(self.ai.id, name))
 	end
 
 	function game:GetUnitByID( unit_id ) -- returns a Shard unit when given an engine unit ID number
-		return shardify_unit( unit_id )
+		return Shard:shardify_unit( unit_id )
 	end
 
 	function game:GetResources() -- returns a table of Resource objects, takes the name of the resource

@@ -1,4 +1,4 @@
-require "unittable"
+shard_include "unittable"
 
 local DebugEnabled = false
 
