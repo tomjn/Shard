@@ -29,6 +29,9 @@ function AI:Init()
 			self.game:SendToConsole("adding "..newmodule:Name().." module")
 			local internalname = newmodule:internalName()
 			self[internalname] = newmodule
+			newmodule.ai = self
+			newmodule.game = self.game
+			newmodule.map = self.map
 			table.insert(self.modules,newmodule)
 			newmodule:Init()
 		end
