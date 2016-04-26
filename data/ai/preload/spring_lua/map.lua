@@ -1,4 +1,4 @@
-map = {}
+local map = {}
 
 	-- function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
 	-- function map:CanBuildHere(unittype,position)
@@ -138,4 +138,5 @@ map = {}
 		return Game.tidal
 	end
 
-	game.map = map
+	-- game.map = map
+return map

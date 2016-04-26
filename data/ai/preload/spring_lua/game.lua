@@ -1,4 +1,4 @@
-game = {}
+local game = {}
 	--game_engine
 
 	-- prints 'message' to ingame chat console
@@ -149,3 +149,4 @@ game = {}
 		end]]--
 	end
 
+return game
