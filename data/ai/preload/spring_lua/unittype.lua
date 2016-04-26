@@ -28,14 +28,15 @@ end
 
 function ShardSpringUnitType:CanBuild(type)
 	if not type then return self.def.isBuilder end
+	Spring.Echo(self.def.name, "can build?", type, type:Name())
 	if not self.canBuildType then
 		self.canBuildType = {}
+		Spring.Echo(self.def.name, "build options", self.def.buildOptions)
 		for _, defID in pairs(self.def.buildOptions) do
-			local shardType = Shard.shardify_unittype(defID)
-			self.canBuildType[shardType] = true
+			self.canBuildType[defID] = true
 		end
 	end
-	return self.canBuildType[type]
+	return self.canBuildType[type:ID()]
 end
 
 function ShardSpringUnitType:WeaponCount()

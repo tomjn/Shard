@@ -24,7 +24,7 @@ function Shard:shardify_unit( unit )
 end
 
 function Shard:shardify_unittype( unittype )
-	shardunittype = ShardSpringUnitType( unit )
+	shardunittype = ShardSpringUnitType( unittype )
 	shardunittype:Init( unittype )
 	return shardunittype
 end
