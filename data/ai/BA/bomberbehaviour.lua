@@ -1,6 +1,6 @@
 shard_include "common"
 
-local ai
+local ai, game, map
 
 function IsBomber(unit)
 	local tmpName = unit:Internal():Name()
@@ -11,6 +11,8 @@ BomberBehaviour = class(Behaviour)
 
 function BomberBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.lastOrderFrame = game:Frame()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype

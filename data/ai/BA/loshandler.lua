@@ -3,7 +3,7 @@ shard_include "common"
 
 local DebugEnabled = false
 local debugPlotLosFile
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -60,6 +60,8 @@ end
 
 function LosHandler:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.losGrid = {}
 	ai.knownEnemies = {}
 	ai.knownWrecks = {}
@@ -74,7 +76,7 @@ end
 function LosHandler:Update()
 	local f = game:Frame()
 
-	if math.mod(f,23) == 0 then
+	if f % 23 == 0 then
 		if DebugEnabled then 
 			debugPlotLosFile = assert(io.open("debuglosplot",'w'), "Unable to write debuglosplot")
 		end 

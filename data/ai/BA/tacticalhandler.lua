@@ -4,7 +4,7 @@ shard_include "common"
 
 local DebugEnabled = false
 local debugPlotTacticalFile
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -32,6 +32,8 @@ end
 
 function TacticalHandler:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.lastPositionsFrame = 0
 	self.lastAverageFrame = 0
 	self.lastPositions = {}

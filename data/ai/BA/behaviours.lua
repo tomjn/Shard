@@ -17,13 +17,12 @@ shard_include "bootbehaviour"
 shard_include "countbehaviour"
 shard_include "common"
 
-
 behaviours = {
 
 }
 
 
-function defaultBehaviours(unit)
+function defaultBehaviours(unit, ai)
 	local b = {}
 	local u = unit:Internal()
 	local un = u:Name()

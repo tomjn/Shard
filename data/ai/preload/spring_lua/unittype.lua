@@ -13,6 +13,10 @@ function ShardSpringUnitType:ID()
 	return self.id
 end
 
+function ShardSpringUnitType:Name()
+	return self.def.name
+end
+
 function ShardSpringUnitType:CanMove()
 	return self.def.canMove
 end

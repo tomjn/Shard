@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -21,6 +21,8 @@ end
 
 function BomberHandler:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.recruits = {}
 	self.counter = baseBomberCounter
 	ai.hasBombed = 0
@@ -29,7 +31,7 @@ end
 
 function BomberHandler:Update()
 	local f = game:Frame()
-	if math.mod(f,90) == 0 then
+	if f % 90 == 0 then
 		self:DoTargetting()
 	end
 end

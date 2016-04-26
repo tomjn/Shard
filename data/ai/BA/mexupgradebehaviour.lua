@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -13,6 +13,8 @@ MexUpgradeBehaviour = class(Behaviour)
 
 function MexUpgradeBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.active = false
 	self.mohoStarted = false
 	self.released = false

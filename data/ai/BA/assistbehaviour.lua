@@ -2,7 +2,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -25,6 +25,8 @@ end
 
 function AssistBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.active = false
 	self.target = nil
 	-- keeping track of how many of each type of unit
@@ -66,7 +68,7 @@ function AssistBehaviour:Update()
 
 	local f = game:Frame()
 
-	if math.mod(f,180) == 0 then
+	if f % 180 == 0 then
 		local unit = self.unit:Internal()
 		local uname = self.name
 		if self.isCommander then
@@ -94,7 +96,7 @@ function AssistBehaviour:Update()
 		end
 	end
 
-	if math.mod(f,60) == 0 then
+	if f % 60 == 0 then
 		if self.active then
 			if self.target ~= nil then
 				if self.assisting ~= self.target then

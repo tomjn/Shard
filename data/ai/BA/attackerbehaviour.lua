@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -23,6 +23,8 @@ AttackerBehaviour = class(Behaviour)
 
 function AttackerBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()

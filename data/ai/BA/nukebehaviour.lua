@@ -4,7 +4,7 @@ shard_include "common"
 NukeBehaviour = class(Behaviour)
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -17,6 +17,8 @@ local CMD_ATTACK = 20
 
 function NukeBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	local uname = self.unit:Internal():Name()
 	if uname == "armemp" then
 		self.stunning = true

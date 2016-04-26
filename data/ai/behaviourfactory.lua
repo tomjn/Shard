@@ -14,7 +14,7 @@ function BehaviourFactory:AddBehaviours(unit, ai)
 	-- unit:AddBehaviour(behaviour)
 	local b = behaviours[unit:Internal():Name()]
 	if b == nil then
-		b = defaultBehaviours(unit)
+		b = defaultBehaviours(unit, ai)
 	end
 	for i,behaviour in ipairs(b) do
 		t = behaviour()

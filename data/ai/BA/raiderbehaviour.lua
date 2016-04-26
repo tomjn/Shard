@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -26,6 +26,8 @@ RaiderBehaviour = class(Behaviour)
 
 function RaiderBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
@@ -136,7 +138,7 @@ function RaiderBehaviour:Update()
 	local f = game:Frame()
 
 	if not self.active then
-		if math.mod(f, 89) == 0 then
+		if f % 89 == 0 then
 			local unit = self.unit:Internal()
 			local bestCell = ai.targethandler:GetBestRaidCell(unit)
 			ai.targethandler:RaiderHere(self)
@@ -151,7 +153,7 @@ function RaiderBehaviour:Update()
 			end
 		end
 	else
-		if math.mod(f, 29) == 0 then
+		if f % 29 == 0 then
 			-- attack nearby vulnerables immediately
 			local unit = self.unit:Internal()
 			local attackTarget

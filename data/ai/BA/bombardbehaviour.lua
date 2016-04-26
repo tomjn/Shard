@@ -4,7 +4,7 @@ shard_include "common"
 BombardBehaviour = class(Behaviour)
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -18,6 +18,8 @@ local valueThreatThreshold = 1600 -- anything above this level of value+threat w
 
 function BombardBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
     self.lastFireFrame = 0
     local unit = self.unit:Internal()
     self.position = unit:GetPosition()

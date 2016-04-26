@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -29,6 +29,8 @@ end
 
 function DefendBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.moving = {}
 	self.unmoved = 0
 	self.lastPos = self.unit:Internal():GetPosition()
@@ -87,7 +89,7 @@ function DefendBehaviour:Update()
 	if unit == nil then return end
 	if self.active then
 		local f = game:Frame()
-		if math.mod(f,60) == 0 then
+		if f % 60 == 0 then
 			if self.target == nil then return end
 			local targetPos = self.target.position or BehaviourPosition(self.target.behaviour)
 			if targetPos == nil then return end

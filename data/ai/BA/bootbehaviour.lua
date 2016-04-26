@@ -5,7 +5,7 @@ shard_include "common"
 BootBehaviour = class(Behaviour)
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -18,6 +18,8 @@ local MOVESTATE_HOLDPOS = 0
 
 function BootBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.id = self.unit:Internal():ID()
 	self.name = self.unit:Internal():Name()
 	self.mobile = not unitTable[self.name].isBuilding

@@ -3,7 +3,7 @@ shard_include "common"
 
 local DebugEnabled = false
 local debugPlotTargetFile
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -36,10 +36,8 @@ end
 TargetHandler = class(Module)
 
 local sqrt = math.sqrt
-local fmod = math.fmod
 local floor = math.floor
 local ceil = math.ceil
-local mod = math.mod
 
 local function round(num) 
 	if num >= 0 then
@@ -633,6 +631,8 @@ end
 
 function TargetHandler:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	ai.enemyMexSpots = {}
 	currentEnemyThreatCount = 0
 	currentEnemyImmobileThreatCount = 0

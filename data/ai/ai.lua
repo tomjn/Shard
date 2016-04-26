@@ -1,7 +1,7 @@
 local AI = class(AIBase)
 
 function AI:Init()
-	if SpringLua then
+	if ShardSpringLua then
 		self.api = VFS.Include("luarules/gadgets/ai/preload/api.lua")
 	else
 		self.api = require "preload/api"
@@ -10,10 +10,12 @@ function AI:Init()
 	self.map = self.api.map
 	self.game.ai = self
 	self.map.ai = self
+	self.game.map = self.map
 	self.game:SendToConsole("Shard by AF - playing:"..self.game:GameName().." on:"..self.map:MapName())
 
 
 	self.modules = {}
+	Spring.Echo("modules", #modules)
 	if next(modules) ~= nil then
 		for i,m in ipairs(modules) do
 			newmodule = m()

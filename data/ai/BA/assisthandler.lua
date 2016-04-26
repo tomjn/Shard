@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -21,6 +21,8 @@ end
 
 function AssistHandler:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.free = {}
 	self.working = {}
 	self.totalAssignments = 0

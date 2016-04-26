@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -9,10 +9,8 @@ local function EchoDebug(inStr)
 	end
 end
 
-local fmod = math.fmod
 local floor = math.floor
 local ceil = math.ceil
-local mod = math.mod
 
 AttackHandler = class(Module)
 
@@ -26,6 +24,8 @@ end
 
 function AttackHandler:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.recruits = {}
 	self.count = {}
 	self.squads = {}
@@ -38,13 +38,13 @@ end
 
 function AttackHandler:Update()
 	local f = game:Frame()
-	if mod(f, 150) == 0 then
+	if f % 150 == 0 then
 		self:DraftSquads()
 	end
-	if mod(f, 60) == 0 then
+	if f % 60 == 0 then
 		self:DoMovement()
 	end
-	if mod(f, 30) == 0 then
+	if f % 30 == 0 then
 		-- actually retargets each squad every 15 seconds
 		self:ReTarget()
 	end

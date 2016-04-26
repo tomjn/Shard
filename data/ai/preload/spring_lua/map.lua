@@ -21,7 +21,8 @@ map.metal = shard_include("spring_lua/metal")
 
 	function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance) -- returns Position
 		-- needs spring gadget implementation, perhaps https://github.com/spring1944/spring1944/blob/master/LuaRules/Gadgets/craig/buildsite.lua ?
-		return nil
+		return builderpos
+		-- return nil
 		-- return game_engine:Map():FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
 	end
 
@@ -109,17 +110,13 @@ map.metal = shard_include("spring_lua/metal")
 	end
 
 	function map:MaximumHeight() -- returns maximum map height
-		return 0
-
-		-- local m = game_engine:Map()
-		-- return m:MaximumHeight()
+		local minHeight, maxHeight = Spring.GetGroundExtremes()
+		return maxHeight
 	end
 
 	function map:MinimumHeight() -- returns minimum map height
-		return 0
-
-		-- local m = game_engine:Map()
-		-- return m:MinimumHeight()
+		local minHeight, maxHeight = Spring.GetGroundExtremes()
+		return minHeight
 	end
 
 

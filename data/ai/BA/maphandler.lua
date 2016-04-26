@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -286,7 +286,7 @@ local function MapSpotMobility(metals, geos)
 			local x = math.ceil(spot.x / ai.mobilityGridSize)
 			local z = math.ceil(spot.z / ai.mobilityGridSize)
 			for mtype, utype in pairs(mobUnitType) do
-				if mobMap[mtype][x][z] == 0 then
+				if mobMap and mobMap[mtype] and mobMap[mtype][x] and mobMap[mtype][x][z] == 0 then
 					local thisNetwork
 					if ai.topology[mtype][x][z] == nil then
 						-- if topology is empty here, initiate a new network, and flood fill it
@@ -460,18 +460,20 @@ function MapHandler:Update()
 	-- workaround for shifting metal spots: map dats is reloaded every two minutess
 	local f = game:Frame()
 	if f > self.lastDataResetFrame + 3600 then
-		self:LoadMapData()
+		-- self:LoadMapData()
 		self.lastDataResetFrame = f
 	end
 end
 
 function MapHandler:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 
 	ai.activeMobTypes = {}
 	ai.factoryListMap = {}
 
-	local dataloaded = self:LoadMapData()
+	-- local dataloaded = self:LoadMapData()
 
 	self.lastDataResetFrame = game:Frame()
 
@@ -519,12 +521,14 @@ function MapHandler:Init()
 	local tmpFeatures = map:GetMapFeatures()
 	ai.mapHasGeothermal = false
 	local geoSpots = {}
-	for _, feature in pairs(tmpFeatures) do
-		if feature then
-			tmpName = feature:Name()
-			if tmpName == "geovent" then
-				ai.mapHasGeothermal = true
-				table.insert(geoSpots, feature:GetPosition())
+	if tmpFeatures then
+		for _, feature in pairs(tmpFeatures) do
+			if feature then
+				tmpName = feature:Name()
+				if tmpName == "geovent" then
+					ai.mapHasGeothermal = true
+					table.insert(geoSpots, feature:GetPosition())
+				end
 			end
 		end
 	end
@@ -619,7 +623,7 @@ function MapHandler:Init()
 
 	if DebugEnabled then debugPlotFile:close() end
 
-	self:SaveMapData()
+	-- self:SaveMapData()
 
 	-- cleanup
 	mobMap = {}

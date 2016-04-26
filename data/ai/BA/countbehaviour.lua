@@ -3,7 +3,7 @@ shard_include "common"
 CountBehaviour = class(Behaviour)
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -13,6 +13,8 @@ end
 
 function CountBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	self.finished = false
     self.name = self.unit:Internal():Name()
     self.id = self.unit:Internal():ID()

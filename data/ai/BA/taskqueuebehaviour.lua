@@ -2,7 +2,7 @@ shard_include "common"
 
 
 local DebugEnabled = false
-local ai
+local ai, game, map
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -209,6 +209,8 @@ end
 
 function TaskQueueBehaviour:Init()
 	ai = self.ai
+	game = ai.game
+	map = ai.map
 	if ai.outmodedFactories == nil then ai.outmodedFactories = 0 end
 
 	GetEcon()
