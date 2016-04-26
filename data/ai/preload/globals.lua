@@ -36,6 +36,8 @@ shard_include "aibase"
 
 if ShardSpringLua then
 	shard_include "spring_lua/unit"
+	shard_include "spring_lua/unittype"
 else
 	shard_include "spring_native/unit"
+	shard_include "spring_lua/unittype"
 end
