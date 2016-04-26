@@ -5,6 +5,7 @@ end)
 
 function ShardSpringUnit:Init( id )
 	self.id = id
+	self.className = "unit"
 end
 
 function ShardSpringUnit:Internal()
@@ -21,7 +22,10 @@ end
 
 
 function ShardSpringUnit:Name()
-	return UnitDefs[Spring.GetUnitDefID(self.id)].name
+	if not self.name then
+		self.name = UnitDefs[Spring.GetUnitDefID(self.id)].name
+	end
+	return self.name
 end
 
 
@@ -46,39 +50,37 @@ end
 
 
 function ShardSpringUnit:Type()
-	local ai = Shard.AIsByTeamID[self:Team()]
-	if not ai return end
-	local name = self:Name()
-	return ai.game:GetTypeByName( name )
+	if not self.type then
+		local ai = Shard.AIs[1]
+		self.type = ai.game:GetTypeByName( self:Name() )
+	end
+	return self.type
 end
 
 
 function ShardSpringUnit:CanMove()
-	return false
+	return self:Type():CanMove()
 end
 
 
 function ShardSpringUnit:CanDeploy()
-	return false
+	return self:Type():CanDeploy()
 end
-
-
-function ShardSpringUnit:CanBuild()
-	return false
-end
-
 
 function ShardSpringUnit:IsBeingBuilt()
-	return false
+	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
+	return buildProgress < 1
 end
 
 
 function ShardSpringUnit:CanAssistBuilding( unit )-- IUnit* unit) -- the unit that is under construction to help with
-	return false
+	return true -- not sure when this would not be true in Spring
+	-- return false
 end
 
 
 function ShardSpringUnit:CanMoveWhenDeployed()
+	-- what does deployed mean in the case of Spring?
 	return false
 end
 
@@ -116,52 +118,46 @@ function ShardSpringUnit:MoveAndFire(p)
 end
 
 
-function ShardSpringUnit:Build(t) -- IUnitType*
-	return false
+function ShardSpringUnit:Build(t, p) -- IUnitType*
+	if type(t) == "string" then
+		local ai = Shard.AIs[1]
+		t = ai.game:GetTypeByName(t)
+	end
+	if not p then p = self:GetPosition() end
+	Spring.GiveOrderToUnit( self.id, -t:ID(), { p.x, p.y, p.z } )
+	return true
+end
+
+function ShardSpringUnit:AreaReclaim( p, radius )--Position p, double radius)
+	Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { p.x, p.y, p.z, radius } )
+	return true
 end
 
 
-function ShardSpringUnit:Build(typeName) -- std::string
-	return false
+function ShardSpringUnit:Reclaim( thing )--IMapFeature* mapFeature)
+	if not thing return end
+	if thing.className == "feature" then
+		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { thing:ID() + Game.maxUnits } )
+	elseif thing.className == "unit" then
+		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { thing:ID() } )
+	end
+	return true
 end
-
-
-function ShardSpringUnit:Build(typeName, p) -- std::string , Position
-	return false
-end
-
-
-function ShardSpringUnit:Build( type, position ) -- IUnitType* t, Position p)
-	return false
-end
-
-
-function ShardSpringUnit:AreaReclaim( position, radius )--Position p, double radius)
-	return false
-end
-
-
-function ShardSpringUnit:Reclaim( feature )--IMapFeature* mapFeature)
-	return false
-end
-
-
-function ShardSpringUnit:Reclaim( unit )
-	return false
-end
-
 
 function ShardSpringUnit:Attack( unit )
-	return false
+	Spring.GiveOrderToUnit( self.id, CMD.ATTACK, { unit:ID() } )
+	return true
 end
 
 
 function ShardSpringUnit:Repair( unit )
-	return false
+	Spring.GiveOrderToUnit( self.id, CMD.REPAIR, { unit:ID() } )
+	return true
 end
 
 
 function ShardSpringUnit:MorphInto( type )
+	-- how?
 	return false
 end
 
@@ -189,7 +185,7 @@ end
 
 
 function ShardSpringUnit:WeaponCount()
-	return 0
+	return self:Type():WeaponCount()
 end
 
 
@@ -199,16 +195,30 @@ end
 
 
 function ShardSpringUnit:CanBuild( type )
-	return false
+	return self:Type():CanBuild(type)
 end
 
 
 function ShardSpringUnit:GetResourceUsage( idx )
-	return 0
+	local metalMake, metalUse, energyMake, energyUse = Spring.GetUnitResources(self.id)
+	local SResourceTransfer = { gameframe = Spring.GameFrame(), rate = 1 }
+	if Shard.resourceIds[idx] == "metal" then
+		SResourceTransfer.generation = metalMake
+		SResourceTransfer.consumption = metalUse
+	elseif Shard.resourceIds[idx] == "energy" then
+		SResourceTransfer.generation = energyMake
+		SResourceTransfer.consumption = energyUse
+	end
+	return SResourceTransfer
 end
 
 
 function ShardSpringUnit:ExecuteCustomCommand(  cmdId, params_list, options, timeOut )
+	if params_list and params_list.push_back then
+		-- handle fake vectorFloat object
+		params_list = params_list.values
+	end
+	Spring.GiveOrderToUnit(self.id, cmdId, params_list, options)
 	return 0
 end
 --[[
