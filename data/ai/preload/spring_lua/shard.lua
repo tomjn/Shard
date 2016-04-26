@@ -6,6 +6,7 @@ Shard.resourceKeyAliases = {
 	storage = "capacity",
 	expense = "usage",
 }
+Shard.unitsByID = {}
 
 function Shard:shardify_resource(luaResource)
 	local shardResource = {}
@@ -26,6 +27,15 @@ function Shard:shardify_unittype( unittype )
 	shardunittype = ShardSpringUnitType( unit )
 	shardunittype:Init( unittype )
 	return shardunittype
+end
+
+function Shard:GetUnit(unitID)
+	if not self.unitsByID[unitID] then
+		local unit = ShardSpringUnit()
+		unit:Init(unitID)
+		self.unitsByID[unitID] = unit
+	end
+	return self.unitsByID[unitID]
 end
 
 return Shard

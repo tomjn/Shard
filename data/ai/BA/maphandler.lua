@@ -1,6 +1,6 @@
 shard_include "common"
 
-local DebugEnabled = false
+local DebugEnabled = true
 local ai, game, map
 
 local function EchoDebug(inStr)
@@ -10,7 +10,7 @@ local function EchoDebug(inStr)
 end
 
 local debugSquares = {}
-local debugPlotFile
+-- local debugPlotFile
 
 -- mobTypes = {}
 local mobUnitType = {}
@@ -83,7 +83,7 @@ local function PlotDebug(x, z, label)
 	if DebugEnabled then
 		if label == nil then label= "nil" end
 		local string = math.ceil(x) .. " " .. math.ceil(z) .. " " .. label .. "\n"
-		debugPlotFile:write(string)
+		-- debugPlotFile:write(string)
 	end
 end
 
@@ -95,7 +95,7 @@ local function PlotSquareDebug(x, z, size, label)
 		-- if debugSquares[x .. "  " .. z .. " " .. size] == nil then
 			if label == nil then label = "nil" end
 			local string = x .. " " .. z .. " " .. size .. " " .. label .. "\n"
-			debugPlotFile:write(string)
+			-- debugPlotFile:write(string)
 			-- debugSquares[x .. "  " .. z .. " " .. size] = true
 		-- end
 	end
@@ -104,7 +104,7 @@ end
 local function PlotLineDebug(pos1, pos2)
 	if DebugEnabled then
 		local string = math.ceil(pos1.x) .. " " .. math.ceil(pos1.z) .. " " .. math.ceil(pos2.x) .. " " .. math.ceil(pos2.z) .. "\n"
-		debugPlotFile:write(string)
+		-- debugPlotFile:write(string)
 	end
 end
 
@@ -481,9 +481,9 @@ function MapHandler:Init()
 		return
 	end
 
-	if DebugEnabled then 
-		debugPlotFile = assert(io.open("debugplot",'w'), "Unable to write debugplot")
-	end
+	-- if DebugEnabled then 
+		-- debugPlotFile = assert(io.open("debugplot",'w'), "Unable to write debugplot")
+	-- end
 
 	ai.mobilityGridSize = 256 -- will be recalculated by MapMobility()
 
@@ -621,7 +621,7 @@ function MapHandler:Init()
 		end
 	end
 
-	if DebugEnabled then debugPlotFile:close() end
+	-- if DebugEnabled then debugPlotFile:close() end
 
 	-- self:SaveMapData()
 

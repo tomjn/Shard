@@ -27,11 +27,9 @@ map.metal = shard_include("spring_lua/metal")
 	end
 
 	function map:CanBuildHere(unittype,position) -- returns boolean
-		local unitName = unittype:Name()
-		local def = UnitDefNames[unitName]
-		local newX, newY, newZ = Spring.Pos2BuildPos(def.id, position.x, position.y, position.z)
-
-		local blocked = Spring.TestBuildOrder(def.id, newX, newY, newZ, 1) == 0
+		local newX, newY, newZ = Spring.Pos2BuildPos(unittype:ID(), position.x, position.y, position.z)
+		local blocked = Spring.TestBuildOrder(unittype:ID(), newX, newY, newZ, 1) == 0
+		-- Spring.Echo(unittype:Name(), newX, newY, newZ, blocked)
 		return ( not blocked )
 	end
 
@@ -86,9 +84,9 @@ map.metal = shard_include("spring_lua/metal")
 
 	function map:MapDimensions() -- returns a Position holding the dimensions of the map
 		return {
-			x = Game.mapX,
-			y = Game.mapY,
-			z = 0
+			x = Game.mapSizeX / 8,
+			z = Game.mapSizeZ / 8,
+			y = 0
 		}
 	end
 

@@ -8,10 +8,6 @@ function ShardSpringUnit:Init( id )
 	self.className = "unit"
 end
 
-function ShardSpringUnit:Internal()
-	return self
-end
-
 function ShardSpringUnit:ID()
 	return self.id
 end

@@ -1,7 +1,7 @@
 shard_include "common"
 
 
-local DebugEnabled = false
+local DebugEnabled = true
 local ai, game, map
 
 local function EchoDebug(inStr)

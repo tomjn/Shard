@@ -1,6 +1,5 @@
 UnitHandler = class(Module)
 
-
 function UnitHandler:Name()
 	return "UnitHandler"
 end
@@ -33,7 +32,7 @@ function UnitHandler:UnitCreated(engineunit)
 	self.units[engineunit:ID()] = u
 	u:SetEngineRepresentation(engineunit)
 	u:Init()
-	if engineunit:Team() == game:GetTeamID() then
+	if engineunit:Team() == self.game:GetTeamID() then
 		self.myUnits[engineunit:ID()] = u
 		self.behaviourFactory:AddBehaviours(u, self.ai)
 	end
@@ -82,7 +81,7 @@ function UnitHandler:AIRepresentation(engineUnit)
 		
 		u:SetEngineRepresentation(engineUnit)
 		u:Init()
-		if engineUnit:Team() == game:GetTeamID() then
+		if engineUnit:Team() == self.game:GetTeamID() then
 			self.behaviourFactory:AddBehaviours(u, self.ai)
 			self.myUnits[engineUnit:ID()] = u
 		end
