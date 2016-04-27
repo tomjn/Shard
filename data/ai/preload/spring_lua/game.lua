@@ -45,46 +45,33 @@ local game = {}
 	end
 
 	function game:GetEnemies()
-		return self.ai.enemyUnitIds
-		-- local ev = self.ai.enemyUnitIds
-		-- local e = {}
-		-- for i =1, #ev do
-		-- 	e[i] = ev[i]
-		-- end
-		-- return e
+		local ev = self.ai.enemyUnitIds
+		if not ev then return {} end
+		local e = {}
+		for uID, _ in pairs(ev) do
+			e[#e+1] = Shard:shardify_unit(uID)
+		end
+		return e
 	end
 
 	function game:GetUnits()
-		return self.ai.ownUnitIds
-
-		--[[local fv = game_engine:GetUnits()
-		local f = {}
-		local i = 0
-		while i  < fv:size() do
-			table.insert(f,fv[i])
-			i = i + 1
+		local uv = self.ai.ownUnitIds
+		if not uv then return {} end
+		local u = {}
+		for uID, _ in pairs(uv) do
+			u[#u+1] = Shard:shardify_unit(uID)
 		end
-		fv = nil
-		return f]]--
+		return u
 	end
 
 	function game:GetFriendlies()
-		return self.ai.friendlyUnitIds
-
-		--[[local has_friendlies = game_engine:HasFriendlies()
-		if has_friendlies ~= true then
-			return nil
-		else
-			local fv = game_engine:GetFriendlies()
-			local f = {}
-			local i = 0
-			while i  < fv:size() do
-				table.insert(f,fv[i])
-				i = i + 1
-			end
-			fv = nil
-			return f
-		end]]--
+		local fv = self.ai.friendlyUnitIds
+		if not fv then return {} end
+		local f = {}
+		for uID, _ in pairs(fv) do
+			f[#f+1] = Shard:shardify_unit(uID)
+		end
+		return f
 	end
 
 	function game:GameName() -- returns the shortname of this game

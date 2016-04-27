@@ -3,7 +3,7 @@ shard_include "common"
 
 local DebugEnabled = false
 local debugPlotLosFile
-local ai, game, map
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -59,9 +59,6 @@ function LosHandler:internalName()
 end
 
 function LosHandler:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
 	self.losGrid = {}
 	ai.knownEnemies = {}
 	ai.knownWrecks = {}
@@ -92,36 +89,39 @@ function LosHandler:Update()
 		if friendlies ~= nil then
 			for _, unit in pairs(friendlies) do
 				ai.friendlyTeamID[unit:Team()] = true -- because I can't get allies' teamIDs directly
-				local uname = unit:Name()
-				local utable = unitTable[uname]
-				local upos = unit:GetPosition()
-				if utable.losRadius > 0 then
-					self:FillCircle(upos.x, upos.z, utable.losRadius * 32, 2)
-				end
-				if utable.airLosRadius > 0 then
-					-- 4 will become 2 in IsKnownEnemy
-					self:FillCircle(upos.x, upos.z, (utable.losRadius + utable.airLosRadius) * 32, 4)
-				end
-				if utable.radarRadius > 0 then
-					self:FillCircle(upos.x, upos.z, utable.radarRadius, 1)
-				end
-				if utable.sonarRadius > 0 then
-					-- 3 will become 2 in IsKnownEnemy
-					self:FillCircle(upos.x, upos.z, utable.sonarRadius, 3)
+				if not ShardSpringLua then
+					local uname = unit:Name()
+					local utable = unitTable[uname]
+					local upos = unit:GetPosition()
+					if utable.losRadius > 0 then
+						self:FillCircle(upos.x, upos.z, utable.losRadius * 32, 2)
+					end
+					if utable.airLosRadius > 0 then
+						-- 4 will become 2 in IsKnownEnemy
+						self:FillCircle(upos.x, upos.z, (utable.losRadius + utable.airLosRadius) * 32, 4)
+					end
+					if utable.radarRadius > 0 then
+						self:FillCircle(upos.x, upos.z, utable.radarRadius, 1)
+					end
+					if utable.sonarRadius > 0 then
+						-- 3 will become 2 in IsKnownEnemy
+						self:FillCircle(upos.x, upos.z, utable.sonarRadius, 3)
+					end
 				end
 			end
 		end
 		-- update enemy jamming and populate list of enemies
 		local enemies = game:GetEnemies()
 		if enemies ~= nil then
-			local tracking
 			local enemyList = {}
 			for i, e in pairs(enemies) do
 				local uname = e:Name()
-				local utable = unitTable[uname]
 				local upos = e:GetPosition()
-				if utable.jammerRadius > 0 then
-					self:FillCircle(upos.x, upos.z, utable.jammerRadius, 1, true)
+				if not ShardSpringLua then
+					local utable = unitTable[uname]
+					if utable.jammerRadius > 0 then
+						self:FillCircle(upos.x, upos.z, utable.jammerRadius, 1, true)
+					end
 				end
 				-- so that we only have to poll GetEnemies() once
 				table.insert(enemyList, { unitName = uname, position = upos, unitID = e:ID(), cloaked = e:IsCloaked(), beingBuilt = e:IsBeingBuilt(), health = e:GetHealth(), los = 0 })
@@ -369,6 +369,19 @@ function LosHandler:FillCircle(cx, cz, radius, val, jam)
 end
 
 function LosHandler:GroundLos(upos)
+	if ShardSpringLua then
+		local LosOrRadar, inLos, inRadar, jammed = Spring.GetPositionLosState(upos.x, upos.y, upos.z, self.ai.allyId)
+		if inLos then return 2 end
+		if upos.y < 0 then -- underwater
+			if inRadar then return 3 end
+		end
+		if inRadar then return 1 end
+		if Spring.IsPosInAirLos(upos.x, upos.y, upos.z, self.ai.allyId) then
+			return 4
+		else
+			return 0
+		end
+	end
 	local gx = math.ceil(upos.x / losGridElmos)
 	local gz = math.ceil(upos.z / losGridElmos)
 	if self.losGrid[gx] == nil then
@@ -393,6 +406,22 @@ function LosHandler:GroundLos(upos)
 end
 
 function LosHandler:AllLos(upos)
+	if ShardSpringLua then
+		local t = {}
+		local LosOrRadar, inLos, inRadar, jammed = Spring.GetPositionLosState(upos.x, upos.y, upos.z, self.ai.allyId)
+		if inLos then t[2] = true end
+		if inRadar then
+			if upos.y < 0 then -- underwater
+				t[3] = true
+			else
+				t[1] = true
+			end
+		end
+		if Spring.IsPosInAirLos(upos.x, upos.y, upos.z, self.ai.allyId) then
+			t[4] = true
+		end
+		return t
+	end
 	local gx = math.ceil(upos.x / losGridElmos)
 	local gz = math.ceil(upos.z / losGridElmos)
 	if self.losGrid[gx] == nil then

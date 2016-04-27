@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai, game, map
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -12,9 +12,6 @@ end
 WardBehaviour = class(Behaviour)
 
 function WardBehaviour:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
 	self.active = false
 	self.underFire = false
 	self.lastAttackedFrame = game:Frame()

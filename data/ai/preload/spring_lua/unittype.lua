@@ -28,10 +28,10 @@ end
 
 function ShardSpringUnitType:CanBuild(type)
 	if not type then return self.def.isBuilder end
-	Spring.Echo(self.def.name, "can build?", type, type:Name())
+	-- Spring.Echo(self.def.name, "can build?", type, type:Name())
 	if not self.canBuildType then
 		self.canBuildType = {}
-		Spring.Echo(self.def.name, "build options", self.def.buildOptions)
+		-- Spring.Echo(self.def.name, "build options", self.def.buildOptions)
 		for _, defID in pairs(self.def.buildOptions) do
 			self.canBuildType[defID] = true
 		end

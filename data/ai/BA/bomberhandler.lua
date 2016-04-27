@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai, game, map
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -20,9 +20,6 @@ function BomberHandler:internalName()
 end
 
 function BomberHandler:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
 	self.recruits = {}
 	self.counter = baseBomberCounter
 	ai.hasBombed = 0

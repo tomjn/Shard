@@ -1,7 +1,7 @@
 shard_include "common"
 
-local DebugEnabled = true
-local ai, game, map
+local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -466,9 +466,6 @@ function MapHandler:Update()
 end
 
 function MapHandler:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
 
 	ai.activeMobTypes = {}
 	ai.factoryListMap = {}

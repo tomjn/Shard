@@ -32,9 +32,16 @@ local unitWeaponMtypes = {}
 local quadX = { -1, 1, -1, 1 }
 local quadZ = { -1, -1, 1, 1 }
 
+local maxElmosX, maxElmosZ
+if ShardSpringLua then
+	maxElmosX, maxElmosZ = Game.mapSizeX, Game.mapSizeZ
+else
+	maxElmosX, maxElmosZ = ai.maxElmosX, ai.maxElmosZ
+end
+
 function ConstrainToMap(x, z)
-	x = max(min(x, ai.maxElmosX-mapBuffer), mapBuffer)
-	z = max(min(z, ai.maxElmosZ-mapBuffer), mapBuffer)
+	x = max(min(x, maxElmosX-mapBuffer), mapBuffer)
+	z = max(min(z, maxElmosZ-mapBuffer), mapBuffer)
 	return x, z
 end
 
@@ -46,13 +53,13 @@ function RandomAway(pos, dist, opposite, angle)
 	away.y = pos.y + 0
 	if away.x < 1 then
 		away.x = 1
-	elseif away.x > ai.maxElmosX - 1 then
-		away.x = ai.maxElmosX - 1
+	elseif away.x > maxElmosX - 1 then
+		away.x = maxElmosX - 1
 	end
 	if away.z < 1 then
 		away.z = 1
-	elseif away.z > ai.maxElmosZ - 1 then
-		away.z = ai.maxElmosZ - 1
+	elseif away.z > maxElmosZ - 1 then
+		away.z = maxElmosZ - 1
 	end
 	if opposite then
 		angle = twicePi - angle
@@ -289,7 +296,7 @@ function WhatHurtsUnit(unitName, mtype, position)
 	if mtype then whatHurtsMtype[mtype] = hurts end
 	if mtype == "amp" and position ~= nil then
 		-- special case: amphibious need to check whether underwater or not
-		local underwater = ai.maphandler:IsUnderWater(position)
+		local underwater = position.y < 0
 		if underwater then
 			return { ground = false, air = false, submerged = true}
 		else

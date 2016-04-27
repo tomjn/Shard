@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai, game, map
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -19,9 +19,6 @@ end
 ReclaimBehaviour = class(Behaviour)
 
 function ReclaimBehaviour:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
 	self.layers = {}

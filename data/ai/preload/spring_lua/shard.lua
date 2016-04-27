@@ -17,25 +17,25 @@ function Shard:shardify_resource(luaResource)
 	return shardResource
 end
 
-function Shard:shardify_unit( unit )
-	shardunit = ShardSpringUnit( unit )
-	shardunit:Init( unit )
-	return shardunit
-end
-
-function Shard:shardify_unittype( unittype )
-	shardunittype = ShardSpringUnitType( unittype )
-	shardunittype:Init( unittype )
-	return shardunittype
-end
-
-function Shard:GetUnit(unitID)
+function Shard:shardify_unit( unitID )
 	if not self.unitsByID[unitID] then
 		local unit = ShardSpringUnit()
 		unit:Init(unitID)
 		self.unitsByID[unitID] = unit
 	end
 	return self.unitsByID[unitID]
+end
+
+function Shard:shardify_unittype( unittype )
+	local shardunittype = ShardSpringUnitType( unittype )
+	shardunittype:Init( unittype )
+	return shardunittype
+end
+
+function Shard:shardify_damage( damage, weaponDefId, paralyzer )
+	local sharddamage = ShardSpringDamage()
+	sharddamage:Init(damage, weaponDefId, paralyzer)
+	return sharddamage
 end
 
 return Shard

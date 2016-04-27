@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai, game, map
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -20,9 +20,6 @@ function AssistHandler:internalName()
 end
 
 function AssistHandler:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
 	self.free = {}
 	self.working = {}
 	self.totalAssignments = 0
@@ -333,6 +330,7 @@ function AssistHandler:RemoveWorking(asstbehaviour)
 end
 
 function AssistHandler:AssignIDByName(asstbehaviour)
+	-- Spring.Echo("assisthandler:assignidbyname", ai, ai.id, self.ai, self.ai.id)
 	local uname = asstbehaviour.name
 	if self.IDByNameTaken[uname] == nil then
 		asstbehaviour.IDByName = 1

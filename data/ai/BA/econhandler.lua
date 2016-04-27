@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai, game, map
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -20,9 +20,6 @@ function EconHandler:internalName()
 end
 
 function EconHandler:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
 	self.resourceNames = { "Energy", "Metal" }
 	self.lastFrame = -17 -- so that it updates immediately even on the first frame
 	self.hasData = false -- so that it gets data immediately

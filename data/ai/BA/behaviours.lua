@@ -1,4 +1,3 @@
-shard_include "taskqueues"
 shard_include "taskqueuebehaviour"
 shard_include "attackerbehaviour"
 shard_include "raiderbehaviour"
@@ -26,7 +25,7 @@ function defaultBehaviours(unit, ai)
 	local b = {}
 	local u = unit:Internal()
 	local un = u:Name()
-	Spring.Echo(un, "getting default behaviours")
+	-- Spring.Echo(un, "getting default behaviours")
 
 	-- keep track of how many of each kind of unit we have
 	table.insert(b, CountBehaviour)

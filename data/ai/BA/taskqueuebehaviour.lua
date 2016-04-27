@@ -1,8 +1,8 @@
 shard_include "common"
 
 
-local DebugEnabled = true
-local ai, game, map
+local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -208,9 +208,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 end
 
 function TaskQueueBehaviour:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
+	shard_include "taskqueues"
 	if ai.outmodedFactories == nil then ai.outmodedFactories = 0 end
 
 	GetEcon()

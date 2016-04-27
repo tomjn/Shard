@@ -14,6 +14,9 @@ function AI:Init()
 	self.game:SendToConsole("Shard by AF - playing:"..self.game:GameName().." on:"..self.map:MapName())
 
 
+	ai = self
+	game = self.game
+	map = self.map
 	self.modules = {}
 	Spring.Echo("modules", #modules)
 	if next(modules) ~= nil then

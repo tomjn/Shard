@@ -1,7 +1,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai, game, map
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -20,9 +20,6 @@ function CountHandler:internalName()
 end
 
 function CountHandler:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
 	ai.factories = 0
 	ai.maxFactoryLevel = 0
 	ai.factoriesAtLevel = {}

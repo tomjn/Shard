@@ -2,7 +2,7 @@
 shard_include "common"
 
 local DebugEnabled = false
-local ai, game, map
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -24,9 +24,6 @@ function AssistBehaviour:DoIAssist()
 end
 
 function AssistBehaviour:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
 	self.active = false
 	self.target = nil
 	-- keeping track of how many of each type of unit
@@ -36,6 +33,7 @@ function AssistBehaviour:Init()
 	if commanderList[uname] then self.isCommander = true end
 	self.id = self.unit:Internal():ID()
 	ai.assisthandler:AssignIDByName(self)
+	-- Spring.Echo("assistbehaviour:init", ai, ai.id, self.ai, self.ai.id)
 	EchoDebug(uname .. " " .. ai.IDByName[self.id])
 	EchoDebug("AssistBehaviour: added to unit "..uname)
 end

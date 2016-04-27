@@ -95,7 +95,7 @@ map.metal = shard_include("spring_lua/metal")
 	end
 
 	function map:AverageWind() -- returns (minwind+maxwind)/2
-		return ( Game.windMin + (Game.windMax - game.windMin)/2 )
+		return ( Game.windMin + (Game.windMax - Game.windMin)/2 )
 	end
 
 

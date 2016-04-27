@@ -3,7 +3,7 @@ shard_include "common"
 
 local DebugEnabled = false
 local debugPlotTargetFile
-local ai, game, map
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -630,9 +630,6 @@ end
 ]]--
 
 function TargetHandler:Init()
-	ai = self.ai
-	game = ai.game
-	map = ai.map
 	ai.enemyMexSpots = {}
 	currentEnemyThreatCount = 0
 	currentEnemyImmobileThreatCount = 0
