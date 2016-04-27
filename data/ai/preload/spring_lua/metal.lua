@@ -91,10 +91,11 @@ end
 ------------------------------------------------------------
 -- Mex finding
 ------------------------------------------------------------
+
 function GetSpots()
 	
 	-- Main group collection
-	local uniqueGroups = {}
+	-- local uniqueGroups = {}
 	
 	-- Strip info
 	local nStrips = 0
@@ -129,7 +130,8 @@ function GetSpots()
 						end
 						assignedTo.maxZ = z
 						assignedTo.worth = assignedTo.worth + matchGroup.worth
-						uniqueGroups[matchGroup] = nil
+						-- uniqueGroups[matchGroup] = nil
+						matchGroup.unique = nil
 					end
 				else
 					assignedTo = matchGroup
@@ -158,7 +160,8 @@ function GetSpots()
 					worth = worth
 				}
 			stripGroup[nStrips] = newGroup
-			uniqueGroups[newGroup] = true
+			-- uniqueGroups[newGroup] = true
+			newGroup.unique = true
 		end
 	end
 	
@@ -191,22 +194,26 @@ function GetSpots()
 	
 	-- Final processing
 	local spots = {}
-	for g, _ in pairs(uniqueGroups) do
+	-- for g, _ in pairs(uniqueGroups) do
+	for _, g in pairs(stripGroup) do
+		if g.unique then
 		
-		local gMinX, gMaxX = huge, -1
-		local gLeft, gRight = g.left, g.right
-		for iz = g.minZ, g.maxZ, gridSize do
-			if gLeft[iz] < gMinX then gMinX = gLeft[iz] end
-			if gRight[iz] > gMaxX then gMaxX = gRight[iz] end
+			local gMinX, gMaxX = huge, -1
+			local gLeft, gRight = g.left, g.right
+			for iz = g.minZ, g.maxZ, gridSize do
+				if gLeft[iz] < gMinX then gMinX = gLeft[iz] end
+				if gRight[iz] > gMaxX then gMaxX = gRight[iz] end
+			end
+			g.minX = gMinX
+			g.maxX = gMaxX
+			
+			g.x = (gMinX + gMaxX) * 0.5
+			g.z = (g.minZ + g.maxZ) * 0.5
+			g.y = spGetGroundHeight(g.x, g.z)
+			
+			spots[#spots + 1] = g
+
 		end
-		g.minX = gMinX
-		g.maxX = gMaxX
-		
-		g.x = (gMinX + gMaxX) * 0.5
-		g.z = (g.minZ + g.maxZ) * 0.5
-		g.y = spGetGroundHeight(g.x, g.z)
-		
-		spots[#spots + 1] = g
 	end
 	return spots
 end
