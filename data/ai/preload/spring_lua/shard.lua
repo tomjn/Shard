@@ -18,6 +18,7 @@ function Shard:shardify_resource(luaResource)
 end
 
 function Shard:shardify_unit( unitID )
+	if not unitID then return end
 	if not self.unitsByID[unitID] then
 		local unit = ShardSpringUnit()
 		unit:Init(unitID)

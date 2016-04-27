@@ -13,11 +13,18 @@ function UnitHandler:Init()
 	self.myUnits = {}
 	self.behaviourFactory = BehaviourFactory()
 	self.behaviourFactory:Init()
+	Spring.Echo(self.ai.id, "unithandler init")
 end
 
 function UnitHandler:Update()
 	for k,v in pairs(self.myUnits) do
-		v:Update()
+		local ux, uy, uz = Spring.GetUnitPosition(v:Internal():ID())
+		if not ux then
+			Spring.Echo(self.ai.id, "nil unit position", v:Internal():ID(), v:Internal():Name(), k)
+			self.myUnits[k] = nil
+		else
+			v:Update()
+		end
 	end
 end
 
@@ -33,6 +40,7 @@ function UnitHandler:UnitCreated(engineunit)
 	u:SetEngineRepresentation(engineunit)
 	u:Init()
 	if engineunit:Team() == self.game:GetTeamID() then
+		-- Spring.Echo(self.ai.id, engineunit:Team(), self.game:GetTeamID(), "created my unit", engineunit:ID(), engineunit:Name())
 		self.myUnits[engineunit:ID()] = u
 		self.behaviourFactory:AddBehaviours(u, self.ai)
 	end
@@ -57,6 +65,7 @@ function UnitHandler:UnitDead(engineunit)
 			v:UnitDead(u)
 		end
 	end
+	Spring.Echo(self.ai.id, "removing unit from unithandler tables", engineunit:ID(), engineunit:Name())
 	self.units[engineunit:ID()] = nil
 	self.myUnits[engineunit:ID()] = nil
 end
@@ -73,15 +82,20 @@ function UnitHandler:AIRepresentation(engineUnit)
 	if engineUnit == nil then
 		return nil
 	end
+	if not engineUnit:GetPosition() then
+		return nil
+	end
 	local unittable = self.units
 	local u = unittable[engineUnit:ID()]
 	if u == nil then
+		Spring.Echo(self.ai.id, "adding unit to unithandler tables", engineUnit:ID(), engineUnit:Name())
 		u = Unit()
 		self.units[engineUnit:ID()] = u
 		
 		u:SetEngineRepresentation(engineUnit)
 		u:Init()
 		if engineUnit:Team() == self.game:GetTeamID() then
+			-- Spring.Echo(self.ai.id, "giving my unit behaviours", engineUnit:ID(), engineUnit:Name())
 			self.behaviourFactory:AddBehaviours(u, self.ai)
 			self.myUnits[engineUnit:ID()] = u
 		end

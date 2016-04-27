@@ -119,7 +119,7 @@ function AI:UnitDamaged(engineunit,engineattacker,enginedamage)
 	if engineunit == nil then
 		return
 	end
-	self.game:SendToConsole("UnitDamage for " .. enginedamage:Damage())
+	-- self.game:SendToConsole("UnitDamage for " .. enginedamage:Damage())
 	for i,m in ipairs(self.modules) do
 		m:UnitDamaged(engineunit,engineattacker,enginedamage)
 	end

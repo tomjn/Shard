@@ -101,6 +101,17 @@ function defaultBehaviours(unit, ai)
 			table.insert(b, DefendBehaviour)
 		end
 	end
+
+	local alreadyHave = {}
+	for i = #b, 1, -1 do
+		local behaviour = b[i]
+		if alreadyHave[behaviour] then
+			Spring.Echo("duplicate behaviour", u:ID(), u:Name(), ai.id)
+			table.remove(b, i)
+		else
+			alreadyHave[behaviour] = true
+		end
+	end
 	
 	return b
 end

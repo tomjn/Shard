@@ -78,6 +78,7 @@ function ScoutBehaviour:Update()
 			-- attack small targets along the way if the scout is armed
 			local attackTarget
 			if self.armed then
+				-- Spring.Echo(unit:GetPosition(), unit)
 				if ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 1) then
 					attackTarget = ai.targethandler:NearbyVulnerable(unit)
 				end
