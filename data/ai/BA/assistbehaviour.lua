@@ -85,11 +85,11 @@ function AssistBehaviour:Update()
 			end
 		else
 			-- fill empty spots after con units die
-			-- Spring.Echo(ai.IDByName[self.id], ai.nameCount[uname])
-			if ai.IDByName[self.id] > ai.nameCount[uname] then
-				EchoDebug("filling empty spots with " .. uname .. " " .. ai.IDByName[self.id])
-				ai.assisthandler:AssignIDByName(self)
-				EchoDebug("ID now: " .. ai.IDByName[self.id])
+			if not self.ai.IDByName[self.id] or not self.ai.nameCount[uname] then Spring.Echo(self.id, uname, self.ai.IDByName[self.id], self.ai.nameCount[uname]) end
+			if self.ai.IDByName[self.id] > self.ai.nameCount[uname] then
+				EchoDebug("filling empty spots with " .. uname .. " " .. self.ai.IDByName[self.id])
+				self.ai.assisthandler:AssignIDByName(self)
+				EchoDebug("ID now: " .. self.ai.IDByName[self.id])
 				self.unit:ElectBehaviour()
 			end
 		end

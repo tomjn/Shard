@@ -106,12 +106,13 @@ function defaultBehaviours(unit, ai)
 	for i = #b, 1, -1 do
 		local behaviour = b[i]
 		if alreadyHave[behaviour] then
-			Spring.Echo("duplicate behaviour", u:ID(), u:Name(), ai.id)
-			table.remove(b, i)
+			Spring.Echo(ai.id, "duplicate behaviour", u:ID(), u:Name())
+			-- table.remove(b, i)
 		else
 			alreadyHave[behaviour] = true
 		end
 	end
+	Spring.Echo(ai.id, #b, "behaviours", u:ID(), u:Name())
 	
 	return b
 end

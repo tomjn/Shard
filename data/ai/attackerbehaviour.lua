@@ -1,6 +1,6 @@
 shard_include( "attackers" )
 
-function IsAttacker(unit)
+functiself.ai.n IsAttacker(unit)
 	for i,name in ipairs(attackerlist) do
 		if name == unit:Internal():Name() then
 			return true
@@ -69,7 +69,7 @@ function AttackerBehaviour:Activate()
 end
 
 
-function AttackerBehaviour:OwnerDead()
+function AttackerBehaviour:OwnerDied()
 	ai.attackhandler:RemoveRecruit(self)
 	self.attacking = nil
 	self.active = nil

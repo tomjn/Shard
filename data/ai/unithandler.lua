@@ -40,7 +40,7 @@ function UnitHandler:UnitCreated(engineunit)
 	u:SetEngineRepresentation(engineunit)
 	u:Init()
 	if engineunit:Team() == self.game:GetTeamID() then
-		-- Spring.Echo(self.ai.id, engineunit:Team(), self.game:GetTeamID(), "created my unit", engineunit:ID(), engineunit:Name())
+		Spring.Echo(self.ai.id, engineunit:Team(), self.game:GetTeamID(), "created my unit", engineunit:ID(), engineunit:Name())
 		self.myUnits[engineunit:ID()] = u
 		self.behaviourFactory:AddBehaviours(u, self.ai)
 	end

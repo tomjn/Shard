@@ -56,7 +56,7 @@ function AttackerBehaviour:UnitDead(unit)
 	--
 end
 
-function AttackerBehaviour:OwnerDead()
+function AttackerBehaviour:OwnerDied()
 	self.attacking = nil
 	self.active = nil
 	self.unit = nil
