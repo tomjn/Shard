@@ -2,8 +2,8 @@ local game = {}
 	--game_engine
 
 	-- prints 'message' to ingame chat console
-	function game:SendToConsole(message)
-		Spring.Echo( message )
+	function game:SendToConsole(...)
+		Spring.Echo( ... )
 		return true
 	end
 

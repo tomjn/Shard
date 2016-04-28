@@ -277,10 +277,15 @@ function DefendHandler:AssignAll(GAS, mtype) -- Ground Air Submerged (weapon), m
 				end
 				if okay then
 					local defender = dfndbehaviour.unit:Internal()
-					if self.ai.maphandler:UnitCanGoHere(defender, wardPos) then
-						local defenderPos = defender:GetPosition()
-						local dist = Distance(defenderPos, wardPos)
-						bydistance[dist] = dfndbehaviour -- the probability of the same distance is near zero
+					local ux, uy, uz = defender:GetPosition()
+					if ux then
+						if self.ai.maphandler:UnitCanGoHere(defender, wardPos) then
+							local defenderPos = defender:GetPosition()
+							local dist = Distance(defenderPos, wardPos)
+							bydistance[dist] = dfndbehaviour -- the probability of the same distance is near zero
+						end
+					else
+						Spring.Echo(self.ai.id, "defender unit nil position", defender:ID(), defender:Name())
 					end
 				end
 			end
@@ -441,7 +446,7 @@ function DefendHandler:RemoveDefender(dfndbehaviour)
 			if db == dfndbehaviour then
 				table.remove(self.defenders[dfndbehaviour.hits][dfndbehaviour.mtype], i)
 				self.needAssignment[dfndbehaviour.hits][dfndbehaviour.mtype] = true
-				return
+				-- return
 			end
 		end
 	else
@@ -450,7 +455,7 @@ function DefendHandler:RemoveDefender(dfndbehaviour)
 			if db == dfndbehaviour then
 				table.remove(self.loiterers[dfndbehaviour.mtype], i)
 				self.needLoitererAssignment[dfndbehaviour.mtype] = true
-				return
+				-- return
 			end
 		end
 	end

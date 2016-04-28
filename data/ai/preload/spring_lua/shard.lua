@@ -7,6 +7,7 @@ Shard.resourceKeyAliases = {
 	expense = "usage",
 }
 Shard.unitsByID = {}
+Shard.unittypesByID = {}
 
 function Shard:shardify_resource(luaResource)
 	local shardResource = {}
@@ -27,10 +28,19 @@ function Shard:shardify_unit( unitID )
 	return self.unitsByID[unitID]
 end
 
-function Shard:shardify_unittype( unittype )
-	local shardunittype = ShardSpringUnitType( unittype )
-	shardunittype:Init( unittype )
-	return shardunittype
+function Shard:unshardify_unit( unitID )
+	if not unitID then return end
+	self.unitsByID[unitID] = nil
+end
+
+function Shard:shardify_unittype( unitDefID )
+	if not unitDefID then return end
+	if not self.unittypesByID[unitDefID] then
+		local unittype = ShardSpringUnitType()
+		unittype:Init(unitDefID)
+		self.unittypesByID[unitDefID] = unittype
+	end
+	return self.unittypesByID[unitDefID]
 end
 
 function Shard:shardify_damage( damage, weaponDefId, paralyzer )

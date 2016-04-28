@@ -107,7 +107,7 @@ function defaultBehaviours(unit, ai)
 		local behaviour = b[i]
 		if alreadyHave[behaviour] then
 			Spring.Echo(ai.id, "duplicate behaviour", u:ID(), u:Name())
-			-- table.remove(b, i)
+			table.remove(b, i)
 		else
 			alreadyHave[behaviour] = true
 		end
