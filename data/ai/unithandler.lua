@@ -74,7 +74,7 @@ function UnitHandler:UnitDead(engineunit)
 	game:SendToConsole(self.ai.id, "removing unit from unithandler tables", engineunit:ID(), engineunit:Name())
 	self.units[engineunit:ID()] = nil
 	self.myUnits[engineunit:ID()] = nil
-	self.reallyActuallyDead[engineUnit:ID()] = self.game:Frame()
+	self.reallyActuallyDead[engineunit:ID()] = self.game:Frame()
 end
 
 function UnitHandler:UnitDamaged(engineunit,attacker,damage)
@@ -91,6 +91,7 @@ function UnitHandler:AIRepresentation(engineUnit)
 	end
 	if self.reallyActuallyDead[engineUnit:ID()] then
 		game:SendToConsole(self.ai.id, "unit already died, not representing unit", engineUnit:ID(), engineUnit:Name())
+		return nil
 	end
 	local ux, uy, uz = engineUnit:GetPosition()
 	if not ux then
