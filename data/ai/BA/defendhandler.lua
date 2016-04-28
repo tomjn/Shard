@@ -285,7 +285,7 @@ function DefendHandler:AssignAll(GAS, mtype) -- Ground Air Submerged (weapon), m
 							bydistance[dist] = dfndbehaviour -- the probability of the same distance is near zero
 						end
 					else
-						Spring.Echo(self.ai.id, "defender unit nil position", defender:ID(), defender:Name())
+						game:SendToConsole(self.ai.id, "defender unit nil position", defender:ID(), defender:Name())
 					end
 				end
 			end

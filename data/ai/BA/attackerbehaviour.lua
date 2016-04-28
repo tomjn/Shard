@@ -58,7 +58,7 @@ function AttackerBehaviour:UnitDead(unit)
 end
 
 function AttackerBehaviour:OwnerDied()
-	Spring.Echo(self.ai.id, "attackbehaviour owner dead", self.unit:Internal():ID(), self.unit:Internal():Name())
+	game:SendToConsole(self.ai.id, "attackbehaviour owner dead", self.unit:Internal():ID(), self.unit:Internal():Name())
 	self.attacking = nil
 	self.active = nil
 	self.unit = nil

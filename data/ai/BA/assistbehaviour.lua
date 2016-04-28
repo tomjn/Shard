@@ -33,7 +33,7 @@ function AssistBehaviour:Init()
 	if commanderList[uname] then self.isCommander = true end
 	self.id = self.unit:Internal():ID()
 	ai.assisthandler:AssignIDByName(self)
-	-- Spring.Echo("assistbehaviour:init", ai, ai.id, self.ai, self.ai.id)
+	-- game:SendToConsole("assistbehaviour:init", ai, ai.id, self.ai, self.ai.id)
 	EchoDebug(uname .. " " .. ai.IDByName[self.id])
 	EchoDebug("AssistBehaviour: added to unit "..uname)
 end
@@ -85,7 +85,7 @@ function AssistBehaviour:Update()
 			end
 		else
 			-- fill empty spots after con units die
-			if not self.ai.IDByName[self.id] or not self.ai.nameCount[uname] then Spring.Echo(self.id, uname, self.ai.IDByName[self.id], self.ai.nameCount[uname]) end
+			if not self.ai.IDByName[self.id] or not self.ai.nameCount[uname] then game:SendToConsole(self.id, uname, self.ai.IDByName[self.id], self.ai.nameCount[uname]) end
 			if self.ai.IDByName[self.id] > self.ai.nameCount[uname] then
 				EchoDebug("filling empty spots with " .. uname .. " " .. self.ai.IDByName[self.id])
 				self.ai.assisthandler:AssignIDByName(self)

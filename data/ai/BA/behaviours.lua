@@ -25,7 +25,7 @@ function defaultBehaviours(unit, ai)
 	local b = {}
 	local u = unit:Internal()
 	local un = u:Name()
-	-- Spring.Echo(un, "getting default behaviours")
+	-- game:SendToConsole(un, "getting default behaviours")
 
 	-- keep track of how many of each kind of unit we have
 	table.insert(b, CountBehaviour)
@@ -106,13 +106,13 @@ function defaultBehaviours(unit, ai)
 	for i = #b, 1, -1 do
 		local behaviour = b[i]
 		if alreadyHave[behaviour] then
-			Spring.Echo(ai.id, "duplicate behaviour", u:ID(), u:Name())
+			game:SendToConsole(ai.id, "duplicate behaviour", u:ID(), u:Name())
 			table.remove(b, i)
 		else
 			alreadyHave[behaviour] = true
 		end
 	end
-	Spring.Echo(ai.id, #b, "behaviours", u:ID(), u:Name())
+	game:SendToConsole(ai.id, #b, "behaviours", u:ID(), u:Name())
 	
 	return b
 end

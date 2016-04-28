@@ -330,7 +330,7 @@ function AssistHandler:RemoveWorking(asstbehaviour)
 end
 
 function AssistHandler:AssignIDByName(asstbehaviour)
-	-- Spring.Echo("assisthandler:assignidbyname", ai, ai.id, self.ai, self.ai.id)
+	-- game:SendToConsole("assisthandler:assignidbyname", ai, ai.id, self.ai, self.ai.id)
 	local uname = asstbehaviour.name
 	if self.IDByNameTaken[uname] == nil then
 		asstbehaviour.IDByName = 1
@@ -368,7 +368,7 @@ function AssistHandler:RemoveAssistant(asstbehaviour)
 	local uname = asstbehaviour.name
 	local uid = asstbehaviour.id
 	-- game:SendToConsole("assistant " .. uname .. " died")
-	Spring.Echo(uname, uid, self.IDByNameTaken[uname], ai.IDByName[uid], ai.id, self.ai.id, asstbehaviour.ai.id)
+	game:SendToConsole(uname, uid, self.IDByNameTaken[uname], ai.IDByName[uid], ai.id, self.ai.id, asstbehaviour.ai.id)
 	if self.IDByNameTaken[uname] ~= nil then self.IDByNameTaken[uname][ai.IDByName[uid]] = nil end
 	ai.IDByName[uid] = nil
 end

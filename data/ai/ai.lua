@@ -1,11 +1,15 @@
+if not ShardSpringLua then
+	-- globals
+	require("preload/globals")
+	shard_include("behaviourfactory")
+	shard_include("unit")
+	shard_include("module")
+	shard_include("modules")
+end
 local AI = class(AIBase)
 
 function AI:Init()
-	if ShardSpringLua then
-		self.api = VFS.Include("luarules/gadgets/ai/preload/api.lua")
-	else
-		self.api = require "preload/api"
-	end
+	self.api = shard_include("preload/api")
 	self.game = self.api.game
 	self.map = self.api.map
 	self.game.ai = self
@@ -18,7 +22,6 @@ function AI:Init()
 	game = self.game
 	map = self.map
 	self.modules = {}
-	Spring.Echo("modules", #modules)
 	if next(modules) ~= nil then
 		for i,m in ipairs(modules) do
 			newmodule = m()
