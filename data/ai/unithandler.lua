@@ -14,7 +14,6 @@ function UnitHandler:Init()
 	self.reallyActuallyDead = {}
 	self.behaviourFactory = BehaviourFactory()
 	self.behaviourFactory:Init()
-	game:SendToConsole(self.ai.id, "unithandler init")
 end
 
 function UnitHandler:Update()
@@ -90,12 +89,12 @@ function UnitHandler:AIRepresentation(engineUnit)
 		return nil
 	end
 	if self.reallyActuallyDead[engineUnit:ID()] then
-		game:SendToConsole(self.ai.id, "unit already died, not representing unit", engineUnit:ID(), engineUnit:Name())
+		-- game:SendToConsole(self.ai.id, "unit already died, not representing unit", engineUnit:ID(), engineUnit:Name())
 		return nil
 	end
 	local ux, uy, uz = engineUnit:GetPosition()
 	if not ux then
-		game:SendToConsole(self.ai.id, "nil engineUnit position, not representing unit", engineUnit:ID(), engineUnit:Name())
+		-- game:SendToConsole(self.ai.id, "nil engineUnit position, not representing unit", engineUnit:ID(), engineUnit:Name())
 		return nil
 	end
 	local unittable = self.units

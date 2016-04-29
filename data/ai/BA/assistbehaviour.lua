@@ -85,7 +85,7 @@ function AssistBehaviour:Update()
 			end
 		else
 			-- fill empty spots after con units die
-			if not self.ai.IDByName[self.id] or not self.ai.nameCount[uname] then game:SendToConsole(self.id, uname, self.ai.IDByName[self.id], self.ai.nameCount[uname]) end
+			-- if not self.ai.IDByName[self.id] or not self.ai.nameCount[uname] then game:SendToConsole(self.id, uname, self.ai.IDByName[self.id], self.ai.nameCount[uname]) end
 			if self.ai.IDByName[self.id] > self.ai.nameCount[uname] then
 				EchoDebug("filling empty spots with " .. uname .. " " .. self.ai.IDByName[self.id])
 				self.ai.assisthandler:AssignIDByName(self)
