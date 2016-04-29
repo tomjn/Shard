@@ -368,7 +368,6 @@ function AssistHandler:RemoveAssistant(asstbehaviour)
 	local uname = asstbehaviour.name
 	local uid = asstbehaviour.id
 	-- game:SendToConsole("assistant " .. uname .. " died")
-	game:SendToConsole(uname, uid, self.IDByNameTaken[uname], ai.IDByName[uid], ai.id, self.ai.id, asstbehaviour.ai.id)
 	if self.IDByNameTaken[uname] ~= nil then self.IDByNameTaken[uname][ai.IDByName[uid]] = nil end
 	ai.IDByName[uid] = nil
 end
