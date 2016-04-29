@@ -235,7 +235,6 @@ end
 ------------------------------------------------
 
 function widget.UnitCreated(unitID, unitDefID, unitTeam)
-	Spring.Echo("buildsite unitcreated", unitTeam, myTeamID)
 	if (not AreTeamsAllied(unitTeam, myTeamID)) then
 		return
 	end

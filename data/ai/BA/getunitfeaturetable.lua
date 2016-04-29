@@ -46,6 +46,10 @@ end
 
 local wrecks = {}
 for unitDefID,unitDef in pairs(UnitDefs) do
+	-- Spring.Echo(unitDef.name, "build slope", unitDef.maxHeightDif)
+	-- if unitDef.moveDef.maxSlope then
+		-- Spring.Echo(unitDef.name, "move slope", unitDef.moveDef.maxSlope)
+	-- end
 	local utable = {}
 	if unitDef["modCategories"]["weapon"] then
 		utable.isWeapon = true

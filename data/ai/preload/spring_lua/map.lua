@@ -35,7 +35,7 @@ map.metal = shard_include("spring_lua/metal")
 function map:FindClosestBuildSite(unittype, builderpos, searchradius, minimumdistance) -- returns Position
 	searchradius = searchradius or 500
 	minimumdistance = minimumdistance or 50
-	local x, y, z, facing = self.buildsite.FindBuildsite(builderpos, unittype:ID(), true, searchradius, minimumdistance)
+	-- local x, y, z, facing = self.buildsite.FindBuildsite(builderpos, unittype:ID(), true, searchradius, minimumdistance)
 	if x then
 		return {x=x, y=y, z=z}, facing
 	else

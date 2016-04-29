@@ -74,22 +74,28 @@ function LosHandler:Update()
 	local f = game:Frame()
 
 	if f % 23 == 0 then
-		if DebugEnabled then 
-			debugPlotLosFile = assert(io.open("debuglosplot",'w'), "Unable to write debuglosplot")
-		end 
-		-- game:SendToConsole("updating los")
-		self.losGrid = {}
-		-- note: this could be more effecient by using a behaviour
-		-- if the unit is a building, we know it's LOS contribution forever
-		-- if the unit moves, the behaviours can be polled rather than GetFriendlies()
-		-- except for allies' units
-		local friendlies = game:GetFriendlies()
-		ai.friendlyTeamID = {}
-		ai.friendlyTeamID[game:GetTeamID()] = true
-		if friendlies ~= nil then
-			for _, unit in pairs(friendlies) do
-				ai.friendlyTeamID[unit:Team()] = true -- because I can't get allies' teamIDs directly
-				if not ShardSpringLua then
+		if ShardSpringLua and self.ai.alliedTeamIds then
+			self.ai.friendlyTeamID = {}
+			self.ai.friendlyTeamID[self.game:GetTeamID()] = true
+			for teamID, _ in pairs(self.ai.alliedTeamIds) do
+				self.ai.friendlyTeamID[teamID] = true
+			end
+		else
+			if DebugEnabled then 
+				debugPlotLosFile = assert(io.open("debuglosplot",'w'), "Unable to write debuglosplot")
+			end 
+			-- game:SendToConsole("updating los")
+			self.losGrid = {}
+			-- note: this could be more effecient by using a behaviour
+			-- if the unit is a building, we know it's LOS contribution forever
+			-- if the unit moves, the behaviours can be polled rather than GetFriendlies()
+			-- except for allies' units
+			local friendlies = game:GetFriendlies()
+			ai.friendlyTeamID = {}
+			ai.friendlyTeamID[game:GetTeamID()] = true
+			if friendlies ~= nil then
+				for _, unit in pairs(friendlies) do
+					ai.friendlyTeamID[unit:Team()] = true -- because I can't get allies' teamIDs directly
 					local uname = unit:Name()
 					local utable = unitTable[uname]
 					local upos = unit:GetPosition()

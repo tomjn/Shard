@@ -1,6 +1,6 @@
 shard_include "common"
 
-local DebugEnabled = false
+local DebugEnabled = true
 
 
 local function EchoDebug(inStr)
@@ -205,11 +205,17 @@ local function MapMobility()
 			-- find out if each mobility type can exist there
 			for mtype, utype in pairs(mobUnitType) do
 				local canbuild = false
-				if mtype == "hov" then
-					-- hovers don't build on water for some reason, so use some logic with other unit types to figure it out
-					canbuild = game.map:CanBuildHere(mobUnitType["hov"], pos) or game.map:CanBuildHere(game:GetTypeByName(WaterSurfaceUnitName), pos)
+				if ShardSpringLua then
+					local uname = mobUnitExampleName[mtype]
+					local uDef = UnitDefNames[uname]
+					canbuild = Spring.TestMoveOrder(uDef.id, pos.x, Spring.GetGroundHeight(pos.x,pos.z), pos.z)
 				else
-					canbuild = game.map:CanBuildHere(mobUnitType[mtype], pos)
+					if mtype == "hov" then
+						-- hovers don't build on water for some reason, so use some logic with other unit types to figure it out
+						canbuild = game.map:CanBuildHere(mobUnitType["hov"], pos) or game.map:CanBuildHere(game:GetTypeByName(WaterSurfaceUnitName), pos)
+					else
+						canbuild = game.map:CanBuildHere(mobUnitType[mtype], pos)
+					end
 				end
 				if canbuild then
 					-- EchoDebug(mtype .. " at " .. x .. "," .. z .. " count " .. mobCount[mtype])
@@ -774,12 +780,13 @@ end
 function MapHandler:UnitCanGoHere(unit, position)
 	if unit == nil then return false end
 	if position == nil then return false end
+	if ShardSpringLua then return Spring.TestMoveOrder(unit:Type():ID(), position.x, position.y, position.z) end
 	local mtype, unet = self:MobilityOfUnit(unit)
 	local pnet = self:MobilityNetworkHere(mtype, position)
 	if unet == pnet then
 		return true
 	else
-		EchoDebug(mtype .. " " .. tostring(unet) .. " " .. tostring(pnet))
+		-- EchoDebug(mtype .. " " .. tostring(unet) .. " " .. tostring(pnet))
 		return false
 	end
 end
@@ -820,6 +827,7 @@ function MapHandler:MobilityNetworkSizeHere(mtype, position)
 end
 
 function MapHandler:IsUnderWater(position)
+	if ShardSpringLua then return Spring.GetGroundHeight(position.x, position.z) < 0 end
 	local x = math.ceil(position.x / ai.mobilityGridSize)
 	local z = math.ceil(position.z / ai.mobilityGridSize)
 	if ai.topology["sub"][x] ~= nil then
