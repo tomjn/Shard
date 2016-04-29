@@ -46,7 +46,7 @@ function UnitHandler:UnitCreated(engineunit)
 	u:SetEngineRepresentation(engineunit)
 	u:Init()
 	if engineunit:Team() == self.game:GetTeamID() then
-		game:SendToConsole(self.ai.id, engineunit:Team(), self.game:GetTeamID(), "created my unit", engineunit:ID(), engineunit:Name())
+		-- game:SendToConsole(self.ai.id, engineunit:Team(), self.game:GetTeamID(), "created my unit", engineunit:ID(), engineunit:Name())
 		self.myUnits[engineunit:ID()] = u
 		self.behaviourFactory:AddBehaviours(u, self.ai)
 	end
@@ -71,7 +71,7 @@ function UnitHandler:UnitDead(engineunit)
 			v:UnitDead(u)
 		end
 	end
-	game:SendToConsole(self.ai.id, "removing unit from unithandler tables", engineunit:ID(), engineunit:Name())
+	-- game:SendToConsole(self.ai.id, "removing unit from unithandler tables", engineunit:ID(), engineunit:Name())
 	self.units[engineunit:ID()] = nil
 	self.myUnits[engineunit:ID()] = nil
 	self.reallyActuallyDead[engineunit:ID()] = self.game:Frame()
@@ -101,7 +101,7 @@ function UnitHandler:AIRepresentation(engineUnit)
 	local unittable = self.units
 	local u = unittable[engineUnit:ID()]
 	if u == nil then
-		game:SendToConsole(self.ai.id, "adding unit to unithandler tables", engineUnit:ID(), engineUnit:Name())
+		-- game:SendToConsole(self.ai.id, "adding unit to unithandler tables", engineUnit:ID(), engineUnit:Name())
 		u = Unit()
 		self.units[engineUnit:ID()] = u
 		

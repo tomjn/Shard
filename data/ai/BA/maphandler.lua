@@ -535,6 +535,7 @@ function MapHandler:Init()
 		end
 	end
 	ai.geoSpots = geoSpots
+	game:SendToConsole(#geoSpots, "geovents")
 
 	ai.UWMetalSpots = {}
 	ai.landMetalSpots = {}
@@ -756,6 +757,24 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 
 	-- if uw then EchoDebug("uw mex is final best distance") end
 	return pos, uw, reclaimEnemyMex
+end
+
+function MapHandler:ClosestFreeGeo(unittype, builder, position)
+	if not position then position = builder:GetPosition() end
+	local bname = builder:Name()
+	local uname = unittype:Name()
+	local bestDistance, bestPos
+	for i,p in pairs(self.ai.geoSpots) do
+		-- dont use this spot if we're already building there
+		if not ai.buildsitehandler:PlansOverlap(p, uname) and self:UnitCanGoHere(builder, p) and game.map:CanBuildHere(unittype, p) and ai.targethandler:IsSafePosition(p, builder) then
+			local dist = Distance(position, p)
+			if not bestDistance or dist < bestDistance then
+				bestDistance = dist
+				bestPos = p
+			end
+		end
+	end
+	return bestPos
 end
 
 function MapHandler:MobilityNetworkHere(mtype, position)
