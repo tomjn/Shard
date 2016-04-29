@@ -8,6 +8,7 @@ Shard.resourceKeyAliases = {
 }
 Shard.unitsByID = {}
 Shard.unittypesByID = {}
+Shard.featuresByID = {}
 
 function Shard:shardify_resource(luaResource)
 	local shardResource = {}
@@ -47,6 +48,21 @@ function Shard:shardify_damage( damage, weaponDefId, paralyzer )
 	local sharddamage = ShardSpringDamage()
 	sharddamage:Init(damage, weaponDefId, paralyzer)
 	return sharddamage
+end
+
+function Shard:shardify_feature( featureID )
+	if not featureID then return end
+	if not self.featuresByID[featureID] then
+		local shardfeature = ShardSpringFeature()
+		shardfeature:Init(featureID)
+		self.featuresByID[featureID] = shardfeature
+	end
+	return self.featuresByID[featureID]
+end
+
+function Shard:unshardify_feature( featureID )
+	if not featureID then return end
+	self.featuresByID[featureID] = nil
 end
 
 return Shard

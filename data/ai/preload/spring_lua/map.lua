@@ -22,7 +22,6 @@ map.metal = shard_include("spring_lua/metal")
 	function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance) -- returns Position
 		-- needs spring gadget implementation, perhaps https://github.com/spring1944/spring1944/blob/master/LuaRules/Gadgets/craig/buildsite.lua ?
 		return builderpos
-		-- return nil
 		-- return game_engine:Map():FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
 	end
 
@@ -34,32 +33,23 @@ map.metal = shard_include("spring_lua/metal")
 	end
 
 	function map:GetMapFeatures()
-		return nil
-
-		--[[local fv = game_engine:Map():GetMapFeatures()
+		local fv = Spring.GetAllFeatures()
+		if not fv then return {} end
 		local f = {}
-		local i = 0
-		while i  < fv:size() do
-			table.insert(f,fv[i])
-			i = i + 1
+		for _, fID in pairs(fv) do
+			f[#f+1] = Shard:shardify_feature(fID)
 		end
-		fv = nil
-		return f]]--
+		return f
 	end
 
 	function map:GetMapFeaturesAt(position,radius)
-		return nil
-
-		--[[local m = game_engine:Map()
-		local fv = m:GetMapFeaturesAt(position,radius)
+		local fv = Spring.GetFeaturesInSphere(position.x, position.y, position.z, radius)
+		if not fv then return {} end
 		local f = {}
-		local i = 0
-		while i  < fv:size() do
-			table.insert(f,fv[i])
-			i = i + 1
+		for _, fID in pairs(fv) do
+			f[#f+1] = Shard:shardify_feature(fID)
 		end
-		fv = nil
-		return f]]--
+		return f
 	end
 
 	function map:SpotCount() -- returns the nubmer of metal spots

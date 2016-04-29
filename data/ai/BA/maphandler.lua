@@ -111,12 +111,8 @@ end
 MapHandler = class(Module)
 
 local function MiddleOfTwo(pos1, pos2)
-	local deltax = pos2.x - pos1.x
-	local deltaz = pos2.z - pos1.z
 	local middle = api.Position()
-	middle.y = 0
-	middle.x = pos1.x + (deltax / 2)
-	middle.z = pos1.z + (deltaz / 2)
+	middle.x, middle.y, middle.z = (pos1.x+pos2.x)/2, (pos1.y+pos2.y)/2,(pos1.z+pos2.z)/2
 	return middle
 end
 
@@ -327,9 +323,12 @@ local function MergePositions(posTable, cutoff, includeNonMerged)
 	EchoDebug(#list .. " " .. cutoff)
 	local merged = {}
 	while #list > 0 do
-		local pos1 = table.remove(list)
+		local lp = table.remove(list)
+		local pos1 = api.Position()
+		pos1.x, pos1.y, pos1.z = lp.x, lp.y, lp.z
 		local merge = nil
-		for i, pos2 in pairs(list) do
+		for i = #list, 1, -1 do
+			local pos2 = list[i]
 			local dist = Distance(pos1, pos2)
 			if dist < cutoff then
 				EchoDebug("merging " .. pos1.x .. "," .. pos1.z .. " with " .. pos2.x .. "," .. pos2.z .. " -- " .. dist .. " away")
