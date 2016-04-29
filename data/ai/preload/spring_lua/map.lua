@@ -1,19 +1,6 @@
 local map = {}
 map.metal = shard_include("spring_lua/metal")
 
--- function buildsiteFinder.UnitCreated(unitID, unitDefID, unitTeam)
--- 	Must be called for each unit entering the team
--- 	(e.g. from gadget:UnitCreated, gadget:UnitGiven)
-
--- function buildsiteFinder.UnitDestroyed(unitID, unitDefID, unitTeam)
--- 	Must be called for each unit leaving the team
--- 	(e.g. from gadget:UnitDestroyed, gadget:UnitTaken)
-
--- function buildsiteFinder.FindBuildsite(builderID, unitDefID, closest)
--- 	Returns x, y, z, facing if it finds a suitable buildsite for unitDefID.
--- 	builderID is currently used only to determine optimal build facing.
--- 	Returns nil if it can not find a suitable buildsite.
-
 	-- function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
 	-- function map:CanBuildHere(unittype,position)
 	-- function map:GetMapFeatures()
@@ -35,12 +22,29 @@ map.metal = shard_include("spring_lua/metal")
 function map:FindClosestBuildSite(unittype, builderpos, searchradius, minimumdistance) -- returns Position
 	searchradius = searchradius or 500
 	minimumdistance = minimumdistance or 50
-	-- local x, y, z, facing = self.buildsite.FindBuildsite(builderpos, unittype:ID(), true, searchradius, minimumdistance)
-	if x then
-		return {x=x, y=y, z=z}, facing
-	else
-		return builderpos
+	local twicePi = math.pi * 2
+	local angleIncMult = twicePi / minimumdistance
+	local bx, bz = builderpos.x, builderpos.z
+	local maxX, maxZ = Game.mapSizeX, Game.mapSizeZ
+	for radius = minimumdistance, searchradius, minimumdistance do
+		local angleInc = radius * twicePi * angleIncMult
+		local initAngle = math.random() * twicePi
+		for angle = initAngle, initAngle+twicePi, angleInc do
+			local realAngle = angle+0
+			if realAngle > twicePi then realAngle = realAngle - twicePi end
+			local dx, dz = radius*math.cos(angle), radius*math.sin(angle)
+			local x, z = bx+dx, bz+dz
+			if x < 0 then x = 0 elseif x > maxX then x = maxX end
+			if z < 0 then z = 0 elseif z > maxZ then z = maxZ end
+			local y = Spring.GetGroundHeight(x,z)
+			if self:CanBuildHere(unittype, {x=x, y=y, z=z}) then
+				return {x=x, y=y, z=z}
+			end
+		end 
 	end
+	-- local x, y, z, facing = self.buildsite.FindBuildsite(builderpos, unittype:ID(), true, searchradius, minimumdistance)
+	-- if x then return {x=x, y=y, z=z}, facing end
+	return builderpos
 	-- return game_engine:Map():FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
 end
 
