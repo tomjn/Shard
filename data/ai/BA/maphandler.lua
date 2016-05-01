@@ -719,6 +719,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 				end
 				if game.map:CanBuildHere(unittype, p) or uwcheck then
 					-- EchoDebug("can build mex at" .. p.x .. " " .. p.z)
+					-- game:SendToConsole("before builder gets safe position", self.ai.id, ai.id, builder:Team())
 					if ai.targethandler:IsSafePosition(p, builder) then
 						bestDistance = dist
 						pos = p

@@ -14,7 +14,7 @@ local function EchoDebug(inStr)
 end
 
 local random = math.random
--- math.randomseed( os.time() + game:GetTeamID() )
+math.randomseed( os.time() + game:GetTeamID() )
 random(); random(); random()
 
 local needAA = false
