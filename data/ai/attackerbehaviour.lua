@@ -1,6 +1,6 @@
 shard_include( "attackers" )
 
-functiself.ai.n IsAttacker(unit)
+function IsAttacker(unit)
 	for i,name in ipairs(attackerlist) do
 		if name == unit:Internal():Name() then
 			return true

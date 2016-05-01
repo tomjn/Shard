@@ -42,3 +42,7 @@ end
 function ShardSpringUnitType:WeaponCount()
 	return #self.def.weapons -- test this. not sure the weapons table will give its length by the # operator
 end
+
+function ShardSpringUnitType:Extractor()
+	return self.def.extractsMetal > 0
+end
