@@ -31,6 +31,8 @@ end
 
 function Behaviour:SetAI(ai)
 	self.ai = ai
+	self.game = ai.game
+	self.map = ai.map
 end
 
 

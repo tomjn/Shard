@@ -38,6 +38,7 @@ function map:FindClosestBuildSite(unittype, builderpos, searchradius, minimumdis
 			if z < 0 then z = 0 elseif z > maxZ then z = maxZ end
 			local y = Spring.GetGroundHeight(x,z)
 			if self:CanBuildHere(unittype, {x=x, y=y, z=z}) then
+				-- Spring.Echo("got closestbuildsite")
 				return {x=x, y=y, z=z}
 			end
 		end 
