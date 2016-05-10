@@ -2,15 +2,14 @@
  Task Queues!
 ]]--
 
-require "common"
-shard_include('taskBot')
-shard_include('taskVeh')
-shard_include('taskShp')
-shard_include('taskAir')
-shard_include('taskHov')
-shard_include('taskEco')
-shard_include('taskBuild')
-shard_include('taskExp')
+shard_include("common")
+shard_include("taskAir")
+shard_include("taskBot")
+shard_include("taskVeh")
+shard_include("taskShp")
+shard_include("taskHov")
+shard_include("taskBuild")
+shard_include("taskEco")
 
 local DebugEnabled = false
 
@@ -19,8 +18,7 @@ local function EchoDebug(inStr)
 		game:SendToConsole("Taskqueues: " .. inStr)
 	end
 end
-
-local random = math.random
+random = math.random
 math.randomseed( os.time() + game:GetTeamID() )
 random(); random(); random()
 
@@ -62,8 +60,6 @@ function CheckMySide(self)
 	-- fix: moved here so map object is present when it's accessed
 	ConUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)
 	ConUnitAdvPerTypeLimit = math.max(map:SpotCount() / 8, 2)
-
-
 	EchoDebug("per-type construction unit limit: " .. ConUnitPerTypeLimit)
 	minDefenseNetworkSize = ai.mobilityGridArea / 4 
 	-- set the averageWind
@@ -142,7 +138,7 @@ function CheckForMapControl()
 		local couldAttack = ai.couldAttack >= 1 or ai.couldBomb >= 1
 		local bombingTooExpensive = ai.bomberhandler:GetCounter() == maxBomberCounter
 		local attackTooExpensive = attackCounter == maxAttackCounter
-		local controlMetalSpots = ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
+		local controlMetalSpots = #ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
 		local needUpgrade = couldAttack or bombingTooExpensive or attackTooExpensive
 		local lotsOfMetal = ai.Metal.income > 25 or controlMetalSpots
 
@@ -207,116 +203,6 @@ end
 
 function IsWaterAttackNeeded()
 	return ai.areWaterTargets or ai.needSubmergedDefense
-end
-
-function have(name,number)
-	--print(tostring(ai.nameCountFinished[name]))
-	if ai.nameCountFinished[name]~=nil then
-		if ai.nameCountFinished[name]>=number then
-			--print(tostring('ai have' .. name))
-			return true
-		end
-	else
-		--print(tostring('ai dont have sufficient ' .. name))
-		return false
-	end
-end
-
-function CountOwnUnits(tmpUnitName)
-	if tmpUnitName == DummyUnitName then return 0 end -- don't count no-units
-	if ai.nameCount[tmpUnitName] == nil then return 0 end
-	return ai.nameCount[tmpUnitName]
-end
-
-function BuildWithLimitedNumber(tmpUnitName, minNumber)
-	if tmpUnitName == DummyUnitName then return DummyUnitName end
-	if minNumber == 0 then return DummyUnitName end
-	if ai.nameCount[tmpUnitName] == nil then
-		return tmpUnitName
-	else
-		if ai.nameCount[tmpUnitName] == 0 or ai.nameCount[tmpUnitName] < minNumber then
-			return tmpUnitName
-		else
-			return DummyUnitName
-		end
-	end
-end
-
-function BuildConNumber(tmpUnitName, MaxNumber)
-	if tmpUnitName == DummyUnitName then return DummyUnitName end
-	if MaxNumber == 0 then return DummyUnitName end
-	local target=ai.nameCountFinished[tmpUnitName]
-	if target == nil then
-		return tmpUnitName
-	else
-		if target < MaxNumber then
-			return tmpUnitName
-		else
-			return DummyUnitName
-		end
-	end
-end
-
-function GroundDefenseIfNeeded(unitName, builder)
-	if not ai.needGroundDefense then
-		return DummyUnitName
-	else
-		return unitName
-	end
-end
-
-
-function CheckMySideIfNeeded()
-	if ai.mySide == nil then
-		EchoDebug("commander: checkmyside")
-		return CheckMySide
-	else
-		return DummyUnitName
-	end
-end
-
-function FactoryOrNano(self)
-	CheckForMapControl()
-	if ai.factories == 0 then return BuildAppropriateFactory() end
-	EchoDebug("factories: " .. ai.factories .. "  combat units: " .. ai.combatCount)
-	local unitName = DummyUnitName
-	local attackCounter = ai.attackhandler:GetCounter()
-	local couldAttack = ai.couldAttack >= 2 or ai.couldBomb >= 2
-	if (ai.combatCount > attackCounter * 0.5 and couldAttack) or ai.needAdvanced then
-		unitName = BuildAppropriateFactory()
-	end
-	if unitName == DummyUnitName and ai.combatCount > attackCounter * 0.2 then
-		unitName = NanoTurret()
-	end
-	return unitName
-end
-
-function BuildWindSolarIfNeeded()
-	-- check if we need power
-	if ai.Energy.extra < 0 then
-		retVal = WindSolar
-		EchoDebug("BuildWindSolarIfNeeded: income "..res.income..", usage "..res.usage..", building more energy")
-	else
-		retVal = DummyUnitName
-	end
-
-	return retVal
-end
-
-function WindSolarTidal(self)
-	LandOrWater(self, WindSolar(), TidalIfTidal())
-end
-
-
-function LandOrWater(self, landName, waterName)
-	local builder = self.unit:Internal()
-	local bpos = builder:GetPosition()
-	local waterNet = ai.maphandler:MobilityNetworkSizeHere("shp", bpos)
-	if waterNet ~= nil then
-		return waterName
-	else
-		return landName
-	end
 end
 
 function BuildAAIfNeeded(unitName)
@@ -420,6 +306,48 @@ function BuildBattleIfNeeded(unitName)
 	end
 end
 
+function Lvl2BotCorRaiderArmBattle(self)
+	if ai.mySide == CORESideName then
+		return Lvl2BotRaider(self)
+	else
+		return Lvl2BotBattle(self)
+	end
+end
+
+local function WindSolarTidal(self)
+	LandOrWater(self, WindSolar(), TidalIfTidal())
+end
+
+function CountOwnUnits(tmpUnitName)
+	if tmpUnitName == DummyUnitName then return 0 end -- don't count no-units
+	if ai.nameCount[tmpUnitName] == nil then return 0 end
+	return ai.nameCount[tmpUnitName]
+end
+
+function BuildWithLimitedNumber(tmpUnitName, minNumber)
+	if tmpUnitName == DummyUnitName then return DummyUnitName end
+	if minNumber == 0 then return DummyUnitName end
+	if ai.nameCount[tmpUnitName] == nil then
+		return tmpUnitName
+	else
+		if ai.nameCount[tmpUnitName] == 0 or ai.nameCount[tmpUnitName] < minNumber then
+			return tmpUnitName
+		else
+			return DummyUnitName
+		end
+	end
+end
+
+
+function GroundDefenseIfNeeded(unitName, builder)
+	if not ai.needGroundDefense then
+		return DummyUnitName
+	else
+		return unitName
+	end
+end
+
+
 
 function corDebug(self)
 	game:SendToConsole("d")
@@ -446,226 +374,76 @@ function BuildTorpedoBomberIfNeeded(unitName)
 	end
 end
 
---complex
-local function lv1GroundEco(self)
-        local unitName=DummyUnitName
-	if ef>0.3  and mf >0.3 then
-		unitName=NanoTurret()
-		--print(tostring('2'))
-	elseif 	ef>0.9 and ei>100  then
-		unitName=buildEstore1(self)
-		--print(tostring('3'))
-	elseif mf>0.75 and mi>10  then
-		unitName=buildMstore1(self)
-		--print(tostring('5'))
-	elseif ef>0.8 and ei>50  then
-		unitName=buildMconv1(self)
+function CheckMySideIfNeeded()
+	if ai.mySide == nil then
+		EchoDebug("commander: checkmyside")
+		return CheckMySide
 	else
-		unitName=Energy1(self)
+		return DummyUnitName
 	end
-	EchoDebug('e1 '..unitName)
+end
+
+function BuildAppropriateFactory()
+	return FactoryUnitName
+end
+
+function FactoryOrNano(self)
+	CheckForMapControl()
+	if ai.factories == 0 then return BuildAppropriateFactory() end
+	EchoDebug("factories: " .. ai.factories .. "  combat units: " .. ai.combatCount)
+	local unitName = DummyUnitName
+	local attackCounter = ai.attackhandler:GetCounter()
+	local couldAttack = ai.couldAttack >= 2 or ai.couldBomb >= 2
+	if (ai.combatCount > attackCounter * 0.5 and couldAttack) or ai.needAdvanced then
+		unitName = BuildAppropriateFactory()
+	end
+	if unitName == DummyUnitName and ai.combatCount > attackCounter * 0.2 then
+		unitName = NanoTurret()
+	end
 	return unitName
 end
 
-local function Economy0(self)
-        local unitName=DummyUnitName
+function LandOrWater(self, landName, waterName)
+	local builder = self.unit:Internal()
+	local bpos = builder:GetPosition()
+	local waterNet = ai.maphandler:MobilityNetworkSizeHere("shp", bpos)
+	if waterNet ~= nil then
+		return waterName
+	else
+		return landName
+	end
+end
+
+
+
 	
-	if 	ef>0.9 and ei>100  and mf>0.5 then
-		unitName=buildEstore1(self)
-		--print(tostring('c3'))
-	elseif mf>0.7 and mi>10  then
-		unitName=buildMstore1(self)
-		--print(tostring('c5'))
-	elseif ef>0.8 and ei>50 then
-		unitName=buildMconv1(self)
-		--print(tostring('c4'))
-	elseif ef>0.3 and (mi<1 or mf<0.6) then
-		unitName=BuildMex0()
-		--print(tostring('c1'))
-	elseif (ef<0.5 or ei<eu)   then
-		unitName=WindSolar(self)
-	elseif mf<0.3 or mi< 3 then
-		unitName=BuildMex0(self)
-		--print(tostring('c2'))
 
 
-	end
-	EchoDebug('commander '..unitName)
-	return unitName
-end
-
-local function Economy1(self)
-        local unitName=DummyUnitName
-	if ef>0.3  and mf >0.3 then
-		unitName=NanoTurret()
-	elseif (ef<0.3 or ei<eu) and mf>0.1 then
-		unitName=Energy1(self)
-		--print(tostring('2'))
-	elseif 	ef>0.9 and ei>100 and mi>mu  then
-		unitName=buildEstore1(self)
-		--print(tostring('3'))
-	elseif mf>0.7 and mi>10  then
-		unitName=buildMstore1(self)
-		--print(tostring('5'))
-	elseif ef>0.8 and ei>50  then
-		unitName=buildMconv1(self)
-	elseif mf<0.3 or mi< 3 then
-		unitName=BuildMex1()
-	end
-	EchoDebug('e1 '..unitName)
-	return unitName
-end
-
-local function EconomyBattleEngineer(self)
-        local unitName=DummyUnitName
-	if ef>0.2 and mi>mu and mf >0.2 then
-		unitName=NanoTurret()
-	elseif (ef<0.1) and mf>0.3 then
-		unitName=Solar(self)
-	elseif mf<0.1 then 
-		unitName=BuildMex0()
-	end
-	--print(tostring('EBE '..unitName))
-	return unitName
-end
-
-local function EconomyNavalEngineer(self)
-        local unitName=DummyUnitName
-	if ef<0.2 and mi>mu and mf >0.2 then
-		unitName=TidalIfTidal(self)
-	elseif mf<0.2 and ei>eu and ef>0.2 then
-		unitName=BuildUWMex(self)
-	end
-	--print(tostring('ENE '..unitName))
-	return unitName
-end
 
 
-local function Economy3(self)
-	local unitName=DummyUnitName
-	if 	ef>0.9 and ei>1000 and mi>mu then
-		unitName=buildEstore2(self)
-		--print(tostring('a3'))
-	elseif mf>0.8 and mi>30 and ef>0.1  then
-		unitName=buildMstore2(self)
-		--print(tostring('a5'))
-	elseif ef>0.8  then
-		unitName=buildMconv2(self)
-		--print(tostring('a4'))
-	elseif mf<0.2 and ef>0.1 then
-		unitName=BuildMohoMex()
-		--print(tostring('a1'))
-	elseif (ef<0.3 or ei<eu) then
-		unitName=BuildFusion3(self)
-	end
-	--print(tostring('E3 '..unitName))
-	return unitName
-end
 
-local function lv3GroundEco(self)
-	local unitName=DummyUnitName
 
-	if ef>0.8  then
-		unitName=buildMconv2(self)
-		--print(tostring('a4'))
-	else 
-		unitName=BuildFusion3(self)
-	end
-	--print(tostring('E3 '..unitName))
-	return unitName
-end
 
 local function Economy2(self)
 	local unitName=DummyUnitName
-	if 	ef>0.9 and ei>1000 and mi>mu then
+	if 	ai.Energy.full>0.9 and ai.Energy.income>1000 and ai.Metal.income>ai.Metal.usage then
 		unitName=buildEstore2(self)
-		--print(tostring('a3'))
-	elseif mf>0.7 and mi>30  then
+	elseif ai.Metal.full>0.7 and ai.Metal.income>30  then
 		unitName=buildMstore2(self)
-		--print(tostring('a5'))
-	elseif ef>0.8  then
+	elseif ai.Energy.full>0.8  then
 		unitName=buildMconv2(self)
-		--print(tostring('a4'))
-	elseif ef>0.2 then
+	elseif ai.Energy.full>0.2 then
 		unitName=BuildMohoMex()
-		--print(tostring('a1'))
-	elseif (ef<0.3 or ei<eu) then
+	elseif (ai.Energy.full<0.3 or ai.Energy.income<ai.Metal.usage) then
 		unitName=BuildFusion(self)
 	end
-	--print(tostring('E2 '..unitName))
-	return unitName
-end
-
-	
-local function EconomyUnderWater(self)
-	local unitName=DummyUnitName
-	if 	ef>0.9 and ei>100  and mi>mu then
-		unitName=buildWEstore1(self)
-		--print(tostring('cw3'))
-	elseif mf>0.7 and mi>10  then
-		unitName=buildWMstore1(self)
-		--print(tostring('cw5'))
-	elseif ef>0.8 and ei>50 then
-		unitName=buildWMconv1(self)
-		--print(tostring('cw4'))
-	elseif ef>0.1 and (mi<1 or mf<0.6) then
-		unitName=BuildUWMex()
-		--print(tostring('cw1'))
-	elseif (ef<0.3 or ei<eu) and mi>3 and mf>0.1 then
-		unitName=TidalIfTidal(self)
-		--print(tostring('cw2'))
-	else
-		unitName=BuildUWMex()
-		--unitName=NanoTurret()
-		--print(tostring('cw6'))
-	end
-	--print(tostring('cw '..unitName))
-	return unitName
-end
-
-local function EconomyUnderWater2(self)
-	local unitName=DummyUnitName
-	if 	ef>0.9 and ei>1000 and mi>mu then
-		unitName=buildEstore2(self)
-		--print(tostring('aw3'))
-	elseif mf>0.7 and mi>30  then
-		unitName=buildMstore2(self)
-		--print(tostring('aw5'))
-	elseif ef>0.8  then
-		unitName=buildMconv2UW(self)
-		--print(tostring('aw4'))
-	elseif ef>0.2 then
-		unitName=BuildUWMohoMex()
-		--print(tostring('aw1'))
-	elseif (ef<0.3 or ei<eu) and mf>0.1 then
-		unitName=BuildUWFusion(self)
-	end
-	--print(tostring('cw2 '..unitName))
-	return unitName
-end
-
-local function EconomySeaplane(self)
-	local unitName=DummyUnitName
-	if 	ef>0.9 and ei>1000 and mi>mu then
-		unitName=buildEstore2(self)
-		print(tostring('s3'))
-	elseif mf>0.7 and mi>30  then
-		unitName=buildMstore2(self)
-		print(tostring('s5'))
-	elseif ef>0.8  then
-		unitName=buildMconv2UW(self)
-		print(tostring('s4'))
-	elseif ef>0.5 and mf>0.5 then
-		unitName=ConShip(self) 
-	end
-	--print(tostring('sp '..unitName))
+	EchoDebug('Economy level 2 '..unitName)
 	return unitName
 end
 
 local function ConsulAsFactory(self)
 	local UnitName=DummyUnitName
 	local rnd= math.random(1,9)
-	print(tostring('EBEF '.. rnd))
 	if 	rnd==1 then UnitName=ConVehicle(self) 
 	elseif 	rnd==2 then UnitName=ConShip(self) 
 	elseif 	rnd==3 then UnitName=Lvl1BotRaider(self) 
@@ -677,14 +455,13 @@ local function ConsulAsFactory(self)
 	else UnitName=DummyUnitName
 	end
 	if UnitName==nil then UnitName = DummyUnitName end
-	--print(tostring('EBEF '.. rnd .. ' ' ..UnitName))
+	EchoDebug('Consul as factory '..unitName)
 	return UnitName
 end
 
 local function FreakerAsFactory(self)
 	local UnitName=DummyUnitName
-	local rnd= math.random(1,9)
-	print(tostring('EBEF '.. rnd))
+	local rnd = math.random(1,9)
 	if 	rnd==1 then UnitName=ConBot(self)
 	elseif 	rnd==2 then UnitName=ConShip(self)
 	elseif 	rnd==3 then UnitName=Lvl1BotRaider(self)
@@ -692,34 +469,17 @@ local function FreakerAsFactory(self)
 	elseif 	rnd==5 then UnitName=Lvl2BotRaider(self)
 	elseif 	rnd==6 then UnitName=Lv2AmphBot(self)
 	elseif 	rnd==7 then UnitName=Lvl1ShipDestroyerOnly(self)
-	elseif 	rnd==8 then UnitName=NewCommanders(self)
-	else UnitName=DummyUnitName
+	elseif 	rnd==8 then UnitName=Decoy(self)
+	else UnitName = DummyUnitName
 	end
 	if UnitName==nil then UnitName = DummyUnitName end
-	--print(tostring('EBEF '.. rnd .. ' ' ..UnitName))
+	EchoDebug('Freaker as factory '..unitName)
 	return UnitName
 end
 
-local function CormlsAsFactory(self)
+function NavalEngineerAsFactory(self)
 	local UnitName=DummyUnitName
 	local rnd= math.random(1,9)
-	--print(tostring('ENEF '.. rnd))
-	if 	rnd==1 then UnitName=ConShip(self)
-	elseif 	rnd==2 then UnitName=ScoutShip(self)
-	elseif 	rnd==3 then UnitName=Lvl1ShipDestroyerOnly(self)
-	elseif 	rnd==4 then UnitName=Lvl1ShipRaider(self)
-	elseif 	rnd==5 then UnitName=Lvl1ShipBattle(self)
-	elseif 	rnd==6 then UnitName=Lv2AmphBot(self)	
-	else 
-		UnitName=DummyUnitName
-	
-	end
-	return UnitName
-end
-local function NavalEngineerAsFactory(self)
-	local UnitName=DummyUnitName
-	local rnd= math.random(1,9)
-	print(tostring('ENEF '.. rnd))
 	if 	rnd==1 then UnitName=ConShip(self)
 	elseif 	rnd==2 then UnitName=ScoutShip(self)
 	elseif 	rnd==3 then UnitName=Lvl1ShipDestroyerOnly(self)
@@ -728,17 +488,14 @@ local function NavalEngineerAsFactory(self)
 	elseif 	rnd==6 then UnitName=Lv2AmphBot(self)
 	else 
 		UnitName=DummyUnitName
-	
 	end
-	--print(tostring('enef '),tostring(UnitName)) 
+	EchoDebug('Naval engineers as factory '..unitName)
 	return UnitName
 end
 
-
-
-local function EngineerAsFactory(self)
+function EngineerAsFactory(self)
 	local unitName=DummyUnitName
-	if ef>0.3 and ef<0.7 and mf>0.3 and mf<0.7 then
+	if ai.Energy.full>0.3 and ai.Energy.full<0.7 and ai.Metal.full>0.3 and ai.Metal.full<0.7 then
 		if ai.mySide == CORESideName then
 			unitName=FreakerAsFactory(self)
 		else
@@ -746,29 +503,18 @@ local function EngineerAsFactory(self)
 		end
 	end
 	return unitName
-end
-
--- local function NavalEngineerAsFactory(self)
--- 	local unitName=DummyUnitName
--- 		if ai.mySide == CORESideName then
--- 			unitName=CormlsAsFactory(self)
--- 		else
--- 			unitName=ArmlmsAsFactory(self)
--- 		end
--- 	print(tostring('enef '),tostring(unitName)) 
--- 	return unitName
--- end
-	
+end	
 
 local function CommanderEconomy(self)
-	local here =ai.maphandler:WaterOrGroundHere(self.unit:Internal():GetPosition())
+	local underwater =ai. maphandler:IsUnderWater(self.unit:Internal():GetPosition())
 	local unitName = DummyUnitName
-	if here then 
-		unitName = Economy0(self)
+	if not underwater then 
+		unitName = Economy0()
 	else
-		unitName = EconomyUnderWater(self)
+		unitName = EconomyUnderWater()
 	end
 	return unitName
+	
 	
 end
 
@@ -783,40 +529,36 @@ local function AmphibiousEconomy(self)
 	return unitName
 	
 end
+
 -- mobile construction units:
 
 local anyCommander = {
 	CheckMySideIfNeeded,
+	CommanderEconomy,
 	BuildAppropriateFactory,
 	BuildLLT,
-	CommanderEconomy,
 	BuildRadar,
 	BuildLightAA,
 	BuildPopTorpedo,
 	BuildSonar,
-	
 }
 
 local anyConUnit = {
+	Economy1,
 	BuildAppropriateFactory,
-        Economy1,
 	BuildLLT,
-	AATurrets1,
+	BuildSpecialLT,
+	BuildMediumAA,
 	BuildRadar,
 	BuildLvl1Jammer,
 	BuildGeo,
 	BuildHLT,
 	BuildLvl1Plasma,
 	BuildHeavyishAA,
-	BuildSpecialLT,
-	BuildMediumAA,
 }
 
 local anyConAmphibious = {
-	BuildAppropriateFactory,
-	Economy1,
-	EconomyUnderWater,
-	--AmphibiousEconomy,
+	AmphibiousEconomy,
 	BuildGeo,
 	BuildSpecialLT,
 	BuildMediumAA,
@@ -825,27 +567,27 @@ local anyConAmphibious = {
 	BuildHLT,
 	BuildLvl1Plasma,
 	BuildHeavyishAA,
+	AmphibiousEconomy,
 	BuildPopTorpedo,
 	BuildFloatLightAA,
 	BuildSonar,
 	BuildFloatRadar,
 	BuildFloatHLT,
-	BuildLightTorpedo,
 }
 
 local anyConShip = {
-	BuildAppropriateFactory,
 	EconomyUnderWater,
 	BuildFloatLightAA,
 	BuildSonar,
 	BuildLightTorpedo,
 	BuildFloatRadar,
+	BuildAppropriateFactory,
 	BuildFloatHLT,
 }
 
 local anyAdvConUnit = {
 	BuildAppropriateFactory,
-	Economy2,
+	AdvEconomy,
 	BuildNukeIfNeeded,
 	BuildAdvancedRadar,
 	BuildHeavyPlasma,
@@ -858,26 +600,8 @@ local anyAdvConUnit = {
 	BuildExtraHeavyAA,
 	BuildLvl2Jammer,
 	BuildMohoGeo,
+	-- DoSomethingAdvancedForTheEconomy,
 }
-
-
-local anyAdvConUnit3 = {
-	BuildAppropriateFactory,
-	Economy3,
-	BuildNukeIfNeeded,
-	BuildAdvancedRadar,
-	BuildHeavyPlasma,
-	BuildAntinuke,
-	BuildLvl2PopUp,
-	BuildHeavyAA,
-	BuildLvl2Plasma,
-	BuildTachyon,
-	-- BuildTacticalNuke,
-	BuildExtraHeavyAA,
-	BuildLvl2Jammer,
-	BuildMohoGeo,
-}
-
 
 local anyConSeaplane = {
 	EconomySeaplane,
@@ -888,42 +612,43 @@ local anyConSeaplane = {
 }
 
 local anyAdvConSub = {
-	BuildAppropriateFactory,
-	EconomyUnderWater2,
+	AdvEconomyUnderWater,
 	BuildFloatHeavyAA,
 	BuildAdvancedSonar,
 	BuildHeavyTorpedo,
 }
 
 local anyNavalEngineer = {
-	BuildAppropriateFactory,
 	EconomyNavalEngineer,
 	BuildFloatHLT,
 	BuildFloatLightAA,
+	BuildAppropriateFactory,
+	Lvl1ShipBattle,
 	BuildFloatRadar,
 	BuildSonar,
+	Lvl1ShipRaider,
+	Conship,
+	ScoutShip,
 	BuildLightTorpedo,
-	NavalEngineerAsFactory,
 }
 
 local anyCombatEngineer = {
-	BuildAppropriateFactory,
 	EconomyBattleEngineer,
-	EngineerAsFactory,
+	BuildAppropriateFactory,
 	BuildMediumAA,
 	BuildAdvancedRadar,
 	BuildLvl2Jammer,
+	BuildLvl2PopUp,
 	BuildHeavyAA,
 	BuildSpecialLTOnly,
-	
+	BuildLvl2Plasma,
+	ConCoreBotArmVehicle,
+	Lvl2BotCorRaiderArmBattle,
+	Lvl1AABot,
+	ConShip,
+	Lvl1ShipDestroyerOnly,
 }
 
-anyFark={
-	WindSolar,
-	buildMex0,
-	BuildMconv1,
-	
-}
 
 -- factories:
 
@@ -933,7 +658,6 @@ local anyLvl1AirPlant = {
 	Lvl1AirRaider,
 	ConAir,
 	Lvl1Fighter,
-	Lvl1AirSupport,
 }
 
 local anyLvl1VehPlant = {
@@ -944,7 +668,6 @@ local anyLvl1VehPlant = {
 	Lvl1AAVeh,
 	Lvl1VehArty,
 	Lvl1VehBreakthrough,
-	lv1VehSupport,
 }
 
 local anyLvl1BotLab = {
@@ -962,7 +685,6 @@ local anyLvl1ShipYard = {
 	ConShip,
 	Lvl1ShipBattle,
 	Lvl1ShipRaider,
-	RezSub1,
 }
 
 local anyHoverPlatform = {
@@ -981,8 +703,6 @@ local anyAmphibiousComplex = {
 	Lvl1ShipRaider,
 	Lvl1AABot,
 	Lvl2AABot,
-	RezSub1,
-	Decoy,
 }
 
 local anyLvl2VehPlant = {
@@ -994,9 +714,6 @@ local anyLvl2VehPlant = {
 	Lvl2VehMerl,
 	Lvl2AAVeh,
 	Lvl2VehAssist,
-	--armst
-	--armanni
-	--trem
 }
 
 local anyLvl2BotLab = {
@@ -1005,11 +722,8 @@ local anyLvl2BotLab = {
 	Lvl2BotBattle,
 	Lvl2BotBreakthrough,
 	Lvl2BotArty,
-	Lvl2BotLongRange,
+	Lvl2BotMerl,
 	Lvl2AABot,
-	spiders,
-	Decoy,
-	Lv2BotMedium,
 	Lvl2BotAssist,
 }
 
@@ -1024,10 +738,10 @@ local anyLvl2AirPlant = {
 }
 
 local anySeaplanePlatform = {
-	ConSeaAir,
-	ScoutSeaAir,
 	SeaBomber,
 	SeaTorpedoBomber,
+	ConSeaAir,
+	ScoutSeaAir,
 	SeaFighter,
 	SeaAirRaider,
 }
@@ -1049,13 +763,6 @@ local anyExperimental = {
 	Lvl3Merl,
 	Lvl3Arty,
 	Lvl3Breakthrough,
-}
-local anyUwExperimental = {
-	lv3amp,
-	lv3hov,
-	AmphibiousBattle,
-	AmphibiousBreakthrough,
-	lv3bigamp,
 }
 
 local anyOutmodedLvl1BotLab = {
@@ -1103,29 +810,11 @@ local anyLvl1VehPlantForWater = {
 	ConVehicleAmphibious,
 	Lvl1AAVeh,
 }
-local anyNanoQueues = {
-	NanoTurret,
-}
-local anylv1MexTask = {
-	BuildUWMex,
-	BuildLightTorpedo,
-	BuildMex1,
-	BuildLLT,
-}	
-local anylv3GroundEcoTask= {
-	lv3GroundEco
-}
 
-local anylv1GroundEcoTask= {
-	lv1GroundEco
-}
 -- use these if it's a watery map
 wateryTaskqueues = {
 	armvp = anyLvl1VehPlantForWater,
 	corvp = anyLvl1VehPlantForWater,
-	
-	
-	
 }
 
 -- fall back to these when a level 2 factory exists
@@ -1143,40 +832,13 @@ outmodedTaskqueues = {
 	coravp = anyOutmodedLvl2VehPlant,
 	armavp = anyOutmodedLvl2VehPlant,
 }
-NanoTurretTaskQueues={
-	corcv = anyNanoQueues,
-	armcv = anyNanoQueues,
-	armcv = anyNanoQueues,
-	corcv = anyNanoQueues,
-	armca = anyNanoQueues,
-	corca = anyNanoQueues,
-	armck = anyNanoQueues,
-	corck = anyNanoQueues,
-	corch = anyNanoQueues,
-	armch = anyNanoQueues,
-	corfast = anyNanoQueues,
-	cormuskrat = anyNanoQueues,
-	armbeaver = anyNanoQueues,
-	consul = anyNanoQueues,
-}
-lv1MexSnapper={
-	cormuskrat = anylv1MexTask,
-	armbeaver = anylv1MexTask,
-	
-}
-lv1GroundEcoBuilders = {
-armcv = anylv1GroundEcoTask,
-corcv = anylv1GroundEcoTask,
-}
 
-lv3GroundEcoBuilders = {
-armacv = anylv3GroundEcoTask,
-coracv = anylv3GroundEcoTask,
-}
 -- finally, the taskqueue definitions
 taskqueues = {
 	corcom = anyCommander,
 	armcom = anyCommander,
+	armdecom = anyCommander,
+	cordecom = anyCommander,
 	corcv = anyConUnit,
 	armcv = anyConUnit,
 	corck = anyConUnit,
@@ -1189,8 +851,8 @@ taskqueues = {
 	armca = anyConUnit,
 	corack = anyAdvConUnit,
 	armack = anyAdvConUnit,
-	coracv = anyAdvConUnit3,
-	armacv = anyAdvConUnit3,
+	coracv = anyAdvConUnit,
+	armacv = anyAdvConUnit,
 	coraca = anyAdvConUnit,
 	armaca = anyAdvConUnit,
 	corcsa = anyConSeaplane,
@@ -1229,8 +891,7 @@ taskqueues = {
 	armasy = anyLvl2ShipYard,
 	corgant = anyExperimental,
 	armshltx = anyExperimental,
-	corgantuw = anyUwExperimental,
-	armshltxuw = anyUwExperimental,
-		
-	armfark = anyFark,
+	corgantuw = anyUWExperimental,
+	armshltxuw = anyUWExperimental,
+	armfark = anyfark,
 }

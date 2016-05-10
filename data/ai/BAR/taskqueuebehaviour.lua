@@ -39,6 +39,9 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 	EchoDebug(value .. " (before econ filter)")
 	-- EchoDebug("ai.Energy: " .. ai.Energy.reserves .. " " .. ai.Energy.capacity .. " " .. ai.Energy.income .. " " .. ai.Energy.usage)
 	-- EchoDebug("ai.Metal: " .. ai.Metal.reserves .. " " .. ai.Metal.capacity .. " " .. ai.Metal.income .. " " .. ai.Metal.usage)
+	if Eco1[value] or Eco2[value] then
+		return value
+	end
 	if nanoTurretList[value] then
 		-- nano turret
 		EchoDebug(" nano turret")
@@ -314,6 +317,13 @@ function TaskQueueBehaviour:GetHelp(value, position)
 	if value == DummyUnitName then return DummyUnitName end
 	EchoDebug(value .. " before getting help")
 	local builder = self.unit:Internal()
+	if Eco1[value] then
+		return value
+	end
+	if Eco2[value] then
+		local hashelp = ai.assisthandler:PersistantSummon(builder, position, math.ceil(unitTable[value].buildTime/10000), 0)
+		return value
+	end
 	if helpList[value] then
 		local hashelp = ai.assisthandler:PersistantSummon(builder, position, helpList[value], 1)
 		if hashelp then
@@ -344,6 +354,7 @@ function TaskQueueBehaviour:GetHelp(value, position)
 		local hashelp = ai.assisthandler:Summon(builder, position, number)
 		if hashelp or self.isFactory then return value end
 	end
+	EchoDebug('not help')
 	return DummyUnitName
 end
 
@@ -474,6 +485,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 end
 
 function TaskQueueBehaviour:BestFactory()
+	
 	local bestScore = -99999
 	local bestName, bestPos
 	local builder = self.unit:Internal()
@@ -528,10 +540,13 @@ function TaskQueueBehaviour:BestFactory()
 					EchoDebug("no turtle position found for " .. factoryName .. ", trying near builder")
 					p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 				end
+				
 				if p ~= nil then
+					
 					EchoDebug("found spot for " .. factoryName)
+					
 					for mi, mtype in pairs(factoryMobilities[factoryName]) do
-						if mtype == "air" or ai.mobRating[mtype] > ai.mobilityRatingFloor then
+						if mtype == "air"  or ai.mobRating[mtype] > 1 then
 							local network = ai.maphandler:MobilityNetworkHere(mtype, p)
 							if ai.scoutSpots[mtype][network] then
 								local numberOfSpots
@@ -582,7 +597,6 @@ function TaskQueueBehaviour:BestFactory()
 					end
 				end
 			end
-			-- DebugEnabled = false
 		end
 	end
 	if bestName ~= nil then

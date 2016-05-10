@@ -1,4 +1,4 @@
-require "unittable"
+shard_include("unittable")
 
 local DebugEnabled = false
 
@@ -35,127 +35,8 @@ factoryMobilities = {
 	asubpen = {"sub", "amp"},
 	corgant = {"bot"},
 	armshltx = {"bot"},
-}
-factorylevels = {
-	corap = 0.75,
-	armap = 0.75,
-	corlab = 1,
-	armlab = 1,
-	corvp = 1.25,
-	armvp = 1.25,
-	coralab = 2,
-	coravp = 2,
-	corhp = 1,
-	armhp = 1,
-	corfhp = 1,
-	armfhp = 1,
-	armalab = 2,
-	armavp = 2,
-	coraap = 1.5,
-	armaap = 1.5,
-	corplat = 1,
-	armplat = 1,
-	corsy = 1,
-	armsy = 1,
-	corasy = 2,
-	armasy = 2,
-	csubpen = 1,
-	asubpen = 1,
-	corgant = 5,
-	armshltx = 5,
-	corgantuw = 5,
-	armshltxuw= 5,
-}
-
-factoryUpgrades={
-	armlab='armalab',
-	corlab='coralab',
-	armvp='armavp',
-	corvp='coravp',
-	armsy='armasy',
-	corsy='corasy',
-	armap='armaap',
-	corap='coraap',
-	armalab='armshltxuw',
-	coralab='corgant',
-	armasy='armshltxuw',
-	corasy='corgantuw',
-	
-}
-mix_mob_surf={
-    csubpen=1,
-    asubpen=1,
-    armfhp=1,
-    corfhp=1,
-    armhp=1,
-    corhp=1,
-}
- 
-lv1factories={
-    armlab=1,
-    corlab=1,
-    armvp=1,
-    corvp=1,
-    armsy=1,
-    corsy=1,
-    --armap=1,
-    --corap=1,
-   
-}
- 
-waterFactories={
-	armsy=1,
-	corsy=1,
-	armasy=1,
-	corasy=1,
-	armshltxuw=1,
-	corgantuw=1,
-}
-airFactories={
-    armap=1,
-    corap=1,
-    armaap=1,
-    coraap=1,
-}
-
-waterairFactories={
-    corplat = 1,
-    armplat=1,
-}
-
-
-advFactories = {
-    coravp = 1,
-    coralab = 1,
-    corasy = 1,
-    coraap = 1,
-    armavp = 1,
-    armalab = 1,
-    armasy = 1,
-    armaap = 1,
-}
-
--- experimental factories
-expFactories = {
-	corgant = 1,
-	armshltx = 1,
-	corgantuw = 1,
-	amrshltxuw =1,
-}
-
--- leads to experimental
-leadsToExpFactories = {
-	corlab = 1,
-	armlab = 1,
-	coralab = 1,
-	armalab = 1,
-}
-
-not_helpable_factories={
-	armvp=1,
-	corvp=1,
-	armavp=1,
-	coravp=1,
+	corgantuw = {"bot"},
+	armshltxuw = {"bot"},
 }
 
 -- for calculating what factories to build
@@ -229,8 +110,6 @@ bigEnergyList = {
 	armfus = 1,
 	cafus = 1,
 	aafus = 1,
-	coruwfus = 1,
-	armuwfus = 1,
 }
 
 -- geothermal plants
@@ -249,12 +128,11 @@ mexUpgrade = {
 	armmex = "armmoho",
 	coruwmex = "coruwmme",
 	armuwmex = "armuwmme",
-	corexp= 'cormexp',
-	armamex= "armmoho",
+	armamex = "armmoho",
+	corexp = "cormexp",
+	
 }
-mex2={
-	cormexp=1
-}
+
 -- these will be abandoned faster
 hyperWatchdog = {
 	armmex = 1,
@@ -278,9 +156,8 @@ helpList = {
 	amgeo = 0,
 	cormoho = 2,
 	armmoho = 2,
-	coruwmme = 0,
-	armuwmme = 0,
-	cormexp=2,
+	coruwmme = 2,
+	armuwmme = 2,
 }
 
 -- priorities of things to defend that can't be accounted for by the formula in turtlehandler
@@ -307,10 +184,39 @@ turtleList = {
 	armuwadvms = 2,
 }
 
+-- factories that can build advanced construction units (i.e. moho mines)
+advFactories = {
+	coravp = 1,
+	coralab = 1,
+	corasy = 1,
+	coraap = 1,
+	corplat = 1,
+	armavp = 1,
+	armalab = 1,
+	armasy = 1,
+	armaap = 1,
+	armplat = 1,
+}
 
+-- experimental factories
+expFactories = {
+	corgant = 1,
+	armshltx = 1,
+	corgantuw = 1,
+	armshltxuw = 1,
+}
 
-
-
+-- leads to experimental
+leadsToExpFactories = {
+	corlab = 1,
+	armlab = 1,
+	coralab = 1,
+	armalab = 1,
+	corsy = 1,
+	armsy = 1,
+	corasy = 1,
+	armasy = 1,
+}
 
 -- sturdy, cheap units to be built in larger numbers than siege units
 battleList = {
@@ -508,17 +414,8 @@ advConList = {
 	armacv = 1,
 	coraca = 1,
 	armaca = 1,
-	armacsub = 1,
-	coracsub = 1,
 }
-groundUpgraders={
-	armacv='mex',
-	coracv='mex',
-	armack='mex',
-	corack='mex',
-	armaca='mex',
-	coraca='mex',
-}
+
 groundFacList = {
 	corvp = 1,
 	armvp = 1,
@@ -612,29 +509,6 @@ raiderList = {
 raiderDisarms = {
 	bladew = 1,
 }
-lv1GroundEcoBuildersList = {
-	armcv = 1,
-	corcv = 1,
-}
-lv3GroundEcoBuilderList = {
-	armacv = 1,
-	coracv = 1,
-}
-
-nanoBuilders = {
-armcv=1,
-corcv=1,
-armca=1,
-corca=1,
-armck=1,
-corck=1,
-corch=1,
-armch=1,
-corfast=1,
-cormuskrat=1,
-armbeaver=1,
-consul=1,
-}
 
 -- units in this list are bombers or torpedo bombers
 bomberList = {
@@ -656,76 +530,6 @@ seaplaneConList = {
 	armcsa = 1,
 }
 
-cleaners = {
-armbeaver = 1,
-cormuskrat = 1,
-armcom = 1,
-corcom = 1,
-armdecom = 1,
-cordecom = 1,
-}
-
-cleanable = {
-	armsolar=1,
-	corsolar=1,
-	armadvsol = 1,
-	coradvsol = 1,
-	armtide = 1,
-	cortite = 1,
-	armfmkr = 1,
-	corfmkr = 1,
-	cormakr = 1,
-	armmakr = 1,
-}
-
--- minimum, maximum, starting point units required to attack, bomb
-minAttackCounter = 8
-maxAttackCounter = 30
-baseAttackCounter = 15
-breakthroughAttackCounter = 16 -- build heavier battle units
-siegeAttackCounter = 20 -- build siege units
-minBattleCount = 4 -- how many battle units to build before building any breakthroughs, even if counter is too high
-minBomberCounter = 0
-maxBomberCounter = 16
-baseBomberCounter = 2
-breakthroughBomberCounter = 8 -- build atomic bombers or air fortresses
-
--- raid counter works backwards: it determines the number of raiders to build
--- if it reaches minRaidCounter, none are built
-minRaidCounter = 0
-maxRaidCounter = 8
-baseRaidCounter = 5
-
--- how many mobile con units of one type is allowed
-ConUnitPerTypeLimit = 4 --max(map:SpotCount() / 10, 2)
-ConUnitAdvPerTypeLimit = 4
-
--- Taskqueuebehaviour was modified to skip this name
-DummyUnitName = "skipthisorder"
-
--- Taskqueuebehaviour was modified to use this as a generic "build me a factory" order
-FactoryUnitName = "buildfactory"
-
--- this unit is used to check for underwater metal spots
-UWMetalSpotCheckUnit = "coruwmex"
-
-mobUnitName = {}
-mobUnitName["veh"] = "armllt" -- this looks wrong, but it gives us a better picture of where vehicles can go
-mobUnitName["bot"] = "corck"
-mobUnitName["amp"] = "cormuskrat"
-mobUnitName["hov"] = "corsh"
-mobUnitName["shp"] = "corcs"
-mobUnitName["sub"] = "coracsub"
-
--- this unit is used to check for hoverable water
-WaterSurfaceUnitName = "armfdrag"
-
--- side names
-CORESideName = "core"
-ARMSideName = "arm"
-
--- how much metal to assume features with these strings in their names have
-baseFeatureMetal = { rock = 30, heap = 80, wreck = 150 }
 
 Eco1={
 armsolar=1,
@@ -807,41 +611,54 @@ cormmkr=1,
 armmmkr=1,
 corfmmm=1,
 armfmmm=1,
-
-
-}
-
-Builders={
---arm 1 livello
-armcv=1,
-armbeaver=1,
-armck=1,
-armca=1,
-armch=1,
-armcs=1,
-
---arm 2 livello
-armacv=2,
-armack=2,
-armaca=2,
-amrcsa=2,
-armacsub=2,
-armmls=2,
-
---core 1 livello
-corcv=1,
-cormuskrat=1,
-corck=1,
-corca=1,
-corch=1,
-corcs=1,
-
---core 2 livello
-coracv=2,
-corack=2,
-coraca=2,
-corcsa=2,
-coracsub=2,
 }
 
 
+-- minimum, maximum, starting point units required to attack, bomb
+minAttackCounter = 8
+maxAttackCounter = 30
+baseAttackCounter = 15
+breakthroughAttackCounter = 16 -- build heavier battle units
+siegeAttackCounter = 20 -- build siege units
+minBattleCount = 4 -- how many battle units to build before building any breakthroughs, even if counter is too high
+minBomberCounter = 0
+maxBomberCounter = 16
+baseBomberCounter = 2
+breakthroughBomberCounter = 8 -- build atomic bombers or air fortresses
+
+-- raid counter works backwards: it determines the number of raiders to build
+-- if it reaches minRaidCounter, none are built
+minRaidCounter = 0
+maxRaidCounter = 8
+baseRaidCounter = 5
+
+-- how many mobile con units of one type is allowed
+ConUnitPerTypeLimit = 4 --max(map:SpotCount() / 10, 2)
+ConUnitAdvPerTypeLimit = 4
+
+-- Taskqueuebehaviour was modified to skip this name
+DummyUnitName = "skipthisorder"
+
+-- Taskqueuebehaviour was modified to use this as a generic "build me a factory" order
+FactoryUnitName = "buildfactory"
+
+-- this unit is used to check for underwater metal spots
+UWMetalSpotCheckUnit = "coruwmex"
+
+mobUnitName = {}
+mobUnitName["veh"] = "armllt" -- this looks wrong, but it gives us a better picture of where vehicles can go
+mobUnitName["bot"] = "corck"
+mobUnitName["amp"] = "cormuskrat"
+mobUnitName["hov"] = "corsh"
+mobUnitName["shp"] = "corcs"
+mobUnitName["sub"] = "coracsub"
+
+-- this unit is used to check for hoverable water
+WaterSurfaceUnitName = "armfdrag"
+
+-- side names
+CORESideName = "core"
+ARMSideName = "arm"
+
+-- how much metal to assume features with these strings in their names have
+baseFeatureMetal = { rock = 30, heap = 80, wreck = 150 }
