@@ -415,32 +415,6 @@ function LandOrWater(self, landName, waterName)
 end
 
 
-
-	
-
-
-
-
-
-
-
-local function Economy2(self)
-	local unitName=DummyUnitName
-	if 	ai.Energy.full>0.9 and ai.Energy.income>1000 and ai.Metal.income>ai.Metal.usage then
-		unitName=buildEstore2(self)
-	elseif ai.Metal.full>0.7 and ai.Metal.income>30  then
-		unitName=buildMstore2(self)
-	elseif ai.Energy.full>0.8  then
-		unitName=buildMconv2(self)
-	elseif ai.Energy.full>0.2 then
-		unitName=BuildMohoMex()
-	elseif (ai.Energy.full<0.3 or ai.Energy.income<ai.Metal.usage) then
-		unitName=BuildFusion(self)
-	end
-	EchoDebug('Economy level 2 '..unitName)
-	return unitName
-end
-
 local function ConsulAsFactory(self)
 	local UnitName=DummyUnitName
 	local rnd= math.random(1,9)
@@ -506,7 +480,7 @@ function EngineerAsFactory(self)
 end	
 
 local function CommanderEconomy(self)
-	local underwater =ai. maphandler:IsUnderWater(self.unit:Internal():GetPosition())
+	local underwater = ai.maphandler:IsUnderWater(self.unit:Internal():GetPosition())
 	local unitName = DummyUnitName
 	if not underwater then 
 		unitName = Economy0()
@@ -519,7 +493,7 @@ local function CommanderEconomy(self)
 end
 
 local function AmphibiousEconomy(self)
-	local here =ai.maphandler:WaterOrGroundHere(self.unit:Internal():GetPosition())
+	local underwater = ai.maphandler:IsUnderWater(self.unit:Internal():GetPosition())
 	local unitName = DummyUnitName
 	if here then 
 		unitName = Economy1(self)

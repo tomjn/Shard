@@ -546,7 +546,7 @@ function TaskQueueBehaviour:BestFactory()
 					EchoDebug("found spot for " .. factoryName)
 					
 					for mi, mtype in pairs(factoryMobilities[factoryName]) do
-						if mtype == "air"  or ai.mobRating[mtype] > 1 then
+						if mtype == "air" or ai.mobRating[mtype] > ai.mobilityRatingFloor then
 							local network = ai.maphandler:MobilityNetworkHere(mtype, p)
 							if ai.scoutSpots[mtype][network] then
 								local numberOfSpots
