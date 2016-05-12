@@ -1,16 +1,12 @@
 if not ShardSpringLua then
 	-- globals
 	require("preload/globals")
-	shard_include("behaviourfactory")
-	shard_include("unit")
-	shard_include("module")
-	shard_include("modules")
 end
 local AI = class(AIBase)
 
 function AI:Init()
 	self.api = shard_include("preload/api")
-	self.api.map.buildsite = CreateBuildsiteFinder(self.id)
+	-- self.api.map.buildsite = CreateBuildsiteFinder(self.id)
 	self.game = self.api.game
 	self.map = self.api.map
 	self.game.ai = self
@@ -18,10 +14,17 @@ function AI:Init()
 	self.game.map = self.map
 	self.game:SendToConsole("Shard by AF - playing:"..self.game:GameName().." on:"..self.map:MapName())
 
-
 	ai = self
 	game = self.game
 	map = self.map
+
+	if not ShardSpringLua then
+		shard_include("behaviourfactory")
+		shard_include("unit")
+		shard_include("module")
+		shard_include("modules")
+	end
+
 	self.modules = {}
 	if next(modules) ~= nil then
 		for i,m in ipairs(modules) do
@@ -156,6 +159,10 @@ function AI:AddModule( newmodule )
 end
 
 -- create and use an AI
-return AI()
+if ShardSpringLua then
+	return AI()
+else
+	ai = AI()
+end
 
 

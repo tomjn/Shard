@@ -40,8 +40,8 @@ else
 end
 
 function ConstrainToMap(x, z)
-	x = max(min(x, maxElmosX-mapBuffer), mapBuffer)
-	z = max(min(z, maxElmosZ-mapBuffer), mapBuffer)
+	x = max(min(x, ai.maxElmosX-mapBuffer), mapBuffer)
+	z = max(min(z, ai.maxElmosZ-mapBuffer), mapBuffer)
 	return x, z
 end
 
@@ -53,13 +53,13 @@ function RandomAway(pos, dist, opposite, angle)
 	away.y = pos.y + 0
 	if away.x < 1 then
 		away.x = 1
-	elseif away.x > maxElmosX - 1 then
-		away.x = maxElmosX - 1
+	elseif away.x > ai.maxElmosX - 1 then
+		away.x = ai.maxElmosX - 1
 	end
 	if away.z < 1 then
 		away.z = 1
-	elseif away.z > maxElmosZ - 1 then
-		away.z = maxElmosZ - 1
+	elseif away.z > ai.maxElmosZ - 1 then
+		away.z = ai.maxElmosZ - 1
 	end
 	if opposite then
 		angle = twicePi - angle

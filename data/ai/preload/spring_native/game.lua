@@ -4,9 +4,11 @@ local game = {}
 	-- prints 'message' to ingame chat console
 	function game:SendToConsole(...)
 		local str = ""
-		for i, part in ipairs({...}) do
+		local parts = {...}
+		for i = 1, #parts do
+			local part = parts[i]
 			str = str .. part
-			if i < #part then str = str .. ", " end
+			if i < #parts then str = str .. ", " end
 		end
 		return game_engine:SendToConsole(str)
 	end
