@@ -154,7 +154,24 @@ function LosHandler:UpdateEnemies(enemyList)
 		local pos = e.position
 		exists[id] = pos
 		if not e.cloaked then
-			local lt = self:AllLos(pos)
+			local lt
+			if ShardSpringLua then
+				local t = {}
+				t[2] = Spring.IsUnitInLos(id, self.ai.allyId)
+				if Spring.IsUnitInRadar(id, self.ai.allyId) then
+					if pos.y < 0 then -- underwater
+						t[3] = true
+					else
+						t[1] = true
+					end
+				end
+				if Spring.IsUnitInAirLos(id, self.ai.allyId) then
+					t[4] = true
+				end
+				lt = t
+			else
+				lt = self:AllLos(pos)
+			end
 			local los = 0
 			local persist = false
 			local underWater = (unitTable[ename].mtype == "sub")
@@ -347,7 +364,7 @@ function LosHandler:Plot4(cx, cz, x, z, val, jam)
 	if x ~= 0 and z ~= 0 then
         self:HorizontalLine(cx - x, cz - z, cx + x, val, jam)
     end
-end 
+end
 
 function LosHandler:FillCircle(cx, cz, radius, val, jam)
 	-- convert to grid coordinates

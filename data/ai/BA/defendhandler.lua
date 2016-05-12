@@ -440,6 +440,7 @@ function DefendHandler:AddDefender(dfndbehaviour)
 end
 
 function DefendHandler:RemoveDefender(dfndbehaviour)
+	-- Spring.Echo(self.ai.id, "remove defender", dfndbehaviour.hits, dfndbehaviour.mtype, self.defenders[dfndbehaviour.hits])
 	if dfndbehaviour.tough or dfndbehaviour.hits == "air" then
 		for i = #self.defenders[dfndbehaviour.hits][dfndbehaviour.mtype], 1, -1 do
 			local db = self.defenders[dfndbehaviour.hits][dfndbehaviour.mtype][i]

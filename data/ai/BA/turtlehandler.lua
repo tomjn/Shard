@@ -37,7 +37,7 @@ local layerMod = {
 }
 
 local missingFactoryDefenseDistance = 1500 -- if a turtle with a factory has no defense, subtract this much from distance
-local modDistance = 0.5 -- how much Priority modifies distance, the higher the number the father builders will travel for the most/least turtled turtle
+local modDistance = 1 -- how much Priority modifies distance, the higher the number the father builders will travel for the most/least turtled turtle
 
 local factoryPriority = 4 -- added to tech level. above this priority allows two of the same type of defense tower.
 
@@ -439,7 +439,7 @@ function TurtleHandler:RemoveShell(unitID)
 end
 
 function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
-	return
+	if 1 then return end -- ai might actually be more effective without defenses
 	if builder == nil then return end
 	EchoDebug("checking for least turtled from " .. builder:Name() .. " for " .. tostring(unitName) .. " bombard: " .. tostring(bombard))
 	if unitName == nil then return end

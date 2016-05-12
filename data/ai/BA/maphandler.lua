@@ -516,6 +516,11 @@ function MapHandler:Init()
 	-- copy metal spots
 	local metalSpots = {}
 	for k, v in pairs(self.spots) do table.insert(metalSpots, v) end
+	if #metalSpots > 1600 then
+		-- metal map is too complex, simplify it
+		metalSpots = self:SimplifyMetalSpots(metalSpots, 1600)
+		self.spots = metalSpots
+	end
 
 	-- now let's find out are there any geo spots on the map
 	-- and add them to allSpots
@@ -631,6 +636,31 @@ function MapHandler:Init()
 	-- cleanup
 	mobMap = {}
 
+end
+
+function MapHandler:SimplifyMetalSpots(metalSpots, number)
+	-- for maps that are all metal for example
+	-- pretend for the sake of calculations that there are only 100 metal spots
+	local mapSize = self.map:MapDimensions()
+	local maxX = mapSize.x * 8
+	local maxZ = mapSize.z * 8
+	local divisor = math.ceil(math.sqrt(number))
+	local gridSize = math.ceil( math.max(maxX, maxZ) / divisor )
+	local halfGrid = math.ceil( gridSize / 2 )
+	local spots = {}
+	for x = 0, maxX-gridSize, gridSize do
+		for z = 0, maxZ-gridSize, gridSize do
+			for i = 1, #metalSpots do
+				local spot = metalSpots[i]
+				if spot.x > x and spot.x < x + gridSize and spot.z > z and spot.z < z + gridSize then
+					spots[#spots+1] = spot
+					table.remove(metalSpots, i)
+					break
+				end
+			end
+		end
+	end
+	return spots
 end
  
 function MapHandler:ClosestFreeSpot(unittype, builder, position)
