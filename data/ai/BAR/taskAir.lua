@@ -1,34 +1,18 @@
-
---shard_include('taskqueues')
 local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("unitBot: " .. inStr)
+		game:SendToConsole("taskAir: " .. inStr)
 	end
 end
+
+--LEVEL 1
 
 function ConAir()
 	if ai.mySide == CORESideName then
 		return BuildWithLimitedNumber("corca", ConUnitPerTypeLimit)
 	else
 		return BuildWithLimitedNumber("armca", ConUnitPerTypeLimit)
-	end
-end
-
-function ConAdvAir()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("coraca", ConUnitAdvPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armaca", ConUnitAdvPerTypeLimit)
-	end
-end
-
-function ConSeaAir()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("corcsa", ConUnitPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armcsa", ConUnitPerTypeLimit)
 	end
 end
 
@@ -42,14 +26,54 @@ function Lvl1AirRaider(self)
 	return BuildRaiderIfNeeded(unitName)
 end
 
-function MegaAircraft()
+function Lvl1Fighter()
+	local unitName
 	if ai.mySide == CORESideName then
-		return BuildBreakthroughIfNeeded("corcrw")
+		unitName = "corveng"
 	else
-		return BuildBreakthroughIfNeeded("armcybr")
+		unitName = "armfig"
+	end
+	return BuildAAIfNeeded(unitName)
+end
+
+function Lvl1Bomber()
+	local unitName
+	if ai.mySide == CORESideName then
+		unitName = "corshad"
+	else
+		unitName = "armthund"
+	end
+	return BuildBomberIfNeeded(unitName)
+end
+
+function ScoutAir()
+	local unitName
+	if ai.mySide == CORESideName then
+		unitName = "corfink"
+	else
+		unitName = "armpeep"
+	end
+	return BuildWithLimitedNumber(unitName, 1)
+end
+
+--LEVEL 2
+function ConAdvAir()
+	if ai.mySide == CORESideName then
+		return BuildWithLimitedNumber("coraca", ConUnitAdvPerTypeLimit)
+	else
+		return BuildWithLimitedNumber("armaca", ConUnitAdvPerTypeLimit)
 	end
 end
 
+function Lvl2Fighter()
+	local unitName
+	if ai.mySide == CORESideName then
+		unitName = "corvamp"
+	else
+		unitName = "armhawk"
+	end
+	return BuildAAIfNeeded(unitName)
+end
 
 function Lvl2AirRaider(self)
 	local unitName = ""
@@ -67,44 +91,6 @@ function Lvl2AirRaider(self)
 	return BuildRaiderIfNeeded(unitName)
 end
 
-function Lvl1Bomber()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corshad"
-	else
-		unitName = "armthund"
-	end
-	return BuildBomberIfNeeded(unitName)
-end
-function Lvl1AirSupport()
-	local unitName=dummyUnitName
-	if ef and mf>0.5 then
-		if ai.mySide == CORESideName then
-			unitName = "corshad"
-		else
-			unitName = "armthund"
-		end
-	else
-		if ai.mySide == CORESideName then
-			unitName = "bladew"
-		else
-			unitName = "armcam"
-		end
-	end
-	return BuildWithLimitedNumber(unitName,20)
-end
-
-
-function Lvl1Fighter()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corveng"
-	else
-		unitName = "armfig"
-	end
-	return BuildAAIfNeeded(unitName)
-end
-
 function Lvl2Bomber()
 	local unitName
 	if ai.mySide == CORESideName then
@@ -114,6 +100,7 @@ function Lvl2Bomber()
 	end
 	return BuildBomberIfNeeded(unitName)
 end
+
 
 function Lvl2TorpedoBomber()
 	local unitName
@@ -125,14 +112,32 @@ function Lvl2TorpedoBomber()
 	return BuildTorpedoBomberIfNeeded(unitName)
 end
 
-function Lvl2Fighter()
+function MegaAircraft()
+	if ai.mySide == CORESideName then
+		return BuildBreakthroughIfNeeded("corcrw")
+	else
+		return BuildBreakthroughIfNeeded("armcybr")
+	end
+end
+
+
+function ScoutAdvAir()
 	local unitName
 	if ai.mySide == CORESideName then
-		unitName = "corvamp"
+		unitName = "corawac"
 	else
-		unitName = "armhawk"
+		unitName = "armawac"
 	end
-	return BuildAAIfNeeded(unitName)
+	return BuildWithLimitedNumber(unitName, 1)
+end
+
+--SEAPLANE
+function ConSeaAir()
+	if ai.mySide == CORESideName then
+		return BuildWithLimitedNumber("corcsa", ConUnitPerTypeLimit)
+	else
+		return BuildWithLimitedNumber("armcsa", ConUnitPerTypeLimit)
+	end
 end
 
 function SeaBomber()
@@ -175,27 +180,6 @@ function SeaAirRaider(self)
 	return BuildRaiderIfNeeded(unitName)
 end
 
-function ScoutAir()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corfink"
-	else
-		unitName = "armpeep"
-	end
-	return BuildWithLimitedNumber(unitName, 1)
-end
-
-
-function ScoutAdvAir()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corawac"
-	else
-		unitName = "armawac"
-	end
-	return BuildWithLimitedNumber(unitName, 1)
-end
-
 function ScoutSeaAir()
 	local unitName
 	if ai.mySide == CORESideName then
@@ -206,6 +190,7 @@ function ScoutSeaAir()
 	return BuildWithLimitedNumber(unitName, 1)
 end
 
+--AIRPAD
 function AirRepairPadIfNeeded()
 	local tmpUnitName = DummyUnitName
 

@@ -1,10 +1,8 @@
-
---shard_include('taskqueues')
 local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("unitBot: " .. inStr)
+		game:SendToConsole("taskBuild: " .. inStr)
 	end
 end
 

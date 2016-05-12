@@ -1,14 +1,12 @@
-
---shard_include('taskqueues')
 local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("unitBot: " .. inStr)
+		game:SendToConsole("taskExp: " .. inStr)
 	end
 end
 
-
+--SOME FUNCTIONS ARE DUPLICATE HERE
 function Lvl3Merl(self)
 	local unitName = ""
 	if ai.mySide == CORESideName then
@@ -29,7 +27,7 @@ function Lvl3Arty(self)
 	return BuildSiegeIfNeeded(unitName)
 end
 
-function lv3amp(self)
+function lv3Amp(self)
 	local unitName=DummyUnitName
 	if ai.mySide == CORESideName then
 		unitName = "shiva"
@@ -87,3 +85,39 @@ function Lvl3Battle(self)
 	end
 	return BuildBattleIfNeeded(unitName)
 end
+
+function Lvl3Hov(self)
+	local unitName = DummyUnitName
+	if ai.mySide == CORESideName then
+		unitName = "corsok"
+	else
+		unitName = "armlun"
+	end
+	return BuildBattleIfNeeded(unitName)
+end
+	
+function Lv3VehAmp(self)
+	local unitName = DummyUnitName
+	if ai.mySide == CORESideName then
+		if ai.Metal.full < 0.5 then
+			unitName = "corseal"
+		else
+			unitName = "corparrow"
+		end
+	else
+		unitName = "armcroc"
+	end
+	return BuildSiegeIfNeeded(unitName)
+end
+	
+	
+function Lv3Special(self)
+	local unitName = DummyUnitName
+	if ai.mySide == CORESideName then
+		unitName = "gorg"
+	else
+		unitName = "armshock"
+	end
+	return BuildBattleIfNeeded(unitName)
+end
+	
