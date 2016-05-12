@@ -439,7 +439,7 @@ function TurtleHandler:RemoveShell(unitID)
 end
 
 function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
-	if 1 then return end -- ai might actually be more effective without defenses
+	-- if 1 then return end -- ai might actually be more effective without defenses
 	if builder == nil then return end
 	EchoDebug("checking for least turtled from " .. builder:Name() .. " for " .. tostring(unitName) .. " bombard: " .. tostring(bombard))
 	if unitName == nil then return end

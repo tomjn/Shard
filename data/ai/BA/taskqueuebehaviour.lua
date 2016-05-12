@@ -443,6 +443,9 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 				end
 			end
 		end
+		if p and Distance(p, builder:GetPosition()) > 500 then
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, builder:GetPosition(), utype)
+		end
 		if p == nil then
 			EchoDebug("did NOT find build spot near turtle position")
 			utype = nil
