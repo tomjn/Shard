@@ -54,7 +54,7 @@ function BootBehaviour:Priority()
 	end
 
 	-- don't apply to structures
-	if self.unit:CanMove() == false then
+	if self.unit:Internal():CanMove() == false then
 		return 0
 	end
 	if self.waiting then

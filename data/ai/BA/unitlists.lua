@@ -1,5 +1,3 @@
-require "unittable"
-
 local DebugEnabled = false
 
 local function EchoDebug(inStr)
@@ -550,11 +548,21 @@ UWMetalSpotCheckUnit = "coruwmex"
 
 mobUnitName = {}
 mobUnitName["veh"] = "armllt" -- this looks wrong, but it gives us a better picture of where vehicles can go
-mobUnitName["bot"] = "corck"
+mobUnitName["bot"] = "armeyes" --"corck"
 mobUnitName["amp"] = "cormuskrat"
 mobUnitName["hov"] = "corsh"
 mobUnitName["shp"] = "corcs"
 mobUnitName["sub"] = "coracsub"
+
+-- for ShardSpringLua only
+mobUnitExampleName = {
+	veh = "armcv",
+	bot = "armck",
+	amp = "armbeaver",
+	hov = "armch",
+	shp = "armcs",
+	sub = "armacsub"
+}
 
 -- this unit is used to check for hoverable water
 WaterSurfaceUnitName = "armfdrag"

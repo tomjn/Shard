@@ -1,7 +1,8 @@
-require "common"
+shard_include "common"
 
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -207,6 +208,7 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 end
 
 function TaskQueueBehaviour:Init()
+	shard_include "taskqueues"
 	if ai.outmodedFactories == nil then ai.outmodedFactories = 0 end
 
 	GetEcon()
@@ -371,29 +373,24 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		end
 	elseif geothermalPlant[value] then
 		-- geothermal
-		local builderPos = builder:GetPosition()
-		p = map:FindClosestBuildSite(utype, builderPos, 5000, 0)
-		if p ~= nil then
-			-- don't build on geo spots that units can't get to
-			if ai.maphandler:UnitCanGoHere(builder, p) then
-				if value == "cmgeo" or value == "amgeo" then
-					-- don't build moho geos next to factories
-					if ai.buildsitehandler:ClosestHighestLevelFactory(builder, 500) ~= nil then
-						if value == "cmgeo" then
-							if ai.targethandler:IsBombardPosition(p, "corbhmth") then
-								-- instead build geothermal plasma battery if it's a good spot for it
-								value = "corbhmth"
-								utype = game:GetTypeByName(value)
-							end
-						else
-							-- instead build a safe geothermal
-							value = "armgmm"
+		p = self.ai.maphandler:ClosestFreeGeo(utype, builder)
+		-- Spring.Echo("geo spot", p.x, p.y, p.z)
+		if p then
+			if value == "cmgeo" or value == "amgeo" then
+				-- don't build moho geos next to factories
+				if ai.buildsitehandler:ClosestHighestLevelFactory(builder, 500) ~= nil then
+					if value == "cmgeo" then
+						if ai.targethandler:IsBombardPosition(p, "corbhmth") then
+							-- instead build geothermal plasma battery if it's a good spot for it
+							value = "corbhmth"
 							utype = game:GetTypeByName(value)
 						end
+					else
+						-- instead build a safe geothermal
+						value = "armgmm"
+						utype = game:GetTypeByName(value)
 					end
 				end
-			else
-				utype = nil
 			end
 		else
 			utype = nil
@@ -445,6 +442,9 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 					if p ~= nil then break end
 				end
 			end
+		end
+		if p and Distance(p, builder:GetPosition()) > 500 then
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, builder:GetPosition(), utype)
 		end
 		if p == nil then
 			EchoDebug("did NOT find build spot near turtle position")

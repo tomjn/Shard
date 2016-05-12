@@ -1,8 +1,9 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
 local DebugEnabledPlans = false
 local debugPlotBuildFile
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then

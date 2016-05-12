@@ -1,22 +1,40 @@
-require "preload/api"
-shard_include("behaviourfactory")
-shard_include("unit")
-shard_include("module")
-shard_include("modules")
-
-AI = class(AIBase)
+if not ShardSpringLua then
+	-- globals
+	require("preload/globals")
+end
+local AI = class(AIBase)
 
 function AI:Init()
-	game:SendToConsole("Shard by AF - playing:"..game:GameName().." on:"..game.map:MapName())
+	ai = self
+	self.api = shard_include("preload/api")
+	-- self.api.map.buildsite = CreateBuildsiteFinder(self.id)
+	self.game = self.api.game
+	self.map = self.api.map
+	self.game.ai = self
+	self.map.ai = self
+	self.game.map = self.map
+	self.game:SendToConsole("Shard by AF - playing:"..self.game:GameName().." on:"..self.map:MapName())
+
+	ai = self
+	game = self.game
+	map = self.map
+
+	if not ShardSpringLua then
+		shard_include("behaviourfactory")
+		shard_include("unit")
+		shard_include("module")
+		shard_include("modules")
+	end
 
 	self.modules = {}
 	if next(modules) ~= nil then
 		for i,m in ipairs(modules) do
 			newmodule = m()
-			game:SendToConsole("adding "..newmodule:Name().." module")
+			self.game:SendToConsole("adding "..newmodule:Name().." module")
 			local internalname = newmodule:internalName()
 			self[internalname] = newmodule
 			table.insert(self.modules,newmodule)
+			newmodule:SetAI(self)
 			newmodule:Init()
 		end
 	end
@@ -28,7 +46,7 @@ function AI:Update()
 	end
 	for i,m in ipairs(self.modules) do
 		if m == nil then
-			game:SendToConsole("nil module!")
+			self.game:SendToConsole("nil module!")
 		else
 			m:Update()
 		end
@@ -41,7 +59,7 @@ function AI:GameMessage(text)
 	end
 	for i,m in ipairs(self.modules) do
 		if m == nil then
-			game:SendToConsole("nil module!")
+			self.game:SendToConsole("nil module!")
 		else
 			m:GameMessage(text)
 		end
@@ -53,7 +71,7 @@ function AI:UnitCreated(engineunit)
 		return
 	end
 	if engineunit == nil then
-		game:SendToConsole("shard found nil engineunit")
+		self.game:SendToConsole("shard found nil engineunit")
 		return
 	end
 	for i,m in ipairs(self.modules) do
@@ -66,7 +84,7 @@ function AI:UnitBuilt(engineunit)
 		return
 	end
 	if engineunit == nil then
-		game:SendToConsole("shard-warning: unitbuilt engineunit nil ")
+		self.game:SendToConsole("shard-warning: unitbuilt engineunit nil ")
 		return
 	end
 	for i,m in ipairs(self.modules) do
@@ -91,7 +109,7 @@ function AI:UnitIdle(engineunit)
 		return
 	end
 	if engineunit == nil then
-		game:SendToConsole("shard-warning: idle engineunit nil")
+		self.game:SendToConsole("shard-warning: idle engineunit nil")
 		return
 	end
 	
@@ -107,7 +125,7 @@ function AI:UnitDamaged(engineunit,engineattacker,enginedamage)
 	if engineunit == nil then
 		return
 	end
-	game:SendToConsole("UnitDamage for " .. enginedamage:Damage())
+	-- self.game:SendToConsole("UnitDamage for " .. enginedamage:Damage())
 	for i,m in ipairs(self.modules) do
 		m:UnitDamaged(engineunit,engineattacker,enginedamage)
 	end
@@ -140,6 +158,8 @@ function AI:AddModule( newmodule )
 end
 
 -- create and use an AI
-ai = AI()
-
-
+if ShardSpringLua then
+	return AI()
+else
+	ai = AI()
+end

@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -27,7 +28,7 @@ end
 
 function BomberHandler:Update()
 	local f = game:Frame()
-	if math.mod(f,90) == 0 then
+	if f % 90 == 0 then
 		self:DoTargetting()
 	end
 end

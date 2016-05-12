@@ -87,7 +87,7 @@ function AttackerBehaviour:SetInitialState()
 	end
 end
 
-function AttackerBehaviour:OwnerDead()
+function AttackerBehaviour:OwnerDied()
 	ai.attackhandler:RemoveRecruit(self)
 	self.attacking = nil
 	self.active = nil

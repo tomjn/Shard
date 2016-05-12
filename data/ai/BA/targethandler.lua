@@ -1,8 +1,9 @@
 
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
 local debugPlotTargetFile
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -35,10 +36,8 @@ end
 TargetHandler = class(Module)
 
 local sqrt = math.sqrt
-local fmod = math.fmod
 local floor = math.floor
 local ceil = math.ceil
-local mod = math.mod
 
 local function round(num) 
 	if num >= 0 then
@@ -880,27 +879,45 @@ function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignor
 	if enemyBaseCell and not ignoreValue then
 		local dist = Distance(position, enemyBaseCell.pos)
 		if dist < range then
-			local value = cell.values.ground.ground + cell.values.air.ground + cell.values.submerged.ground
-			return enemyBaseCell, value + cell.response.ground
+			local value = enemyBaseCell.values.ground.ground + enemyBaseCell.values.air.ground + enemyBaseCell.values.submerged.ground
+			return enemyBaseCell, value + enemyBaseCell.response.ground
 		end
 	end
 	local best
 	local bestValueThreat = 0
 	if minValueThreat then bestValueThreat = minValueThreat end
 	for i, cell in pairs(cellList) do
-		local dist = Distance(position, cell.pos)
-		if dist < range then
-			local value = cell.values.ground.ground + cell.values.air.ground + cell.values.submerged.ground
-			local valuethreat = 0
-			if not ignoreValue then valuethreat = valuethreat + value end
-			if not ignoreThreat then valuethreat = valuethreat + cell.response.ground end
-			if valuethreat > bestValueThreat then
-				best = cell
-				bestValueThreat = valuethreat
+		if #cell.buildingIDs > 0 then
+			local dist = Distance(position, cell.pos)
+			if dist < range then
+				local value = cell.values.ground.ground + cell.values.air.ground + cell.values.submerged.ground
+				local valuethreat = 0
+				if not ignoreValue then valuethreat = valuethreat + value end
+				if not ignoreThreat then valuethreat = valuethreat + cell.response.ground end
+				if valuethreat > bestValueThreat then
+					best = cell
+					bestValueThreat = valuethreat
+				end
 			end
 		end
 	end
-	return best, bestValueThreat
+	if best then
+		local bestBuildingID, bestBuildingVT
+		for i, buildingID in pairs(best.buildingIDs) do
+			local building = game:GetUnitByID(buildingID)
+			if building then
+				local uname = building:Name()
+				local value = Value(uname)
+				local threat = ThreatRange(uname, "ground") + ThreatRange(uname, "air")
+				local valueThreat = value + threat
+				if not bestBuildingVT or valueThreat > bestBuildingVT then
+					bestBuildingVT = valueThreat
+					bestBuildingID = buildingID
+				end
+			end
+		end
+	end
+	return best, bestValueThreat, bestBuildingID
 end
 
 function TargetHandler:GetBestBomberTarget(torpedo)
