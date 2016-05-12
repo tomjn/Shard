@@ -32,13 +32,6 @@ local unitWeaponMtypes = {}
 local quadX = { -1, 1, -1, 1 }
 local quadZ = { -1, -1, 1, 1 }
 
-local maxElmosX, maxElmosZ
-if ShardSpringLua then
-	maxElmosX, maxElmosZ = Game.mapSizeX, Game.mapSizeZ
-else
-	maxElmosX, maxElmosZ = ai.maxElmosX, ai.maxElmosZ
-end
-
 function ConstrainToMap(x, z)
 	x = max(min(x, ai.maxElmosX-mapBuffer), mapBuffer)
 	z = max(min(z, ai.maxElmosZ-mapBuffer), mapBuffer)
