@@ -1,253 +1,242 @@
-------------------------------------------------------------
--- Config
-------------------------------------------------------------
-local gridSize = 16 -- Resolution of metal map
-local buildGridSize = 8 -- Resolution of build positions
+local elmosPerMetal = 16
+local metalmapSizeX = Game.mapSizeX / elmosPerMetal
+local metalmapSizeZ = Game.mapSizeZ / elmosPerMetal
+local extractorRadiusMetal = math.ceil( Game.extractorRadius / elmosPerMetal )
+local maxSpotArea = math.ceil( (extractorRadiusMetal*extractorRadiusMetal) * 2 * math.pi )
+local minSpotArea = math.ceil( maxSpotArea * 0.25 )
+local sqRootThree = math.sqrt(3)
+local halfHexHeight = math.ceil( (sqRootThree * extractorRadiusMetal) / 2 )
+local halfExtractorRadiusMetal = math.ceil( extractorRadiusMetal / 2 )
 
-------------------------------------------------------------
--- Speedups
-------------------------------------------------------------
-local min, max = math.min, math.max
-local floor, ceil = math.floor, math.ceil
-local sqrt = math.sqrt
-local huge = math.huge
+Spring.Echo(metalmapSizeX, metalmapSizeZ, metalmapSizeX*metalmapSizeZ, extractorRadiusMetal, maxSpotArea, minSpotArea, halfHexHeight, halfExtractorRadiusMetal)
 
-local spGetGroundInfo = Spring.GetGroundInfo
+local mCeil = math.ceil
+
+local spGetMetalAmount = Spring.GetMetalAmount
 local spGetGroundHeight = Spring.GetGroundHeight
-local spTestBuildOrder = Spring.TestBuildOrder
 
-local extractorRadius = Game.extractorRadius
-local extractorRadiusSqr = extractorRadius * extractorRadius
- 
-local buildmapSizeX = Game.mapSizeX - buildGridSize
-local buildmapSizeZ = Game.mapSizeZ - buildGridSize
-local buildmapStartX = buildGridSize
-local buildmapStartZ = buildGridSize
+local isInBlob = {}
+local blobs = {}
+local hexes = {}
+local spotsInBlob = {}
 
-local metalmapSizeX = Game.mapSizeX - 1.5 * gridSize
-local metalmapSizeZ = Game.mapSizeZ - 1.5 * gridSize
-local metalmapStartX = 1.5 * gridSize
-local metalmapStartZ = 1.5 * gridSize
-
-------------------------------------------------------------
--- Shared functions
-------------------------------------------------------------
-function GetMexPositions(spot, uDefID, facing, testBuild)
-	
-	local positions = {}
-	
-	local xoff, zoff
-	local uDef = UnitDefs[uDefID]
-	if facing == 0 or facing == 2 then
-		xoff = (4 * uDef.xsize) % 16
-		zoff = (4 * uDef.zsize) % 16
-	else
-		xoff = (4 * uDef.zsize) % 16
-		zoff = (4 * uDef.xsize) % 16
+local function Flood4Metal(x, z, id)
+	if x > metalmapSizeX or x < 1 or z > metalmapSizeZ or z < 1 then return end
+	if isInBlob[x] and isInBlob[x][z] then return end
+	local metalAmount = spGetMetalAmount(x, z)
+	if metalAmount and metalAmount > 0 then
+		if not isInBlob[x] then isInBlob[x] = {} end
+		if not blobs[id] then blobs[id] = {} end
+		blobs[id][#blobs[id]+1] = {x=x, z=z}
+		isInBlob[x][z] = id
+		Flood4Metal(x+1,z,id)
+		Flood4Metal(x-1,z,id)
+		Flood4Metal(x,z+1,id)
+		Flood4Metal(x,z-1,id)
+		return true
 	end
-	
-	if not spot.validLeft then
-		GetValidStrips(spot)
-	end
-	
-	local validLeft = spot.validLeft
-	local validRight = spot.validRight
-	for z, vLeft in pairs(validLeft) do
-		if z % 16 == zoff then
-			for x = gridSize *  ceil((vLeft         + xoff) / gridSize) - xoff,
-					gridSize * floor((validRight[z] + xoff) / gridSize) - xoff,
-					gridSize do
-				local y = spGetGroundHeight(x, z)
-				if not (testBuild and spTestBuildOrder(uDefID, x, y, z, facing) == 0) then
-					positions[#positions + 1] = {x, y, z}
-				end
-			end
-		end
-	end
-	
-	return positions
 end
 
-function IsMexPositionValid(spot, x, z)
-	
-	if z <= spot.maxZ - extractorRadius or
-	   z >= spot.minZ + extractorRadius then -- Test for metal being included is dist < extractorRadius
-		return false
+local function Flood1Metal(x, z, id)
+	if x > metalmapSizeX or x < 1 or z > metalmapSizeZ or z < 1 then return end
+	if isInBlob[x] and isInBlob[x][z] then return end
+	local metalAmount = spGetMetalAmount(x, z)
+	if metalAmount and metalAmount > 0 then
+		if not isInBlob[x] then isInBlob[x] = {} end
+		if not blobs[id] then blobs[id] = {} end
+		blobs[id][#blobs[id]+1] = {x=x, z=z}
+		isInBlob[x][z] = id
+		return true
 	end
-	
-	local sLeft, sRight = spot.left, spot.right
-	for sz = spot.minZ, spot.maxZ, gridSize do
-		local dz = sz - z
-		local maxXOffset = sqrt(extractorRadiusSqr - dz * dz) -- Test for metal being included is dist < extractorRadius
-		if x <= sRight[sz] - maxXOffset or
-		   x >= sLeft[sz] + maxXOffset then
-			return false
-		end
-	end
-	
-	return true
 end
 
-------------------------------------------------------------
--- Mex finding
-------------------------------------------------------------
+local function FloodBufferMetal(x, z, id)
+	local buffer = { {x=x, z=z} }
+	local firstokay = false
+	repeat
+		local newBuff = {}
+		for i = 1, #buffer do
+			local buff = buffer[i]
+			local bx, bz = buff.x, buff.z
+			if Flood1Metal(bx, bz, id) then
+				firstokay = true
+				newBuff[#newBuff+1] = {x=bx+1, z=bz}
+				newBuff[#newBuff+1] = {x=bx-1, z=bz}
+				newBuff[#newBuff+1] = {x=bx, z=bz+1}
+				newBuff[#newBuff+1] = {x=bx, z=bz-1}
+			end
+		end
+		buffer = newBuff
+	until #buffer == 0
+	return firstokay
+end
 
-function GetSpots()
-	
-	-- Main group collection
-	-- local uniqueGroups = {}
-	
-	-- Strip info
-	local nStrips = 0
-	local stripLeft = {}
-	local stripRight = {}
-	local stripGroup = {}
-	
-	-- Indexes
-	local aboveIdx
-	local workingIdx
-	
-	-- Strip processing function (To avoid some code duplication)
-	local function DoStrip(x1, x2, z, worth)
-		
-		local assignedTo
-		
-		for i = aboveIdx, workingIdx - 1 do
-			if stripLeft[i] > x2 + gridSize then
-				break
-			elseif stripRight[i] + gridSize >= x1 then
-				local matchGroup = stripGroup[i]
-				if assignedTo then
-					if matchGroup ~= assignedTo then
-						for iz = matchGroup.minZ, assignedTo.minZ - gridSize, gridSize do
-							assignedTo.left[iz] = matchGroup.left[iz]
-						end
-						for iz = matchGroup.minZ, matchGroup.maxZ, gridSize do
-							assignedTo.right[iz] = matchGroup.right[iz]
-						end
-						if matchGroup.minZ < assignedTo.minZ then
-							assignedTo.minZ = matchGroup.minZ
-						end
-						assignedTo.maxZ = z
-						assignedTo.worth = assignedTo.worth + matchGroup.worth
-						-- uniqueGroups[matchGroup] = nil
-						matchGroup.unique = nil
-					end
-				else
-					assignedTo = matchGroup
-					assignedTo.left[z] = assignedTo.left[z] or x1 -- Only accept the first
-					assignedTo.right[z] = x2 -- Repeated overwrite gives us result we want
-					assignedTo.maxZ = z -- Repeated overwrite gives us result we want
-					assignedTo.worth = assignedTo.worth + worth
-				end
-			else
-				aboveIdx = aboveIdx + 1
-			end
-		end
-		
-		nStrips = nStrips + 1
-		stripLeft[nStrips] = x1
-		stripRight[nStrips] = x2
-		
-		if assignedTo then
-			stripGroup[nStrips] = assignedTo
-		else
-			local newGroup = {
-					left = {[z] = x1},
-					right = {[z] = x2},
-					minZ = z,
-					maxZ = z,
-					worth = worth
-				}
-			stripGroup[nStrips] = newGroup
-			-- uniqueGroups[newGroup] = true
-			newGroup.unique = true
+local function CheckHorizontalLineBlob(x, z, tx, id)
+	local area = 0
+	for ix = x, tx do
+		if isInBlob[x] and isInBlob[x][z] == id then
+		-- if spGetMetalAmount(x, z) > 0 then
+			area = area + 1
 		end
 	end
-	
-	-- Strip finding
-	workingIdx = huge
-	for mz = metalmapStartX, metalmapSizeZ, gridSize do
-		
-		aboveIdx = workingIdx
-		workingIdx = nStrips + 1
-		
-		local stripStart = nil
-		local stripWorth = 0
-		
-		for mx = metalmapStartZ, metalmapSizeX, gridSize do
-			local _, groundMetal = spGetGroundInfo(mx, mz)
-			if groundMetal > 0 then
-				stripStart = stripStart or mx
-				stripWorth = stripWorth + groundMetal
-			elseif stripStart then
-				DoStrip(stripStart, mx - gridSize, mz, stripWorth)
-				stripStart = nil
-				stripWorth = 0
+	return area
+end
+
+local function Check4Blob(cx, cz, x, z, id)
+	local area = 0
+	area = area + CheckHorizontalLineBlob(cx - x, cz + z, cx + x, id)
+	if x ~= 0 and z ~= 0 then
+        area = area + CheckHorizontalLineBlob(cx - x, cz - z, cx + x, id)
+    end
+    return area
+end
+
+local function CheckCircle(cx, cz, radius, id)
+	local area = 0
+	if radius > 0 then
+		local err = -radius
+		local x = radius
+		local z = 0
+		while x >= z do
+	        local lastZ = z
+	        err = err + z
+	        z = z + 1
+	        err = err + z
+	        area = area + Check4Blob(cx, cz, x, lastZ, id)
+	        if err >= 0 then
+	            if x ~= lastZ then
+	            	area = area + Check4Blob(cx, cz, lastZ, x, id)
+	            end
+	            err = err - x
+	            x = x - 1
+	            err = err - x
+	        end
+	    end
+	end
+	return area
+end
+
+local function FloodHexBlob(x, z, id)
+	if x > metalmapSizeX or x < 1 or z > metalmapSizeZ or z < 1 then return end
+	if not hexes[id] then hexes[id] = {} end
+	if not hexes[id][x] then hexes[id][x] = {} end
+	-- if hexes[id][x][z] or spGetMetalAmount(x,z) == 0 then return end
+	if hexes[id][x][z] or not isInBlob[x] or isInBlob[x][z] ~= id then return end
+	local blobArea = CheckCircle(x, z, extractorRadiusMetal, id)
+	-- Spring.Echo(x, z, id, blobArea, minSpotArea)
+	if blobArea > minSpotArea then
+		local sx = x*elmosPerMetal
+		local sz = z*elmosPerMetal
+		spotsInBlob[id][#spotsInBlob[id]+1] = {x=sx, z=sz, y=spGetGroundHeight(sx,sz)}
+		hexes[id][x][z] = true
+		FloodHexBlob(x + extractorRadiusMetal, z, id)
+		FloodHexBlob(x + halfExtractorRadiusMetal, z - halfHexHeight, id)
+		FloodHexBlob(x - halfExtractorRadiusMetal, z - halfHexHeight, id)
+		FloodHexBlob(x - extractorRadiusMetal, z, id)
+		FloodHexBlob(x - halfExtractorRadiusMetal, z + halfHexHeight, id)
+		FloodHexBlob(x + halfExtractorRadiusMetal, z + halfHexHeight, id)
+		return true
+	end
+end
+
+local function Flood1HexBlob(x, z, id)
+	if x > metalmapSizeX or x < 1 or z > metalmapSizeZ or z < 1 then return end
+	if not hexes[id] then hexes[id] = {} end
+	if not hexes[id][x] then hexes[id][x] = {} end
+	if hexes[id][x][z] or spGetMetalAmount(x,z) == 0 then return end
+	local blobArea = CheckCircle(x, z, extractorRadiusMetal, id)
+	-- Spring.Echo(x, z, id, blobArea, minSpotArea)
+	if blobArea > minSpotArea then
+		local sx = x*elmosPerMetal
+		local sz = z*elmosPerMetal
+		spotsInBlob[id][#spotsInBlob[id]+1] = {x=sx, z=sz, y=spGetGroundHeight(sx,sz)}
+		hexes[id][x][z] = true
+		return true
+	end
+end
+
+local function FloodBufferHexBlob(x, z, id)
+	local hhh = halfHexHeight
+	local erm = extractorRadiusMetal
+	local herm = halfExtractorRadiusMetal
+	local buffer = { {x=x, z=z} }
+	local firstokay = false
+	repeat
+		local newBuff = {}
+		for i = 1, #buffer do
+			local buff = buffer[i]
+			local bx, bz = buff.x, buff.z
+			if Flood1HexBlob(bx, bz, id) then
+				firstokay = true
+				newBuff[#newBuff+1] = { x = bx + extractorRadiusMetal, z = bz }
+				newBuff[#newBuff+1] = { x = bx + halfExtractorRadiusMetal, z = bz - halfHexHeight }
+				newBuff[#newBuff+1] = { x = bx - halfExtractorRadiusMetal, z = bz - halfHexHeight }
+				newBuff[#newBuff+1] = { x = bx - extractorRadiusMetal, z = bz }
+				newBuff[#newBuff+1] = { x = bx - halfExtractorRadiusMetal, z = bz + halfHexHeight }
+				newBuff[#newBuff+1] = { x = bx + halfExtractorRadiusMetal, z = bz + halfHexHeight }
 			end
 		end
-		
-		if stripStart then
-			DoStrip(stripStart, metalmapSizeX, mz, stripWorth)
+		buffer = newBuff
+	until #buffer == 0
+	return firstokay
+end
+
+local function CirclePack(x, z, id)
+	spotsInBlob[id] = {}
+	FloodBufferHexBlob(x, z, id)
+	hexes[id] = nil
+end
+
+local function GetSpots()
+	local id = 1
+	for x = 1, metalmapSizeX do
+		for z = 1, metalmapSizeZ do
+			local tharBeMetal = FloodBufferMetal(x, z, id)
+			if tharBeMetal then id = id + 1 end
 		end
 	end
-	
-	-- Final processing
+	Spring.Echo(#blobs, "blobs")
+	-- isInBlob = {}
 	local spots = {}
-	-- for g, _ in pairs(uniqueGroups) do
-	for _, g in pairs(stripGroup) do
-		if g.unique then
-		
-			local gMinX, gMaxX = huge, -1
-			local gLeft, gRight = g.left, g.right
-			for iz = g.minZ, g.maxZ, gridSize do
-				if gLeft[iz] < gMinX then gMinX = gLeft[iz] end
-				if gRight[iz] > gMaxX then gMaxX = gRight[iz] end
+	for id = 1, #blobs do
+		local blob = blobs[id]
+		local x, z = 0, 0
+		for p = 1, #blob do
+			local pixel = blob[p]
+			x = x + pixel.x
+			z = z + pixel.z
+		end
+		x = x / #blob
+		z = z / #blob
+		local blobArea = #blob
+		blob = nil
+		blobs[id] = nil
+		if blobArea < maxSpotArea then
+			local sx = x * elmosPerMetal
+			local sz = z * elmosPerMetal
+			spots[#spots+1] = {x=sx, z=sz, y=spGetGroundHeight(sx,sz)}
+		else
+			x = mCeil(x)
+			z = mCeil(z)
+			CirclePack(x, z, id)
+			local blobSpots = spotsInBlob[id]
+			Spring.Echo(#blobSpots, "spots in blob", id)
+			for i = 1, #blobSpots do
+				local spot = blobSpots[i]
+				spots[#spots+1] = spot
 			end
-			g.minX = gMinX
-			g.maxX = gMaxX
-			
-			g.x = (gMinX + gMaxX) * 0.5
-			g.z = (g.minZ + g.maxZ) * 0.5
-			g.y = spGetGroundHeight(g.x, g.z)
-			
-			spots[#spots + 1] = g
-
+			spotsInBlob[id] = nil
 		end
 	end
+	-- for i = 1, #spots do
+	-- 	local spot = spots[i]
+	-- 	if not spot.y then
+	-- 		Spring.MarkerAddPoint(spot.x, spGetGroundHeight(spot.x, spot.z), spot.z, "bad")
+	-- 	end
+	-- end
 	return spots
 end
 
-function GetValidStrips(spot)
-	
-	local sMinZ, sMaxZ = spot.minZ, spot.maxZ
-	local sLeft, sRight = spot.left, spot.right
-	
-	local validLeft = {}
-	local validRight = {}
-	
-	local maxZOffset = buildGridSize * ceil(extractorRadius / buildGridSize - 1)
-	for mz = max(sMaxZ - maxZOffset, buildmapStartZ), min(sMinZ + maxZOffset, buildmapSizeZ), buildGridSize do
-		local vLeft, vRight = buildmapStartX, buildmapSizeX
-		for sz = sMinZ, sMaxZ, gridSize do
-			local dz = sz - mz
-			local maxXOffset = buildGridSize * ceil(sqrt(extractorRadiusSqr - dz * dz) / buildGridSize - 1) -- Test for metal being included is dist < extractorRadius
-			local left, right = sRight[sz] - maxXOffset, sLeft[sz] + maxXOffset
-			if left  > vLeft  then vLeft  = left  end
-			if right < vRight then vRight = right end
-		end
-		validLeft[mz] = vLeft
-		validRight[mz] = vRight
-	end
-	
-	spot.validLeft = validLeft
-	spot.validRight = validRight
-end
+local spots = GetSpots()
 
-local metal = {}
-
-metal.spots = GetSpots()
-metal.GetMexPositions = GetMexPositions
-metal.IsMexPositionValid = IsMexPositionValid
-
-return metal
+return spots
