@@ -1,5 +1,6 @@
 local map = {}
 map.spots = shard_include("spring_lua/metal")
+map.buildsite = CreateBuildsiteFinder(ai.id)
 
 	-- function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
 	-- function map:CanBuildHere(unittype,position)

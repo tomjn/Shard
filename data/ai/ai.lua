@@ -164,5 +164,3 @@ if ShardSpringLua then
 else
 	ai = AI()
 end
-
-
