@@ -5,15 +5,14 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("WardBehaviour: " .. inStr)
+		game:SendToConsole("WardBehaviour: ", inStr)
 	end
 end
 
 WardBehaviour = class(Behaviour)
 
 function WardBehaviour:Init()
-	self.active = false
-	self.underFire = false
+	self.minFleeDistance = 500
 	self.lastAttackedFrame = game:Frame()
 	self.initialLocation = self.unit:Internal():GetPosition()
 	self.name = self.unit:Internal():Name()
@@ -28,7 +27,7 @@ function WardBehaviour:Init()
 	elseif self.isScout then
 		self.threshold = 1
 	elseif self.mobile then
-		self.threshold = 1.5
+		self.threshold = 0.5
 	end
 	-- any threat whatsoever will trigger for buildings
 	EchoDebug("WardBehaviour: added to unit "..self.name)
@@ -68,6 +67,7 @@ function WardBehaviour:Update()
 			self.underFire = false
 		end
 	else
+		self.withinTurtle = false
 		if f % 30 == 0 then
 			-- run away preemptively from positions within range of enemy weapons, and notify defenders that the unit is in danger
 			local unit = self.unit:Internal()
@@ -80,45 +80,44 @@ function WardBehaviour:Update()
 			if safe then
 				self.underFire = false
 				self.response = nil
-				self.unit:ElectBehaviour()
 			else
 				EchoDebug(self.name .. " is not safe")
 				self.underFire = true
 				self.response = response
 				self.lastAttackedFrame = game:Frame()
 				if not self.mobile then ai.defendhandler:Danger(self) end
-				self.unit:ElectBehaviour()
 			end
 			if self.mobile then self.withinTurtle = ai.turtlehandler:SafeWithinTurtle(position, self.name) end
+			self.unit:ElectBehaviour()
 		end
 	end
 end
 
 function WardBehaviour:Activate()
-	EchoDebug("WardBehaviour: activated on unit "..self.name)
+	EchoDebug("activated on unit "..self.name)
 
 	-- can we move at all?
 	if self.mobile then
 		-- run to the most defended base location
-		local salvation = ai.turtlehandler:MostTurtled(self.unit:Internal(), nil, nil, true)
-		if salvation == nil then
-			-- if no turtle, find the nearest combat unit
-			salvation = self:NearestCombat()
+		local salvation = self.ai.turtlehandler:MostTurtled(self.unit:Internal(), nil, nil, true) or self:NearestCombat()
+		EchoDebug(tostring(salvation), "salvation")
+		if salvation and Distance(self.unit:Internal():GetPosition(), salvation) > self.minFleeDistance then
+			self.unit:Internal():Move(RandomAway(salvation,150))
+			self.noSalvation = false
+			self.active = true
+			EchoDebug("unit ".. self.name .." runs away from danger")
+		else
+			-- we're already as safe as we can get
+			EchoDebug("no salvation for", self.name)
+			self.noSalvation = true
+			self.unit:ElectBehaviour()
 		end
-		if salvation == nil then
-			-- if none found, just go to where we were built
-			salvation = self.initialLocation
-		end
-		self.unit:Internal():Move(RandomAway(salvation,150))
-
-		self.active = true
-		EchoDebug("WardBehaviour: unit ".. self.name .." runs away from danger")
 	end
 end
 
 function WardBehaviour:NearestCombat()
 	local best
-	local ownUnits = game:GetFriendlies()
+	local ownUnits = self.game:GetFriendlies()
 	local fleeing = self.unit:Internal()
 	local fn = fleeing:Name()
 	local fid = fleeing:ID()
@@ -127,7 +126,7 @@ function WardBehaviour:NearestCombat()
 	for i,unit in pairs(ownUnits) do
 		local un = unit:Name()
 		if unit:ID() ~= fid and un ~= "corcom" and un ~= "armcom" and not ai.defendhandler:IsDefendingMe(unit, self) then
-			if unitTable[un].isWeapon and (battleList[un] or breakthroughList[un]) and unitTable[un].metalCost > unitTable[fn].metalCost * 1.5 then
+			if unitTable[un].isWeapon and (battleList[un] or breakthroughList[un]) then
 				local upos = unit:GetPosition()
 				if ai.targethandler:IsSafePosition(upos, fleeing) and unit:GetHealth() > unit:GetMaxHealth() * 0.9 and ai.maphandler:UnitCanGetToUnit(fleeing, unit) and not unit:IsBeingBuilt() then
 					local dist = Distance(fpos, upos) - unitTable[un].metalCost
@@ -139,6 +138,7 @@ function WardBehaviour:NearestCombat()
 			end
 		end
 	end
+	if best then EchoDebug("got NearestCombat for ", fn, bestDistance, "away") end
 	return best
 end
 
@@ -149,7 +149,7 @@ function WardBehaviour:Deactivate()
 end
 
 function WardBehaviour:Priority()
-	if self.underFire and self.mobile then
+	if self.underFire and self.mobile and not self.withinTurtle and not self.noSalvation then
 		return 110
 	else
 		return 0
