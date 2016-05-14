@@ -546,6 +546,7 @@ function TaskQueueBehaviour:BestFactory()
 								else
 									numberOfSpots = #ai.scoutSpots[mtype][network]
 								end
+								EchoDebug(numberOfSpots .. " spots for " .. factoryName)
 								if numberOfSpots > 5 then
 									local dist = Distance(builderPos, p)
 									local spotPercentage = numberOfSpots / #ai.scoutSpots["air"][1]
@@ -657,6 +658,7 @@ function TaskQueueBehaviour:Update()
 			local tmpProjectName = self.currentProject or "empty project"
 			if self.currentProject ~= nil then
 				EchoDebug("Watchdog: "..tmpOwnName.." abandoning "..tmpProjectName)
+				EchoDebug("last watchdog check: "..self.lastWatchdogCheck .. ", watchdog timeout:"..self.watchdogTimeout)
 			end
 			self:ProgressQueue()
 			return

@@ -13,7 +13,7 @@ local debugSquares = {}
 -- local debugPlotFile
 
 -- mobTypes = {}
-local mobUnitType = {}
+local mobUnitTypes = {}
 local UWMetalSpotCheckUnitType
 
 local mobMap = {}
@@ -187,34 +187,32 @@ local function MapMobility()
 	local half = ai.mobilityGridSizeHalf
 	local pos = api.Position()
 	pos.y = 0
-	for mtype, utype in pairs(mobUnitType) do
+	for mtype, utypes in pairs(mobUnitTypes) do
 		mobMap[mtype] = {}
 		mobCount[mtype] = 0
 	end
 	for x = 1, maxX do
-		for mtype, utype in pairs(mobUnitType) do
+		for mtype, utypes in pairs(mobUnitTypes) do
 			mobMap[mtype][x] = {}
 		end
 		for z = 1, maxZ do
 			-- all blocked unless unblocked below
-			for mtype, utype in pairs(mobUnitType) do
+			for mtype, utypes in pairs(mobUnitTypes) do
 				mobMap[mtype][x][z] = 1
 			end
 			pos.x = (x * ai.mobilityGridSize) - half
 			pos.z = (z * ai.mobilityGridSize) - half
 			-- find out if each mobility type can exist there
-			for mtype, utype in pairs(mobUnitType) do
+			for mtype, utypes in pairs(mobUnitTypes) do
 				local canbuild = false
 				if ShardSpringLua then
 					local uname = mobUnitExampleName[mtype]
 					local uDef = UnitDefNames[uname]
 					canbuild = Spring.TestMoveOrder(uDef.id, pos.x, Spring.GetGroundHeight(pos.x,pos.z), pos.z)
 				else
-					if mtype == "hov" then
-						-- hovers don't build on water for some reason, so use some logic with other unit types to figure it out
-						canbuild = game.map:CanBuildHere(mobUnitType["hov"], pos) or game.map:CanBuildHere(game:GetTypeByName(WaterSurfaceUnitName), pos)
-					else
-						canbuild = game.map:CanBuildHere(mobUnitType[mtype], pos)
+					for _, utype in pairs(utypes) do
+						canbuild = game.map:CanBuildHere(utype, pos)
+						if canbuild then break end
 					end
 				end
 				if canbuild then
@@ -231,12 +229,12 @@ end
 
 local function InitializeTopology()
 	ai.topology = {}
-	for mtype, utype in pairs(mobUnitType) do
+	for mtype, utypes in pairs(mobUnitTypes) do
 		ai.topology[mtype] = {}
 	end
 	ai.topology["air"] = {}
 	for x = 1, ai.mobilityGridMaxX do
-		for mtype, utype in pairs(mobUnitType) do
+		for mtype, utypes in pairs(mobUnitTypes) do
 			ai.topology[mtype][x] = {}
 		end
 		ai.topology["air"][x] = {}
@@ -259,7 +257,7 @@ local function MapSpotMobility(metals, geos)
 	local mobSpots = {}
 	local mobNetworks = {}
 	local mobNetworkCount = {}
-	for mtype, utype in pairs(mobUnitType) do
+	for mtype, utypes in pairs(mobUnitTypes) do
 		mobSpots[mtype] = {}
 		mobNetworkMetals[mtype] = {}
 		mobNetworkCount[mtype] = {}
@@ -287,7 +285,7 @@ local function MapSpotMobility(metals, geos)
 			end
 			local x = math.ceil(spot.x / ai.mobilityGridSize)
 			local z = math.ceil(spot.z / ai.mobilityGridSize)
-			for mtype, utype in pairs(mobUnitType) do
+			for mtype, utypes in pairs(mobUnitTypes) do
 				if mobMap and mobMap[mtype] and mobMap[mtype][x] and mobMap[mtype][x][z] == 0 then
 					local thisNetwork
 					if ai.topology[mtype][x][z] == nil then
@@ -489,8 +487,11 @@ function MapHandler:Init()
 
 	ai.mobilityGridSize = 256 -- will be recalculated by MapMobility()
 
-	for mtype, uname in pairs(mobUnitName) do
-		mobUnitType[mtype] = game:GetTypeByName(uname)
+	for mtype, unames in pairs(mobUnitNames) do
+		mobUnitTypes[mtype] = {}
+		for i, uname in pairs(unames) do
+			mobUnitTypes[mtype][i] = game:GetTypeByName(uname)
+		end
 	end
 	UWMetalSpotCheckUnitType = game:GetTypeByName(UWMetalSpotCheckUnit)
 
@@ -551,7 +552,7 @@ function MapHandler:Init()
 		EchoDebug(mtype .. " spots: " .. #mspots)
 	end
 	-- EchoDebug(" spots sub:" .. #mobSpots["sub"] .. " bot:" .. #mobSpots["bot"] .. " veh:" .. #mobSpots["veh"])
-	for mtype, utype in pairs(mobUnitType) do
+	for mtype, utypes in pairs(mobUnitTypes) do
 		EchoDebug(mtype .. "  networks: " .. mobNetworks[mtype])
 		for n, count in pairs(mobNetworkCount[mtype]) do
 			EchoDebug("network #" .. n .. " has " .. count .. " spots and " .. ai.networkSize[mtype][n] .. " grids")
