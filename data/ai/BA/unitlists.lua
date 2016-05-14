@@ -546,15 +546,18 @@ FactoryUnitName = "buildfactory"
 -- this unit is used to check for underwater metal spots
 UWMetalSpotCheckUnit = "coruwmex"
 
-mobUnitName = {}
-mobUnitName["veh"] = "armllt" -- this looks wrong, but it gives us a better picture of where vehicles can go
-mobUnitName["bot"] = "armeyes" --"corck"
-mobUnitName["amp"] = "cormuskrat"
-mobUnitName["hov"] = "corsh"
-mobUnitName["shp"] = "corcs"
-mobUnitName["sub"] = "coracsub"
+-- for non-lua only; tests build orders of these units to determine mobility there
+-- multiple units for one mtype function as OR
+mobUnitNames = {
+	veh = {"corcv", "armllt"},
+	bot = {"corck", "armeyes"},
+	amp = {"cormuskrat"},
+	hov = {"corsh", "armfdrag"},
+	shp = {"corcs"},
+	sub = {"coracsub"},
+}
 
--- for ShardSpringLua only
+-- for ShardSpringLua only; tests move orders of these units to determine mobility there
 mobUnitExampleName = {
 	veh = "armcv",
 	bot = "armck",
@@ -563,9 +566,6 @@ mobUnitExampleName = {
 	shp = "armcs",
 	sub = "armacsub"
 }
-
--- this unit is used to check for hoverable water
-WaterSurfaceUnitName = "armfdrag"
 
 -- side names
 CORESideName = "core"

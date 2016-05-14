@@ -22,6 +22,7 @@ local game = {}
 	end
 
 	function game:GetTypeByName(typename) -- returns unittype
+		if not UnitDefNames[typename] then return end
 		return Shard:shardify_unittype(UnitDefNames[typename].id)
 	end
 

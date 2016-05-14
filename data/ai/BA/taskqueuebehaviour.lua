@@ -443,8 +443,12 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 				end
 			end
 		end
-		if p and Distance(p, builder:GetPosition()) > 500 then
-			p = ai.buildsitehandler:ClosestBuildSpot(builder, builder:GetPosition(), utype)
+		if p and Distance(p, builder:GetPosition()) > 300 then
+			-- HERE BECAUSE DEFENSE PLACEMENT SYSTEM SUCKS
+			-- this prevents cons from wasting time building defenses very far away
+			-- a better solution is needed
+			utype = nil
+			-- p = ai.buildsitehandler:ClosestBuildSpot(builder, builder:GetPosition(), utype)
 		end
 		if p == nil then
 			EchoDebug("did NOT find build spot near turtle position")
@@ -546,6 +550,7 @@ function TaskQueueBehaviour:BestFactory()
 								else
 									numberOfSpots = #ai.scoutSpots[mtype][network]
 								end
+								EchoDebug(numberOfSpots .. " spots for " .. factoryName)
 								if numberOfSpots > 5 then
 									local dist = Distance(builderPos, p)
 									local spotPercentage = numberOfSpots / #ai.scoutSpots["air"][1]
@@ -657,6 +662,7 @@ function TaskQueueBehaviour:Update()
 			local tmpProjectName = self.currentProject or "empty project"
 			if self.currentProject ~= nil then
 				EchoDebug("Watchdog: "..tmpOwnName.." abandoning "..tmpProjectName)
+				EchoDebug("last watchdog check: "..self.lastWatchdogCheck .. ", watchdog timeout:"..self.watchdogTimeout)
 			end
 			self:ProgressQueue()
 			return
