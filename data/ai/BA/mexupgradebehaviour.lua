@@ -45,7 +45,7 @@ function MexUpgradeBehaviour:UnitIdle(unit)
 					mohoName = "armmoho"
 				end
 				-- maybe we're underwater?
-				tmpType = game:GetTypeByName("comuwmme")
+				tmpType = game:GetTypeByName("coruwmme")
 				if builder:CanBuild(tmpType) then
 					mohoName = "coruwmme"
 				end
