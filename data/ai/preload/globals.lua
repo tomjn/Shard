@@ -48,7 +48,6 @@ if ShardSpringLua then
 	shard_include "spring_lua/unittype"
 	shard_include "spring_lua/damage"
 	shard_include "spring_lua/feature"
-	shard_include "spring_lua/buildsite"
 else
 	shard_include "spring_native/unit"
 	shard_include "spring_lua/unittype"
