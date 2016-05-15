@@ -7,7 +7,6 @@ local AI = class(AIBase)
 function AI:Init()
 	ai = self
 	self.api = shard_include("preload/api")
-	-- self.api.map.buildsite = CreateBuildsiteFinder(self.id)
 	self.game = self.api.game
 	self.map = self.api.map
 	self.game.ai = self

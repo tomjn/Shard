@@ -1,6 +1,5 @@
 local map = {}
 map.spots = shard_include("spring_lua/metal")
-map.buildsite = CreateBuildsiteFinder(ai.id)
 
 	-- function map:FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
 	-- function map:CanBuildHere(unittype,position)
@@ -44,10 +43,7 @@ function map:FindClosestBuildSite(unittype, builderpos, searchradius, minimumdis
 			end
 		end 
 	end
-	-- local x, y, z, facing = self.buildsite.FindBuildsite(builderpos, unittype:ID(), true, searchradius, minimumdistance)
-	-- if x then return {x=x, y=y, z=z}, facing end
 	return builderpos
-	-- return game_engine:Map():FindClosestBuildSite(unittype,builderpos, searchradius, minimumdistance)
 end
 
 function map:CanBuildHere(unittype,position) -- returns boolean
