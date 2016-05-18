@@ -322,10 +322,10 @@ function TaskQueueBehaviour:GetHelp(value, position)
 	if Eco1[value] then
 		return value
 	end
-	if Eco2[value] then
-		local hashelp = ai.assisthandler:PersistantSummon(builder, position, math.ceil(unitTable[value].buildTime/10000), 0)
-		return value
-	end
+	-- if Eco2[value] then
+	-- 	local hashelp = ai.assisthandler:PersistantSummon(builder, position, math.ceil(unitTable[value].buildTime/10000), 0)
+	-- 	return value
+	-- end
 	if helpList[value] then
 		local hashelp = ai.assisthandler:PersistantSummon(builder, position, helpList[value], 1)
 		if hashelp then

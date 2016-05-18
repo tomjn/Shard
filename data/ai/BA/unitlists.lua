@@ -532,85 +532,85 @@ seaplaneConList = {
 
 
 Eco1={
-armsolar=1,
-armwin=1,
-armadvsol=1,
-armtide=1,
+	armsolar=1,
+	armwin=1,
+	armadvsol=1,
+	armtide=1,
 
-corsolar=1,
-corwin=1,
-coradvsol=1,
-cortide=1,
+	corsolar=1,
+	corwin=1,
+	coradvsol=1,
+	cortide=1,
 
-corgeo=1,
-armgeo=1,
+	corgeo=1,
+	armgeo=1,
 
---store
+	--store
 
-armestor=1,
-armmstor=1,
-armuwes=1,
-armuwms=1,
+	armestor=1,
+	armmstor=1,
+	armuwes=1,
+	armuwms=1,
 
-corestor=1,
-cormstor=1,
-coruwes=1,
-coruwms=1,
+	corestor=1,
+	cormstor=1,
+	coruwes=1,
+	coruwms=1,
 
---conv
-armmakr=1,
-cormakr=1,
-armfmkr=1,
-corfmkr=1,
+	--conv
+	armmakr=1,
+	cormakr=1,
+	armfmkr=1,
+	corfmkr=1,
 
 
---metalli
-corexp=1,
-armamex=1,
+	--metalli
+	corexp=1,
+	armamex=1,
 
-cormex=1,
-armmex=1,
+	cormex=1,
+	armmex=1,
 
-armuwmex=1,
-coruwmex=1,
+	armuwmex=1,
+	coruwmex=1,
 
-armnanotc=1,
-cornanotc=1,
+	armnanotc=1,
+	cornanotc=1,
 }
 
 Eco2={
---metalli
-armmoho=1,
-cormoho=1,
-cormexp=1,
+	--metalli
+	armmoho=1,
+	cormoho=1,
+	cormexp=1,
 
-coruwmme=1,
-armuwmme=1,
+	coruwmme=1,
+	armuwmme=1,
 
---magazzini 
-armuwadves=1,
-armuwadvms=1,
+	--magazzini 
+	armuwadves=1,
+	armuwadvms=1,
 
-coruwadves=1,
-coruwadvms=1,
+	coruwadves=1,
+	coruwadvms=1,
 
-cmgeo = 1,
-amgeo = 1,
-corbhmth =1,
-armgmm =1,
+	cmgeo = 1,
+	amgeo = 1,
+	corbhmth =1,
+	armgmm =1,
 
-corfus = 1,
-armfus = 1,
-cafus = 1,
-aafus = 1,
-armuwfus = 1,
-coruwfus = 1,
+	corfus = 1,
+	armfus = 1,
+	cafus = 1,
+	aafus = 1,
+	armuwfus = 1,
+	coruwfus = 1,
 
---convertitori
-cormmkr=1,
-armmmkr=1,
-corfmmm=1,
-armfmmm=1,
+	--convertitori
+	cormmkr=1,
+	armmmkr=1,
+	corfmmm=1,
+	armfmmm=1,
 }
 
 
