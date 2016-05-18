@@ -40,6 +40,9 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 	EchoDebug(value .. " (before econ filter)")
 	-- EchoDebug("ai.Energy: " .. ai.Energy.reserves .. " " .. ai.Energy.capacity .. " " .. ai.Energy.income .. " " .. ai.Energy.usage)
 	-- EchoDebug("ai.Metal: " .. ai.Metal.reserves .. " " .. ai.Metal.capacity .. " " .. ai.Metal.income .. " " .. ai.Metal.usage)
+	if Eco1[value] or Eco2[value] then
+		return value
+	end
 	if nanoTurretList[value] then
 		-- nano turret
 		EchoDebug(" nano turret")
@@ -316,6 +319,13 @@ function TaskQueueBehaviour:GetHelp(value, position)
 	if value == DummyUnitName then return DummyUnitName end
 	EchoDebug(value .. " before getting help")
 	local builder = self.unit:Internal()
+	if Eco1[value] then
+		return value
+	end
+	if Eco2[value] then
+		local hashelp = ai.assisthandler:PersistantSummon(builder, position, math.ceil(unitTable[value].buildTime/10000), 0)
+		return value
+	end
 	if helpList[value] then
 		local hashelp = ai.assisthandler:PersistantSummon(builder, position, helpList[value], 1)
 		if hashelp then

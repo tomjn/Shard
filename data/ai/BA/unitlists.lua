@@ -1,3 +1,5 @@
+shard_include("unittable")
+
 local DebugEnabled = false
 
 local function EchoDebug(inStr)
@@ -33,6 +35,8 @@ factoryMobilities = {
 	asubpen = {"sub", "amp"},
 	corgant = {"bot"},
 	armshltx = {"bot"},
+	corgantuw = {"bot"},
+	armshltxuw = {"bot"},
 }
 
 -- for calculating what factories to build
@@ -86,6 +90,8 @@ factoryExitSides = {
 	asubpen = 4,
 	corgant = 1,
 	armshltx = 1,
+	corgantuw = 1,
+	armshltxuw = 1,
 }
 
 littlePlasmaList = {
@@ -122,6 +128,9 @@ mexUpgrade = {
 	armmex = "armmoho",
 	coruwmex = "coruwmme",
 	armuwmex = "armuwmme",
+	armamex = "armmoho",
+	corexp = "cormexp",
+	
 }
 
 -- these will be abandoned faster
@@ -159,8 +168,8 @@ turtleList = {
 	armfmkr = 0.5,
 	cormmkr = 4,
 	armmmkr = 4,
-	coruwmmm = 4,
-	armuwmmm = 4,
+	corfmmm = 4,
+	armfmmm = 4,
 	corestor = 0.5,
 	armestor = 0.5,
 	cormstor = 0.5,
@@ -193,6 +202,8 @@ advFactories = {
 expFactories = {
 	corgant = 1,
 	armshltx = 1,
+	corgantuw = 1,
+	armshltxuw = 1,
 }
 
 -- leads to experimental
@@ -201,6 +212,10 @@ leadsToExpFactories = {
 	armlab = 1,
 	coralab = 1,
 	armalab = 1,
+	corsy = 1,
+	armsy = 1,
+	corasy = 1,
+	armasy = 1,
 }
 
 -- sturdy, cheap units to be built in larger numbers than siege units
@@ -514,6 +529,90 @@ seaplaneConList = {
 	corcsa = 1,
 	armcsa = 1,
 }
+
+
+Eco1={
+armsolar=1,
+armwin=1,
+armadvsol=1,
+armtide=1,
+
+corsolar=1,
+corwin=1,
+coradvsol=1,
+cortide=1,
+
+corgeo=1,
+armgeo=1,
+
+--store
+
+armestor=1,
+armmstor=1,
+armuwes=1,
+armuwms=1,
+
+corestor=1,
+cormstor=1,
+coruwes=1,
+coruwms=1,
+
+--conv
+armmakr=1,
+cormakr=1,
+armfmkr=1,
+corfmkr=1,
+
+
+--metalli
+corexp=1,
+armamex=1,
+
+cormex=1,
+armmex=1,
+
+armuwmex=1,
+coruwmex=1,
+
+armnanotc=1,
+cornanotc=1,
+}
+
+Eco2={
+--metalli
+armmoho=1,
+cormoho=1,
+cormexp=1,
+
+coruwmme=1,
+armuwmme=1,
+
+--magazzini 
+armuwadves=1,
+armuwadvms=1,
+
+coruwadves=1,
+coruwadvms=1,
+
+cmgeo = 1,
+amgeo = 1,
+corbhmth =1,
+armgmm =1,
+
+corfus = 1,
+armfus = 1,
+cafus = 1,
+aafus = 1,
+armuwfus = 1,
+coruwfus = 1,
+
+--convertitori
+cormmkr=1,
+armmmkr=1,
+corfmmm=1,
+armfmmm=1,
+}
+
 
 -- minimum, maximum, starting point units required to attack, bomb
 minAttackCounter = 8

@@ -2,8 +2,14 @@
  Task Queues!
 ]]--
 
-shard_include "common"
-
+shard_include("common")
+shard_include("taskAir")
+shard_include("taskBot")
+shard_include("taskVeh")
+shard_include("taskShp")
+shard_include("taskHov")
+shard_include("taskBuild")
+shard_include("taskEco")
 
 local DebugEnabled = false
 
@@ -12,46 +18,45 @@ local function EchoDebug(inStr)
 		game:SendToConsole("Taskqueues: " .. inStr)
 	end
 end
-
-local random = math.random
+random = math.random
 math.randomseed( os.time() + game:GetTeamID() )
 random(); random(); random()
 
-local needAA = false
-local needShields = false
-local needAntinuke = false
-local needtorpedo = false
-local needGroundDefense = true
+needAA = false
+needShields = false
+needAntinuke = false
+needtorpedo = false
+needGroundDefense = true
 
 -- do we need siege equipment such as artillery and merl?
-local needSiege = false
+needSiege = false
 
-local heavyPlasmaLimit = 3 -- changes with CheckForMapControl
-local AAUnitPerTypeLimit = 3 -- changes with CheckForMapControl
-local nukeLimit = 1 -- changes with CheckForMapControl
-local tacticalNukeLimit = 1 -- changes with CheckForMapControl
+heavyPlasmaLimit = 3 -- changes with CheckForMapControl
+AAUnitPerTypeLimit = 3 -- changes with CheckForMapControl
+nukeLimit = 1 -- changes with CheckForMapControl
+tacticalNukeLimit = 1 -- changes with CheckForMapControl
 
-local lastCheckFrame = 0
-local lastSiegeCheckFrame = 0
+lastCheckFrame = 0
+lastSiegeCheckFrame = 0
 
 -- build ranges to check for things
-local AreaCheckRange = 1500
+AreaCheckRange = 1500
 
-local tidalPower = 0
+tidalPower = 0
 
-local averageWind = 0
-local needWind = false
-local windRatio = 1
+averageWind = 0
+needWind = false
+windRatio = 1
 
-local needAmphibiousCons = false
+needAmphibiousCons = false
 
-local minDefenseNetworkSize = 100000
+minDefenseNetworkSize = 100000
 
-local function MapHasWater()
+function MapHasWater()
 	return (ai.waterMap or ai.hasUWSpots) or false
 end
 
-local function CheckMySide(self)
+function CheckMySide(self)
 	-- fix: moved here so map object is present when it's accessed
 	ConUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)
 	ConUnitAdvPerTypeLimit = math.max(map:SpotCount() / 8, 2)
@@ -102,7 +107,7 @@ local function CheckMySide(self)
 end
 
 -- this is initialized in maphandler
-local function MapHasUnderwaterMetal()
+function MapHasUnderwaterMetal()
 	return ai.hasUWSpots or false
 end
 
@@ -200,192 +205,6 @@ function IsWaterAttackNeeded()
 	return ai.areWaterTargets or ai.needSubmergedDefense
 end
 
-function BuildMex()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "cormex"
-	else
-		unitName = "armmex"
-	end
-	return unitName
-end
-
-function BuildUWMex()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "coruwmex"
-	else
-		unitName = "armuwmex"
-	end
-	return unitName
-end
-
-function BuildMohoMex()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "cormoho"
-	else
-		unitName = "armmoho"
-	end
-	return unitName
-end
-
-function BuildUWMohoMex()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "coruwmme"
-	else
-		unitName = "armuwmme"
-	end
-	return unitName
-end
-
-function BuildWindSolarIfNeeded()
-	-- check if we need power
-	if ai.Energy.extra < 0 then
-		retVal = WindSolar
-		EchoDebug("BuildWindSolarIfNeeded: income "..res.income..", usage "..res.usage..", building more energy")
-	else
-		retVal = DummyUnitName
-	end
-
-	return retVal
-end
-
-function TidalIfTidal(self)
-	local unitName = DummyUnitName
-	EchoDebug("tidal power is " .. tidalPower)
-	if tidalPower >= 10 then
-		if ai.mySide == CORESideName then
-			unitName = "cortide"
-		else
-			unitName = "armtide"
-		end
-	end
-	return unitName
-end
-
--- build conversion or storage
-function DoSomethingForTheEconomy(self)
-	local highEnergy = ai.Energy.full > 0.9
-	local lowEnergy = ai.Energy.full < 0.1
-	local highMetal = ai.Metal.full > 0.9
-	local lowMetal = ai.Metal.full < 0.1
-	local isWater = unitTable[self.unit:Internal():Name()].needsWater
-	local unitName = DummyUnitName
-	-- maybe we need conversion?
-	if ai.Energy.extra > 80 and highEnergy and lowMetal and ai.Metal.extra < 0 and ai.Energy.income > 300 then
-		local converterLimit = math.min(math.floor(ai.Energy.income / 200), 4)
-		if isWater then
-			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("corfmkr", converterLimit)
-			else
-				unitName = BuildWithLimitedNumber("armfmkr", converterLimit)
-			end		
-		else
-			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("cormakr", converterLimit)
-			else
-				unitName = BuildWithLimitedNumber("armmakr", converterLimit)
-			end
-		end
-	end
-	-- maybe we need storage?
-	if unitName == DummyUnitName then
-		-- energy storage
-		if ai.Energy.extra > 150 and highEnergy and not lowMetal then
-			if isWater then
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("coruwes", 2)
-				else
-					unitName = BuildWithLimitedNumber("armuwes", 2)
-				end	
-			else
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("corestor", 2)
-				else
-					unitName = BuildWithLimitedNumber("armestor", 2)
-				end
-			end
-		end
-	end
-	if unitName == DummyUnitName then
-		-- metal storage
-		if ai.Metal.extra > 5 and highMetal and highEnergy then
-			if isWater then
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("coruwms", 2)
-				else
-					unitName = BuildWithLimitedNumber("armuwms", 2)
-				end	
-			else
-				if ai.mySide == CORESideName then
-					unitName = BuildWithLimitedNumber("cormstor", 2)
-				else
-					unitName = BuildWithLimitedNumber("armmstor", 2)
-				end
-			end
-		end
-	end
-
-	return unitName
-end
-
-
--- build advanced conversion or storage
-function DoSomethingAdvancedForTheEconomy(self)
-	local highEnergy = ai.Energy.full > 0.9
-	local lowEnergy = ai.Energy.full < 0.1
-	local highMetal = ai.Metal.full > 0.9
-	local lowMetal = ai.Metal.full < 0.1
-	local unitName = self.unit:Internal():Name()
-	local isWater = unitTable[unitName].needsWater or seaplaneConList[unitName]
-	local unitName = DummyUnitName
-	-- maybe we need conversion?
-	if ai.Energy.extra > 800 and highEnergy and lowMetal and ai.Metal.extra < 0 and ai.Energy.income > 2000 then
-		local converterLimit = math.floor(ai.Energy.income / 1000)
-		if isWater then
-			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("armuwmmm", converterLimit)
-			else
-				unitName = BuildWithLimitedNumber("armuwmmm", converterLimit)
-			end		
-		else
-			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("cormmkr", converterLimit)
-			else
-				unitName = BuildWithLimitedNumber("armmmkr", converterLimit)
-			end
-		end
-	end
-	-- building big storage is a waste
-	--[[
-	-- maybe we need storage?
-	if unitName == DummyUnitName then
-		-- energy storage
-		if ai.Energy.extra > 1500 and highEnergy and not lowMetal then
-			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("coruwadves", 1)
-			else
-				unitName = BuildWithLimitedNumber("armuwadves", 1)
-			end	
-		end
-	end
-	if unitName == DummyUnitName then
-		-- metal storage
-		if ai.Metal.extra > 25 and highMetal and highEnergy then
-			if ai.mySide == CORESideName then
-				unitName = BuildWithLimitedNumber("coruwadvms", 1)
-			else
-				unitName = BuildWithLimitedNumber("armuwadvms", 1)
-			end	
-		end
-	end
-	]]--
-
-	return unitName
-end
-
 function BuildAAIfNeeded(unitName)
 	if IsAANeeded() then
 		if not unitTable[unitName].isBuilding then
@@ -440,190 +259,6 @@ function BuildBreakthroughIfNeeded(unitName)
 	end
 end
 
-function Lvl1VehArty(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corwolv"
-	else
-		unitName = "tawf013"
-	end
-	return BuildSiegeIfNeeded(unitName)
-end
-
-function Lvl1BotBreakthrough(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corthud"
-	else
-		unitName = "armwar"
-	end
-	return BuildBreakthroughIfNeeded(unitName)
-end
-
-function Lvl1VehBreakthrough(self)
-	if ai.mySide == CORESideName then
-		return BuildBreakthroughIfNeeded("corlevlr")
-	else
-		-- armjanus isn't very a very good defense unit by itself
-		local output = BuildSiegeIfNeeded("armjanus")
-		if output == DummyUnitName then
-			output = BuildBreakthroughIfNeeded("armstump")
-		end
-		return output
-	end
-end
-
-function Lvl2VehBreakthrough(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		return BuildBreakthroughIfNeeded("corgol")
-	else
-		-- armmanni isn't very a very good defense unit by itself
-		local output = BuildSiegeIfNeeded("armmanni")
-		if output == DummyUnitName then
-			output = BuildBreakthroughIfNeeded("armbull")
-		end
-		return output
-	end
-end
-
-function Lvl2BotBreakthrough(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corsumo"
-	else
-		unitName = "armfboy"
-	end
-	return BuildBreakthroughIfNeeded(unitName)
-end
-
-function Lvl2BotArty(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "cormort"
-	else
-		unitName = "armfido"
-	end
-	return BuildSiegeIfNeeded(unitName)
-end
-
-function Lvl2BotMerl(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corhrk"
-	else
-		return DummyUnitName
-	end
-	return BuildSiegeIfNeeded(unitName)
-end
-
-function Lvl2VehArty(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "cormart"
-	else
-		unitName = "armmart"
-	end
-	return BuildSiegeIfNeeded(unitName)
-end
-
-function Lvl2VehMerl(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corvroc"
-	else
-		unitName = "armmerl"
-	end
-	return BuildSiegeIfNeeded(unitName)
-end
-
-function HoverMerl(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "cormh"
-	else
-		unitName = "armmh"
-	end
-	return BuildSiegeIfNeeded(unitName)
-end
-
-function Lvl2ShipBreakthrough(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corbats"
-	else
-		unitName = "armbats"
-	end
-	return BuildBreakthroughIfNeeded(unitName)
-end
-
-function Lvl2ShipMerl(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "cormship"
-	else
-		unitName = "armmship"
-	end
-	return BuildSiegeIfNeeded(unitName)
-end
-
-function MegaShip()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corblackhy"
-	else
-		unitName = "aseadragon"
-	end
-	return BuildBreakthroughIfNeeded(BuildWithLimitedNumber(unitName, 1))
-end
-
-function MegaAircraft()
-	if ai.mySide == CORESideName then
-		return BuildBreakthroughIfNeeded("corcrw")
-	else
-		return BuildBreakthroughIfNeeded("armcybr")
-	end
-end
-
-function Lvl3Merl(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "armraven"
-	else
-		unitName = DummyUnitName
-	end
-	return BuildSiegeIfNeeded(unitName)
-end
-
-function Lvl3Arty(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "shiva"
-	else
-		unitName = "armshock"
-	end
-	return BuildSiegeIfNeeded(unitName)
-end
-
-function Lvl3Breakthrough(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = BuildWithLimitedNumber("corkrog", 1)
-		if unitName == DummyUnitName then
-			unitName = BuildWithLimitedNumber("gorg", 2)
-		end
-		if unitName == DummyUnitName then
-			unitName = "corkarg"
-		end
-	else
-		unitName = BuildWithLimitedNumber("armbanth", 5)
-		if unitName == DummyUnitName then
-			unitName = "armraz"
-		end
-	end
-	return BuildBreakthroughIfNeeded(unitName)
-end
-
 function BuildRaiderIfNeeded(unitName)
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
 	local mtype = unitTable[unitName].mtype
@@ -642,130 +277,6 @@ function BuildRaiderIfNeeded(unitName)
 		unitName = DummyUnitName
 	end
 	return unitName
-end
-
-function Lvl1VehRaider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corgator"
-	else
-		unitName = "armflash"
-	end
-	return BuildRaiderIfNeeded(unitName)
-end
-
--- because core doesn't have a lvl2 vehicle raider or a lvl3 raider
-function Lvl1VehRaiderOutmoded(self)
-	if ai.mySide == CORESideName then
-		return BuildRaiderIfNeeded("corgator")
-	else
-		return DummyUnitName
-	end
-end
-
-
-function Lvl1BotRaider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corak"
-	else
-		unitName = "armpw"
-	end
-	return BuildRaiderIfNeeded(unitName)
-end
-
-function Lvl1ShipRaider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corsub"
-	else
-		unitName = "armsub"
-	end
-	return BuildRaiderIfNeeded(unitName)
-end
-
-function Lvl1AirRaider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "bladew"
-	else
-		unitName = "armkam"
-	end
-	return BuildRaiderIfNeeded(unitName)
-end
-
-function Lvl2VehRaider(self)
-	if ai.mySide == CORESideName then
-		return DummyUnitName
-	else
-		return BuildRaiderIfNeeded("armlatnk")
-	end
-end
-
-function Lvl2BotRaider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corpyro"
-	else
-		unitName = "armfast"
-	end
-	return BuildRaiderIfNeeded(unitName)
-end
-
-function Lvl2ShipRaider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corshark"
-	else
-		unitName = "armsubk"
-	end
-	return BuildRaiderIfNeeded(unitName)
-end
-
-function Lvl2AirRaider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corape"
-	else
-		-- spedical case: arm has an ubergunship
-		local raidCounter = ai.raidhandler:GetCounter("air")
-		if raidCounter < baseRaidCounter and raidCounter > minRaidCounter then
-			return "blade"
-		else
-			unitName = "armbrawl"
-		end
-	end
-	return BuildRaiderIfNeeded(unitName)
-end
-
-function HoverRaider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corsh"
-	else
-		unitName = "armsh"
-	end
-	return BuildRaiderIfNeeded(unitName)
-end
-
-function AmphibiousRaider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corgarp"
-	else
-		unitName = "armpincer"
-	end
-	return BuildRaiderIfNeeded(unitName)
-end
-
-function Lvl3Raider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = DummyUnitName
-	else
-		unitName = "marauder"
-	end
-	return BuildRaiderIfNeeded(unitName)
 end
 
 function BuildBattleIfNeeded(unitName)
@@ -803,179 +314,6 @@ function Lvl2BotCorRaiderArmArty(self)
 	end
 end
 
-function Lvl1VehBattle(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corraid"
-	else
-		unitName = "armstump"
-	end
-	return BuildBattleIfNeeded(unitName)
-end
-
-function Lvl1BotBattle(self)
-	local unitName = ""
-	local r = math.random(1, 2)
-	if r == 1 then
-		if ai.mySide == CORESideName then
-			unitName = "corthud"
-		else
-			unitName = "armham"
-		end
-	else
-		if ai.mySide == CORESideName then
-			unitName = "corstorm"
-		else
-			unitName = "armrock"
-		end
-	end
-	return BuildBattleIfNeeded(unitName)
-end
-
-function HoverBattle(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corsnap"
-	else
-		unitName = "armanac"
-	end
-	return BuildBattleIfNeeded(unitName)
-end
-
-function HoverBreakthrough(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "nsaclash"
-	else
-		unitName = "armanac"
-	end
-	BuildBreakthroughIfNeeded(unitName)
-end
-
-function AmphibiousBattle(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corseal"
-	else
-		unitName = "armcroc"
-	end
-	return BuildBattleIfNeeded(unitName)
-end
-
-function AmphibiousBreakthrough(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corparrow"
-	else
-		unitName = "armcroc"
-	end
-	BuildBreakthroughIfNeeded(unitName)
-end
-
-function Lvl1ShipDestroyerOnly(self)
-	if ai.combatCount > 12 then
-		if ai.mySide == CORESideName then
-			unitName = "corroy"
-		else
-			unitName = "armroy"
-		end
-		return BuildBattleIfNeeded(unitName)
-	end
-end
-
-function Lvl1ShipBattle(self)
-	local unitName = ""
-	local r = 1
-	if ai.combatCount > 12 then r = 2 end -- only build destroyers if you've already got quite a few units (combat = scouts + raiders + battle)
-	if r == 1 then
-		if ai.mySide == CORESideName then
-			unitName = "coresupp"
-		else
-			unitName = "decade"
-		end
-	else
-		if ai.mySide == CORESideName then
-			unitName = "corroy"
-		else
-			unitName = "armroy"
-		end
-	end
-	return BuildBattleIfNeeded(unitName)
-end
-
-function Lvl2VehBattle(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "correap"
-	else
-		unitName = "armbull"
-	end
-	return BuildBattleIfNeeded(unitName)
-end
-
-function Lvl2BotBattle(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corcan"
-	else
-		unitName = "armzeus"
-	end
-	return BuildBattleIfNeeded(unitName)
-end
-
-function Lvl2ShipBattle(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corcrus"
-	else
-		unitName = "armcrus"
-	end
-	return BuildBattleIfNeeded(unitName)
-end
-
-function Lvl3Battle(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corkarg"
-	else
-		unitName = "armraz"
-	end
-	return BuildBattleIfNeeded(unitName)
-end
-
-function WindSolar()
-	local wind = false
-	if needWind then
-		if windRatio == 1 then
-			wind = true
-		else
-			local r = math.random()
-			if r < windRatio then wind = true end
-		end
-	end
-	if wind then
-		if ai.mySide == CORESideName then
-			return "corwin"
-		else
-			return "armwin"
-		end
-	else
-		if ai.mySide == CORESideName then
-			return "corsolar"
-		else
-			return "armsolar"
-		end
-	end
-end
-
-function Solar()
-	if ai.mySide == CORESideName then
-		return "corsolar"
-	else
-		return "armsolar"
-	end
-end
-
 local function WindSolarTidal(self)
 	LandOrWater(self, WindSolar(), TidalIfTidal())
 end
@@ -1000,212 +338,8 @@ function BuildWithLimitedNumber(tmpUnitName, minNumber)
 	end
 end
 
-local function SolarAdv()
-	if ai.mySide == CORESideName then
-		return "coradvsol"
-	else
-		return "armadvsol"
-	end
-end
 
-local function BuildGeo()
-	-- don't attempt if there are no spots on the map
-	if not ai.mapHasGeothermal then
-		return DummyUnitName
-	end
-	if ai.mySide == CORESideName then
-		return "corgeo"
-	else
-		return "armgeo"
-	end
-end
-
-local function BuildMohoGeo(self)
-	-- don't attempt if there are no spots on the map
-	if not ai.mapHasGeothermal then
-		return DummyUnitName
-	end
-	if ai.mySide == CORESideName then
-		return "cmgeo"
-	else
-		return "amgeo"
-	end
-	-- will turn into a safe geothermal or a geothermal plasma battery if too close to a factory
-end
-
-local function BuildFusion()
-	if ai.mySide == CORESideName then
-		return "corfus"
-	else
-		return "armfus"
-	end
-	-- will become cafus and aafus in CategoryEconFilter in TaskQueueBehaviour if energy income is higher than 4000
-end
-
-local function BuildUWFusion()
-	if ai.mySide == CORESideName then
-		return "coruwfus"
-	else
-		return "armuwfus"
-	end
-end
-
-local function Lvl1AABot()
-	if ai.mySide == CORESideName then
-		return BuildAAIfNeeded("corcrash")
-	else
-		return BuildAAIfNeeded("armjeth")
-	end
-end
-
-local function Lvl2AABot()
-	if ai.mySide == CORESideName then
-		return BuildAAIfNeeded("coraak")
-	else
-		return BuildAAIfNeeded("armaak")
-	end
-end
-
-local function Lvl1AAVeh()
-	if ai.mySide == CORESideName then
-		return BuildAAIfNeeded("cormist")
-	else
-		return BuildAAIfNeeded("armsam")
-	end
-end
-
-local function Lvl2AAVeh()
-	if ai.mySide == CORESideName then
-		return BuildAAIfNeeded("corsent")
-	else
-		return BuildAAIfNeeded("armyork")
-	end
-end
-
-local function Lvl2AAShip()
-	if ai.mySide == CORESideName then
-		return BuildAAIfNeeded("corarch")
-	else
-		return BuildAAIfNeeded("armaas")
-	end
-end
-
-local function AAHover()
-	if ai.mySide == CORESideName then
-		return BuildAAIfNeeded("corah")
-	else
-		return BuildAAIfNeeded("armah")
-	end
-end
-
-local function ConVehicle()
-	local unitName
-	if needAmphibiousCons then
-		if ai.mySide == CORESideName then
-			unitName = "cormuskrat"
-		else
-			unitName = "armbeaver"
-		end
-	else
-		if ai.mySide == CORESideName then
-			unitName = "corcv"
-		else
-			unitName = "armcv"
-		end
-	end
-	return BuildWithLimitedNumber(unitName, ConUnitPerTypeLimit)
-end
-
-local function ConVehicleAmphibious()
-	if ai.mySide == CORESideName then
-		unitName = "cormuskrat"
-	else
-		unitName = "armbeaver"
-	end
-	return BuildWithLimitedNumber(unitName, ConUnitAdvPerTypeLimit)
-end
-
-local function ConAdvVehicle()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("coracv", ConUnitAdvPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armacv", ConUnitAdvPerTypeLimit)
-	end
-end
-
-local function ConBot()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("corck", ConUnitPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armck", ConUnitPerTypeLimit)
-	end
-end
-
-local function ConCoreBotArmVehicle()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("corck", ConUnitPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armcv", ConUnitPerTypeLimit)
-	end
-end
-
-local function ConAdvBot()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("corack", ConUnitAdvPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armack", ConUnitAdvPerTypeLimit)
-	end
-end
-
-local function ConAir()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("corca", ConUnitPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armca", ConUnitPerTypeLimit)
-	end
-end
-
-local function ConAdvAir()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("coraca", ConUnitAdvPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armaca", ConUnitAdvPerTypeLimit)
-	end
-end
-
-local function ConSeaAir()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("corcsa", ConUnitPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armcsa", ConUnitPerTypeLimit)
-	end
-end
-
-local function ConShip()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("corcs", ConUnitPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armcs", ConUnitPerTypeLimit)
-	end
-end
-
-local function ConAdvSub()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("coracsub", ConUnitAdvPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armacsub", ConUnitAdvPerTypeLimit)
-	end
-end
-
-local function ConHover()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("corch", ConUnitPerTypeLimit)
-	else
-		return BuildWithLimitedNumber("armch", ConUnitPerTypeLimit)
-	end
-end
-
-local function GroundDefenseIfNeeded(unitName, builder)
+function GroundDefenseIfNeeded(unitName, builder)
 	if not ai.needGroundDefense then
 		return DummyUnitName
 	else
@@ -1213,436 +347,9 @@ local function GroundDefenseIfNeeded(unitName, builder)
 	end
 end
 
-function BuildShield()
-	if IsShieldNeeded() then
-		local unitName = ""
-		if ai.mySide == CORESideName then
-			unitName = "corgate"
-		else
-			unitName = "armgate"
-		end
-		return unitName
-	end
-	return DummyUnitName
-end
-
-function BuildAntinuke()
-	if IsAntinukeNeeded() then
-		local unitName = ""
-		if ai.mySide == CORESideName then
-			unitName = "corfmd"
-		else
-			unitName = "armamd"
-		end
-		return unitName
-	end
-	return DummyUnitName
-end
-
-function BuildNuke()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corsilo"
-	else
-		unitName = "armsilo"
-	end
-	return BuildWithLimitedNumber(unitName, nukeLimit)
-end
-
-function BuildNukeIfNeeded()
-	if IsNukeNeeded() then
-		return BuildNuke()
-	end
-end
-
-function BuildTacticalNuke()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "cortron"
-	else
-		unitName = "armemp"
-	end
-	return BuildWithLimitedNumber(unitName, tacticalNukeLimit)
-end
-
-local function BuildLvl1Plasma()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corpun"
-	else
-		unitName = "armguard"
-	end
-	return unitName
-end
-
-local function BuildLvl2Plasma()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "cortoast"
-	else
-		unitName = "armamb"
-	end
-	return unitName
-end
-
-local function BuildHeavyPlasma()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corint"
-	else
-		unitName = "armbrtha"
-	end
-	return BuildWithLimitedNumber(unitName, heavyPlasmaLimit)
-end
-
-local function BuildLLT(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corllt"
-	else
-		unitName = "armllt"
-	end
-	local unit = self.unit:Internal()
-	return GroundDefenseIfNeeded(unitName, unit)
-end
-
-local function BuildSpecialLT(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if IsAANeeded() then
-		-- pop-up turrets are protected against bombs
-		if ai.mySide == CORESideName then
-			unitName = "cormaw"
-		else
-			unitName = "armclaw"
-		end
-	else
-		if ai.mySide == CORESideName then
-			unitName = "hllt"
-		else
-			unitName = "tawf001"
-		end
-	end
-	local unit = self.unit:Internal()
-	return GroundDefenseIfNeeded(unitName, unit)
-end
-
-local function BuildSpecialLTOnly(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "hllt"
-	else
-		unitName = "tawf001"
-	end
-	local unit = self.unit:Internal()
-	return GroundDefenseIfNeeded(unitName, unit)
-end
-
-local function BuildFloatHLT(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corfhlt"
-	else
-		unitName = "armfhlt"
-	end
-	local unit = self.unit:Internal()
-	return GroundDefenseIfNeeded(unitName, unit)
-end
-
-local function BuildHLT(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corhlt"
-	else
-		unitName = "armhlt"
-	end
-	local unit = self.unit:Internal()
-	return GroundDefenseIfNeeded(unitName, unit)
-end
-
-local function BuildLvl2PopUp(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corvipe"
-	else
-		unitName = "armamb"
-	end
-	local unit = self.unit:Internal()
-	return GroundDefenseIfNeeded(unitName, unit)
-end
-
-local function BuildTachyon(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "cordoom"
-	else
-		unitName = "armanni"
-	end
-	local unit = self.unit:Internal()
-	return GroundDefenseIfNeeded(unitName, unit)
-end
-
-local function BuildDepthCharge(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "cordl"
-	else
-		unitName = "armdl"
-	end
-	return BuildTorpedoIfNeeded(unitName)
-end
 
 
-local function BuildLightTorpedo(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "cortl"
-	else
-		unitName = "armtl"
-	end
-	return BuildTorpedoIfNeeded(unitName)
-end
-
-local function BuildPopTorpedo(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corptl"
-	else
-		unitName = "armptl"
-	end
-	return BuildTorpedoIfNeeded(unitName)
-end
-
-local function BuildHeavyTorpedo(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "coratl"
-	else
-		unitName = "armatl"
-	end
-	return BuildTorpedoIfNeeded(unitName)
-end
-
-
--- build AA in area only if there's not enough of it there already
-local function BuildLightAA(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = BuildAAIfNeeded("corrl")
-	else
-		unitName = BuildAAIfNeeded("armrl")
-	end
-	return unitName
-end
-
-local function BuildFloatLightAA(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = BuildAAIfNeeded("corfrt")
-	else
-		unitName = BuildAAIfNeeded("armfrt")
-	end
-	return unitName
-end
-
-local function BuildMediumAA(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = BuildAAIfNeeded("madsam")
-	else
-		unitName = BuildAAIfNeeded("packo")
-	end
-	return unitName
-end
-
-local function BuildHeavyishAA(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = BuildAAIfNeeded("corerad")
-	else
-		unitName = BuildAAIfNeeded("armcir")
-	end
-	return unitName
-end
-
-local function BuildHeavyAA(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = BuildAAIfNeeded("corflak")
-	else
-		unitName = BuildAAIfNeeded("armflak")
-	end
-	return unitName
-end
-
-local function BuildFloatHeavyAA(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = BuildAAIfNeeded("corenaa")
-	else
-		unitName = BuildAAIfNeeded("armfflak")
-	end
-	return unitName
-end
-
-local function BuildExtraHeavyAA(self)
-	if self.unit == nil then
-		return DummyUnitName
-	end
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = BuildAAIfNeeded("screamer")
-	else
-		unitName = BuildAAIfNeeded("mercury")
-	end
-	return unitName
-end
-
-local function BuildSonar()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corsonar"
-	else
-		unitName = "armsonar"
-	end
-	return unitName
-end
-
-local function BuildAdvancedSonar()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corason"
-	else
-		unitName = "armason"
-	end
-	return unitName
-end
-
-
-local function BuildRadar()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corrad"
-	else
-		unitName = "armrad"
-	end
-	return unitName
-end
-
-local function BuildFloatRadar()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corfrad"
-	else
-		unitName = "armfrad"
-	end
-	return unitName
-end
-
-local function BuildAdvancedRadar()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corarad"
-	else
-		unitName = "armarad"
-	end
-	return unitName
-end
-
-local function BuildLvl1Jammer()
-	if not IsJammerNeeded() then return DummyUnitName end
-	if ai.mySide == CORESideName then
-		return "corjamt"
-	else
-		return "armjamt"
-	end
-end
-
-local function BuildLvl2Jammer()
-	if not IsJammerNeeded() then return DummyUnitName end
-	if ai.mySide == CORESideName then
-		return "corshroud"
-	else
-		return "armveil"
-	end
-end
-
-local function NanoTurret()
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "cornanotc"
-	else
-		unitName = "armnanotc"
-	end
-	return BuildWithLimitedNumber(unitName, ai.factories * 12)
-end
-
-local function AirRepairPadIfNeeded()
-	local tmpUnitName = DummyUnitName
-
-	-- only make air pads if the team has at least 1 air fac
-	if CountOwnUnits("corap") > 0 or CountOwnUnits("armap") > 0 or CountOwnUnits("coraap") > 0 or CountOwnUnits("armaap") > 0 then
-		if ai.mySide == CORESideName then
-			tmpUnitName = "corasp"
-		else
-			tmpUnitName = "armasp"
-		end
-	end
-	
-	return BuildWithLimitedNumber(tmpUnitName, ConUnitPerTypeLimit)
-end
-
-local function corDebug(self)
+function corDebug(self)
 	game:SendToConsole("d")
 	return "corwin"
 end
@@ -1667,97 +374,7 @@ function BuildTorpedoBomberIfNeeded(unitName)
 	end
 end
 
-function Lvl1Bomber()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corshad"
-	else
-		unitName = "armthund"
-	end
-	return BuildBomberIfNeeded(unitName)
-end
-
-function Lvl1Fighter()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corveng"
-	else
-		unitName = "armfig"
-	end
-	return BuildAAIfNeeded(unitName)
-end
-
-function Lvl2Bomber()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corhurc"
-	else
-		unitName = "armpnix"
-	end
-	return BuildBomberIfNeeded(unitName)
-end
-
-function Lvl2TorpedoBomber()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "cortitan"
-	else
-		unitName = "armlance"
-	end
-	return BuildTorpedoBomberIfNeeded(unitName)
-end
-
-function Lvl2Fighter()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corvamp"
-	else
-		unitName = "armhawk"
-	end
-	return BuildAAIfNeeded(unitName)
-end
-
-function SeaBomber()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corsb"
-	else
-		unitName = "armsb"
-	end
-	return BuildBomberIfNeeded(unitName)
-end
-
-function SeaTorpedoBomber()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corseap"
-	else
-		unitName = "armseap"
-	end
-	return BuildTorpedoBomberIfNeeded(unitName)
-end
-
-function SeaFighter()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corsfig"
-	else
-		unitName = "armsfig"
-	end
-	return BuildAAIfNeeded(unitName)
-end
-
-function SeaAirRaider(self)
-	local unitName = ""
-	if ai.mySide == CORESideName then
-		unitName = "corcut"
-	else
-		unitName = "armsaber"
-	end
-	return BuildRaiderIfNeeded(unitName)
-end
-
-local function CheckMySideIfNeeded()
+function CheckMySideIfNeeded()
 	if ai.mySide == nil then
 		EchoDebug("commander: checkmyside")
 		return CheckMySide
@@ -1766,11 +383,11 @@ local function CheckMySideIfNeeded()
 	end
 end
 
-local function BuildAppropriateFactory()
+function BuildAppropriateFactory()
 	return FactoryUnitName
 end
 
-local function FactoryOrNano(self)
+function FactoryOrNano(self)
 	CheckForMapControl()
 	if ai.factories == 0 then return BuildAppropriateFactory() end
 	EchoDebug("factories: " .. ai.factories .. "  combat units: " .. ai.combatCount)
@@ -1786,7 +403,7 @@ local function FactoryOrNano(self)
 	return unitName
 end
 
-local function LandOrWater(self, landName, waterName)
+function LandOrWater(self, landName, waterName)
 	local builder = self.unit:Internal()
 	local bpos = builder:GetPosition()
 	local waterNet = ai.maphandler:MobilityNetworkSizeHere("shp", bpos)
@@ -1797,180 +414,154 @@ local function LandOrWater(self, landName, waterName)
 	end
 end
 
-local function RezBot1()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "cornecro"
-	else
-		unitName = "armrectr"
+
+local function ConsulAsFactory(self)
+	local UnitName=DummyUnitName
+	local rnd= math.random(1,9)
+	if 	rnd==1 then UnitName=ConVehicle(self) 
+	elseif 	rnd==2 then UnitName=ConShip(self) 
+	elseif 	rnd==3 then UnitName=Lvl1BotRaider(self) 
+	elseif 	rnd==4 then UnitName=Lvl1AABot(self) 
+	elseif 	rnd==5 then UnitName=Lvl2BotArty(self)
+	elseif 	rnd==6 then UnitName=spiders(self)
+	elseif 	rnd==7 then UnitName=Lv2BotMedium(self)
+	elseif 	rnd==8 then UnitName=Lvl1ShipDestroyerOnly(self)
+	else UnitName=DummyUnitName
 	end
-	return BuildWithLimitedNumber(unitName, 1)
+	if UnitName==nil then UnitName = DummyUnitName end
+	EchoDebug('Consul as factory '..unitName)
+	return UnitName
 end
 
-local function ScoutBot()
-	local unitName
-	if ai.mySide == CORESideName then
-		return DummyUnitName
-	else
-		unitName = "armflea"
+local function FreakerAsFactory(self)
+	local UnitName=DummyUnitName
+	local rnd = math.random(1,9)
+	if 	rnd==1 then UnitName=ConBot(self)
+	elseif 	rnd==2 then UnitName=ConShip(self)
+	elseif 	rnd==3 then UnitName=Lvl1BotRaider(self)
+	elseif 	rnd==4 then UnitName=Lvl1AABot(self)
+	elseif 	rnd==5 then UnitName=Lvl2BotRaider(self)
+	elseif 	rnd==6 then UnitName=Lv2AmphBot(self)
+	elseif 	rnd==7 then UnitName=Lvl1ShipDestroyerOnly(self)
+	elseif 	rnd==8 then UnitName=Decoy(self)
+	else UnitName = DummyUnitName
 	end
-	return BuildWithLimitedNumber(unitName, 1)
+	if UnitName==nil then UnitName = DummyUnitName end
+	EchoDebug('Freaker as factory '..unitName)
+	return UnitName
 end
 
-local function ScoutVeh()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corfav"
-	else
-		unitName = "armfav"
+function NavalEngineerAsFactory(self)
+	local UnitName=DummyUnitName
+	local rnd= math.random(1,9)
+	if 	rnd==1 then UnitName=ConShip(self)
+	elseif 	rnd==2 then UnitName=ScoutShip(self)
+	elseif 	rnd==3 then UnitName=Lvl1ShipDestroyerOnly(self)
+	elseif 	rnd==4 then UnitName=Lvl1ShipRaider(self)
+	elseif 	rnd==5 then UnitName=Lvl1ShipBattle(self)
+	elseif 	rnd==6 then UnitName=Lv2AmphBot(self)
+	else 
+		UnitName=DummyUnitName
 	end
-	return BuildWithLimitedNumber(unitName, 1)
+	EchoDebug('Naval engineers as factory '..unitName)
+	return UnitName
 end
 
-local function ScoutAir()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corfink"
-	else
-		unitName = "armpeep"
+function EngineerAsFactory(self)
+	local unitName=DummyUnitName
+	if ai.Energy.full>0.3 and ai.Energy.full<0.7 and ai.Metal.full>0.3 and ai.Metal.full<0.7 then
+		if ai.mySide == CORESideName then
+			unitName=FreakerAsFactory(self)
+		else
+			unitName=ConsulAsFactory(self)
+		end
 	end
-	return BuildWithLimitedNumber(unitName, 1)
+	return unitName
+end	
+
+local function CommanderEconomy(self)
+	local underwater = ai.maphandler:IsUnderWater(self.unit:Internal():GetPosition())
+	local unitName = DummyUnitName
+	if not underwater then 
+		unitName = Economy0()
+	else
+		unitName = EconomyUnderWater()
+	end
+	return unitName
+	
+	
 end
 
-local function ScoutShip()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corpt"
+local function AmphibiousEconomy(self)
+	local underwater = ai.maphandler:IsUnderWater(self.unit:Internal():GetPosition())
+	local unitName = DummyUnitName
+	if here then 
+		unitName = Economy1(self)
 	else
-		unitName = "armpt"
+		unitName = EconomyUnderWater(self)
 	end
-	local scout = BuildWithLimitedNumber(unitName, 1)
-	if scout == DummyUnitName then
-		return BuildAAIfNeeded(unitName)
-	else
-		return unitName
-	end
+	return unitName
+	
 end
-
-local function ScoutAdvAir()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corawac"
-	else
-		unitName = "armawac"
-	end
-	return BuildWithLimitedNumber(unitName, 1)
-end
-
-local function ScoutSeaAir()
-	local unitName
-	if ai.mySide == CORESideName then
-		unitName = "corhunt"
-	else
-		unitName = "armsehak"
-	end
-	return BuildWithLimitedNumber(unitName, 1)
-end
-
-local function Lvl2BotAssist()
-	if ai.mySide == CORESideName then
-		return "corfast"
-	else
-		return "armfark"
-	end
-end
-
-local function Lvl2VehAssist()
-	if ai.mySide == CORESideName then
-		return DummyUnitName
-	else
-		return "consul"
-	end
-end
-
-local function Lvl2ShipAssist()
-	if ai.mySide == CORESideName then
-		return "cormls"
-	else
-		return "armmls"
-	end
-end
-
--- end of functions
-
 
 -- mobile construction units:
 
 local anyCommander = {
 	CheckMySideIfNeeded,
-	BuildMex,
+	CommanderEconomy,
 	BuildAppropriateFactory,
-	WindSolar,
 	BuildLLT,
 	BuildRadar,
 	BuildLightAA,
-	DoSomethingForTheEconomy,
-	TidalIfTidal,
 	BuildPopTorpedo,
 	BuildSonar,
 }
 
 local anyConUnit = {
+	Economy1,
 	BuildAppropriateFactory,
-	NanoTurret,
 	BuildLLT,
 	BuildSpecialLT,
 	BuildMediumAA,
 	BuildRadar,
 	BuildLvl1Jammer,
-	WindSolar,
 	BuildGeo,
-	SolarAdv,
 	BuildHLT,
 	BuildLvl1Plasma,
-	DoSomethingForTheEconomy,
 	BuildHeavyishAA,
-	BuildMex,
 }
 
 local anyConAmphibious = {
+	AmphibiousEconomy,
 	BuildGeo,
 	BuildSpecialLT,
 	BuildMediumAA,
 	BuildRadar,
 	BuildLvl1Jammer,
-	WindSolar,
-	SolarAdv,
-	FactoryOrNano,
 	BuildHLT,
 	BuildLvl1Plasma,
-	DoSomethingForTheEconomy,
 	BuildHeavyishAA,
-	BuildMex,
+	AmphibiousEconomy,
 	BuildPopTorpedo,
 	BuildFloatLightAA,
 	BuildSonar,
 	BuildFloatRadar,
-	TidalIfTidal,
 	BuildFloatHLT,
-	DoSomethingForTheEconomy,
 }
 
 local anyConShip = {
-	BuildUWMex,
+	EconomyUnderWater,
 	BuildFloatLightAA,
 	BuildSonar,
 	BuildLightTorpedo,
 	BuildFloatRadar,
-	TidalIfTidal,
 	BuildAppropriateFactory,
 	BuildFloatHLT,
-	DoSomethingForTheEconomy,
 }
 
 local anyAdvConUnit = {
 	BuildAppropriateFactory,
-	BuildFusion,
+	AdvEconomy,
 	BuildNukeIfNeeded,
 	BuildAdvancedRadar,
 	BuildHeavyPlasma,
@@ -1983,37 +574,31 @@ local anyAdvConUnit = {
 	BuildExtraHeavyAA,
 	BuildLvl2Jammer,
 	BuildMohoGeo,
-	BuildMohoMex,
 	-- DoSomethingAdvancedForTheEconomy,
 }
 
 local anyConSeaplane = {
-	BuildUWMohoMex,
+	EconomySeaplane,
 	BuildFloatHeavyAA,
-	BuildUWFusion,
 	BuildAdvancedSonar,
 	BuildHeavyTorpedo,
 	BuildAppropriateFactory,
-	-- DoSomethingAdvancedForTheEconomy,
 }
 
 local anyAdvConSub = {
-	BuildUWMohoMex,
+	AdvEconomyUnderWater,
 	BuildFloatHeavyAA,
-	BuildUWFusion,
 	BuildAdvancedSonar,
 	BuildHeavyTorpedo,
-	-- DoSomethingAdvancedForTheEconomy,
 }
 
 local anyNavalEngineer = {
+	EconomyNavalEngineer,
 	BuildFloatHLT,
 	BuildFloatLightAA,
 	BuildAppropriateFactory,
 	Lvl1ShipBattle,
 	BuildFloatRadar,
-	TidalIfTidal,
-	BuildUWMex,
 	BuildSonar,
 	Lvl1ShipRaider,
 	Conship,
@@ -2022,9 +607,8 @@ local anyNavalEngineer = {
 }
 
 local anyCombatEngineer = {
+	EconomyBattleEngineer,
 	BuildAppropriateFactory,
-	NanoTurret,
-	Solar,
 	BuildMediumAA,
 	BuildAdvancedRadar,
 	BuildLvl2Jammer,
@@ -2037,7 +621,6 @@ local anyCombatEngineer = {
 	Lvl1AABot,
 	ConShip,
 	Lvl1ShipDestroyerOnly,
-	BuildMex,
 }
 
 
@@ -2228,6 +811,8 @@ outmodedTaskqueues = {
 taskqueues = {
 	corcom = anyCommander,
 	armcom = anyCommander,
+	armdecom = anyCommander,
+	cordecom = anyCommander,
 	corcv = anyConUnit,
 	armcv = anyConUnit,
 	corck = anyConUnit,
@@ -2280,8 +865,7 @@ taskqueues = {
 	armasy = anyLvl2ShipYard,
 	corgant = anyExperimental,
 	armshltx = anyExperimental,
-	armfark = {
-		WindSolar,
-		BuildMex,
-	}
+	corgantuw = anyUWExperimental,
+	armshltxuw = anyUWExperimental,
+	armfark = anyfark,
 }
