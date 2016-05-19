@@ -11,10 +11,11 @@ shard_include("taskHov")
 shard_include("taskBuild")
 shard_include("taskEco")
 
-local DebugEnabled = false
+local DebugEnabled = true
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
+		if not inStr then return end
 		game:SendToConsole("Taskqueues: " .. inStr)
 	end
 end

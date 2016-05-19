@@ -455,9 +455,9 @@ function Economy0()
 	local unitName=DummyUnitName
 	if ai.Energy.full > 0.1 and (ai.Metal.income < 1 or ai.Metal.full < 0.3) then
 		unitName = BuildMex()
-	elseif ai.Energy.full > 0.9 and ai.Energy.income > 100  and ai.Metal.reserves > 100 and ai.Energy.capacity < 7000 then
+	-- elseif ai.Energy.full > 0.9 and ai.Energy.income > 100  and ai.Metal.reserves > 100 and ai.Energy.capacity < 7000 then
 		-- unitName = buildEstore1()
-	elseif ai.Metal.full > 0.7 and ai.Metal.income > 10 and ai.Metal.capacity < 7000  then
+	-- elseif ai.Metal.full > 0.7 and ai.Metal.income > 10 and ai.Metal.capacity < 7000  then
 		-- unitName = buildMstore1()
 	elseif ai.Energy.full > 0.9 and ai.Energy.income > 200 and ai.Metal.full < 0.5 then
 		unitName = buildMconv1()
@@ -491,11 +491,11 @@ function Economy1()
         local unitName=DummyUnitName
 	if ai.Energy.full > 0.5 and ai.Metal.full > 0.1 and ai.Metal.full < 0.5 and ai.Metal.income > 30 then
 		unitName = SpecialMex()
-	elseif (ai.Energy.full > 0.5  and ai.Metal.full > 0.3) or (ai.Energy.income > ai.Energy.usage*1.1 and ai.Metal.income > ai. Metal.usage*1.1)then
+	elseif (ai.Energy.full > 0.5  and ai.Metal.full > 0.3 and ai.Metal.income > 10 and ai.Energy.income > 100) then -- or (ai.Energy.income > ai.Energy.usage*1.1 and ai.Metal.income > ai. Metal.usage*1.1)then
 		unitName = NanoTurret()
-	elseif 	ai.Energy.full > 0.9 and ai.Energy.income > 100 and ai.Metal.reserves > 250 and ai.Energy.capacity < 7000 then
+	-- elseif 	ai.Energy.full > 0.9 and ai.Energy.income > 100 and ai.Metal.reserves > 250 and ai.Energy.capacity < 7000 then
 		-- unitName = buildEstore1()
-	elseif ai.Metal.full > 0.8 and ai.Metal.income > 10 and ai.Metal.capacity < 7000  then
+	-- elseif ai.Metal.full > 0.8 and ai.Metal.income > 10 and ai.Metal.capacity < 7000  then
 		-- unitName = buildMstore1()
 	elseif ai.Energy.full > 0.9 and ai.Energy.income > 200 and ai.Metal.full < 0.5 then
 		unitName = buildMconv1()
@@ -560,7 +560,7 @@ end
 
 function EconomyBattleEngineer(self)
         local unitName=DummyUnitName
-	if ai.Energy.full > 0.2 and ai.Metal.income > ai.Metal.usage and ai.Energy.full > 0.2 then
+	if ai.Energy.full > 0.5  and ai.Metal.full > 0.3 and ai.Metal.income > 10 and ai.Energy.income > 100 then
 		unitName= NanoTurret()
 	elseif ai.Energy.full < 0.1 and ai.Metal.full > 0.3 then
 		unitName = Solar()

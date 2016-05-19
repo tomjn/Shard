@@ -521,25 +521,27 @@ function TaskQueueBehaviour:BestFactory()
 				local utype = game:GetTypeByName(factoryName)
 				local builderPos = builder:GetPosition()
 				local p
-				EchoDebug("looking for most turtled position for " .. factoryName)
-				local turtlePosList = ai.turtlehandler:MostTurtled(builder, factoryName)
-				if turtlePosList then
-					if #turtlePosList ~= 0 then
-						for i, turtlePos in ipairs(turtlePosList) do
-							p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
-							if p ~= nil then break end
-						end
-					end
-				end
 				if p == nil then
-					EchoDebug("no turtle position found, trying next to factory")
+					EchoDebug("looking next to factory for position for " .. factoryName)
 					local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 10000)
 					if factoryPos then
 						p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
 					end
 				end
 				if p == nil then
-					EchoDebug("no turtle position found for " .. factoryName .. ", trying near builder")
+					EchoDebug("looking for most turtled position for " .. factoryName)
+					local turtlePosList = ai.turtlehandler:MostTurtled(builder, factoryName)
+					if turtlePosList then
+						if #turtlePosList ~= 0 then
+							for i, turtlePos in ipairs(turtlePosList) do
+								p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+								if p ~= nil then break end
+							end
+						end
+					end
+				end
+				if p == nil then
+					EchoDebug("trying near builder for " .. factoryName)
 					p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 				end
 				if p ~= nil then
