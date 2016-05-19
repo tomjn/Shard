@@ -164,7 +164,7 @@ function ShardSpringUnit:GetPosition()
 	return {
 		x=bpx,
 		y=bpy,
-		z=bpz
+		z=bpz,
 	}
 end
 
