@@ -108,12 +108,13 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	if pos ~= nil then
 		if unitTable[unitTypeToBuild:Name()].buildOptions then
 			-- don't build factories too close to south map edge because they face south
-			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ - 240) then
+			-- Spring.Echo(pos.x, pos.z, self.ai.maxElmosX, self.ai.maxElmosZ)
+			if (pos.x <= 0) or (pos.x > self.ai.maxElmosX) or (pos.z <= 0) or (pos.z > self.ai.maxElmosZ - 240) then
 				EchoDebug("bad position: " .. pos.x .. ", " .. pos.z)
 				pos = nil
 			end
 		else
-			if (pos.x <= 0) or (pos.x > ai.maxElmosX) or (pos.z <= 0) or (pos.z > ai.maxElmosZ) then
+			if (pos.x <= 0) or (pos.x > self.ai.maxElmosX) or (pos.z <= 0) or (pos.z > self.ai.maxElmosZ) then
 				EchoDebug("bad position: " .. pos.x .. ", " .. pos.z)
 				pos = nil
 			end
@@ -159,7 +160,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	end
 	-- don't build where the builder can't go
 	if pos ~= nil then
-		if not ai.maphandler:UnitCanGoHere(builder, pos) then
+		if not self.ai.maphandler:UnitCanGoHere(builder, pos) then
 			EchoDebug(builder:Name() .. " can't go there: " .. pos.x .. "," .. pos.z)
 			pos = nil
 		end
@@ -176,7 +177,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 			end
 		elseif bigPlasmaList[uname] or littlePlasmaList[uname] or nukeList[uname] then
 			-- don't build bombarding units outside of bombard positions
-			local b = ai.targethandler:IsBombardPosition(pos, uname)
+			local b = self.ai.targethandler:IsBombardPosition(pos, uname)
 			if not b then
 				EchoDebug("bombard not in bombard position")
 				pos = nil
@@ -199,7 +200,15 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 	-- return self:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, position)
 	if attemptNumber == nil then EchoDebug("looking for build spot for " .. builder:Name() .. " to build " .. unitTypeToBuild:Name()) end
 	local minDistance = minimumDistance or self:GetBuildSpacing(unitTypeToBuild)
-	if buildDistance == nil then buildDistance = 100 end
+	buildDistance = buildDistance or 100
+	if ShardSpringLua then
+		local function validFunction(pos)
+			local vpos = self:CheckBuildPos(pos, unitTypeToBuild, builder, position)
+			-- Spring.Echo(pos.x, pos.y, pos.z, unitTypeToBuild:Name(), builder:Name(), position.x, position.y, position.z, vpos)
+			return vpos
+		end
+		return self.map:FindClosestBuildSite(unitTypeToBuild, position, 300, minDistance, validFunction)
+	end
 	local tmpAttemptNumber = attemptNumber or 0
 	local pos = nil
 
@@ -239,6 +248,8 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 			EchoDebug("trying spiral check")
 			pos = self:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, position, minDistance * 16)
 		end
+	else
+		game:SendToConsole(builder:Name() .. " building " .. unitTypeToBuild:Name() .. " build position found in " .. tmpAttemptNumber .. " attempts")
 	end
 
 	return pos

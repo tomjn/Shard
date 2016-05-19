@@ -456,7 +456,6 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		if p and Distance(p, builder:GetPosition()) > 300 then
 			-- HERE BECAUSE DEFENSE PLACEMENT SYSTEM SUCKS
 			-- this prevents cons from wasting time building defenses very far away
-			-- a better solution is needed
 			utype = nil
 			-- p = ai.buildsitehandler:ClosestBuildSpot(builder, builder:GetPosition(), utype)
 		end
@@ -474,6 +473,11 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 					if p ~= nil then break end
 				end
 			end
+		end
+		if p and Distance(p, builder:GetPosition()) > 300 then
+			-- HERE BECAUSE DEFENSE PLACEMENT SYSTEM SUCKS
+			-- this prevents cons from wasting time building very far away
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, builder:GetPosition(), utype)
 		end
 	end
 	-- last ditch placement
