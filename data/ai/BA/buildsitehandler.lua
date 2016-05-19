@@ -290,8 +290,8 @@ function BuildSiteHandler:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, pos
 	return pos
 end
 
-function BuildSiteHandler:ClosestHighestLevelFactory(builder, maxDist)
-	local bpos = builder:GetPosition()
+function BuildSiteHandler:ClosestHighestLevelFactory(builderPos, maxDist)
+	if not builderPos then return end
 	local minDist = maxDist
 	local maxLevel = ai.maxFactoryLevel
 	EchoDebug(maxLevel .. " max factory level")
@@ -299,7 +299,7 @@ function BuildSiteHandler:ClosestHighestLevelFactory(builder, maxDist)
 	if ai.factoriesAtLevel[maxLevel] ~= nil then
 		for i, factory in pairs(ai.factoriesAtLevel[maxLevel]) do
 			if not ai.outmodedFactoryID[factory.id] then
-				local dist = Distance(bpos, factory.position)
+				local dist = Distance(builderPos, factory.position)
 				if dist < minDist then
 					minDist = dist
 					factoryPos = factory.position

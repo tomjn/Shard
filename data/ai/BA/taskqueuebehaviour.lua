@@ -384,11 +384,11 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 	elseif geothermalPlant[value] then
 		-- geothermal
 		p = self.ai.maphandler:ClosestFreeGeo(utype, builder)
-		-- Spring.Echo("geo spot", p.x, p.y, p.z)
 		if p then
+			EchoDebug("geo spot", p.x, p.y, p.z)
 			if value == "cmgeo" or value == "amgeo" then
 				-- don't build moho geos next to factories
-				if ai.buildsitehandler:ClosestHighestLevelFactory(builder, 500) ~= nil then
+				if ai.buildsitehandler:ClosestHighestLevelFactory(p, 500) ~= nil then
 					if value == "cmgeo" then
 						if ai.targethandler:IsBombardPosition(p, "corbhmth") then
 							-- instead build geothermal plasma battery if it's a good spot for it
@@ -408,7 +408,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 	elseif nanoTurretList[value] then
 		-- build nano turrets next to a factory near you
 		EchoDebug("looking for factory for nano")
-		local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 5000)
+		local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder:GetPosition(), 5000)
 		if factoryPos then
 			EchoDebug("found factory")
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
@@ -523,7 +523,7 @@ function TaskQueueBehaviour:BestFactory()
 				local p
 				if p == nil then
 					EchoDebug("looking next to factory for position for " .. factoryName)
-					local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 10000)
+					local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builderPos, 10000)
 					if factoryPos then
 						p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
 					end

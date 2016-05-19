@@ -542,8 +542,8 @@ Eco1={
 	coradvsol=1,
 	cortide=1,
 
-	corgeo=1,
-	armgeo=1,
+	-- corgeo=1,
+	-- armgeo=1,
 
 	--store
 
