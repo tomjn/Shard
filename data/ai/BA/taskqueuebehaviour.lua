@@ -225,6 +225,7 @@ function TaskQueueBehaviour:Init()
 	self.name = u:Name()
 	if commanderList[self.name] then self.isCommander = true end
 	self.id = u:ID()
+	EchoDebug(self.name .. " initializing...")
 
 	-- register if factory is going to use outmoded queue
 	if factoryMobilities[self.name] ~= nil then
@@ -262,7 +263,6 @@ function TaskQueueBehaviour:Init()
 	if self:HasQueues() then
 		self.queue = self:GetQueue()
 	end
-	
 end
 
 function TaskQueueBehaviour:HasQueues()
@@ -635,7 +635,7 @@ function TaskQueueBehaviour:GetQueue()
 		q = taskqueues[self.name]
 	end
 	if type(q) == "function" then
-		--game:SendToConsole("function table found!")
+		-- game:SendToConsole("function table found!")
 		q = q(self)
 	end
 	return q

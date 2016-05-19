@@ -73,6 +73,7 @@ function Lvl3Raider(self)
 	else
 		unitName = "marauder"
 	end
+	EchoDebug(unitName)
 	return BuildRaiderIfNeeded(unitName)
 end
 

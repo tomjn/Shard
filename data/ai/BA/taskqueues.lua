@@ -8,10 +8,11 @@ shard_include("taskBot")
 shard_include("taskVeh")
 shard_include("taskShp")
 shard_include("taskHov")
+shard_include("taskExp")
 shard_include("taskBuild")
 shard_include("taskEco")
 
-local DebugEnabled = true
+local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -261,6 +262,7 @@ function BuildBreakthroughIfNeeded(unitName)
 end
 
 function BuildRaiderIfNeeded(unitName)
+	EchoDebug("build raider if needed: " .. unitName)
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
 	local mtype = unitTable[unitName].mtype
 	if ai.factoriesAtLevel[3] ~= nil and ai.factoriesAtLevel[3] ~= {} then
