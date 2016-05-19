@@ -1,9 +1,10 @@
-require "common"
+shard_include "common"
 
 -- keeps track of where enemy units seem to be moving
 
 local DebugEnabled = false
 local debugPlotTacticalFile
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then

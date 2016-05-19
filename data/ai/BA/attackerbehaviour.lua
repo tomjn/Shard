@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -56,7 +57,7 @@ function AttackerBehaviour:UnitDead(unit)
 	--
 end
 
-function AttackerBehaviour:OwnerDead()
+function AttackerBehaviour:OwnerDied()
 	self.attacking = nil
 	self.active = nil
 	self.unit = nil

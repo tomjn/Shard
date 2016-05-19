@@ -1,8 +1,9 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
 local DebugPlotEnabled = false
 local debugPlotTurtleFile
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -36,7 +37,7 @@ local layerMod = {
 }
 
 local missingFactoryDefenseDistance = 1500 -- if a turtle with a factory has no defense, subtract this much from distance
-local modDistance = 1
+local modDistance = 1 -- how much Priority modifies distance, the higher the number the father builders will travel for the most/least turtled turtle
 
 local factoryPriority = 4 -- added to tech level. above this priority allows two of the same type of defense tower.
 
@@ -315,6 +316,9 @@ function TurtleHandler:Base(turtle, size, limbs)
 		totalX = totalX + organ.position.x
 		totalZ = totalZ + organ.position.z
 	end
+	local oldY = turtle.position.y+0
+	turtle.position = api.Position()
+	turtle.position.y = oldY
 	turtle.position.x = totalX / #turtle.organs
 	turtle.position.z = totalZ / #turtle.organs
 	local angleAdd = twicePi / limbs
@@ -435,6 +439,7 @@ function TurtleHandler:RemoveShell(unitID)
 end
 
 function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
+	-- if 1 then return end -- ai might actually be more effective without defenses
 	if builder == nil then return end
 	EchoDebug("checking for least turtled from " .. builder:Name() .. " for " .. tostring(unitName) .. " bombard: " .. tostring(bombard))
 	if unitName == nil then return end

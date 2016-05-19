@@ -1,10 +1,11 @@
-require "common"
+shard_include "common"
 
 -- Sends units out of factories and holds units in place who are being repaired after resurrection
 
 BootBehaviour = class(Behaviour)
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then

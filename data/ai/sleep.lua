@@ -12,18 +12,32 @@ function Sleep:Init()
 	self.sleeping = {}
 end
 
+function Sleep:GetSleeper(key)
+	for i = 1, #self.sleeping do
+		local sleeper = self.sleeping[i]
+		if sleeper.key == key then
+			return sleeper
+		end
+	end
+	local sleeper = { key = key, frames = 0 }
+	self.sleeping[#self.sleeping+1] = sleeper
+	return sleeper
+end
+
 function Sleep:Update()
 	local done = {}
 	local count = 0
-	for k,v in pairs(self.sleeping) do
-		if (v-1) < 1 then
+	for i = 1, #self.sleeping do
+		local sleeper = self.sleeping[i]
+		local frames = sleeper.frames
+		if (frames-1) < 1 then
 			-- limit the number of things woken up each frame to 50
 			if #done < 50 then
-				self:Wakeup(k)
-				table.insert(done,k)
+				self:Wakeup(sleeper)
+				table.insert(done,sleeper.key)
 			end
 		end
-		self.sleeping[k] = v -1
+		sleeper.frames = frames -1
 	end
 	for i=1,#done do
 		self:Kill(done[i])
@@ -39,26 +53,34 @@ function Sleep:Wait(functor, frames)
 	if functor == nil then
 		game:SendToConsole("error: functor == nil in Sleep:Wait ")
 	else
-		self.sleeping[functor] = frames
+		local sleeper = self:GetSleeper(functor)
+		sleeper.frames = frames
 	end
 end
 
-function Sleep:Wakeup(key)
-	if key == nil then
+function Sleep:Wakeup(sleeper)
+	if sleeper == nil then
 		game:SendToConsole("key == nil in Sleep:Wakeup()")
-	else
-		if type(key) == "table" then
-			if key.wakeup ~= nil then
-				key:wakeup()
-			else
-				game:SendToConsole("key:wakeup == nil in Sleep:Wakeup")
-			end
+		return
+	end
+	local key = sleeper.key
+	if type(key) == "table" then
+		if key.wakeup ~= nil then
+			key:wakeup()
 		else
-			key()
+			game:SendToConsole("key:wakeup == nil in Sleep:Wakeup")
 		end
+	else
+		key()
 	end
 end
 
 function Sleep:Kill(key)
-	self.sleeping[key] = nil
+	for i = #self.sleeping, 1, -1 do
+		local sleeper = self.sleeping[i]
+		if sleeper.key == key then
+			table.remove(self.sleeping, i)
+			-- return
+		end
+	end
 end

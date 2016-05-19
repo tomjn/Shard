@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -44,7 +45,7 @@ function MexUpgradeBehaviour:UnitIdle(unit)
 					mohoName = "armmoho"
 				end
 				-- maybe we're underwater?
-				tmpType = game:GetTypeByName("comuwmme")
+				tmpType = game:GetTypeByName("coruwmme")
 				if builder:CanBuild(tmpType) then
 					mohoName = "coruwmme"
 				end

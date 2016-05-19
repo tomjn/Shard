@@ -1,6 +1,7 @@
-require "common"
+shard_include "common"
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -329,6 +330,7 @@ function AssistHandler:RemoveWorking(asstbehaviour)
 end
 
 function AssistHandler:AssignIDByName(asstbehaviour)
+	-- game:SendToConsole("assisthandler:assignidbyname", ai, ai.id, self.ai, self.ai.id)
 	local uname = asstbehaviour.name
 	if self.IDByNameTaken[uname] == nil then
 		asstbehaviour.IDByName = 1

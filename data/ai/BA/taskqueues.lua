@@ -2,7 +2,7 @@
  Task Queues!
 ]]--
 
-require "common"
+shard_include "common"
 
 
 local DebugEnabled = false
@@ -795,11 +795,11 @@ function BuildBattleIfNeeded(unitName)
 	end
 end
 
-function Lvl2BotCorRaiderArmBattle(self)
+function Lvl2BotCorRaiderArmArty(self)
 	if ai.mySide == CORESideName then
 		return Lvl2BotRaider(self)
 	else
-		return Lvl2BotBattle(self)
+		return Lvl2BotArty(self)
 	end
 end
 
@@ -1382,7 +1382,7 @@ local function BuildLvl2PopUp(self)
 	if ai.mySide == CORESideName then
 		unitName = "corvipe"
 	else
-		unitName = "armpb"
+		unitName = "armamb"
 	end
 	local unit = self.unit:Internal()
 	return GroundDefenseIfNeeded(unitName, unit)
@@ -2033,7 +2033,7 @@ local anyCombatEngineer = {
 	BuildSpecialLTOnly,
 	BuildLvl2Plasma,
 	ConCoreBotArmVehicle,
-	Lvl2BotCorRaiderArmBattle,
+	Lvl2BotCorRaiderArmArty,
 	Lvl1AABot,
 	ConShip,
 	Lvl1ShipDestroyerOnly,

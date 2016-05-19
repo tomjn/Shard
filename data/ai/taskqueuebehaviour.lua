@@ -138,7 +138,8 @@ function TaskQueueBehaviour:ProgressQueue()
 								self.progress = true
 							end
 						else
-							self.progress = not self.unit:Internal():Build(utype)
+							p = self.map:FindClosestBuildSite(utype, unit:GetPosition())
+							self.progress = not self.unit:Internal():Build(utype,p)
 						end
 					else
 						self.progress = true

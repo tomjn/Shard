@@ -1,9 +1,9 @@
-game = {}
+local game = {}
 	--game_engine
 
 	-- prints 'message' to ingame chat console
-	function game:SendToConsole(message)
-		Spring.Echo( message )
+	function game:SendToConsole(...)
+		Spring.Echo( ... )
 		return true
 	end
 
@@ -22,15 +22,13 @@ game = {}
 	end
 
 	function game:GetTypeByName(typename) -- returns unittype
-		--
-		return nil
-		-- return game_engine:GetTypeByName(typename)
+		if not UnitDefNames[typename] then return end
+		return Shard:shardify_unittype(UnitDefNames[typename].id)
 	end
 
 
 	function game:ConfigFolderPath() -- returns string with path to the folder
-		--
-		return "" --
+		return "luarules/gadgets/ai/" .. self:GameName() .. "/"
 		-- return game_engine:ConfigFolderPath()
 	end
 
@@ -42,64 +40,42 @@ game = {}
 		return VFS.FileExists( filename )
 	end
 
-	function game:GetTeamID() -- returns boolean
-		return Spring.GetMyTeamID()
+	function game:GetTeamID()
+		return self.ai.id
+		-- return Spring.GetMyTeamID()
 	end
 
 	function game:GetEnemies()
-		return nil
-
-		--[[local has_enemies = game_engine:HasEnemies()
-		if has_enemies ~= true then
-			return nil
-		else
-			local ev = game_engine:GetEnemies()
-			local e = {}
-			local i = 0
-			while i  < ev:size() do
-				table.insert(e,ev[i])
-				i = i + 1
-			end
-			ev = nil
-			return e
-		end]]--
+		local ev = self.ai.enemyUnitIds
+		if not ev then return {} end
+		local e = {}
+		for uID, _ in pairs(ev) do
+			e[#e+1] = Shard:shardify_unit(uID)
+		end
+		return e
 	end
 
 	function game:GetUnits()
-		return nil
-
-		--[[local fv = game_engine:GetUnits()
-		local f = {}
-		local i = 0
-		while i  < fv:size() do
-			table.insert(f,fv[i])
-			i = i + 1
+		local uv = self.ai.ownUnitIds
+		if not uv then return {} end
+		local u = {}
+		for uID, _ in pairs(uv) do
+			u[#u+1] = Shard:shardify_unit(uID)
 		end
-		fv = nil
-		return f]]--
+		return u
 	end
 
 	function game:GetFriendlies()
-		return nil
-
-		--[[local has_friendlies = game_engine:HasFriendlies()
-		if has_friendlies ~= true then
-			return nil
-		else
-			local fv = game_engine:GetFriendlies()
-			local f = {}
-			local i = 0
-			while i  < fv:size() do
-				table.insert(f,fv[i])
-				i = i + 1
-			end
-			fv = nil
-			return f
-		end]]--
+		local fv = self.ai.friendlyUnitIds
+		if not fv then return {} end
+		local f = {}
+		for uID, _ in pairs(fv) do
+			f[#f+1] = Shard:shardify_unit(uID)
+		end
+		return f
 	end
 
 	function game:GameName() -- returns the shortname of this game
-		--
 		return Game.gameShortName
 	end
 
@@ -114,7 +90,8 @@ game = {}
 	end
 
 	function game:GetResource(idx) --  returns a Resource object
-		return false --game_engine:GetResource(idx)
+		local currentLevel, storage, pull, income, expense, share, sent, received = Spring.GetTeamResources(self.ai.id, Shard.resourceIds[idx])
+		return Shard:shardify_resource({currentLevel=currentLevel, storage=storage, pull=pull, income=income, expense=expense, share=share, sent=sent, received=received})
 	end
 
 	function game:GetResourceCount() -- return the number of resources
@@ -122,15 +99,17 @@ game = {}
 	end
 
 	function game:GetResourceByName(name) -- returns a Resource object, takes the name of the resource
-		return "" --game_engine:GetResourceByName(name)
+		name = string.lower(name)
+		local currentLevel, storage, pull, income, expense, share, sent, received = Spring.GetTeamResources(self.ai.id, name)
+		return Shard:shardify_resource({currentLevel=currentLevel, storage=storage, pull=pull, income=income, expense=expense, share=share, sent=sent, received=received})
 	end
 
 	function game:GetUnitByID( unit_id ) -- returns a Shard unit when given an engine unit ID number
-		return nil --game_engine:getUnitByID( unit_id )
+		return Shard:shardify_unit( unit_id )
 	end
 
 	function game:GetResources() -- returns a table of Resource objects, takes the name of the resource
-		return {}
+		return { self:GetResource(1), self:GetResource(2) }
 
 		--[[local rcount = game_engine:GetResourceCount()
 		if(rcount > 0) then
@@ -149,3 +128,4 @@ game = {}
 		end]]--
 	end
 
+return game

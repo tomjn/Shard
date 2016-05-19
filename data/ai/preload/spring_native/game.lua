@@ -1,9 +1,16 @@
-game = {}
+local game = {}
 	--game_engine
 
 	-- prints 'message' to ingame chat console
-	function game:SendToConsole(message)
-		return game_engine:SendToConsole(message)
+	function game:SendToConsole(...)
+		local str = ""
+		local parts = {...}
+		for i = 1, #parts do
+			local part = parts[i]
+			str = str .. part
+			if i < #parts then str = str .. ", " end
+		end
+		return game_engine:SendToConsole(str)
 	end
 
 	function game:Frame() -- returns int/game frame number
@@ -139,3 +146,5 @@ game = {}
 			return nil
 		end
 	end
+
+return game

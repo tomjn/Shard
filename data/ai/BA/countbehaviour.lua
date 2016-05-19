@@ -1,8 +1,9 @@
-require "common"
+shard_include "common"
 
 CountBehaviour = class(Behaviour)
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
