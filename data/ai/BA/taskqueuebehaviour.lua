@@ -40,6 +40,9 @@ function TaskQueueBehaviour:CategoryEconFilter(value)
 	EchoDebug(value .. " (before econ filter)")
 	-- EchoDebug("ai.Energy: " .. ai.Energy.reserves .. " " .. ai.Energy.capacity .. " " .. ai.Energy.income .. " " .. ai.Energy.usage)
 	-- EchoDebug("ai.Metal: " .. ai.Metal.reserves .. " " .. ai.Metal.capacity .. " " .. ai.Metal.income .. " " .. ai.Metal.usage)
+	if Eco1[value] or Eco2[value] then
+		return value
+	end
 	if nanoTurretList[value] then
 		-- nano turret
 		EchoDebug(" nano turret")
@@ -222,6 +225,7 @@ function TaskQueueBehaviour:Init()
 	self.name = u:Name()
 	if commanderList[self.name] then self.isCommander = true end
 	self.id = u:ID()
+	EchoDebug(self.name .. " initializing...")
 
 	-- register if factory is going to use outmoded queue
 	if factoryMobilities[self.name] ~= nil then
@@ -259,7 +263,6 @@ function TaskQueueBehaviour:Init()
 	if self:HasQueues() then
 		self.queue = self:GetQueue()
 	end
-	
 end
 
 function TaskQueueBehaviour:HasQueues()
@@ -316,6 +319,13 @@ function TaskQueueBehaviour:GetHelp(value, position)
 	if value == DummyUnitName then return DummyUnitName end
 	EchoDebug(value .. " before getting help")
 	local builder = self.unit:Internal()
+	if Eco1[value] then
+		return value
+	end
+	-- if Eco2[value] then
+	-- 	local hashelp = ai.assisthandler:PersistantSummon(builder, position, math.ceil(unitTable[value].buildTime/10000), 0)
+	-- 	return value
+	-- end
 	if helpList[value] then
 		local hashelp = ai.assisthandler:PersistantSummon(builder, position, helpList[value], 1)
 		if hashelp then
@@ -374,11 +384,11 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 	elseif geothermalPlant[value] then
 		-- geothermal
 		p = self.ai.maphandler:ClosestFreeGeo(utype, builder)
-		-- Spring.Echo("geo spot", p.x, p.y, p.z)
 		if p then
+			EchoDebug("geo spot", p.x, p.y, p.z)
 			if value == "cmgeo" or value == "amgeo" then
 				-- don't build moho geos next to factories
-				if ai.buildsitehandler:ClosestHighestLevelFactory(builder, 500) ~= nil then
+				if ai.buildsitehandler:ClosestHighestLevelFactory(p, 500) ~= nil then
 					if value == "cmgeo" then
 						if ai.targethandler:IsBombardPosition(p, "corbhmth") then
 							-- instead build geothermal plasma battery if it's a good spot for it
@@ -398,7 +408,7 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 	elseif nanoTurretList[value] then
 		-- build nano turrets next to a factory near you
 		EchoDebug("looking for factory for nano")
-		local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 5000)
+		local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder:GetPosition(), 5000)
 		if factoryPos then
 			EchoDebug("found factory")
 			p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
@@ -446,7 +456,6 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 		if p and Distance(p, builder:GetPosition()) > 300 then
 			-- HERE BECAUSE DEFENSE PLACEMENT SYSTEM SUCKS
 			-- this prevents cons from wasting time building defenses very far away
-			-- a better solution is needed
 			utype = nil
 			-- p = ai.buildsitehandler:ClosestBuildSpot(builder, builder:GetPosition(), utype)
 		end
@@ -464,6 +473,11 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 					if p ~= nil then break end
 				end
 			end
+		end
+		if p and Distance(p, builder:GetPosition()) > 300 then
+			-- HERE BECAUSE DEFENSE PLACEMENT SYSTEM SUCKS
+			-- this prevents cons from wasting time building very far away
+			p = ai.buildsitehandler:ClosestBuildSpot(builder, builder:GetPosition(), utype)
 		end
 	end
 	-- last ditch placement
@@ -511,25 +525,27 @@ function TaskQueueBehaviour:BestFactory()
 				local utype = game:GetTypeByName(factoryName)
 				local builderPos = builder:GetPosition()
 				local p
-				EchoDebug("looking for most turtled position for " .. factoryName)
-				local turtlePosList = ai.turtlehandler:MostTurtled(builder, factoryName)
-				if turtlePosList then
-					if #turtlePosList ~= 0 then
-						for i, turtlePos in ipairs(turtlePosList) do
-							p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
-							if p ~= nil then break end
-						end
-					end
-				end
 				if p == nil then
-					EchoDebug("no turtle position found, trying next to factory")
-					local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builder, 10000)
+					EchoDebug("looking next to factory for position for " .. factoryName)
+					local factoryPos = ai.buildsitehandler:ClosestHighestLevelFactory(builderPos, 10000)
 					if factoryPos then
 						p = ai.buildsitehandler:ClosestBuildSpot(builder, factoryPos, utype)
 					end
 				end
 				if p == nil then
-					EchoDebug("no turtle position found for " .. factoryName .. ", trying near builder")
+					EchoDebug("looking for most turtled position for " .. factoryName)
+					local turtlePosList = ai.turtlehandler:MostTurtled(builder, factoryName)
+					if turtlePosList then
+						if #turtlePosList ~= 0 then
+							for i, turtlePos in ipairs(turtlePosList) do
+								p = ai.buildsitehandler:ClosestBuildSpot(builder, turtlePos, utype)
+								if p ~= nil then break end
+							end
+						end
+					end
+				end
+				if p == nil then
+					EchoDebug("trying near builder for " .. factoryName)
 					p = ai.buildsitehandler:ClosestBuildSpot(builder, builderPos, utype)
 				end
 				if p ~= nil then
@@ -623,7 +639,7 @@ function TaskQueueBehaviour:GetQueue()
 		q = taskqueues[self.name]
 	end
 	if type(q) == "function" then
-		--game:SendToConsole("function table found!")
+		-- game:SendToConsole("function table found!")
 		q = q(self)
 	end
 	return q

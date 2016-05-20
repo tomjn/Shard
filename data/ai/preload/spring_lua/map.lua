@@ -19,14 +19,15 @@ map.spots = shard_include("spring_lua/metal")
 
 -- ###################
 
-function map:FindClosestBuildSite(unittype, builderpos, searchradius, minimumdistance) -- returns Position
+function map:FindClosestBuildSite(unittype, builderpos, searchradius, minimumdistance, validFunction) -- returns Position
+	-- validFunction takes a position and returns a position or nil if the position is not valid
 	searchradius = searchradius or 500
 	minimumdistance = minimumdistance or 50
 	local twicePi = math.pi * 2
 	local angleIncMult = twicePi / minimumdistance
 	local bx, bz = builderpos.x, builderpos.z
 	local maxX, maxZ = Game.mapSizeX, Game.mapSizeZ
-	for radius = minimumdistance, searchradius, minimumdistance do
+	for radius = 50, searchradius, minimumdistance do
 		local angleInc = radius * twicePi * angleIncMult
 		local initAngle = math.random() * twicePi
 		for angle = initAngle, initAngle+twicePi, angleInc do
@@ -37,9 +38,14 @@ function map:FindClosestBuildSite(unittype, builderpos, searchradius, minimumdis
 			if x < 0 then x = 0 elseif x > maxX then x = maxX end
 			if z < 0 then z = 0 elseif z > maxZ then z = maxZ end
 			local y = Spring.GetGroundHeight(x,z)
-			if self:CanBuildHere(unittype, {x=x, y=y, z=z}) then
-				-- Spring.Echo("got closestbuildsite")
-				return {x=x, y=y, z=z}
+			local buildable, position = self:CanBuildHere(unittype, {x=x, y=y, z=z})
+			if buildable then
+				if validFunction then
+					position = validFunction(position)
+					if position then return position end
+				else
+					return position
+				end
 			end
 		end 
 	end
@@ -50,7 +56,7 @@ function map:CanBuildHere(unittype,position) -- returns boolean
 	local newX, newY, newZ = Spring.Pos2BuildPos(unittype:ID(), position.x, position.y, position.z)
 	local blocked = Spring.TestBuildOrder(unittype:ID(), newX, newY, newZ, 1) == 0
 	-- Spring.Echo(unittype:Name(), newX, newY, newZ, blocked)
-	return ( not blocked )
+	return ( not blocked ), {x=newX, y=newY, z=newZ}
 end
 
 function map:GetMapFeatures()

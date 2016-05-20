@@ -103,7 +103,7 @@ function AttackHandler:DraftSquads()
 				self.count[mtype] = 0
 				self.recruits[mtype] = {}
 				ai.hasAttacked = ai.hasAttacked + 1
-				self.counter[mtype] = self.counter[mtype] + 1
+				self.counter[mtype] = math.min(maxAttackCounter, self.counter[mtype] + 1)
 			end
 		end
 	end
@@ -413,7 +413,7 @@ end
 function AttackHandler:NeedMore(attkbehaviour)
 	local mtype = attkbehaviour.mtype
 	local level = attkbehaviour.level
-	self.counter[mtype] = self.counter[mtype] + (level * 0.7) -- 0.75
+	self.counter[mtype] = math.min(maxAttackCounter, self.counter[mtype] + (level * 0.7) ) -- 0.75
 	EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 end
 
@@ -422,14 +422,12 @@ function AttackHandler:NeedLess(mtype, subtract)
 	if mtype == nil then
 		for mtype, count in pairs(self.counter) do
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-			self.counter[mtype] = self.counter[mtype] - subtract
-			self.counter[mtype] = math.max(self.counter[mtype], minAttackCounter)
+			self.counter[mtype] = math.max(self.counter[mtype] - subtract, minAttackCounter)
 			EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 		end
 	else
 		if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-		self.counter[mtype] = self.counter[mtype] - subtract
-		self.counter[mtype] = math.max(self.counter[mtype], minAttackCounter)
+		self.counter[mtype] = math.max(self.counter[mtype] - subtract, minAttackCounter)
 		EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 	end
 end

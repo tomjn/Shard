@@ -47,8 +47,9 @@ end
 
 function ShardSpringUnit:Type()
 	if not self.type then
-		local ai = Shard.AIs[1]
-		self.type = ai.game:GetTypeByName( self:Name() )
+		-- local ai = Shard.AIs[1]
+		-- self.type = ai.game:GetTypeByName( self:Name() )
+		self.type = game:GetTypeByName( self:Name() )
 	end
 	return self.type
 end
@@ -116,8 +117,9 @@ end
 
 function ShardSpringUnit:Build(t, p) -- IUnitType*
 	if type(t) == "string" then
-		local ai = Shard.AIs[1]
-		t = ai.game:GetTypeByName(t)
+		-- local ai = Shard.AIs[1]
+		-- t = ai.game:GetTypeByName(t)
+		t = game:GetTypeByName(t)
 	end
 	if not p then p = self:GetPosition() end
 	Spring.GiveOrderToUnit( self.id, -t:ID(), { p.x, p.y, p.z }, {} )
@@ -164,7 +166,7 @@ function ShardSpringUnit:GetPosition()
 	return {
 		x=bpx,
 		y=bpy,
-		z=bpz
+		z=bpz,
 	}
 end
 

@@ -792,6 +792,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 end
 
 function MapHandler:ClosestFreeGeo(unittype, builder, position)
+	EchoDebug("closestfreegeo for " .. unittype:Name() .. " by " .. builder:Name())
 	if not position then position = builder:GetPosition() end
 	local bname = builder:Name()
 	local uname = unittype:Name()
