@@ -615,7 +615,6 @@ local anyCombatEngineer = {
 	BuildMediumAA,
 	BuildAdvancedRadar,
 	BuildLvl2Jammer,
-	BuildLvl2PopUp,
 	BuildHeavyAA,
 	BuildSpecialLTOnly,
 	BuildLvl2Plasma,

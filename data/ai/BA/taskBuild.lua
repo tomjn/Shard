@@ -97,7 +97,7 @@ function BuildLvl2PopUp(self)
 	if ai.mySide == CORESideName then
 		unitName = "corvipe"
 	else
-		unitName = "armamb"
+		unitName = "armpb"
 	end
 	local unit = self.unit:Internal()
 	return GroundDefenseIfNeeded(unitName, unit)
