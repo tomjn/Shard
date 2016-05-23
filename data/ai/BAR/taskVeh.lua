@@ -130,7 +130,7 @@ function Lvl2VehAssist()
 		return DummyUnitName
 	else
 		local number=math.ceil(ai.combatCount/6)+1
-		return BuildConNumber("consul", number)
+		return BuildWithLimitedNumber("consul", number)
 	end
 end
 

@@ -1,4 +1,4 @@
-local DebugEnabled = true
+local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -40,7 +40,7 @@ end
 
 function BuildMex1()
 	local unitName = DummyUnitName
-	if ai.Metal.income <10 then
+	if ai.Metal.income < 30 then
 		unitName = BuildMex()
 	else
 		unitName = SpecialMex()
@@ -145,28 +145,21 @@ end
 
 function Energy1()
 	local unitName=DummyUnitName
-	local wind = false
-		if needWind then
-			if windRatio == 1 then
-				wind = true
-			else
-				local r = math.random()
-				if r < windRatio then wind = true end
-			end
-		end
-		if ai.Energy.income>150  then --and ai.Metal.reserves >50
-			unitName = SolarAdv()
-		elseif wind then
-			unitName = Wind()
-		else
-			unitName = Solar()
-		end
+	local wind = needWind and ((windRatio == 1) or (math.random() < windRatio))
+	if ai.Energy.income > 150 then --and ai.Metal.reserves >50
+		unitName = SolarAdv()
+	elseif wind then
+		unitName = Wind()
+	else
+		unitName = Solar()
+	end
 	return unitName
 end
 
-local function BuildGeo()
+function BuildGeo()
 	-- don't attempt if there are no spots on the map
-	if not ai.mapHasGeothermal then
+	EchoDebug("BuildGeo " .. tostring(ai.mapHasGeothermal))
+	if not ai.mapHasGeothermal or ai.Energy.income < 150 or ai.Metal.income < 10 then
 		return DummyUnitName
 	end
 	if ai.mySide == CORESideName then
@@ -176,9 +169,10 @@ local function BuildGeo()
 	end
 end
 
-local function BuildMohoGeo()
+function BuildMohoGeo()
+	EchoDebug("BuildMohoGeo " .. tostring(ai.mapHasGeothermal))
 	-- don't attempt if there are no spots on the map
-	if not ai.mapHasGeothermal then
+	if not ai.mapHasGeothermal or ai.Energy.income < 900 or ai.Metal.income < 24 then
 		return DummyUnitName
 	end
 	if ai.mySide == CORESideName then
@@ -220,10 +214,10 @@ local function BuildAdvFusion()
 end
 
 local function BuildAdvEnergy(self)
-	print(tostring('advname '..self.name))
+	EchoDebug(tostring('advname '..self.name))
 	local unitName = DummyUnitName
 	unitName = BuildFusion()
-	if ai.Energy.income > 3000 and (self.name == 'armacv' or self.name == 'coracv') then
+	if ai.Energy.income > 4000 and (self.name == 'armacv' or self.name == 'coracv') then
 		unitName = BuildAdvFusion()
 	end
 	return unitName
@@ -460,14 +454,14 @@ function buildWMconv1()
 end
 
 function Economy0()
-        local unitName=DummyUnitName
+	local unitName=DummyUnitName
 	if ai.Energy.full > 0.1 and (ai.Metal.income < 1 or ai.Metal.full < 0.3) then
 		unitName = BuildMex()
-	elseif ai.Energy.full > 0.9 and ai.Energy.income > 100  and ai.Metal.reserves > 100 and ai.Energy.capacity < 7000 then
-		unitName = buildEstore1()
-	elseif ai.Metal.full > 0.7 and ai.Metal.income > 10 and ai.Metal.capacity < 7000  then
-		unitName = buildMstore1()
-	elseif ai.Energy.full > 0.8 and ai.Energy.income > 50 then
+	-- elseif ai.Energy.full > 0.9 and ai.Energy.income > 100  and ai.Metal.reserves > 100 and ai.Energy.capacity < 7000 then
+		-- unitName = buildEstore1()
+	-- elseif ai.Metal.full > 0.7 and ai.Metal.income > 10 and ai.Metal.capacity < 7000  then
+		-- unitName = buildMstore1()
+	elseif ai.Energy.income > ai.Energy.usage * 1.5 and ai.Energy.full > 0.9 and ai.Energy.income > 200 and ai.Energy.income < 2000 and ai.Metal.full < 0.3 then
 		unitName = buildMconv1()
 	elseif (ai.Energy.full < 0.5 or ai.Energy.income < ai.Energy.usage)   then
 		unitName = WindSolar()
@@ -480,13 +474,13 @@ end
 
 function AdvEconomy(self)
 	local unitName=DummyUnitName
-	if ai.Energy.full > 0.9 and ai.Energy.income > 1000 and ai.Metal.income > ai.Metal.usage and ai.Energy.capacity < 40000 then
-		unitName = buildEstore2()
-	elseif ai.Metal.full > 0.8 and ai.Metal.income > 30 and ai.Metal.capacity < 20000 then
-		unitName = buildMstore2()
-	elseif ai.Energy.full > 0.8 and ai.Metal.full < 0.9 then
+	-- if ai.Energy.full > 0.9 and ai.Energy.income > 1000 and ai.Metal.income > ai.Metal.usage and ai.Energy.capacity < 40000 then
+		-- unitName = buildEstore2()
+	-- elseif ai.Metal.full > 0.8 and ai.Metal.income > 30 and ai.Metal.capacity < 20000 then
+		-- unitName = buildMstore2()
+	if ai.Energy.income > ai.Energy.usage * 1.5 and ai.Energy.full > 0.9 and ai.Energy.income > 2000 and ai.Metal.full < 0.3 then
 		unitName = buildMconv2()
-	elseif (ai.Energy.full < 0.3 or ai.Energy.income < ai.Energy.usage*1.1) then
+	elseif (ai.Energy.full < 0.3 or ai.Energy.income < ai.Energy.usage*1.1) and ai.Metal.full > 0.1 and ai.Metal.income > 18 then
 		unitName = BuildAdvEnergy(self)
 	else--if ai.Metal.full < 0.2 and ai.Energy.full > 0.1 then
 		unitName = BuildMohoMex()
@@ -497,20 +491,20 @@ end
 
 function Economy1()
         local unitName=DummyUnitName
-	if (ai.Energy.full > 0.3 and ai.Metal.full < 0.3) then
+	if ai.Energy.full > 0.5 and ai.Metal.full > 0.3 and ai.Metal.full < 0.7 and ai.Metal.income > 30 then
 		unitName = SpecialMex()
-	elseif (ai.Energy.full > 0.5  and ai.Metal.full > 0.3) or (ai.Energy.income > ai.Energy.usage*1.1 and ai.Metal.income > ai. Metal.usage*1.1)then
+	elseif (ai.Energy.full > 0.5  and ai.Metal.full > 0.3 and ai.Metal.income > 10 and ai.Energy.income > 100) then -- or (ai.Energy.income > ai.Energy.usage*1.1 and ai.Metal.income > ai. Metal.usage*1.1)then
 		unitName = NanoTurret()
-	elseif 	ai.Energy.full > 0.9 and ai.Energy.income > 100 and ai.Metal.reserves > 250 and ai.Energy.capacity < 7000 then
-		unitName = buildEstore1()
-	elseif ai.Metal.full > 0.8 and ai.Metal.income > 10 and ai.Metal.capacity < 7000  then
-		unitName = buildMstore1()
-	elseif ai.Energy.full > 0.8 and ai.Energy.income > 50  then
+	-- elseif 	ai.Energy.full > 0.9 and ai.Energy.income > 100 and ai.Metal.reserves > 250 and ai.Energy.capacity < 7000 then
+		-- unitName = buildEstore1()
+	-- elseif ai.Metal.full > 0.8 and ai.Metal.income > 10 and ai.Metal.capacity < 7000  then
+		-- unitName = buildMstore1()
+	elseif ai.Energy.income > ai.Energy.usage * 1.5 and ai.Energy.full > 0.9 and ai.Energy.income > 200 and ai.Energy.income < 2000 and ai.Metal.full < 0.3 then
 		unitName = buildMconv1()
 	elseif (ai.Energy.full < 0.3 or ai.Energy.income < ai.Metal.usage) and ai.Metal.full > 0.1 then
 		unitName = Energy1()
 	else
-		unitName=SpecialMex()
+		unitName = BuildMex()
 	end
 	EchoDebug('Economy level 1 '..unitName)
 	return unitName
@@ -568,12 +562,12 @@ end
 
 function EconomyBattleEngineer(self)
         local unitName=DummyUnitName
-	if ai.Energy.full > 0.2 and ai.Metal.income > ai.Metal.usage and ai.Energy.full > 0.2 then
+	if ai.Energy.full > 0.5  and ai.Metal.full > 0.3 and ai.Metal.income > 10 and ai.Energy.income > 100 then
 		unitName= NanoTurret()
 	elseif ai.Energy.full < 0.1 and ai.Metal.full > 0.3 then
 		unitName = Solar()
 	elseif ai.Metal.full < 0.2 then 
-		unitName=BuildMex0()
+		unitName=BuildMex()
 	else
 		unitName = EngineerAsFactory()
 	end

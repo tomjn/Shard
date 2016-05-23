@@ -1,8 +1,9 @@
-shard_include("common")
+shard_include "common"
 
 AntinukeBehaviour = class(Behaviour)
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then

@@ -8,6 +8,7 @@ shard_include("taskBot")
 shard_include("taskVeh")
 shard_include("taskShp")
 shard_include("taskHov")
+shard_include("taskExp")
 shard_include("taskBuild")
 shard_include("taskEco")
 
@@ -15,6 +16,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
+		if not inStr then return end
 		game:SendToConsole("Taskqueues: " .. inStr)
 	end
 end
@@ -138,7 +140,7 @@ function CheckForMapControl()
 		local couldAttack = ai.couldAttack >= 1 or ai.couldBomb >= 1
 		local bombingTooExpensive = ai.bomberhandler:GetCounter() == maxBomberCounter
 		local attackTooExpensive = attackCounter == maxAttackCounter
-		local controlMetalSpots = #ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
+		local controlMetalSpots = ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
 		local needUpgrade = couldAttack or bombingTooExpensive or attackTooExpensive
 		local lotsOfMetal = ai.Metal.income > 25 or controlMetalSpots
 
@@ -260,6 +262,7 @@ function BuildBreakthroughIfNeeded(unitName)
 end
 
 function BuildRaiderIfNeeded(unitName)
+	EchoDebug("build raider if needed: " .. unitName)
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
 	local mtype = unitTable[unitName].mtype
 	if ai.factoriesAtLevel[3] ~= nil and ai.factoriesAtLevel[3] ~= {} then
@@ -306,11 +309,11 @@ function BuildBattleIfNeeded(unitName)
 	end
 end
 
-function Lvl2BotCorRaiderArmBattle(self)
+function Lvl2BotCorRaiderArmArty(self)
 	if ai.mySide == CORESideName then
 		return Lvl2BotRaider(self)
 	else
-		return Lvl2BotBattle(self)
+		return Lvl2BotArty(self)
 	end
 end
 
@@ -416,55 +419,55 @@ end
 
 
 local function ConsulAsFactory(self)
-	local UnitName=DummyUnitName
+	local unitName=DummyUnitName
 	local rnd= math.random(1,9)
-	if 	rnd==1 then UnitName=ConVehicle(self) 
-	elseif 	rnd==2 then UnitName=ConShip(self) 
-	elseif 	rnd==3 then UnitName=Lvl1BotRaider(self) 
-	elseif 	rnd==4 then UnitName=Lvl1AABot(self) 
-	elseif 	rnd==5 then UnitName=Lvl2BotArty(self)
-	elseif 	rnd==6 then UnitName=spiders(self)
-	elseif 	rnd==7 then UnitName=Lv2BotMedium(self)
-	elseif 	rnd==8 then UnitName=Lvl1ShipDestroyerOnly(self)
-	else UnitName=DummyUnitName
+	if 	rnd==1 then unitName=ConVehicle(self) 
+	elseif 	rnd==2 then unitName=ConShip(self) 
+	elseif 	rnd==3 then unitName=Lvl1BotRaider(self) 
+	elseif 	rnd==4 then unitName=Lvl1AABot(self) 
+	elseif 	rnd==5 then unitName=Lvl2BotArty(self)
+	-- elseif 	rnd==6 then unitName=spiders(self)
+	elseif 	rnd==7 then unitName=Lv2BotMedium(self)
+	elseif 	rnd==8 then unitName=Lvl1ShipDestroyerOnly(self)
+	else unitName=DummyUnitName
 	end
-	if UnitName==nil then UnitName = DummyUnitName end
+	if unitName==nil then unitName = DummyUnitName end
 	EchoDebug('Consul as factory '..unitName)
-	return UnitName
+	return unitName
 end
 
 local function FreakerAsFactory(self)
-	local UnitName=DummyUnitName
+	local unitName=DummyUnitName
 	local rnd = math.random(1,9)
-	if 	rnd==1 then UnitName=ConBot(self)
-	elseif 	rnd==2 then UnitName=ConShip(self)
-	elseif 	rnd==3 then UnitName=Lvl1BotRaider(self)
-	elseif 	rnd==4 then UnitName=Lvl1AABot(self)
-	elseif 	rnd==5 then UnitName=Lvl2BotRaider(self)
-	elseif 	rnd==6 then UnitName=Lv2AmphBot(self)
-	elseif 	rnd==7 then UnitName=Lvl1ShipDestroyerOnly(self)
-	elseif 	rnd==8 then UnitName=Decoy(self)
-	else UnitName = DummyUnitName
+	if 	rnd==1 then unitName=ConBot(self)
+	elseif 	rnd==2 then unitName=ConShip(self)
+	elseif 	rnd==3 then unitName=Lvl1BotRaider(self)
+	elseif 	rnd==4 then unitName=Lvl1AABot(self)
+	elseif 	rnd==5 then unitName=Lvl2BotRaider(self)
+	elseif 	rnd==6 then unitName=Lv2AmphBot(self)
+	elseif 	rnd==7 then unitName=Lvl1ShipDestroyerOnly(self)
+	-- elseif 	rnd==8 then unitName=Decoy(self)
+	else unitName = DummyUnitName
 	end
-	if UnitName==nil then UnitName = DummyUnitName end
+	if unitName==nil then unitName = DummyUnitName end
 	EchoDebug('Freaker as factory '..unitName)
-	return UnitName
+	return unitName
 end
 
 function NavalEngineerAsFactory(self)
-	local UnitName=DummyUnitName
+	local unitName=DummyUnitName
 	local rnd= math.random(1,9)
-	if 	rnd==1 then UnitName=ConShip(self)
-	elseif 	rnd==2 then UnitName=ScoutShip(self)
-	elseif 	rnd==3 then UnitName=Lvl1ShipDestroyerOnly(self)
-	elseif 	rnd==4 then UnitName=Lvl1ShipRaider(self)
-	elseif 	rnd==5 then UnitName=Lvl1ShipBattle(self)
-	elseif 	rnd==6 then UnitName=Lv2AmphBot(self)
+	if 	rnd==1 then unitName=ConShip(self)
+	elseif 	rnd==2 then unitName=ScoutShip(self)
+	elseif 	rnd==3 then unitName=Lvl1ShipDestroyerOnly(self)
+	elseif 	rnd==4 then unitName=Lvl1ShipRaider(self)
+	elseif 	rnd==5 then unitName=Lvl1ShipBattle(self)
+	elseif 	rnd==6 then unitName=Lv2AmphBot(self)
 	else 
-		UnitName=DummyUnitName
+		unitName=DummyUnitName
 	end
 	EchoDebug('Naval engineers as factory '..unitName)
-	return UnitName
+	return unitName
 end
 
 function EngineerAsFactory(self)
@@ -612,12 +615,11 @@ local anyCombatEngineer = {
 	BuildMediumAA,
 	BuildAdvancedRadar,
 	BuildLvl2Jammer,
-	BuildLvl2PopUp,
 	BuildHeavyAA,
 	BuildSpecialLTOnly,
 	BuildLvl2Plasma,
 	ConCoreBotArmVehicle,
-	Lvl2BotCorRaiderArmBattle,
+	Lvl2BotCorRaiderArmArty,
 	Lvl1AABot,
 	ConShip,
 	Lvl1ShipDestroyerOnly,

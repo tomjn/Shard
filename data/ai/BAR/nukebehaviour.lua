@@ -1,9 +1,10 @@
-shard_include("common")
+shard_include "common"
 
 
 NukeBehaviour = class(Behaviour)
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -57,7 +58,7 @@ function NukeBehaviour:Update()
 				if self.tactical then
 					bestCell = ai.targethandler:GetBestBombardCell(self.position, self.range, 2500)
 				elseif self.stunning then
-					bestCell = ai.targethandler:GetBestBombardCell(self.position, self.range, 3000) -- only targets threats
+					bestCell = ai.targethandler:GetBestBombardCell(self.position, self.range, 3000, true) -- only targets threats
 				else
 					bestCell = ai.targethandler:GetBestNukeCell()
 				end

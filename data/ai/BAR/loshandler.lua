@@ -1,7 +1,9 @@
-shard_include("common")
+
+shard_include "common"
 
 local DebugEnabled = false
 local debugPlotLosFile
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -71,52 +73,61 @@ end
 function LosHandler:Update()
 	local f = game:Frame()
 
-	if math.mod(f,23) == 0 then
-		if DebugEnabled then 
-			debugPlotLosFile = assert(io.open("debuglosplot",'w'), "Unable to write debuglosplot")
-		end 
-		-- game:SendToConsole("updating los")
-		self.losGrid = {}
-		-- note: this could be more effecient by using a behaviour
-		-- if the unit is a building, we know it's LOS contribution forever
-		-- if the unit moves, the behaviours can be polled rather than GetFriendlies()
-		-- except for allies' units
-		local friendlies = game:GetFriendlies()
-		ai.friendlyTeamID = {}
-		ai.friendlyTeamID[game:GetTeamID()] = true
-		if friendlies ~= nil then
-			for _, unit in pairs(friendlies) do
-				ai.friendlyTeamID[unit:Team()] = true -- because I can't get allies' teamIDs directly
-				local uname = unit:Name()
-				local utable = unitTable[uname]
-				local upos = unit:GetPosition()
-				if utable.losRadius > 0 then
-					self:FillCircle(upos.x, upos.z, utable.losRadius * 32, 2)
-				end
-				if utable.airLosRadius > 0 then
-					-- 4 will become 2 in IsKnownEnemy
-					self:FillCircle(upos.x, upos.z, (utable.losRadius + utable.airLosRadius) * 32, 4)
-				end
-				if utable.radarRadius > 0 then
-					self:FillCircle(upos.x, upos.z, utable.radarRadius, 1)
-				end
-				if utable.sonarRadius > 0 then
-					-- 3 will become 2 in IsKnownEnemy
-					self:FillCircle(upos.x, upos.z, utable.sonarRadius, 3)
+	if f % 23 == 0 then
+		if ShardSpringLua and self.ai.alliedTeamIds then
+			self.ai.friendlyTeamID = {}
+			self.ai.friendlyTeamID[self.game:GetTeamID()] = true
+			for teamID, _ in pairs(self.ai.alliedTeamIds) do
+				self.ai.friendlyTeamID[teamID] = true
+			end
+		else
+			if DebugEnabled then 
+				debugPlotLosFile = assert(io.open("debuglosplot",'w'), "Unable to write debuglosplot")
+			end 
+			-- game:SendToConsole("updating los")
+			self.losGrid = {}
+			-- note: this could be more effecient by using a behaviour
+			-- if the unit is a building, we know it's LOS contribution forever
+			-- if the unit moves, the behaviours can be polled rather than GetFriendlies()
+			-- except for allies' units
+			local friendlies = game:GetFriendlies()
+			ai.friendlyTeamID = {}
+			ai.friendlyTeamID[game:GetTeamID()] = true
+			if friendlies ~= nil then
+				for _, unit in pairs(friendlies) do
+					ai.friendlyTeamID[unit:Team()] = true -- because I can't get allies' teamIDs directly
+					local uname = unit:Name()
+					local utable = unitTable[uname]
+					local upos = unit:GetPosition()
+					if utable.losRadius > 0 then
+						self:FillCircle(upos.x, upos.z, utable.losRadius, 2)
+					end
+					if utable.airLosRadius > 0 then
+						-- 4 will become 2 in IsKnownEnemy
+						self:FillCircle(upos.x, upos.z, (utable.losRadius + utable.airLosRadius), 4)
+					end
+					if utable.radarRadius > 0 then
+						self:FillCircle(upos.x, upos.z, utable.radarRadius, 1)
+					end
+					if utable.sonarRadius > 0 then
+						-- 3 will become 2 in IsKnownEnemy
+						self:FillCircle(upos.x, upos.z, utable.sonarRadius, 3)
+					end
 				end
 			end
 		end
 		-- update enemy jamming and populate list of enemies
 		local enemies = game:GetEnemies()
 		if enemies ~= nil then
-			local tracking
 			local enemyList = {}
 			for i, e in pairs(enemies) do
 				local uname = e:Name()
-				local utable = unitTable[uname]
 				local upos = e:GetPosition()
-				if utable.jammerRadius > 0 then
-					self:FillCircle(upos.x, upos.z, utable.jammerRadius, 1, true)
+				if not ShardSpringLua then
+					local utable = unitTable[uname]
+					if utable.jammerRadius > 0 then
+						self:FillCircle(upos.x, upos.z, utable.jammerRadius, 1, true)
+					end
 				end
 				-- so that we only have to poll GetEnemies() once
 				table.insert(enemyList, { unitName = uname, position = upos, unitID = e:ID(), cloaked = e:IsCloaked(), beingBuilt = e:IsBeingBuilt(), health = e:GetHealth(), los = 0 })
@@ -143,7 +154,24 @@ function LosHandler:UpdateEnemies(enemyList)
 		local pos = e.position
 		exists[id] = pos
 		if not e.cloaked then
-			local lt = self:AllLos(pos)
+			local lt
+			if ShardSpringLua then
+				local t = {}
+				t[2] = Spring.IsUnitInLos(id, self.ai.allyId)
+				if Spring.IsUnitInRadar(id, self.ai.allyId) then
+					if pos.y < 0 then -- underwater
+						t[3] = true
+					else
+						t[1] = true
+					end
+				end
+				if Spring.IsUnitInAirLos(id, self.ai.allyId) then
+					t[4] = true
+				end
+				lt = t
+			else
+				lt = self:AllLos(pos)
+			end
 			local los = 0
 			local persist = false
 			local underWater = (unitTable[ename].mtype == "sub")
@@ -336,7 +364,7 @@ function LosHandler:Plot4(cx, cz, x, z, val, jam)
 	if x ~= 0 and z ~= 0 then
         self:HorizontalLine(cx - x, cz - z, cx + x, val, jam)
     end
-end 
+end
 
 function LosHandler:FillCircle(cx, cz, radius, val, jam)
 	-- convert to grid coordinates
@@ -364,6 +392,19 @@ function LosHandler:FillCircle(cx, cz, radius, val, jam)
 end
 
 function LosHandler:GroundLos(upos)
+	if ShardSpringLua then
+		local LosOrRadar, inLos, inRadar, jammed = Spring.GetPositionLosState(upos.x, upos.y, upos.z, self.ai.allyId)
+		if inLos then return 2 end
+		if upos.y < 0 then -- underwater
+			if inRadar then return 3 end
+		end
+		if inRadar then return 1 end
+		if Spring.IsPosInAirLos(upos.x, upos.y, upos.z, self.ai.allyId) then
+			return 4
+		else
+			return 0
+		end
+	end
 	local gx = math.ceil(upos.x / losGridElmos)
 	local gz = math.ceil(upos.z / losGridElmos)
 	if self.losGrid[gx] == nil then
@@ -388,6 +429,22 @@ function LosHandler:GroundLos(upos)
 end
 
 function LosHandler:AllLos(upos)
+	if ShardSpringLua then
+		local t = {}
+		local LosOrRadar, inLos, inRadar, jammed = Spring.GetPositionLosState(upos.x, upos.y, upos.z, self.ai.allyId)
+		if inLos then t[2] = true end
+		if inRadar then
+			if upos.y < 0 then -- underwater
+				t[3] = true
+			else
+				t[1] = true
+			end
+		end
+		if Spring.IsPosInAirLos(upos.x, upos.y, upos.z, self.ai.allyId) then
+			t[4] = true
+		end
+		return t
+	end
 	local gx = math.ceil(upos.x / losGridElmos)
 	local gz = math.ceil(upos.z / losGridElmos)
 	if self.losGrid[gx] == nil then

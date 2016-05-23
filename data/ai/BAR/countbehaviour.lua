@@ -1,8 +1,9 @@
-shard_include("common")
+shard_include "common"
 
 CountBehaviour = class(Behaviour)
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -57,7 +58,7 @@ function CountBehaviour:UnitBuilt(unit)
 		else
 			ai.nameCountFinished[self.name] = ai.nameCountFinished[self.name] + 1
 		end
-		if self.isMex then ai.mexCount[self.id] = self end
+		if self.isMex then ai.mexCount = ai.mexCount + 1 end
 		if self.isCon then ai.conCount = ai.conCount + 1 end
 		if self.isCombat then ai.combatCount = ai.combatCount + 1 end
 		if self.isBattle then ai.battleCount = ai.battleCount + 1 end
@@ -95,7 +96,7 @@ function CountBehaviour:UnitDead(unit)
 		ai.nameCount[self.name] = ai.nameCount[self.name] - 1
 		if self.finished then
 			ai.nameCountFinished[self.name] = ai.nameCountFinished[self.name] - 1
-			if self.isMex then ai.mexCount[self.id] = nil end
+			if self.isMex then ai.mexCount = ai.mexCount - 1 end
 			if self.isCon then ai.conCount = ai.conCount - 1 end
 			if self.isCombat then ai.combatCount = ai.combatCount - 1 end
 			if self.isBattle then ai.battleCount = ai.battleCount - 1 end
