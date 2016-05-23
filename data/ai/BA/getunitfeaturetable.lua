@@ -74,6 +74,8 @@ for unitDefID,unitDef in pairs(UnitDefs) do
 	utable.jammerRadius = unitDef["jammerRadius"]
 	utable.stealth = unitDef["stealth"]
 	utable.metalCost = unitDef["metalCost"]
+	utable.energyCost = unitDef["energyCost"]
+	utable.buildTime = unitDef["buildTime"]
 	utable.totalEnergyOut = unitDef["totalEnergyOut"]
 	utable.extractsMetal = unitDef["extractsMetal"]
 	if unitDef["minWaterDepth"] > 0 then
