@@ -17,7 +17,7 @@ function IsReclaimer(unit)
 end
 
 ReclaimBehaviour = class(Behaviour)
-
+ReclaimBehaviour.cleans = 0
 function ReclaimBehaviour:Init()
 	local mtype, network = ai.maphandler:MobilityOfUnit(self.unit:Internal())
 	self.mtype = mtype
@@ -34,6 +34,7 @@ function ReclaimBehaviour:Init()
 	self.name = self.unit:Internal():Name()
 	if reclaimerList[self.name] then self.dedicated = true end
 	self.id = self.unit:Internal():ID()
+	self.cleaner = false
 end
 
 function ReclaimBehaviour:UnitBuilt(unit)
@@ -65,9 +66,19 @@ end
 function ReclaimBehaviour:Update()
 	local f = game:Frame()
 	if f % 120 == 0 then
+		EchoDebug('lenght' .. ReclaimBehaviour.cleans)
+		
 		local doreclaim = false
 		if self.dedicated and not self.resurrecting then
 			doreclaim = true
+		elseif type(self.cleaner) ~= 'boolean' and ai.cleanable[self.cleaner] == nil then 
+			self.cleaner = false
+			EchoDebug('remove a cleaner'  )
+			if ReclaimBehaviour.cleans > 0 then ReclaimBehaviour.cleans = ReclaimBehaviour.cleans -1 end
+		elseif  self.cleaner == false and ReclaimBehaviour.cleans < math.ceil((1-ai.Metal.full) *5) and ((ai.bigEnergyCount > 0 and ai.Energy.full > 0.75 and ai.Metal.full < 0.5) or ai.bigEnergyCount > 1 ) then
+				doreclaim = true
+				self.cleaner = true
+				EchoDebug('insert a cleaner'..tostring(self.cleaner))
 		elseif ai.conCount > 2 and ai.needToReclaim and ai.reclaimerCount == 0 and ai.IDByName[self.id] ~= 1 and ai.IDByName[self.id] == ai.nameCount[self.name] then
 			if not ai.haveExtraReclaimer then
 				ai.haveExtraReclaimer = true
@@ -94,7 +105,30 @@ end
 function ReclaimBehaviour:Retarget()
 	EchoDebug("needs target")
 	local unit = self.unit:Internal()
-	if not ai.needToReclaim and self.dedicated then
+	if self.cleaner == true then
+		local pos=unit:GetPosition()
+		local bestpos = nil
+		local target = false
+		for id,p in pairs(ai.cleanable) do
+			if ai.maphandler:UnitCanGoHere(unit, p) then
+				if bestpos==nil then
+					bestpos=DistanceXZ(pos.x, pos.z, p.x, p.z)
+					target=id
+					
+				else 
+					new=DistanceXZ(pos.x, pos.z, p.x, p.z)
+					if new< bestpos then
+						bestpos=new
+						target=id
+						
+					end
+				end
+			end
+			EchoDebug('target clean ' .. tostring(target))
+		end
+		self.cleaner=target
+		if type(self.cleaner) == 'number' then ReclaimBehaviour.cleans = ReclaimBehaviour.cleans + 1 end
+	elseif not ai.needToReclaim and self.dedicated then
 		self.targetResurrection, self.targetCell = ai.targethandler:WreckToResurrect(unit)
 	else
 		self.targetCell = ai.targethandler:GetBestReclaimCell(unit)
@@ -104,8 +138,11 @@ function ReclaimBehaviour:Retarget()
 end
 
 function ReclaimBehaviour:Priority()
-	if self.targetCell ~= nil then
+	if type(self.cleaner) == 'number'  then
+		return 102
+	elseif self.targetCell ~= nil then
 		return 101
+
 	else
 		-- EchoDebug("priority 0")
 		return 0
@@ -114,7 +151,12 @@ end
 
 function ReclaimBehaviour:Reclaim()
 	if self.active then
-		if self.targetCell ~= nil then
+		if type(self.cleaner) == 'number' then
+			CustomCommand(self.unit:Internal(), CMD_RECLAIM, {self.cleaner})
+			EchoDebug('clean! ' .. tostring(self.cleaner))
+			
+			
+		elseif self.targetCell ~= nil then
 			local cell = self.targetCell
 			self.target = cell.pos
 			EchoDebug("cell at" .. self.target.x .. " " .. self.target.z)
