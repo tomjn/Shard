@@ -100,11 +100,11 @@ function LosHandler:Update()
 					local utable = unitTable[uname]
 					local upos = unit:GetPosition()
 					if utable.losRadius > 0 then
-						self:FillCircle(upos.x, upos.z, utable.losRadius * 32, 2)
+						self:FillCircle(upos.x, upos.z, utable.losRadius, 2)
 					end
 					if utable.airLosRadius > 0 then
 						-- 4 will become 2 in IsKnownEnemy
-						self:FillCircle(upos.x, upos.z, (utable.losRadius + utable.airLosRadius) * 32, 4)
+						self:FillCircle(upos.x, upos.z, (utable.losRadius + utable.airLosRadius), 4)
 					end
 					if utable.radarRadius > 0 then
 						self:FillCircle(upos.x, upos.z, utable.radarRadius, 1)
