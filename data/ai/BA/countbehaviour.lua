@@ -26,6 +26,7 @@ function CountBehaviour:Init()
    		end
    	end
     self.level = unitTable[self.name].techLevel
+    if unitTable[self.name].totalEnergyOut > 750 then self.isBigEnergy = true end
     if unitTable[self.name].extractsMetal > 0 then self.isMex = true end
     if battleList[self.name] then self.isBattle = true end
     if breakthroughList[self.name] then self.isBreakthrough = true end
@@ -33,6 +34,7 @@ function CountBehaviour:Init()
     	self.isSiege = true
     end
     if reclaimerList[self.name] then self.isReclaimer = true end
+    if cleanable[self.name] then self.isCleanable = true end
     if assistList[self.name] then self.isAssist = true end
 	if ai.nameCount[self.name] == nil then
 		ai.nameCount[self.name] = 1
@@ -66,6 +68,8 @@ function CountBehaviour:UnitBuilt(unit)
 		if self.isSiege then ai.siegeCount = ai.siegeCount + 1 end
 		if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount + 1 end
 		if self.isAssist then ai.assistCount = ai.assistCount + 1 end
+		if self.isBigEnergy then ai.bigEnergyCount = ai.bigEnergyCount + 1 end
+		if self.isCleanable then ai.cleanable[unit.engineID] = self.position end
 		ai.lastNameFinished[self.name] = game:Frame()
 		EchoDebug(ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
 		self.finished = true
@@ -104,6 +108,8 @@ function CountBehaviour:UnitDead(unit)
 			if self.isSiege then ai.siegeCount = ai.siegeCount - 1 end
 			if self.isReclaimer then ai.reclaimerCount = ai.reclaimerCount - 1 end
 			if self.isAssist then ai.assistCount = ai.assistCount - 1 end
+			if self.isBigEnergy then ai.bigEnergyCount = ai.bigEnergyCount - 1 end
+			if self.isCleanable then ai.cleanable[unit.engineID] = nil end
 		end
 	end
 end
