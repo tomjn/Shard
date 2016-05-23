@@ -1,4 +1,6 @@
-shard_include("common")
+shard_include "common"
+
+
 
 function IsBomber(unit)
 	local tmpName = unit:Internal():Name()

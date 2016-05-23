@@ -85,6 +85,8 @@ function widget:Initialize()
 		utable.jammerRadius = unitDef["jammerRadius"]
 		utable.stealth = tostring(unitDef["stealth"])
 		utable.metalCost = unitDef["metalCost"]
+		utable.energyCost = unitDef["energyCost"]
+		utable.buildTime = unitDef["buildTime"]
 		utable.totalEnergyOut = unitDef["totalEnergyOut"]
 		utable.extractsMetal = unitDef["extractsMetal"]
 		if unitDef["minWaterDepth"] > 0 then

@@ -1,8 +1,9 @@
-shard_include("common")
+shard_include "common"
 
 -- keeps track of hits to our units
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then

@@ -1,6 +1,7 @@
-shard_include("common")
+shard_include "common"
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -29,7 +30,7 @@ function CountHandler:Init()
 	ai.lastNameCreated = {}
 	ai.lastNameFinished = {}
 	ai.lastNameDead = {}
-	ai.mexCount = {}
+	ai.mexCount = 0
 	ai.conCount = 0
 	ai.combatCount = 0
 	ai.battleCount = 0

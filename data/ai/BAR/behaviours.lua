@@ -1,32 +1,31 @@
-shard_include("taskqueues")
-shard_include("taskqueuebehaviour")
-shard_include("attackerbehaviour")
-shard_include("raiderbehaviour")
-shard_include("bomberbehaviour")
-shard_include("wardbehaviour")
-shard_include("mexupgradebehaviour")
-shard_include("assistbehaviour")
-shard_include("reclaimbehaviour")
-shard_include("defendbehaviour")
-shard_include("factoryregisterbehaviour")
-shard_include("scoutbehaviour")
-shard_include("antinukebehaviour")
-shard_include("nukebehaviour")
-shard_include("bombardbehaviour")
-shard_include("bootbehaviour")
-shard_include("countbehaviour")
-shard_include("common")
-
+shard_include "taskqueuebehaviour"
+shard_include "attackerbehaviour"
+shard_include "raiderbehaviour"
+shard_include "bomberbehaviour"
+shard_include "wardbehaviour"
+shard_include "mexupgradebehaviour"
+shard_include "assistbehaviour"
+shard_include "reclaimbehaviour"
+shard_include "defendbehaviour"
+shard_include "factoryregisterbehaviour"
+shard_include "scoutbehaviour"
+shard_include "antinukebehaviour"
+shard_include "nukebehaviour"
+shard_include "bombardbehaviour"
+shard_include "bootbehaviour"
+shard_include "countbehaviour"
+shard_include "common"
 
 behaviours = {
 
 }
 
 
-function defaultBehaviours(unit)
+function defaultBehaviours(unit, ai)
 	local b = {}
 	local u = unit:Internal()
 	local un = u:Name()
+	-- game:SendToConsole(un, "getting default behaviours")
 
 	-- keep track of how many of each kind of unit we have
 	table.insert(b, CountBehaviour)
@@ -102,6 +101,18 @@ function defaultBehaviours(unit)
 			table.insert(b, DefendBehaviour)
 		end
 	end
+
+	local alreadyHave = {}
+	for i = #b, 1, -1 do
+		local behaviour = b[i]
+		if alreadyHave[behaviour] then
+			-- game:SendToConsole(ai.id, "duplicate behaviour", u:ID(), u:Name())
+			table.remove(b, i)
+		else
+			alreadyHave[behaviour] = true
+		end
+	end
+	-- game:SendToConsole(ai.id, #b, "behaviours", u:ID(), u:Name())
 	
 	return b
 end

@@ -28,9 +28,9 @@ function ScoutBehaviour:Init()
 	self.mtype = mtype
 	self.name = self.unit:Internal():Name()
 	self.armed = unitTable[self.name].isWeapon
-	self.keepYourDistance = unitTable[self.name].losRadius * 16
+	self.keepYourDistance = unitTable[self.name].losRadius * 0.5
 	if mtype == "air" then
-		self.airDistance = unitTable[self.name].losRadius * 48
+		self.airDistance = unitTable[self.name].losRadius * 1.5
 		self.lastCircleFrame = game:Frame()
 	end
 	self.lastUpdateFrame = game:Frame()

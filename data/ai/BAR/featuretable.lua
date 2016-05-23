@@ -1,49 +1,9 @@
--- shard help feature table for BA
+-- shard help feature table for BAR
 
 featureTable = {}
 
-featureTable["a500_cluster1_dead"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["a500_cluster2_dead"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["a500_cluster3_dead"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["aa_cluster1_dead"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["aa_cluster2_dead"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["aa_cluster3_dead"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
 featureTable["aafus_dead"] = { reclaimable = true, blocking = true, unitName = "aafus", energy = 0, metal = 6441, }
 featureTable["aafus_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 2576, }
-featureTable["ad0500_senegal_1"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_1_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_2"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_2_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_3"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_3_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_4"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_4_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_5"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_5_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_6"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_6_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_7"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0500_senegal_7_large"] = { reclaimable = true, blocking = true, energy = 500, metal = 0, }
-featureTable["ad0_senegal_1"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_1_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_2"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_2_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_3"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_3_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_4"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_4_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_5"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_5_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_6"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_6_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_7"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_senegal_7_large"] = { reclaimable = true, blocking = true, energy = 90, metal = 0, }
-featureTable["ad0_bush_2_l"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["ad0_bush_2_m"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["ad0_bush_2_s"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["ad0_bushes_l_3"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["ad0_bushes_m_3"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["ad0_bushes_s_3"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
 featureTable["ajuno_dead"] = { reclaimable = true, blocking = true, unitName = "ajuno", energy = 0, metal = 352, }
 featureTable["ajuno_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 145, }
 featureTable["armaak_dead"] = { reclaimable = true, blocking = true, unitName = "armaak", energy = 0, metal = 314, }
@@ -65,7 +25,6 @@ featureTable["armah_heap"] = { reclaimable = true, blocking = false, energy = 0,
 featureTable["armalab_dead"] = { reclaimable = true, blocking = true, unitName = "armalab", energy = 0, metal = 1773, }
 featureTable["armalab_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 887, }
 featureTable["armamb_dead"] = { reclaimable = true, blocking = true, unitName = "armamb", energy = 0, metal = 1522, }
-featureTable["armamb_dead2"] = { reclaimable = true, blocking = true, energy = 0, metal = 609, }
 featureTable["armamb_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 244, }
 featureTable["armamd_dead"] = { reclaimable = true, blocking = true, unitName = "armamd", energy = 0, metal = 934, }
 featureTable["armamd_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 374, }
@@ -126,8 +85,7 @@ featureTable["armdf_dead"] = { reclaimable = true, blocking = true, unitName = "
 featureTable["armdf_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 89, }
 featureTable["armdl_dead"] = { reclaimable = true, blocking = true, unitName = "armdl", energy = 0, metal = 176, }
 featureTable["armdl_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 70, }
-featureTable["armdrag_dragonsteeth"] = { reclaimable = true, blocking = true, unitName = "armdrag", energy = 0, metal = 5, }
-featureTable["armdrag_rockteeth"] = { reclaimable = true, blocking = false, energy = 0, metal = 2, }
+featureTable["armdrag_rockteeth"] = { reclaimable = true, blocking = false, unitName = "armdrag", energy = 0, metal = 2, }
 featureTable["armemp_dead"] = { reclaimable = true, blocking = true, unitName = "armemp", energy = 0, metal = 976, }
 featureTable["armemp_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 390, }
 featureTable["armestor_dead"] = { reclaimable = true, blocking = true, unitName = "armestor", energy = 0, metal = 103, }
@@ -143,7 +101,6 @@ featureTable["armfav_dead"] = { reclaimable = true, blocking = false, unitName =
 featureTable["armfav_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 6, }
 featureTable["armfboy_dead"] = { reclaimable = true, blocking = true, unitName = "armfboy", energy = 0, metal = 1008, }
 featureTable["armfboy_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 403, }
-featureTable["armfdrag_floatingteeth"] = { reclaimable = true, blocking = true, unitName = "armfdrag", energy = 0, metal = 20, }
 featureTable["armfflak_dead"] = { reclaimable = true, blocking = true, unitName = "armfflak", energy = 0, metal = 525, }
 featureTable["armfgate_dead"] = { reclaimable = true, blocking = true, unitName = "armfgate", energy = 0, metal = 2296, }
 featureTable["armfgate_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 918, }
@@ -157,6 +114,8 @@ featureTable["armflash_dead"] = { reclaimable = true, blocking = true, unitName 
 featureTable["armflash_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 28, }
 featureTable["armflea_dead"] = { reclaimable = true, blocking = false, unitName = "armflea", energy = 0, metal = 9, }
 featureTable["armflea_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 4, }
+featureTable["armfmmm_dead"] = { reclaimable = true, blocking = true, unitName = "armfmmm", energy = 0, metal = 247, }
+featureTable["armfmmm_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 99, }
 featureTable["armfort_fortification"] = { reclaimable = true, blocking = true, unitName = "armfort", energy = 0, metal = 15, }
 featureTable["armfort_rockteethx"] = { reclaimable = true, blocking = true, energy = 0, metal = 7, }
 featureTable["armfrad_dead"] = { reclaimable = true, blocking = false, unitName = "armfrad", energy = 0, metal = 83, }
@@ -214,8 +173,6 @@ featureTable["armmship_dead"] = { reclaimable = true, blocking = false, unitName
 featureTable["armmship_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 491, }
 featureTable["armmstor_dead"] = { reclaimable = true, blocking = true, unitName = "armmstor", energy = 0, metal = 198, }
 featureTable["armmstor_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 79, }
-featureTable["armorco_dead"] = { reclaimable = true, blocking = true, unitName = "armorco", energy = 0, metal = 16645.19921875, }
-featureTable["armorco_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 8322.599609375, }
 featureTable["armpb_dead"] = { reclaimable = true, blocking = true, unitName = "armpb", energy = 0, metal = 350, }
 featureTable["armpb_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 140, }
 featureTable["armpincer_dead"] = { reclaimable = true, blocking = true, unitName = "armpincer", energy = 0, metal = 122, }
@@ -239,8 +196,8 @@ featureTable["armrock_dead"] = { reclaimable = true, blocking = true, unitName =
 featureTable["armrock_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 25, }
 featureTable["armroy_dead"] = { reclaimable = true, blocking = false, unitName = "armroy", energy = 0, metal = 558, }
 featureTable["armroy_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 234, }
-featureTable["armsam_dead"] = { reclaimable = true, blocking = true, unitName = "armsam", energy = 0, metal = 123, }
-featureTable["armsam_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 49, }
+featureTable["armsam_dead"] = { reclaimable = true, blocking = true, unitName = "armsam", energy = 0, metal = 97, }
+featureTable["armsam_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 45, }
 featureTable["armscab_dead"] = { reclaimable = true, blocking = true, unitName = "armscab", energy = 0, metal = 934, }
 featureTable["armscab_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 374, }
 featureTable["armsd_dead"] = { reclaimable = true, blocking = true, unitName = "armsd", energy = 0, metal = 566, }
@@ -249,8 +206,10 @@ featureTable["armseer_dead"] = { reclaimable = true, blocking = true, unitName =
 featureTable["armseer_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 48, }
 featureTable["armsh_dead"] = { reclaimable = true, blocking = false, unitName = "armsh", energy = 0, metal = 49, }
 featureTable["armsh_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 20, }
-featureTable["armshltx_armshlt_dead"] = { reclaimable = true, blocking = true, unitName = "armshltx", energy = 0, metal = 4807, }
-featureTable["armshltx_armshlt_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 1923, }
+featureTable["armshltx_armshltx_dead"] = { reclaimable = true, blocking = true, unitName = "armshltx", energy = 0, metal = 4807, }
+featureTable["armshltx_armshltx_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 1923, }
+featureTable["armshltxuw_armshlt_dead"] = { reclaimable = true, blocking = true, unitName = "armshltxuw", energy = 0, metal = 4807, }
+featureTable["armshltxuw_armshlt_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 1923, }
 featureTable["armshock_dead"] = { reclaimable = true, blocking = true, unitName = "armshock", energy = 0, metal = 2028, }
 featureTable["armshock_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 811, }
 featureTable["armsilo_dead"] = { reclaimable = true, blocking = true, unitName = "armsilo", energy = 0, metal = 4956, }
@@ -297,8 +256,6 @@ featureTable["armuwmex_dead"] = { reclaimable = true, blocking = true, unitName 
 featureTable["armuwmex_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 14, }
 featureTable["armuwmme_dead"] = { reclaimable = true, blocking = true, unitName = "armuwmme", energy = 0, metal = 391, }
 featureTable["armuwmme_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 156, }
-featureTable["armfmmm_dead"] = { reclaimable = true, blocking = true, unitName = "armfmmm", energy = 0, metal = 247, }
-featureTable["armfmmm_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 99, }
 featureTable["armuwms_dead"] = { reclaimable = true, blocking = true, unitName = "armuwms", energy = 0, metal = 234, }
 featureTable["armuwms_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 94, }
 featureTable["armvader_corpse"] = { reclaimable = true, blocking = true, unitName = "armvader", energy = 0, metal = 49, }
@@ -320,24 +277,100 @@ featureTable["armzeus_heap"] = { reclaimable = true, blocking = false, energy = 
 featureTable["aseadragon_dead"] = { reclaimable = true, blocking = false, unitName = "aseadragon", energy = 0, metal = 20879, }
 featureTable["aseadragon_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 5066, }
 featureTable["asubpen_dead"] = { reclaimable = true, blocking = false, unitName = "asubpen", energy = 0, metal = 559, }
-featureTable["brock_1"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["brock_2"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["brock_3"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["brock_6"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["brock_7"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["brock_8"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["brock_9"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["btreechi_3"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["btreechi_4"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["btreeclo_1"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["btreeclo_2"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["btreeclo_4"] = { reclaimable = true, blocking = true, energy = 1, metal = 0, }
 featureTable["cafus_dead"] = { reclaimable = true, blocking = true, unitName = "cafus", energy = 0, metal = 6440, }
 featureTable["cafus_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 2576, }
+featureTable["chicken1_dead"] = { reclaimable = true, blocking = true, unitName = "chicken1", energy = 0, metal = 0, }
+featureTable["chicken1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken1b_dead"] = { reclaimable = true, blocking = true, unitName = "chicken1b", energy = 0, metal = 0, }
+featureTable["chicken1b_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken1c_dead"] = { reclaimable = true, blocking = true, unitName = "chicken1c", energy = 0, metal = 0, }
+featureTable["chicken1c_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken1d_dead"] = { reclaimable = true, blocking = true, unitName = "chicken1d", energy = 0, metal = 0, }
+featureTable["chicken1d_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken1x_dead"] = { reclaimable = true, blocking = true, unitName = "chicken1x", energy = 0, metal = 0, }
+featureTable["chicken1x_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken1y_dead"] = { reclaimable = true, blocking = true, unitName = "chicken1y", energy = 0, metal = 0, }
+featureTable["chicken1y_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken1z_dead"] = { reclaimable = true, blocking = true, unitName = "chicken1z", energy = 0, metal = 0, }
+featureTable["chicken1z_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken2_dead"] = { reclaimable = true, blocking = true, unitName = "chicken2", energy = 0, metal = 0, }
+featureTable["chicken2_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken2b_dead"] = { reclaimable = true, blocking = true, unitName = "chicken2b", energy = 0, metal = 0, }
+featureTable["chicken2b_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken_dodo1_dead"] = { reclaimable = true, blocking = true, unitName = "chicken_dodo1", energy = 0, metal = 0, }
+featureTable["chicken_dodo1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken_dodo2_dead"] = { reclaimable = true, blocking = true, unitName = "chicken_dodo2", energy = 0, metal = 0, }
+featureTable["chicken_dodo2_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chicken_egg"] = { reclaimable = true, blocking = false, energy = 250, metal = 25, }
+featureTable["chicken_eggb"] = { reclaimable = true, blocking = false, energy = 250, metal = 25, }
+featureTable["chicken_eggc"] = { reclaimable = true, blocking = false, energy = 250, metal = 25, }
+featureTable["chicken_eggd"] = { reclaimable = true, blocking = false, energy = 250, metal = 25, }
+featureTable["chickena1_dead"] = { reclaimable = true, blocking = true, unitName = "chickena1", energy = 0, metal = 0, }
+featureTable["chickena1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickena1b_dead"] = { reclaimable = true, blocking = true, unitName = "chickena1b", energy = 0, metal = 0, }
+featureTable["chickena1b_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickena1c_dead"] = { reclaimable = true, blocking = true, unitName = "chickena1c", energy = 0, metal = 0, }
+featureTable["chickena1c_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickena2_dead"] = { reclaimable = true, blocking = true, unitName = "chickena2", energy = 0, metal = 0, }
+featureTable["chickena2_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickena2b_dead"] = { reclaimable = true, blocking = true, unitName = "chickena2b", energy = 0, metal = 0, }
+featureTable["chickena2b_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenc1_dead"] = { reclaimable = true, blocking = true, unitName = "chickenc1", energy = 0, metal = 0, }
+featureTable["chickenc1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenc2_dead"] = { reclaimable = true, blocking = true, unitName = "chickenc2", energy = 0, metal = 0, }
+featureTable["chickenc2_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenc3_dead"] = { reclaimable = true, blocking = true, unitName = "chickenc3", energy = 0, metal = 0, }
+featureTable["chickenc3_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenc3b_dead"] = { reclaimable = true, blocking = true, unitName = "chickenc3b", energy = 0, metal = 0, }
+featureTable["chickenc3b_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenc3c_dead"] = { reclaimable = true, blocking = true, unitName = "chickenc3c", energy = 0, metal = 0, }
+featureTable["chickenc3c_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickend1_dead"] = { reclaimable = true, blocking = true, unitName = "chickend1", energy = 0, metal = 0, }
+featureTable["chickend1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenf1_dead"] = { reclaimable = true, blocking = true, unitName = "chickenf1", energy = 0, metal = 0, }
+featureTable["chickenf1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenf1b_dead"] = { reclaimable = true, blocking = true, unitName = "chickenf1b", energy = 0, metal = 0, }
+featureTable["chickenf1b_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenf2_dead"] = { reclaimable = true, blocking = true, unitName = "chickenf2", energy = 0, metal = 0, }
+featureTable["chickenf2_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenh1_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenh1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenh1b_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenh1b_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenh2_dead"] = { reclaimable = true, blocking = true, unitName = "chickenh2", energy = 0, metal = 0, }
+featureTable["chickenh2_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenh3_dead"] = { reclaimable = true, blocking = true, unitName = "chickenh3", energy = 0, metal = 0, }
+featureTable["chickenh3_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenh4_dead"] = { reclaimable = true, blocking = true, unitName = "chickenh4", energy = 0, metal = 0, }
+featureTable["chickenh4_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenh5_dead"] = { reclaimable = true, blocking = true, unitName = "chickenh5", energy = 0, metal = 0, }
+featureTable["chickenh5_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenp1_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenp1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenr1_dead"] = { reclaimable = true, blocking = true, unitName = "chickenr1", energy = 0, metal = 0, }
+featureTable["chickenr1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenr2_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenr2_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenr3_dead"] = { reclaimable = true, blocking = true, unitName = "chickenr3", energy = 0, metal = 0, }
+featureTable["chickenr3_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickens1_dead"] = { reclaimable = true, blocking = true, unitName = "chickens1", energy = 0, metal = 0, }
+featureTable["chickens1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickens2_dead"] = { reclaimable = true, blocking = true, unitName = "chickens2", energy = 0, metal = 0, }
+featureTable["chickens2_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickens3_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickens3_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenw1_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenw1_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenw1b_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenw1b_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenw1c_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenw1c_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenw1d_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenw1d_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenw2_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["chickenw2_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
 featureTable["cjuno_dead"] = { reclaimable = true, blocking = true, unitName = "cjuno", energy = 0, metal = 388, }
 featureTable["cjuno_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 192, }
-featureTable["cluster1_dead"] = { reclaimable = true, blocking = true, energy = 1, metal = 0, }
-featureTable["cluster2_dead"] = { reclaimable = true, blocking = true, energy = 1, metal = 0, }
 featureTable["consul_dead"] = { reclaimable = true, blocking = true, unitName = "consul", energy = 0, metal = 153, }
 featureTable["consul_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 61, }
 featureTable["coraak_dead"] = { reclaimable = true, blocking = true, unitName = "coraak", energy = 0, metal = 395, }
@@ -402,8 +435,7 @@ featureTable["cordl_dead"] = { reclaimable = true, blocking = true, unitName = "
 featureTable["cordl_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 73, }
 featureTable["cordoom_dead"] = { reclaimable = true, blocking = true, unitName = "cordoom", energy = 0, metal = 1611, }
 featureTable["cordoom_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 644, }
-featureTable["cordrag_dragonsteeth_core"] = { reclaimable = true, blocking = true, unitName = "cordrag", energy = 0, metal = 5, }
-featureTable["cordrag_rockteeth"] = { reclaimable = true, blocking = false, energy = 0, metal = 2, }
+featureTable["cordrag_rockteeth"] = { reclaimable = true, blocking = false, unitName = "cordrag", energy = 0, metal = 2, }
 featureTable["corenaa_dead"] = { reclaimable = true, blocking = true, unitName = "corenaa", energy = 0, metal = 541, }
 featureTable["corerad_dead"] = { reclaimable = true, blocking = true, unitName = "corerad", energy = 0, metal = 486, }
 featureTable["corerad_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 194, }
@@ -431,6 +463,8 @@ featureTable["corflak_dead"] = { reclaimable = true, blocking = true, unitName =
 featureTable["corflak_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 206, }
 featureTable["corfmd_dead"] = { reclaimable = true, blocking = true, unitName = "corfmd", energy = 0, metal = 980, }
 featureTable["corfmd_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 392, }
+featureTable["corfmmm_dead"] = { reclaimable = true, blocking = true, unitName = "corfmmm", energy = 0, metal = 242, }
+featureTable["corfmmm_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 97, }
 featureTable["corfort_fortification_core"] = { reclaimable = true, blocking = true, unitName = "corfort", energy = 0, metal = 15, }
 featureTable["corfort_rockteethx"] = { reclaimable = true, blocking = true, energy = 0, metal = 7, }
 featureTable["corfrad_dead"] = { reclaimable = true, blocking = false, unitName = "corfrad", energy = 0, metal = 80, }
@@ -439,6 +473,8 @@ featureTable["corfus_dead"] = { reclaimable = true, blocking = true, unitName = 
 featureTable["corfus_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 1171, }
 featureTable["corgant_dead"] = { reclaimable = true, blocking = true, unitName = "corgant", energy = 0, metal = 5101, }
 featureTable["corgant_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 2040, }
+featureTable["corgantuw_dead"] = { reclaimable = true, blocking = true, unitName = "corgantuw", energy = 0, metal = 5101, }
+featureTable["corgantuw_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 2040, }
 featureTable["corgarp_dead"] = { reclaimable = true, blocking = true, unitName = "corgarp", energy = 0, metal = 134, }
 featureTable["corgate_dead"] = { reclaimable = true, blocking = true, unitName = "corgate", energy = 0, metal = 2428, }
 featureTable["corgate_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 971, }
@@ -478,8 +514,8 @@ featureTable["cormexp_dead"] = { reclaimable = true, blocking = true, unitName =
 featureTable["cormexp_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 577, }
 featureTable["cormh_dead"] = { reclaimable = true, blocking = false, unitName = "cormh", energy = 0, metal = 119, }
 featureTable["cormh_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 48, }
-featureTable["cormist_dead"] = { reclaimable = true, blocking = true, unitName = "cormist", energy = 0, metal = 134, }
-featureTable["cormist_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 54, }
+featureTable["cormist_dead"] = { reclaimable = true, blocking = true, unitName = "cormist", energy = 0, metal = 100, }
+featureTable["cormist_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 46, }
 featureTable["cormls_dead"] = { reclaimable = true, blocking = true, unitName = "cormls", energy = 0, metal = 157, }
 featureTable["cormls_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 66, }
 featureTable["cormlv_dead"] = { reclaimable = true, blocking = true, unitName = "cormlv", energy = 0, metal = 37, }
@@ -562,7 +598,6 @@ featureTable["cortide_dead"] = { reclaimable = true, blocking = false, unitName 
 featureTable["cortide_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 17, }
 featureTable["cortl_dead"] = { reclaimable = true, blocking = false, unitName = "cortl", energy = 0, metal = 205, }
 featureTable["cortoast_dead"] = { reclaimable = true, blocking = true, unitName = "cortoast", energy = 0, metal = 1507, }
-featureTable["cortoast_dead2"] = { reclaimable = true, blocking = true, energy = 0, metal = 603, }
 featureTable["cortoast_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 241, }
 featureTable["cortron_dead"] = { reclaimable = true, blocking = true, unitName = "cortron", energy = 0, metal = 445, }
 featureTable["cortron_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 178, }
@@ -580,12 +615,9 @@ featureTable["coruwmex_dead"] = { reclaimable = true, blocking = true, unitName 
 featureTable["coruwmex_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 14, }
 featureTable["coruwmme_dead"] = { reclaimable = true, blocking = true, unitName = "coruwmme", energy = 0, metal = 550, }
 featureTable["coruwmme_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 220, }
-featureTable["corfmmm_dead"] = { reclaimable = true, blocking = true, unitName = "corfmmm", energy = 0, metal = 242, }
-featureTable["corfmmm_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 97, }
 featureTable["coruwms_dead"] = { reclaimable = true, blocking = true, unitName = "coruwms", energy = 0, metal = 228, }
 featureTable["coruwms_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 91, }
 featureTable["corvipe_dead"] = { reclaimable = true, blocking = true, unitName = "corvipe", energy = 0, metal = 380, }
-featureTable["corvipe_dead2"] = { reclaimable = true, blocking = true, energy = 0, metal = 152, }
 featureTable["corvipe_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 61, }
 featureTable["corvoyr_dead"] = { reclaimable = true, blocking = true, unitName = "corvoyr", energy = 0, metal = 60, }
 featureTable["corvoyr_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 24, }
@@ -601,52 +633,45 @@ featureTable["corwolv_dead"] = { reclaimable = true, blocking = true, unitName =
 featureTable["csubpen_dead"] = { reclaimable = true, blocking = false, unitName = "csubpen", energy = 0, metal = 596, }
 featureTable["decade_dead"] = { reclaimable = true, blocking = false, unitName = "decade", energy = 0, metal = 197, }
 featureTable["decade_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 97, }
-featureTable["espire1"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["espire2"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["espire3"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["espire4"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["espire5"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["e_chickenq_dead"] = { reclaimable = true, blocking = true, unitName = "e_chickenq", energy = 0, metal = 0, }
+featureTable["e_chickenq_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["epic_chickenq_dead"] = { reclaimable = true, blocking = true, unitName = "epic_chickenq", energy = 0, metal = 0, }
+featureTable["epic_chickenq_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["freefusion_free_fusion_dead"] = { reclaimable = true, blocking = true, unitName = "freefusion", energy = 0, metal = 3300, }
 featureTable["gorg_dead"] = { reclaimable = true, blocking = true, unitName = "gorg", energy = 0, metal = 13959, }
 featureTable["gorg_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 2793, }
+featureTable["h_chickenq_dead"] = { reclaimable = true, blocking = true, unitName = "h_chickenq", energy = 0, metal = 0, }
+featureTable["h_chickenq_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
 featureTable["hllt_dead"] = { reclaimable = true, blocking = true, unitName = "hllt", energy = 0, metal = 120, }
 featureTable["hllt_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 48, }
 featureTable["intruder_dead"] = { reclaimable = true, blocking = true, unitName = "intruder", energy = 0, metal = 822, }
 featureTable["intruder_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 329, }
-featureTable["krogtaar_dead"] = { reclaimable = true, blocking = true, unitName = "krogtaar", energy = 0, metal = 5990, }
-featureTable["krogtaar_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 4472, }
 featureTable["madsam_dead"] = { reclaimable = true, blocking = true, unitName = "madsam", energy = 0, metal = 257, }
 featureTable["madsam_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 103, }
 featureTable["marauder_dead"] = { reclaimable = true, blocking = true, unitName = "marauder", energy = 0, metal = 592, }
 featureTable["marauder_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 237, }
 featureTable["mercury_dead"] = { reclaimable = true, blocking = true, unitName = "mercury", energy = 0, metal = 1022, }
 featureTable["mercury_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 409, }
-featureTable["mushroom11"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom13"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom14"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom15"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom16"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom19"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom21"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom22"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom23"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom24"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom25"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom26"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom27"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom28"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["mushroom29"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["n_chickenq_dead"] = { reclaimable = true, blocking = true, unitName = "n_chickenq", energy = 0, metal = 0, }
+featureTable["n_chickenq_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
 featureTable["nsaclash_dead"] = { reclaimable = true, blocking = false, unitName = "nsaclash", energy = 0, metal = 390, }
 featureTable["nsaclash_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 156, }
 featureTable["packo_dead"] = { reclaimable = true, blocking = true, unitName = "packo", energy = 0, metal = 275, }
 featureTable["packo_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 110, }
-featureTable["rock1"] = { reclaimable = true, blocking = true, energy = 0, metal = 100, }
-featureTable["rock500"] = { reclaimable = true, blocking = true, energy = 0, metal = 500, }
+featureTable["pedro1"] = { reclaimable = true, blocking = true, energy = 100, metal = 0, }
+featureTable["pedro2"] = { reclaimable = true, blocking = true, energy = 100, metal = 0, }
+featureTable["pedro3"] = { reclaimable = true, blocking = true, energy = 100, metal = 0, }
+featureTable["pedro4"] = { reclaimable = true, blocking = true, energy = 100, metal = 0, }
+featureTable["pedro5"] = { reclaimable = true, blocking = true, energy = 100, metal = 0, }
+featureTable["pedro6"] = { reclaimable = true, blocking = true, energy = 100, metal = 0, }
+featureTable["peyote1"] = { reclaimable = true, blocking = false, energy = 5, metal = 0, }
+featureTable["peyote2"] = { reclaimable = true, blocking = false, energy = 5, metal = 0, }
+featureTable["peyote3"] = { reclaimable = true, blocking = false, energy = 5, metal = 0, }
+featureTable["peyote4"] = { reclaimable = true, blocking = false, energy = 5, metal = 0, }
 featureTable["screamer_dead"] = { reclaimable = true, blocking = true, unitName = "screamer", energy = 0, metal = 1145, }
 featureTable["screamer_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 458, }
 featureTable["shiva_dead"] = { reclaimable = true, blocking = true, unitName = "shiva", energy = 0, metal = 937, }
 featureTable["shiva_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 375, }
-featureTable["smothdeadtree1"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["smothtree123dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
 featureTable["tawf001_dead"] = { reclaimable = true, blocking = true, unitName = "tawf001", energy = 0, metal = 114, }
 featureTable["tawf001_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 46, }
 featureTable["tawf009_dead"] = { reclaimable = true, blocking = false, unitName = "tawf009", energy = 0, metal = 1332, }
@@ -657,22 +682,24 @@ featureTable["tawf114_dead"] = { reclaimable = true, blocking = true, unitName =
 featureTable["tawf114_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 244, }
 featureTable["trem_dead"] = { reclaimable = true, blocking = true, unitName = "trem", energy = 0, metal = 1118, }
 featureTable["trem_heap"] = { reclaimable = true, blocking = false, energy = 0, metal = 527, }
-featureTable["zero_aa_cluster1_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_aa_cluster2_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_aa_cluster3_dead"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_1"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_1_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_2"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_2_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_3"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_3_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_4"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_4_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_5"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_5_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_6"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_6_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_7"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_ad0_senegal_7_large"] = { reclaimable = false, blocking = true, energy = 0, metal = 0, }
-featureTable["zero_rock1"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["ve_chickenq_dead"] = { reclaimable = true, blocking = true, unitName = "ve_chickenq", energy = 0, metal = 0, }
+featureTable["ve_chickenq_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["vh_chickenq_dead"] = { reclaimable = true, blocking = true, unitName = "vh_chickenq", energy = 0, metal = 0, }
+featureTable["vh_chickenq_heap"] = { reclaimable = true, blocking = true, energy = 0, metal = 0, }
+featureTable["treetype0"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype1"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype2"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype3"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype4"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype5"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype6"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype7"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype8"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype9"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype10"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype11"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype12"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype13"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype14"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
+featureTable["treetype15"] = { reclaimable = true, blocking = true, energy = 250, metal = 0, }
 featureTable["geovent"] = { reclaimable = false, blocking = false, energy = 0, metal = 0, }

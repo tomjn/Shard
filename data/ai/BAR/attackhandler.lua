@@ -1,6 +1,7 @@
-shard_include("common")
+shard_include "common"
 
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -8,10 +9,8 @@ local function EchoDebug(inStr)
 	end
 end
 
-local fmod = math.fmod
 local floor = math.floor
 local ceil = math.ceil
-local mod = math.mod
 
 AttackHandler = class(Module)
 
@@ -36,13 +35,13 @@ end
 
 function AttackHandler:Update()
 	local f = game:Frame()
-	if mod(f, 150) == 0 then
+	if f % 150 == 0 then
 		self:DraftSquads()
 	end
-	if mod(f, 60) == 0 then
+	if f % 60 == 0 then
 		self:DoMovement()
 	end
-	if mod(f, 30) == 0 then
+	if f % 30 == 0 then
 		-- actually retargets each squad every 15 seconds
 		self:ReTarget()
 	end
@@ -104,7 +103,7 @@ function AttackHandler:DraftSquads()
 				self.count[mtype] = 0
 				self.recruits[mtype] = {}
 				ai.hasAttacked = ai.hasAttacked + 1
-				self.counter[mtype] = self.counter[mtype] + 1
+				self.counter[mtype] = math.min(maxAttackCounter, self.counter[mtype] + 1)
 			end
 		end
 	end
@@ -211,11 +210,11 @@ function AttackHandler:DoMovement()
 			local idle = 0
 			local maxRange = 0
 			for iu, member in pairs(squad.members) do
+				if member.damaged then damaged = damaged + 1 end
+				if member.idle then idle = idle + 1 end
+				if member.range > maxRange then maxRange = member.range end
 				local unit = member.unit:Internal()
-				if unit ~= nil then
-					if member.damaged then damaged = damaged + 1 end
-					if member.idle then idle = idle + 1 end
-					if member.range > maxRange then maxRange = member.range end
+				if unit then
 					local upos = unit:GetPosition()
 					local cdist = Distance(upos, midPos)
 					if cdist > congDist then
@@ -258,9 +257,6 @@ function AttackHandler:DoMovement()
 					end
 					member.lastpos.x = upos.x
 					member.lastpos.z = upos.z
-				else
-					EchoDebug("leaving ignote units")
-					table.remove(squad.members, iu)
 				end
 			end
 			local congregate = false
@@ -417,7 +413,7 @@ end
 function AttackHandler:NeedMore(attkbehaviour)
 	local mtype = attkbehaviour.mtype
 	local level = attkbehaviour.level
-	self.counter[mtype] = self.counter[mtype] + (level * 0.7) -- 0.75
+	self.counter[mtype] = math.min(maxAttackCounter, self.counter[mtype] + (level * 0.7) ) -- 0.75
 	EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 end
 
@@ -426,14 +422,12 @@ function AttackHandler:NeedLess(mtype, subtract)
 	if mtype == nil then
 		for mtype, count in pairs(self.counter) do
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-			self.counter[mtype] = self.counter[mtype] - subtract
-			self.counter[mtype] = math.max(self.counter[mtype], minAttackCounter)
+			self.counter[mtype] = math.max(self.counter[mtype] - subtract, minAttackCounter)
 			EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 		end
 	else
 		if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
-		self.counter[mtype] = self.counter[mtype] - subtract
-		self.counter[mtype] = math.max(self.counter[mtype], minAttackCounter)
+		self.counter[mtype] = math.max(self.counter[mtype] - subtract, minAttackCounter)
 		EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 	end
 end
