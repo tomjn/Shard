@@ -37,8 +37,6 @@ function CountHandler:Init()
 	ai.breakthroughCount = 0
 	ai.siegeCount = 0
 	ai.reclaimerCount = 0
-	ai.bigEnergyCount = 0
-	ai.cleanable = {}
 	ai.assistCount = 0
 	
 	self:InitializeNameCounts()

@@ -613,27 +613,6 @@ Eco2={
 	armfmmm=1,
 }
 
-cleaners = {
-	armbeaver = 1,
-	cormuskrat = 1,
-	armcom = 1,
-	corcom = 1,
-	armdecom = 1,
-	cordecom = 1,
-}
-
-cleanable = {
-	armsolar='ground',
-	corsolar='ground',
-	armadvsol = 'ground',
-	coradvsol = 'ground',
-	armtide = 'floating',
-	cortite = 'floating',
-	armfmkr = 'floating',
-	corfmkr = 'floating',
-	cormakr = 'ground',
-	armmakr = 'ground',
-}
 
 -- minimum, maximum, starting point units required to attack, bomb
 minAttackCounter = 8
