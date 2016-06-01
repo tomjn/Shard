@@ -21,14 +21,18 @@ end
 
 function ControlPointHandler:Points()
 	if ShardSpringLua then
-		return Script.LuaRules.ControlPoints() or {}
+		if Script.LuaRules('ControlPoints') then
+			return Script.LuaRules.ControlPoints() or {}
+		end
 	end
 	return {}
 end
 
 function ControlPointHandler:CaptureRadius()
 	if ShardSpringLua then
-		return Script.LuaRules.CaptureRadius()
+		if Script.LuaRules('CaptureRadius') then
+			return Script.LuaRules.CaptureRadius()
+		end
 	end
 	return 500
 end
