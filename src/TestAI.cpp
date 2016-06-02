@@ -121,7 +121,7 @@ CTestAI::CTestAI(IGame* game)
 	lua_settable(this->L, -3);
 
 	// now start the wheels turning
-	LoadLuaFile("ai.lua");
+	LoadLuaFile("boot.lua");
 }
 
 
