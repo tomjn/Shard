@@ -147,4 +147,12 @@ local game = {}
 		end
 	end
 
+	function game:CaptureRadius()
+		return 500
+	end
+
+	function game:NonCapturingUnits()
+		return {}
+	end
+
 return game

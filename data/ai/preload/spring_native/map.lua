@@ -78,6 +78,16 @@ local map = {}
 		return f
 	end
 
+	function map:GetControlPoints()
+		-- not sure this can be implemented in the Spring C++ AI interface
+		return {}
+	end
+
+	function map:AreControlPoints()
+		-- not sure this can be implemented in the Spring C++ AI interface
+		return false
+	end
+
 	function map:MapDimensions() -- returns a Position holding the dimensions of the map
 		local m = game_engine:Map()
 		return m:MapDimensions()
