@@ -128,4 +128,18 @@ local game = {}
 		end]]--
 	end
 
+	function game:CaptureRadius()
+		if Script.LuaRules('CaptureRadius') then
+			return Script.LuaRules.CaptureRadius() or 500
+		end
+		return 500
+	end
+
+	function game:NonCapturingUnits()
+		if Script.LuaRules('NonCapturingUnits') then
+			return Script.LuaRules.NonCapturingUnits() or {}
+		end
+		return {}
+	end
+
 return game
