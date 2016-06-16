@@ -1,5 +1,4 @@
-
-local AI = class(AIBase)
+AI = class(AIBase)
 
 function AI:Init()
 	ai = self
