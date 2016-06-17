@@ -160,6 +160,8 @@ function map:TidalStrength() -- returns tidal strength
 	return Game.tidal
 end
 
+-- DRAWING FUNCTIONS
+
 function map:DrawRectangle(pos1, pos2, color, label, filled, channel)
 	channel = channel or 1
 	color = color or {}
@@ -216,6 +218,8 @@ end
 function map:DisplayDrawings(onOff)
 	SendToUnsynced('ShardDrawDisplay', onOff)
 end
+
+-- END DRAWING FUNCTIONS
 
 	-- game.map = map
 return map
