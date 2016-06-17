@@ -160,57 +160,61 @@ function map:TidalStrength() -- returns tidal strength
 	return Game.tidal
 end
 
-function map:DrawAddRectangle(pos1, pos2, color, label, filled, channel)
+function map:DrawRectangle(pos1, pos2, color, label, filled, channel)
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawAddRectangle', pos1.x, pos1.z, pos2.x, pos2.z, color[1], color[2], color[3], color[4], label, filled, self.ai.game:GetTeamID(), channel)
 end
 
-function map:DrawEraseRectangle(pos1, pos2, color, label, filled, channel)
+function map:EraseRectangle(pos1, pos2, color, label, filled, channel)
 	channel = channel or 1
 	color = color or {}
 	return SendToUnsynced('ShardDrawEraseRectangle', pos1.x, pos1.z, pos2.x, pos2.z, color[1], color[2], color[3], color[4], label, filled, self.ai.game:GetTeamID(), channel)
 end
 
-function map:DrawAddCircle(pos, radius, color, label, filled, channel)
+function map:DrawCircle(pos, radius, color, label, filled, channel)
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawAddCircle', pos.x, pos.z, radius, color[1], color[2], color[3], color[4], label, filled, self.ai.game:GetTeamID(), channel)
 end
 
-function map:DrawEraseCircle(pos, radius, color, label, filled, channel)
+function map:EraseCircle(pos, radius, color, label, filled, channel)
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawEraseCircle', pos.x, pos.z, radius, color[1], color[2], color[3], color[4], label, filled, self.ai.game:GetTeamID(), channel)
 end
 
-function map:DrawAddLine(pos1, pos2, color, label, channel)
+function map:DrawLine(pos1, pos2, color, label, channel)
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawAddLine', pos1.x, pos1.z, pos2.x, pos2.z, color[1], color[2], color[3], color[4], label, self.ai.game:GetTeamID(), channel)
 end
 
-function map:DrawEraseLine(pos1, pos2, color, label, channel)
+function map:EraseLine(pos1, pos2, color, label, channel)
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawEraseLine', pos1.x, pos1.z, pos2.x, pos2.z, color[1], color[2], color[3], color[4], label, self.ai.game:GetTeamID(), channel)
 end
 
-function map:DrawAddPoint(pos, color, label, channel)
+function map:DrawPoint(pos, color, label, channel)
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawAddPoint', pos.x, pos.z, color[1], color[2], color[3], color[4], label, self.ai.game:GetTeamID(), channel)
 end
 
-function map:DrawErasePoint(pos, color, label, channel)
+function map:ErasePoint(pos, color, label, channel)
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawErasePoint', pos.x, pos.z, color[1], color[2], color[3], color[4], label, self.ai.game:GetTeamID(), channel)
 end
 
-function map:DrawClearShapes(channel)
+function map:EraseAll(channel)
 	channel = channel or 1
 	SendToUnsynced('ShardDrawClearShapes', self.ai.game:GetTeamID(), channel)
+end
+
+function map:DisplayDrawings(onOff)
+	SendToUnsynced('ShardDrawDisplay', onOff)
 end
 
 	-- game.map = map
