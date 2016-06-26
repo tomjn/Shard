@@ -326,7 +326,7 @@ local function DrawLabels(shapes)
 		if shape.label and spIsSphereInView(shape.x, shape.y, shape.z, 50) then
 			-- colorByTable(shape.color)
 			local sx, sy = spWorldToScreenCoords(shape.x, shape.y, shape.z)
-			local halfWidth = myFont:GetTextWidth(shape.label) * 6
+			local halfWidth = shape.halfLabelWidth
 			for l = 1, #labels do
 				local label = labels[l]
 				if mAbs(label.sx - sx) < halfWidth + label.halfWidth then
@@ -443,6 +443,9 @@ local function AddShape(shape, teamID, channel)
 		shape.textOutlineColor = {1,1,1,1}
 	else
 		shape.textOutlineColor = {0,0,0,1}
+	end
+	if shape.label then
+		shape.halfLabelWidth = myFont:GetTextWidth(shape.label) * 6
 	end
 	local shapes = GetShapes(teamID, channel)
 	local shapeString = GetShapeString(shape)
