@@ -186,16 +186,16 @@ function map:EraseCircle(pos, radius, color, label, filled, channel)
 	SendToUnsynced('ShardDrawEraseCircle', pos.x, pos.z, radius, color[1], color[2], color[3], color[4], label, filled, self.ai.game:GetTeamID(), channel)
 end
 
-function map:DrawLine(pos1, pos2, color, label, channel)
+function map:DrawLine(pos1, pos2, color, label, arrow, channel)
 	channel = channel or 1
 	color = color or {}
-	SendToUnsynced('ShardDrawAddLine', pos1.x, pos1.z, pos2.x, pos2.z, color[1], color[2], color[3], color[4], label, self.ai.game:GetTeamID(), channel)
+	SendToUnsynced('ShardDrawAddLine', pos1.x, pos1.z, pos2.x, pos2.z, color[1], color[2], color[3], color[4], label, arrow, self.ai.game:GetTeamID(), channel)
 end
 
-function map:EraseLine(pos1, pos2, color, label, channel)
+function map:EraseLine(pos1, pos2, color, label, arrow, channel)
 	channel = channel or 1
 	color = color or {}
-	SendToUnsynced('ShardDrawEraseLine', pos1.x, pos1.z, pos2.x, pos2.z, color[1], color[2], color[3], color[4], label, self.ai.game:GetTeamID(), channel)
+	SendToUnsynced('ShardDrawEraseLine', pos1.x, pos1.z, pos2.x, pos2.z, color[1], color[2], color[3], color[4], label, arrow, self.ai.game:GetTeamID(), channel)
 end
 
 function map:DrawPoint(pos, color, label, channel)

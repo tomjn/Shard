@@ -10,6 +10,8 @@ function widget:GetInfo()
 	}
 end
 
+local lineArrowSize = 80
+
 local aiTeams = {}
 local emptyShapeIDs = {}
 local teamChannelByID = {}
@@ -117,6 +119,12 @@ local function trim(s)
   return s:match'^()%s*$' and '' or s:match'^%s*(.*%S)'
 end
 
+local function normalizeVector2d(vx, vy)
+	if vx == 0 and vy == 0 then return 0, 0 end
+	local dist = mSqrt(vx*vx + vy*vy)
+	return vx/dist, vy/dist, dist
+end
+
 -- using GL_POINT
 local function doPoint(x, y, z)
 	glVertex(x, y, z)
@@ -167,7 +175,7 @@ local function doEmptyCircle2d(x, y, radius, sides)
 end
 
 -- using GL_TRIANGLE_STRIP
-local function doRectangle(x1, z1, x2, z2, y)
+local function doRectangleFlat(x1, z1, x2, z2, y)
 	glVertex(x1, y, z1)
 	glVertex(x2, y, z1)
 	glVertex(x2, y, z2)
@@ -175,6 +183,16 @@ local function doRectangle(x1, z1, x2, z2, y)
 	glVertex(x1, y, z2)
 	glVertex(x2, y, z2)
 end
+
+-- using GL_TRIANGLE_STRIP
+-- local function doRectangleContoured(x1, z1, x2, z2, y1, y2, y3, y4)
+-- 	glVertex(x1, y1, z1)
+-- 	glVertex(x2, y2, z1)
+-- 	glVertex(x2, y3, z2)
+-- 	glVertex(x1, y1, z1)
+-- 	glVertex(x1, y4, z2)
+-- 	glVertex(x2, y3, z2)
+-- end
 
 -- using GL_LINE_LOOP
 local function doEmptyRectangle(x1, z1, x2, z2, y)
@@ -223,7 +241,7 @@ local function DrawRectangles(shapes)
 				if type(shape.filled) == 'string' then
 					glBlending(shape.filled)
 				end
-				glBeginEnd(GL_TRIANGLE_STRIP, doRectangle, shape.x1, shape.z1, shape.x2, shape.z2, shape.y)
+				glBeginEnd(GL_TRIANGLE_STRIP, doRectangleFlat, shape.x1, shape.z1, shape.x2, shape.z2, shape.y)
 				if type(shape.filled) == 'string' then
 					glBlending('reset')
 				end
@@ -273,6 +291,9 @@ local function DrawLines(shapes)
 		if shape.type == "line" then
 			colorByTable(shape.color)
 			glBeginEnd(GL_LINE_STRIP, doLine, shape.x1, shape.y1, shape.z1, shape.x2, shape.y2, shape.z2)
+			if shape.arrow then
+				glBeginEnd(GL_TRIANGLE_STRIP, doTriangle, shape.x2, shape.y2, shape.z2, shape.ax1, shape.y2, shape.az1, shape.ax2, shape.y2, shape.az2)
+			end
 		end
 	end
 	glLineWidth(1)
@@ -475,6 +496,10 @@ local function AddRectangle(x1, z1, x2, z2, color, label, filled, teamID, channe
 		z1 = z1,
 		x2 = x2,
 		z2 = z2,
+		-- y1 = spGetGroundHeight(x1, z1),
+		-- y2 = spGetGroundHeight(x2, z1),
+		-- y3 = spGetGroundHeight(x2, z2),
+		-- y4 = spGetGroundHeight(x1, z2),
 		color = color,
 		label = label,
 		filled = filled,
@@ -498,7 +523,7 @@ local function AddCircle(x, z, radius, color, label, filled, teamID, channel)
 	return AddShape(shape, teamID, channel)
 end
 
-local function AddLine(x1, z1, x2, z2, color, label, teamID, channel)
+local function AddLine(x1, z1, x2, z2, color, label, arrow, teamID, channel)
 	x1, z1, x2, z2 = mCeil(x1), mCeil(z1), mCeil(x2), mCeil(z2)
 	local xAvg = mCeil( (x1 + x2) / 2 )
 	local zAvg = mCeil( (z1 + z2) / 2 )
@@ -515,7 +540,19 @@ local function AddLine(x1, z1, x2, z2, color, label, teamID, channel)
 		y2 = spGetGroundHeight(x2, z2),
 		color = color,
 		label = label,
+		arrow = arrow,
 	}
+	if arrow then
+		local dx = x2 - x1
+		local dz = z2 - z1
+		local vx, vz, dist = normalizeVector2d(dx, dz)
+		local arrowSize = mMin(lineArrowSize, dist)
+		local arrowSizeHalf = arrowSize / 2
+		local backX, backZ = x2-(vx*arrowSize), z2-(vz*arrowSize)
+		local ax1, az1 = backX+(vz*arrowSizeHalf), backZ-(vx*arrowSizeHalf)
+		local ax2, az2 = backX-(vz*arrowSizeHalf), backZ+(vx*arrowSizeHalf)
+		shape.ax1, shape.az1, shape.ax2, shape.az2 = ax1, az1, ax2, az2
+	end
 	return AddShape(shape, teamID, channel)
 end
 
@@ -627,8 +664,8 @@ local function EraseCircle(x, z, radius, color, label, filled, teamID, channel)
 	EraseShapes({x=x, z=z, radius=radius, color=color, label=label, filled=filled}, teamID, channel)
 end
 
-local function EraseLine(x1, z1, x2, z2, color, label, teamID, channel)
-	EraseShapes({x1=x1, z1=z1, x2=x2, z2=z2, color=color, label=label}, teamID, channel)
+local function EraseLine(x1, z1, x2, z2, color, label, arrow, teamID, channel)
+	EraseShapes({x1=x1, z1=z1, x2=x2, z2=z2, color=color, label=label, arrow=arrow}, teamID, channel)
 end
 
 local function ErasePoint(x, z, color, label, teamID, channel)
