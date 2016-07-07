@@ -15,13 +15,33 @@ end
 function Behaviour:UnitBuilt(unit)
 end
 
+function Behaviour:OwnerBuilt()
+end
+
 function Behaviour:UnitDead(unit)
+end
+
+function Behaviour:OwnerDied()
+	return
 end
 
 function Behaviour:UnitDamaged(unit,attacker,damage)
 end
 
+function Behaviour:OwnerDamaged(attacker,damage)
+end
+
 function Behaviour:UnitIdle(unit)
+end
+
+function Behaviour:OwnerIdle()
+end
+
+function Behaviour:UnitMoveFailed(unit)
+	self:UnitIdle(unit)
+end
+
+function Behaviour:OwnerMoveFailed()
 end
 
 function Behaviour:SetUnit(unit)
@@ -54,14 +74,6 @@ end
 
 function Behaviour:Passive()
 	return false
-end
-
-function Behaviour:UnitMoveFailed(unit)
-	self:UnitIdle(unit)
-end
-
-function Behaviour:OwnerDied()
-	return
 end
 
 function Behaviour:EchoDebug(...)

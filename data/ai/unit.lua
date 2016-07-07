@@ -42,6 +42,9 @@ function Unit:UnitBuilt(unit)
 	self:ElectBehaviour()
 	for k,v in pairs(self.behaviours) do
 		v:UnitBuilt(unit)
+		if unit.engineID == self.engineID then
+			v:OwnerBuilt()
+		end
 	end
 end
 
@@ -66,18 +69,27 @@ end
 function Unit:UnitDamaged(unit,attacker,damage)
 	for k,v in pairs(self.behaviours) do
 		v:UnitDamaged(unit,attacker,damage)
+		if unit.engineID == self.engineID then
+			v:OwnerDamaged(attacker,damage)
+		end
 	end
 end
 
 function Unit:UnitIdle(unit)
 	for k,v in pairs(self.behaviours) do
 		v:UnitIdle(unit)
+		if unit.engineID == self.engineID then
+			v:OwnerIdle()
+		end
 	end
 end
 
 function Unit:UnitMoveFailed(unit)
 	for k,v in pairs(self.behaviours) do
 		v:UnitMoveFailed(unit)
+		if unit.engineID == self.engineID then
+			v:OwnerMoveFailed()
+		end
 	end
 end
 
