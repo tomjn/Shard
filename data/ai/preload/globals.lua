@@ -2,6 +2,7 @@
 -- Shard AI
 if ShardSpringLua then
 	function shard_include( file )
+		-- Spring.Echo("shard_include", file)
 		if type(file) ~= 'string' then
 			return nil
 		end
