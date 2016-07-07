@@ -42,6 +42,7 @@ function Behaviour:UnitMoveFailed(unit)
 end
 
 function Behaviour:OwnerMoveFailed()
+	self:OwnerIdle()
 end
 
 function Behaviour:SetUnit(unit)
