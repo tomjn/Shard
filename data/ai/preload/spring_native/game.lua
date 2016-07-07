@@ -7,7 +7,7 @@ local game = {}
 		local parts = {...}
 		for i = 1, #parts do
 			local part = parts[i]
-			str = str .. part
+			str = str .. tostring(part)
 			if i < #parts then str = str .. ", " end
 		end
 		return game_engine:SendToConsole(str)
