@@ -21,7 +21,7 @@ end
 function Behaviour:UnitDead(unit)
 end
 
-function Behaviour:OwnerDied()
+function Behaviour:OwnerDead()
 	return
 end
 

@@ -59,7 +59,7 @@ function Unit:UnitDead(unit)
 		if self.behaviours then
 			-- game:SendToConsole("unit died, removing behaviours", self.engineID, self:Internal():Name())
 			for k,v in pairs(self.behaviours) do
-				self.behaviours[k]:OwnerDied()
+				self.behaviours[k]:OwnerDead()
 				self.behaviours[k] = nil
 			end
 			self.behaviours = nil

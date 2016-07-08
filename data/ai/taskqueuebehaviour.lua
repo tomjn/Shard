@@ -40,7 +40,7 @@ function TaskQueueBehaviour:OwnerMoveFailed()
 	self:OwnerIdle()
 end
 
-function TaskQueueBehaviour:OwnerDied()
+function TaskQueueBehaviour:OwnerDead()
 	if self.waiting ~= nil then
 		for k,v in pairs(self.waiting) do
 			ai.modules.sleep.Kill(self.waiting[k])
