@@ -16,24 +16,15 @@ function AttackerBehaviour:Init()
 	self.dead = false
 end
 
-function AttackerBehaviour:UnitBuilt(unit)
-	if unit.engineID == self.unit.engineID then
-		self:SetInitialState()
-		self.attacking = false
-		ai.attackhandler:AddRecruit(self)
-	end
+function AttackerBehaviour:OwnerBuilt()
+	self:SetInitialState()
+	self.attacking = false
+	ai.attackhandler:AddRecruit(self)
 end
 
-
-function AttackerBehaviour:UnitDead(unit)
-	--
-end
-
-function AttackerBehaviour:UnitIdle(unit)
-	if unit.engineID == self.unit.engineID then
-		self.attacking = false
-		ai.attackhandler:AddRecruit(self)
-	end
+function AttackerBehaviour:OwnerIdle()
+	self.attacking = false
+	ai.attackhandler:AddRecruit(self)
 end
 
 function AttackerBehaviour:AttackCell(cell)
@@ -87,7 +78,7 @@ function AttackerBehaviour:SetInitialState()
 	end
 end
 
-function AttackerBehaviour:OwnerDied()
+function AttackerBehaviour:OwnerDead()
 	ai.attackhandler:RemoveRecruit(self)
 	self.attacking = nil
 	self.active = nil
