@@ -2,6 +2,8 @@
 
 Shard is an engine agnostic RTS AI framework for games. Currently implementing the Spring RTS Engine. It provides a C++ API with wrappers for a writing AI code in a lua environment.
 
+The best documentation is at https://shard.tomjn.com although there's some of the most prominent information below
+
 ## Building For The Spring Engine
 
 For *nix operating systems, clone into the AI directory giving a Shard folder alongside the other AIs, and build the engine as normal. Shard will be built along with the other AIs automatically if all is set up correctly.
