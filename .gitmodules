@@ -1,6 +1,3 @@
-[submodule "data/ai/EvoRTS"]
-	path = data/ai/EvoRTS
-	url = https://github.com/EvolutionRTS/Evolution-RTS-Shard.git
 [submodule "data/ai/BA"]
 	path = data/ai/BA
 	url = https://github.com/eronoobos/BABAR-The-Shardifant.git
