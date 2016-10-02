@@ -10,4 +10,4 @@ env:
     - LUA_VERSION=5.1.4
 
 script:
-    - ./lua/lua data/ai/boot.lua
+    - ./runtests.sh
