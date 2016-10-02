@@ -322,18 +322,18 @@ end
 local function DrawUnits(shapes)
 	glDepthTest(false)
 	glLineWidth(3)
-	glPushMatrix()
 	for i = 1, #shapes do
 		local shape = shapes[i]
 		if shape.type == "unit" then
 			colorByTable(shape.color)
+			glPushMatrix()
 			glTranslate(shape.x, shape.y, shape.z)
 			glBillboard()
 			glBeginEnd(GL_LINE_LOOP, doEmptyCircle2d, 0, 0, shape.radius, shape.sides)
+			glPopMatrix()
 		end
 	end
 	glColor(1, 1, 1, 0.5)
-	glPopMatrix()
 	glLineWidth(1)
 	glDepthTest(true)
 end
@@ -772,8 +772,8 @@ function widget:Initialize()
 	BindCommand("ShardDrawEraseUnit", EraseUnit)
 	BindCommand("ShardDrawClearShapes", ClearShapes)
 	BindCommand("ShardDrawDisplay", DisplayOnOff)
-	myFont = glLoadFont('LuaUI/Fonts/FreeSansBold.otf', 16, 4, 5)
-	myMonoFont = glLoadFont('LuaUI/Fonts/DejaVuSansMono-Bold.ttf', 16, 4, 5)
+	myFont = glLoadFont('LuaUI/Fonts/FreeSansBold.otf', 16, 4, 5) or glLoadFont('fonts/FreeSansBold.otf', 16, 4, 5)
+	myMonoFont = glLoadFont('LuaUI/Fonts/DejaVuSansMono-Bold.ttf', 16, 4, 5) or myFont
 	-- myFont:SetAutoOutlineColor(true)
 end
 

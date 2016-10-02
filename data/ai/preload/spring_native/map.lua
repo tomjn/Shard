@@ -158,6 +158,8 @@ function map:DrawRectangle(pos1, pos2, color, label, filled, channel)
 end
 
 function map:EraseRectangle(pos1, pos2, color, label, filled, channel)
+	pos1 = pos1 or {}
+	pos2 = pos2 or {}
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawEraseRectangle', pos1.x, pos1.z, pos2.x, pos2.z, color[1], color[2], color[3], color[4], label, filled, self.ai.game:GetTeamID(), channel)
@@ -182,6 +184,8 @@ function map:DrawLine(pos1, pos2, color, label, arrow, channel)
 end
 
 function map:EraseLine(pos1, pos2, color, label, arrow, channel)
+	pos1 = pos1 or {}
+	pos2 = pos2 or {}
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawEraseLine', pos1.x, pos1.z, pos2.x, pos2.z, color[1], color[2], color[3], color[4], label, arrow, self.ai.game:GetTeamID(), channel)
@@ -194,6 +198,7 @@ function map:DrawPoint(pos, color, label, channel)
 end
 
 function map:ErasePoint(pos, color, label, channel)
+	pos = pos or {}
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawErasePoint', pos.x, pos.z, color[1], color[2], color[3], color[4], label, self.ai.game:GetTeamID(), channel)

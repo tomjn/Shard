@@ -9,13 +9,10 @@ if ShardSpringLua then
 		local baseFile = "luarules/gadgets/ai/" .. file .. ".lua"
 		local preloadFile = "luarules/gadgets/ai/preload/" .. file .. ".lua"
 		if VFS.FileExists(gameFile) then
-			-- Spring.Echo("got gameFile", gameFile)
 			return VFS.Include(gameFile)
 		elseif VFS.FileExists(baseFile) then
-			-- Spring.Echo("got baseFile", baseFile)
 			return VFS.Include(baseFile)
 		elseif VFS.FileExists(preloadFile) then
-			-- Spring.Echo("got preloadFile", preloadFile)
 			return VFS.Include(preloadFile)
 		end
 	end

@@ -1,3 +1,12 @@
+local function SendToUnsynced(command, ...)
+	-- game_engine:SendToContent(command .. dataToString(...))
+	local buff = io.open('sharddrawbuffer', 'a')
+	if buff then
+		buff:write(command .. dataToString(...) .. "\n")
+		buff:close()
+	end
+end
+
 local game = {}
 	--game_engine
 
@@ -157,6 +166,14 @@ local game = {}
 
 	function game:ControlPointNonCapturingUnits()
 		return {}
+	end
+
+	function game:StartTimer(name)
+		SendToUnsynced('ShardStartTimer', name)
+	end
+
+	function game:StopTimer(name)
+		SendToUnsynced('ShardStopTimer', name)
 	end
 
 return game
