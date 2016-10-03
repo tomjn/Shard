@@ -1,0 +1,13 @@
+language: ruby
+
+before_script:
+    - ./travis.sh
+env:
+    - LUA_VERSION=master
+    - LUA_VERSION=5.2.1
+    - LUA_VERSION=5.2
+    - LUA_VERSION=5.1.5
+    - LUA_VERSION=5.1.4
+
+script:
+    - ./runtests.sh

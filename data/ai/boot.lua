@@ -5,7 +5,7 @@ if not ShardSpringLua then
 	require("preload/globals")
 end
 
-require( "ai.lua" )
+require( "ai" )
 
 -- create and use an AI
 if ShardSpringLua then

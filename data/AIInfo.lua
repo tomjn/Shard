@@ -35,7 +35,7 @@ local infos = {
 	},
 	{
 		key    = 'url',
-		value  = 'http://www.darkstars.co.uk',
+		value  = 'https://shard.tomjn.com',
 		desc   = 'URL with more detailed info about the AI',
 	},
 	{
