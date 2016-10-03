@@ -63,3 +63,11 @@ end
 function Behaviour:OwnerDied()
 	return
 end
+
+function Behaviour:Name()
+	return "UnknownBehaviour"
+end
+
+function Behaviour:EchoDebug(inStr)
+	game:SendToConsole(self:Name() .. ": " .. inStr)
+end
