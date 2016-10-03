@@ -7,6 +7,6 @@ do
 
     if [ "$EXTENSION" == "lua" ]
     then
-        $TRAVIS_BUILD_DIR/lua/luac -p $file
+        $TRAVIS_BUILD_DIR/lua/luac -p "$file"
     fi
 done
