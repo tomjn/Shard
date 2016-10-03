@@ -8,7 +8,7 @@ if ShardSpringLua then
 	-- it's a LuaAI inside a game archive!
 	api.game = shard_include "spring_lua/game"
 	api.map = shard_include "spring_lua/map"
-else if game_engine then
+elseif game_engine then
 	 -- it's a native AI!
 	api.game = shard_include "spring_native/game"
 	api.map = shard_include "spring_native/map"
