@@ -1,5 +1,5 @@
 cd data/ai
-../../lua/lua boot.lua
+$TRAVIS_BUILD_DIR/lua/lua boot.lua
 
 for file in `find .`
 do
@@ -7,11 +7,6 @@ do
 
     if [ "$EXTENSION" == "lua" ]
     then
-        RESULTS=`../../luac -p $file`
-
-        if [ "$RESULTS" != "No syntax errors detected in $file" ]
-        then
-            echo $RESULTS
-        fi
+        $TRAVIS_BUILD_DIR/luac -p $file
     fi
 done
