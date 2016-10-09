@@ -1,13 +1,12 @@
 #ifndef IDAMAGE_H
 #define IDAMAGE_H
 
-#include <boost/shared_ptr.hpp>
-
 #include "../Position.h"
+#include <memory>
 
 class IDamage {
 public:
-	typedef boost::shared_ptr<IDamage> Ptr;
+	typedef std::shared_ptr<IDamage> Ptr;
 
 	virtual ~IDamage(){}
 

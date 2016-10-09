@@ -7,7 +7,7 @@ class CSpringDamage;
 
 class CSpringDamage : public IDamage {
 public:
-	typedef boost::shared_ptr<CSpringDamage> Ptr;
+	typedef std::shared_ptr<CSpringDamage> Ptr;
 
 	CSpringDamage(CSpringGame* game, springai::OOAICallback* callback, SUnitDamagedEvent* evt);
 	virtual ~CSpringDamage() override;
