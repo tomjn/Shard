@@ -7,9 +7,8 @@ set(additionalCompileFlags "")
 set(additionalLibraries    ${Cpp_AIWRAPPER_TARGET} CUtils)
 
 
-
-if ("${PROJECT_NAME}" EQUAL "Spring")
-
+get_directory_property(hasParent PARENT_DIRECTORY)
+if (hasParent)
 	if    (BUILD_Cpp_AIWRAPPER)
 		include_directories(BEFORE ${CMAKE_BINARY_DIR}) # for src-generated wrapper files
 		include_directories(BEFORE ${CMAKE_SOURCE_DIR})
