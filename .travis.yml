@@ -9,11 +9,9 @@ compiler:
 
 before_script:
   - sudo apt-get install build-essential cmake lua5.2
-
-before_script:
   - git clone https://github.com/spring/spring-ai-includes
   - cmake .
 
 script:
   - make
-  - find -name '*.lua' -exec luac -p {} \;
+  - find -name '*.lua' -exec /usr/bin/luac5.2 -p {} \;
