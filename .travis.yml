@@ -14,4 +14,4 @@ before_script:
 
 script:
   - make
-  - find -name '*.lua' -exec /usr/bin/luac5.2 -p {} \;
+  - find -name '*.lua' -print0 |xargs -0 /usr/bin/luac5.2 -p
