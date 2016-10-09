@@ -13,10 +13,9 @@ shard_include "scoutbehaviour"
 shard_include "antinukebehaviour"
 shard_include "nukebehaviour"
 shard_include "bombardbehaviour"
-shard_include "commanderbehaviour"
 shard_include "bootbehaviour"
 shard_include "countbehaviour"
-
+shard_include "common"
 
 behaviours = {
 
@@ -32,10 +31,6 @@ function defaultBehaviours(unit, ai)
 	-- keep track of how many of each kind of unit we have
 	table.insert(b, CountBehaviour)
 	table.insert(b, BootBehaviour)
-
-	if commanderList[un] then
-		table.insert(b, CommanderBehaviour)
-	end
 
 	if nanoTurretList[un] then
 		table.insert(b, AssistBehaviour)
@@ -83,6 +78,7 @@ function defaultBehaviours(unit, ai)
 		table.insert(b, WardBehaviour)
 	elseif IsReclaimer(unit) then
 		table.insert(b, ReclaimBehaviour)
+		table.insert(b, DefendBehaviour)
 		table.insert(b, WardBehaviour)
 	else
 		if IsAttacker(unit) then

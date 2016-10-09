@@ -1,3 +1,5 @@
+shard_include "common"
+
 local DebugEnabled = false
 
 
@@ -22,32 +24,31 @@ function AssistHandler:Init()
 	self.working = {}
 	self.totalAssignments = 0
 	self.magnets = {}
-	self.ai.IDByName = {}
+	ai.IDByName = {}
 	self.IDByNameTaken = {}
 	self.lastAllocation = game:Frame()
-	self.ai.nonAssistantsPerName = 2
-	self.ai.nonAssistant = {}
+	ai.nonAssistantsPerName = 2
+	ai.nonAssistant = {}
 end
 
 function AssistHandler:Update()
 	local f = game:Frame()
 	if f > self.lastAllocation + 1800 then
 		self.lastAllocation = f
-		if self.ai.Metal.full > 0.33 then
-			self.ai.nonAssistantsPerName = math.max(self.ai.nonAssistantsPerName - 1, 2)
-		elseif self.ai.Metal.tics < 2 or self.ai.Metal.full < 0.1 then
-			self.ai.nonAssistantsPerName = math.min(self.ai.nonAssistantsPerName + 1, self.ai.conUnitPerTypeLimit)
-			for fi = #self.free, 1, -1 do
-				local asstbehaviour = self.free[fi]
-				if self.ai.IDByName[asstbehaviour.id] == nil then self:AssignIDByName(asstbehaviour) end
-				if self.ai.IDByName[asstbehaviour.id] <= self.ai.nonAssistantsPerName then
-					self.ai.nonAssistant[asstbehaviour.id] = true
+		if ai.Metal.full > 0.33 then
+			ai.nonAssistantsPerName = math.max(ai.nonAssistantsPerName - 1, 2)
+		elseif ai.Metal.tics < 2 or ai.Metal.full < 0.1 then
+			ai.nonAssistantsPerName = math.min(ai.nonAssistantsPerName + 1, ConUnitPerTypeLimit)
+			for fi, asstbehaviour in pairs(self.free) do
+				if ai.IDByName[asstbehaviour.id] == nil then self:AssignIDByName(asstbehaviour) end
+				if ai.IDByName[asstbehaviour.id] <= ai.nonAssistantsPerName then
+					ai.nonAssistant[asstbehaviour.id] = true
 					asstbehaviour.unit:ElectBehaviour()
 					table.remove(self.free, fi)
 				end
 			end
 		end
-		EchoDebug("nonassistants per name: " .. self.ai.nonAssistantsPerName)
+		EchoDebug("nonassistants per name: " .. ai.nonAssistantsPerName)
 	end
 end
 
@@ -179,11 +180,16 @@ function AssistHandler:TakeUpSlack(builder)
 	if #self.free == 0 then return end
 	local builderPos = builder:GetPosition()
 	self.lastPullPosition = builderPos -- so that any newly free assistants can be sent to a non-dumb place
-	for i = #self.free, 1, -1 do
-		local asstbehaviour = self.free[i]
-		if not asstbehaviour.unit or not asstbehaviour.unit:Internal() then
+	for i, asstbehaviour in pairs(self.free) do
+		local skip = false
+		if asstbehaviour.unit == nil then
 			table.remove(self.free, i)
-		else
+			skip = true
+		elseif asstbehaviour.unit:Internal() == nil then
+			table.remove(self.free, i)
+			skip = true
+		end
+		if not skip then
 			if self:IsLocal(asstbehaviour, builderPos) then
 				asstbehaviour:SoftAssign(builder:ID())
 			end
@@ -193,8 +199,7 @@ end
 
 -- assign any free assistants to really important ongoing projects
 function AssistHandler:DoMagnets()
-	for fi = #self.free, 1, -1 do
-		local asstbehaviour = self.free[fi]
+	for fi, asstbehaviour in pairs(self.free) do
 		if #self.magnets == 0 then break end
 		local skip = false
 		if asstbehaviour.unit == nil then
@@ -252,9 +257,9 @@ function AssistHandler:Release(builder, bid, dead)
 		local asstbehaviour = table.remove(self.working[bid])
 		if dead then asstbehaviour:Assign(nil) end
 		table.insert(self.free, asstbehaviour)
-		if self.ai.IDByName[asstbehaviour.id] ~= nil then
-			if self.ai.IDByName[asstbehaviour.id] <= self.ai.nonAssistantsPerName then
-				self.ai.nonAssistant[asstbehaviour.id] = true
+		if ai.IDByName[asstbehaviour.id] ~= nil then
+			if ai.IDByName[asstbehaviour.id] <= ai.nonAssistantsPerName then
+				ai.nonAssistant[asstbehaviour.id] = true
 			end
 		end
 		-- self.ai:UnitIdle(asstbehaviour.unit:Internal())
@@ -263,8 +268,7 @@ function AssistHandler:Release(builder, bid, dead)
 	self.working[bid] = nil
 	self.totalAssignments = self.totalAssignments - 1
 	EchoDebug("demagnetizing " .. bid)
-	for i = #self.magnets, 1, -1 do
-		local magnet = self.magnets[i]
+	for i, magnet in pairs(self.magnets) do
 		if magnet.bid == bid then
 			EchoDebug("removing a magnet")
 			table.remove(self.magnets, i)
@@ -331,7 +335,7 @@ function AssistHandler:AssignIDByName(asstbehaviour)
 	local uname = asstbehaviour.name
 	if self.IDByNameTaken[uname] == nil then
 		asstbehaviour.IDByName = 1
-		self.ai.IDByName[asstbehaviour.id] = 1
+		ai.IDByName[asstbehaviour.id] = 1
 		self.IDByNameTaken[uname] = {}
 		self.IDByNameTaken[uname][1] = asstbehaviour.id
 	else
@@ -339,18 +343,18 @@ function AssistHandler:AssignIDByName(asstbehaviour)
 			self.IDByNameTaken[uname][asstbehaviour.IDByName] = nil
 		end
 		local id = 1
-		while id <= self.ai.nameCount[uname] do
+		while id <= ai.nameCount[uname] do
 			id = id + 1
 			if not self.IDByNameTaken[uname][id] then break end
 		end
 		asstbehaviour.IDByName = id
-		self.ai.IDByName[asstbehaviour.id] = id
+		ai.IDByName[asstbehaviour.id] = id
 		self.IDByNameTaken[uname][id] = asstbehaviour.id
 	end
-	if self.ai.IDByName[asstbehaviour.id] > self.ai.nonAssistantsPerName then
-		self.ai.nonAssistant[asstbehaviour.id] = nil
+	if ai.IDByName[asstbehaviour.id] > ai.nonAssistantsPerName then
+		ai.nonAssistant[asstbehaviour.id] = nil
 	else
-		self.ai.nonAssistant[asstbehaviour.id] = true
+		ai.nonAssistant[asstbehaviour.id] = true
 	end
 	if asstbehaviour.active then
 		if asstbehaviour:DoIAssist() then
@@ -365,6 +369,6 @@ function AssistHandler:RemoveAssistant(asstbehaviour)
 	local uname = asstbehaviour.name
 	local uid = asstbehaviour.id
 	-- game:SendToConsole("assistant " .. uname .. " died")
-	if self.IDByNameTaken[uname] ~= nil then self.IDByNameTaken[uname][self.ai.IDByName[uid]] = nil end
-	self.ai.IDByName[uid] = nil
+	if self.IDByNameTaken[uname] ~= nil then self.IDByNameTaken[uname][ai.IDByName[uid]] = nil end
+	ai.IDByName[uid] = nil
 end

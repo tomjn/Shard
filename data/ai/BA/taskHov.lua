@@ -6,19 +6,9 @@ local function EchoDebug(inStr)
 	end
 end
 
-function ConHover()
-	if MyTB.side == CORESideName then
-		unitName = "corch"
-	else
-		unitName = "armch"
-	end
-	local mtypedLv = GetMtypedLv(unitName)
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 6) + 1, ai.conUnitPerTypeLimit))
-end
-
-function HoverMerl(tskqbhvr)
+function HoverMerl(self)
 	local unitName = ""
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		unitName = "cormh"
 	else
 		unitName = "armmh"
@@ -26,9 +16,9 @@ function HoverMerl(tskqbhvr)
 	return BuildSiegeIfNeeded(unitName)
 end
 
-function HoverRaider(tskqbhvr)
+function HoverRaider(self)
 	local unitName = ""
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		unitName = "corsh"
 	else
 		unitName = "armsh"
@@ -36,9 +26,9 @@ function HoverRaider(tskqbhvr)
 	return BuildRaiderIfNeeded(unitName)
 end
 
-function HoverBattle(tskqbhvr)
+function HoverBattle(self)
 	local unitName = ""
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		unitName = "corsnap"
 	else
 		unitName = "armanac"
@@ -46,9 +36,9 @@ function HoverBattle(tskqbhvr)
 	return BuildBattleIfNeeded(unitName)
 end
 
-function HoverBreakthrough(tskqbhvr)
+function HoverBreakthrough(self)
 	local unitName = ""
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		unitName = "nsaclash"
 	else
 		unitName = "armanac"
@@ -57,10 +47,18 @@ function HoverBreakthrough(tskqbhvr)
 end
 
 function AAHover()
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		return BuildAAIfNeeded("corah")
 	else
 		return BuildAAIfNeeded("armah")
+	end
+end
+
+function ConHover()
+	if ai.mySide == CORESideName then
+		return BuildWithLimitedNumber("corch", ConUnitPerTypeLimit)
+	else
+		return BuildWithLimitedNumber("armch", ConUnitPerTypeLimit)
 	end
 end
 

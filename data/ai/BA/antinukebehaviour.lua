@@ -1,10 +1,9 @@
+shard_include "common"
+
 AntinukeBehaviour = class(Behaviour)
 
-function AntinukeBehaviour:Name()
-	return "AntinukeBehaviour"
-end
-
 local DebugEnabled = false
+
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
@@ -19,14 +18,24 @@ function AntinukeBehaviour:Init()
     self.finished = false
 end
 
-function AntinukeBehaviour:OwnerBuilt()
-	self.finished = true
+function AntinukeBehaviour:UnitBuilt(unit)
+	if unit.engineID == self.unit.engineID then
+		self.finished = true
+	end
+end
+
+function AntinukeBehaviour:UnitCreated(unit)
+
+end
+
+function AntinukeBehaviour:UnitIdle(unit)
+
 end
 
 function AntinukeBehaviour:Update()
 	if not self.active then return end
 
-	if self.finished and self.ai.needAntinuke then
+	if self.finished and ai.needAntinuke then
 		local f = game:Frame()
 		if self.lastStockpileFrame == 0 or f > self.lastStockpileFrame + 1000 then
 			local floats = api.vectorFloat()
@@ -47,4 +56,8 @@ end
 
 function AntinukeBehaviour:Priority()
 	return 100
+end
+
+function AntinukeBehaviour:UnitDead(unit)
+
 end

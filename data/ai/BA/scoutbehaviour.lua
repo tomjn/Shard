@@ -1,3 +1,6 @@
+shard_include "common"
+
+
 local DebugEnabled = false
 
 
@@ -18,10 +21,6 @@ end
 
 ScoutBehaviour = class(Behaviour)
 
-function ScoutBehaviour:Name()
-	return "ScoutBehaviour"
-end
-
 function ScoutBehaviour:Init()
 	self.evading = false
 	self.active = false
@@ -35,6 +34,14 @@ function ScoutBehaviour:Init()
 		self.lastCircleFrame = game:Frame()
 	end
 	self.lastUpdateFrame = game:Frame()
+end
+
+function ScoutBehaviour:UnitBuilt(unit)
+
+end
+
+function ScoutBehaviour:UnitIdle(unit)
+
 end
 
 function ScoutBehaviour:Priority()
@@ -52,8 +59,8 @@ function ScoutBehaviour:Deactivate()
 	self.target = nil
 	self.evading = false
 	self.attacking = false
-	-- self.unit:Internal():EraseHighlight({0,0,1}, 'scout', 2)
 end
+
 
 function ScoutBehaviour:Update()
 	if self.active then

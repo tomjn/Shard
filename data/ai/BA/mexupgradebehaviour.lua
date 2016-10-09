@@ -1,3 +1,5 @@
+shard_include "common"
+
 local DebugEnabled = false
 
 
@@ -19,62 +21,64 @@ function MexUpgradeBehaviour:Init()
 	EchoDebug("MexUpgradeBehaviour: added to unit "..self.name)
 end
 
-function MexUpgradeBehaviour:OwnerIdle()
-	if self:IsActive() then
-		local builder = self.unit:Internal()
-		EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." is idle")
-		-- release assistants
-		if not self.released then
-			self.ai.assisthandler:Release(builder)
-			self.released = true
-		end
-		-- maybe we've just finished a moho?
-		if self.mohoStarted then
-			self.mohoStarted = false
-			self.mexPos = nil
-		end
-		-- maybe we've just finished reclaiming?
-		if self.mexPos ~= nil and not self.mohoStarted then
-			-- maybe we're ARM and not CORE?
-			local mohoName = "cormoho"
-			tmpType = game:GetTypeByName("armmoho")
-			if builder:CanBuild(tmpType) then
-				mohoName = "armmoho"
+function MexUpgradeBehaviour:UnitIdle(unit)
+	if unit:Internal():ID() == self.unit:Internal():ID() then
+		if self:IsActive() then
+			local builder = self.unit:Internal()
+			EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." is idle")
+			-- release assistants
+			if not self.released then
+				ai.assisthandler:Release(builder)
+				self.released = true
 			end
-			-- maybe we're underwater?
-			tmpType = game:GetTypeByName("coruwmme")
-			if builder:CanBuild(tmpType) then
-				mohoName = "coruwmme"
-			end
-			tmpType = game:GetTypeByName("armuwmme")
-			if builder:CanBuild(tmpType) then
-				mohoName = "armuwmme"
-			end
-			tmpType = game:GetTypeByName(mohoName)
-			-- check if the moho can be built there at all
-			local s = map:CanBuildHere(tmpType, self.mexPos)
-			if s then
-				s = builder:Build(mohoName, self.mexPos)
-			end
-			if s then
-				-- get assistance and magnetize
-				self.ai.assisthandler:PersistantSummon(builder, self.mexPos, helpList[mohoName])
-				self.released = false
-				self.active = true
-				self.mohoStarted = true
-				self.mexPos = nil
-				EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." starts building a Moho")
-			else
-				self.mexPos = nil
+			-- maybe we've just finished a moho?
+			if self.mohoStarted then
 				self.mohoStarted = false
-				self.active = false
-				EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." failed to start building a Moho")
+				self.mexPos = nil
 			end
-		end
+			-- maybe we've just finished reclaiming?
+			if self.mexPos ~= nil and not self.mohoStarted then
+				-- maybe we're ARM and not CORE?
+				local mohoName = "cormoho"
+				tmpType = game:GetTypeByName("armmoho")
+				if builder:CanBuild(tmpType) then
+					mohoName = "armmoho"
+				end
+				-- maybe we're underwater?
+				tmpType = game:GetTypeByName("coruwmme")
+				if builder:CanBuild(tmpType) then
+					mohoName = "coruwmme"
+				end
+				tmpType = game:GetTypeByName("armuwmme")
+				if builder:CanBuild(tmpType) then
+					mohoName = "armuwmme"
+				end
+				tmpType = game:GetTypeByName(mohoName)
+				-- check if the moho can be built there at all
+				local s = map:CanBuildHere(tmpType, self.mexPos)
+				if s then
+					s = builder:Build(mohoName, self.mexPos)
+				end
+				if s then
+					-- get assistance and magnetize
+					ai.assisthandler:PersistantSummon(builder, self.mexPos, helpList[mohoName])
+					self.released = false
+					self.active = true
+					self.mohoStarted = true
+					self.mexPos = nil
+					EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." starts building a Moho")
+				else
+					self.mexPos = nil
+					self.mohoStarted = false
+					self.active = false
+					EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." failed to start building a Moho")
+				end
+			end
 
-		if not self.mohoStarted and (self.mexPos == nil) then
-			EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." restarts mex upgrade routine")
-			self:StartUpgradeProcess()
+			if not self.mohoStarted and (self.mexPos == nil) then
+				EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." restarts mex upgrade routine")
+				StartUpgradeProcess(self)
+			end
 		end
 	end
 end
@@ -82,7 +86,7 @@ end
 function MexUpgradeBehaviour:Update()
 	if not self.active then
 		if (self.lastFrame or 0) + 30 < game:Frame() then
-			self:StartUpgradeProcess()
+			StartUpgradeProcess(self)
 		end
 	end
 end
@@ -90,7 +94,7 @@ end
 function MexUpgradeBehaviour:Activate()
 	EchoDebug("MexUpgradeBehaviour: active on unit ".. self.name)
 	
-	self:StartUpgradeProcess()
+	StartUpgradeProcess(self)
 end
 
 function MexUpgradeBehaviour:Deactivate()
@@ -100,14 +104,17 @@ function MexUpgradeBehaviour:Deactivate()
 end
 
 function MexUpgradeBehaviour:Priority()
-	if self.ai.lvl1Mexes > 0 then
+	if ai.lvl1Mexes > 0 then
 		return 101
 	else
 		return 0
 	end
 end
 
-function MexUpgradeBehaviour:StartUpgradeProcess()
+function MexUpgradeBehaviour:UnitDamaged(unit,attacker,damage)
+end
+
+function StartUpgradeProcess(self)
 	-- try to find nearest mex
 	local ownUnits = game:GetFriendlies()
 	local selfUnit = self.unit:Internal()
@@ -124,7 +131,7 @@ function MexUpgradeBehaviour:StartUpgradeProcess()
 			local upgradetype = game:GetTypeByName(mexUpgrade[un])
 			if selfUnit:CanBuild(upgradetype) then
 				-- make sure you can reach it
-				if self.ai.maphandler:UnitCanGetToUnit(selfUnit, unit) then
+				if ai.maphandler:UnitCanGetToUnit(selfUnit, unit) then
 					local distMod = 0
 					-- if it's not 100% HP, then don't touch it (unless there's REALLY no better choice)
 					-- this prevents a situation when engineer reclaims a mex that is still being built by someone else
@@ -133,7 +140,7 @@ function MexUpgradeBehaviour:StartUpgradeProcess()
 					end
 					local pos = unit:GetPosition()
 					-- if there are enemies nearby, don't go there as well
-					if self.ai.targethandler:IsSafePosition(pos, selfUnit) then
+					if ai.targethandler:IsSafePosition(pos, selfUnit) then
 						-- if mod number by itself is too high, don't compute the distance at all
 						if distMod < closestDistance then
 							local dist = Distance(pos, selfPos) + distMod
@@ -148,7 +155,7 @@ function MexUpgradeBehaviour:StartUpgradeProcess()
 			mexCount = mexCount + 1
 		end
 	end
-	self.ai.lvl1Mexes = mexCount
+	ai.lvl1Mexes = mexCount
 
 	local s = false
 	if mexUnit ~= nil then
