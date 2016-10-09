@@ -25,6 +25,8 @@ if ("${PROJECT_NAME}" EQUAL "Spring")
 else()
 	cmake_minimum_required(VERSION 2.8)
 
+	message(WARNING "Outside of spring source build: the resulting shared lib won't work! (Symbols not found...)")
+
 	add_library(SkirmishAI SHARED
 		src/TestAI.cpp
 		src/AIExport.cpp
