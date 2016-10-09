@@ -25,7 +25,7 @@ if ("${PROJECT_NAME}" EQUAL "Spring")
 else()
 	cmake_minimum_required(VERSION 2.8)
 
-	add_library(SkirmishAI
+	add_library(SkirmishAI SHARED
 		src/TestAI.cpp
 		src/AIExport.cpp
 		src/CppTestAI.cpp

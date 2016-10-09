@@ -8,7 +8,7 @@ compiler:
   - clang
 
 before_script:
-  - sudo apt-get install build-essential cmake lua5.1
+  - sudo apt-get install build-essential cmake lua5.2
 
 before_script:
   - git clone https://github.com/spring/spring-ai-includes
