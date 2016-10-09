@@ -1,13 +1,17 @@
-language: ruby
+sudo: required
+dist: trusty
+cache: ccache
+
+language: cpp
+compiler:
+  - gcc
+  - clang
 
 before_script:
-    - ./travis.sh
-env:
-    - LUA_VERSION=master
-    - LUA_VERSION=5.2.1
-    - LUA_VERSION=5.2
-    - LUA_VERSION=5.1.5
-    - LUA_VERSION=5.1.4
+  - sudo apt-get install build-essential cmake lua5.2
+  - git clone https://github.com/spring/spring-ai-includes
+  - cmake .
 
 script:
-    - ./runtests.sh
+  - make
+  - find -name '*.lua' -print0 |xargs -0 /usr/bin/luac5.2 -p

@@ -1,8 +1,7 @@
-NukeBehaviour = class(Behaviour)
+shard_include "common"
 
-function NukeBehaviour:Name()
-	return "NukeBehaviour"
-end
+
+NukeBehaviour = class(Behaviour)
 
 local DebugEnabled = false
 
@@ -32,8 +31,18 @@ function NukeBehaviour:Init()
     self.finished = false
 end
 
-function NukeBehaviour:OwnerBuilt()
-	self.finished = true
+function NukeBehaviour:UnitBuilt(unit)
+	if unit.engineID == self.unit.engineID then
+		self.finished = true
+	end
+end
+
+function NukeBehaviour:UnitCreated(unit)
+
+end
+
+function NukeBehaviour:UnitIdle(unit)
+
 end
 
 function NukeBehaviour:Update()
@@ -88,4 +97,8 @@ end
 
 function NukeBehaviour:Priority()
 	return 100
+end
+
+function NukeBehaviour:UnitDead(unit)
+
 end

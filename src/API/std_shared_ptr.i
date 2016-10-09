@@ -1,4 +1,4 @@
-	namespace boost {
+	namespace std {
 		template<class T>
 		class shared_ptr{
 		public:

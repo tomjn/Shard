@@ -8,30 +8,26 @@ end
 --LEVEL 1
 
 function ConShip()
-	local unitName = DummyUnitName
-	if MyTB.side == CORESideName then
-		unitName = "corcs"
+	if ai.mySide == CORESideName then
+		return BuildWithLimitedNumber("corcs", ConUnitPerTypeLimit)
 	else
-		unitName = "armcs"
+		return BuildWithLimitedNumber("armcs", ConUnitPerTypeLimit)
 	end
-	local mtypedLv = GetMtypedLv(unitName) + GetMtypedLv('correcl') --need count sub too
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 5) + 2, ai.conUnitPerTypeLimit))
 end
 
-function RezSub1(tskqbhvr)
-	local unitName = DummyUnitName
-	if MyTB.side == CORESideName then
+function RezSub1(self)
+	local unitName
+	if ai.mySide == CORESideName then
 		unitName = "correcl"
 	else
 		unitName = "armrecl"
 	end
-	local mtypedLv = GetMtypedLv(unitName) + GetMtypedLv('armcs') --need count shp too
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 8) + 2, ai.conUnitPerTypeLimit))
+	return BuildWithLimitedNumber(unitName, 1)
 end
 
-function Lvl1ShipRaider(tskqbhvr)
-	local unitName = DummyUnitName
-	if MyTB.side == CORESideName then
+function Lvl1ShipRaider(self)
+	local unitName = ""
+	if ai.mySide == CORESideName then
 		unitName = "corsub"
 	else
 		unitName = "armsub"
@@ -39,27 +35,29 @@ function Lvl1ShipRaider(tskqbhvr)
 	return BuildRaiderIfNeeded(unitName)
 end
 
-function Lvl1ShipDestroyerOnly(tskqbhvr)
-	local unitName = DummyUnitName
-	if MyTB.side == CORESideName then
-		unitName = "corroy"
-	else
-		unitName = "armroy"
+function Lvl1ShipDestroyerOnly(self)
+	if ai.combatCount > 12 then
+		if ai.mySide == CORESideName then
+			unitName = "corroy"
+		else
+			unitName = "armroy"
+		end
+		return BuildBattleIfNeeded(unitName)
 	end
-	local mtypedLv = GetMtypedLv(unitName) + GetMtypedLv('armcs')
-	return BuildWithLimitedNumber(unitName,mtypedLv * 0.7)
 end
 
-function Lvl1ShipBattle(tskqbhvr)
+function Lvl1ShipBattle(self)
 	local unitName = ""
-	if ai.Metal.full < 0.5 then
-		if MyTB.side == CORESideName then
+	local r = 1
+	if mf>0.8 then r = 2 end -- only build destroyers if you've already got quite a few units (combat = scouts + raiders + battle)
+	if r == 1 then
+		if ai.mySide == CORESideName then
 			unitName = "coresupp"
 		else
 			unitName = "decade"
 		end
 	else
-		if MyTB.side == CORESideName then
+		if ai.mySide == CORESideName then
 			unitName = "corroy"
 		else
 			unitName = "armroy"
@@ -70,7 +68,7 @@ end
 
 function ScoutShip()
 	local unitName
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		unitName = "corpt"
 	else
 		unitName = "armpt"
@@ -85,30 +83,24 @@ end
 
 --LEVEL 2
 function ConAdvSub()
-	local unitName = DummyUnitName
-	if MyTB.side == CORESideName then
-		unitName = "coracsub"
+	if ai.mySide == CORESideName then
+		return BuildWithLimitedNumber("coracsub", ConUnitAdvPerTypeLimit)
 	else
-		unitName = "armacsub"
+		return BuildWithLimitedNumber("armacsub", ConUnitAdvPerTypeLimit)
 	end
-	local mtypedLv = GetMtypedLv(unitName) + GetMtypedLv('cormls') --need count shp too
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 6) + 2, ai.conUnitPerTypeLimit))
 end
 
 function Lvl2ShipAssist()
-	local unitName = DummyUnitName
-	if MyTB.side == CORESideName then
-		unitName = "cormls"
+	if ai.mySide == CORESideName then
+		return "cormls"
 	else
-		unitName = "armmls"
+		return "armmls"
 	end
-	local mtypedLv = GetMtypedLv(unitName) + GetMtypedLv('coracsub') --need count sub too
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 6) + 2, ai.conUnitPerTypeLimit))
 end
 
-function Lvl2ShipBreakthrough(tskqbhvr)
+function Lvl2ShipBreakthrough(self)
 	local unitName = ""
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		unitName = "corbats"
 	else
 		unitName = "armbats"
@@ -116,9 +108,9 @@ function Lvl2ShipBreakthrough(tskqbhvr)
 	return BuildBreakthroughIfNeeded(unitName)
 end
 
-function Lvl2ShipMerl(tskqbhvr)
+function Lvl2ShipMerl(self)
 	local unitName = ""
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		unitName = "cormship"
 	else
 		unitName = "armmship"
@@ -128,7 +120,7 @@ end
 
 function MegaShip()
 	local unitName = ""
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		unitName = "corblackhy"
 	else
 		unitName = "aseadragon"
@@ -136,9 +128,9 @@ function MegaShip()
 	return BuildBreakthroughIfNeeded(BuildWithLimitedNumber(unitName, 1))
 end
 
-function Lvl2ShipRaider(tskqbhvr)
+function Lvl2ShipRaider(self)
 	local unitName = ""
-		if MyTB.side == CORESideName then
+		if ai.mySide == CORESideName then
 			unitName = "corshark"
 		else
 			unitName = "armsubk"
@@ -147,20 +139,20 @@ function Lvl2ShipRaider(tskqbhvr)
 	return BuildRaiderIfNeeded(unitName)
 end
 
-function Lvl2SubWar(tskqbhvr)
-	local unitName = DummyUnitName
-		if MyTB.side == CORESideName then
+function Lvl2SubLight(self)
+	local unitName = ""
+		if ai.mySide == CORESideName then
 			unitName = "corssub"
 		else
 			unitName = "tawf009"
 		end
 
-	return BuildBattleIfNeeded(unitName)
+	return BuildRaiderIfNeeded(unitName)
 end
 
-function Lvl2ShipBattle(tskqbhvr)
+function Lvl2ShipBattle(self)
 	local unitName = ""
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		unitName = "corcrus"
 	else
 		unitName = "armcrus"
@@ -169,7 +161,7 @@ function Lvl2ShipBattle(tskqbhvr)
 end
 
 function Lvl2AAShip()
-	if MyTB.side == CORESideName then
+	if ai.mySide == CORESideName then
 		return BuildAAIfNeeded("corarch")
 	else
 		return BuildAAIfNeeded("armaas")

@@ -1,4 +1,4 @@
-
+shard_include "common"
 
 local DebugEnabled = false
 
@@ -14,15 +14,17 @@ local CMD_PATROL = 15
 local CMD_MOVE_STATE = 50
 local MOVESTATE_ROAM = 2
 
--- not does it defend, but is it a dedicated defender
-function IsDefender(unit)
-	return defenderList[unit:Internal():Name()] or false
-end
-
 DefendBehaviour = class(Behaviour)
 
-function DefendBehaviour:Name()
-	return "DefendBehaviour"
+-- not does it defend, but is it a dedicated defender
+function IsDefender(unit)
+	local un = unit:Internal():Name()
+	for i,name in ipairs(defenderList) do
+		if name == un then
+			return true
+		end
+	end
+	return false
 end
 
 function DefendBehaviour:Init()
@@ -58,7 +60,7 @@ function DefendBehaviour:Init()
 	EchoDebug("added to unit "..self.name)
 end
 
-function DefendBehaviour:OwnerDead()
+function DefendBehaviour:OwnerDied()
 	-- game:SendToConsole("defender " .. self.name .. " died")
 	if self.scramble then
 		self.ai.defendhandler:RemoveScramble(self)
@@ -70,8 +72,10 @@ function DefendBehaviour:OwnerDead()
 	end
 end
 
-function DefendBehaviour:OwnerIdle()
-	self.unit:ElectBehaviour()
+function DefendBehaviour:UnitIdle(unit)
+	if unit:Internal():ID() == self.unit:Internal():ID() then
+		self.unit:ElectBehaviour()
+	end
 end
 
 function DefendBehaviour:Update()

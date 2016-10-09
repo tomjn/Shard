@@ -1,3 +1,5 @@
+shard_include "common"
+
 local DebugEnabled = false
 
 
@@ -83,8 +85,7 @@ function ScoutHandler:ClosestSpot(scoutbehaviour)
 	local pos = nil
 	local index = nil
 	local bestDistance = 10000
-	for i = #self.spotsToScout[mtype][network], 1, -1 do
-		local p = self.spotsToScout[mtype][network][i]
+	for i, p in ipairs(self.spotsToScout[mtype][network]) do
 		local los
 		if ai.maphandler:IsUnderWater(p) and unitTable[scoutbehaviour.name].sonarRadius == 0 then
 			-- treat underwater spots as surface spots if the scout has no sonar, so that it moves on

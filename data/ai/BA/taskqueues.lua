@@ -2,6 +2,7 @@
  Task Queues!
 ]]--
 
+shard_include("common")
 shard_include("taskAir")
 shard_include("taskBot")
 shard_include("taskVeh")
@@ -23,8 +24,88 @@ random = math.random
 math.randomseed( os.time() + game:GetTeamID() )
 random(); random(); random()
 
+needAA = false
+needShields = false
+needAntinuke = false
+needtorpedo = false
+needGroundDefense = true
+
+-- do we need siege equipment such as artillery and merl?
+needSiege = false
+
+heavyPlasmaLimit = 3 -- changes with CheckForMapControl
+AAUnitPerTypeLimit = 3 -- changes with CheckForMapControl
+nukeLimit = 1 -- changes with CheckForMapControl
+tacticalNukeLimit = 1 -- changes with CheckForMapControl
+
+lastCheckFrame = 0
+lastSiegeCheckFrame = 0
+
+-- build ranges to check for things
+AreaCheckRange = 1500
+
+tidalPower = 0
+
+averageWind = 0
+needWind = false
+windRatio = 1
+
+needAmphibiousCons = false
+
+minDefenseNetworkSize = 100000
+
 function MapHasWater()
 	return (ai.waterMap or ai.hasUWSpots) or false
+end
+
+function CheckMySide(self)
+	-- fix: moved here so map object is present when it's accessed
+	ConUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)
+	ConUnitAdvPerTypeLimit = math.max(map:SpotCount() / 8, 2)
+	EchoDebug("per-type construction unit limit: " .. ConUnitPerTypeLimit)
+	minDefenseNetworkSize = ai.mobilityGridArea / 4 
+	-- set the averageWind
+	if averageWind == 0 then
+		averageWind = map:AverageWind()
+		if averageWind > 11 then
+			needWind = true
+		else
+			needWind = false
+		end
+		local minWind = map:MinimumWindSpeed()
+		if minWind < 8 then
+			windRatio = minWind / 8
+		else
+			windRatio = 1
+		end
+		EchoDebug("wind/solar ratio: " .. windRatio)
+	end
+	-- set the tidal strength
+	if MapHasWater() then
+		if tidalPower == 0 then tidalPower = map:TidalStrength() end
+	else
+		tidalPower = 0
+	end
+	if ai.hasUWSpots and ai.mobRating["sub"] > ai.mobRating["bot"] * 0.75 then
+		needAmphibiousCons = true
+	end
+	if self.unit ~= nil then
+		local tmpName = self.unit:Internal():Name()
+		if tmpName == "corcom" then
+			ai.mySide = CORESideName
+			return DummyUnitName
+		end
+		if tmpName == "armcom" then
+			ai.mySide = ARMSideName
+			return DummyUnitName
+		end
+		game:SendToConsole("Unexpected start unit: "..tmpName..", cannot determine it's race. Assuming CORE")
+		ai.mySide = CORESideName
+	else
+		game:SendToConsole("Unexpected start unit: nil, cannot determine it's race. Assuming CORE")
+		ai.mySide = CORESideName
+	end
+	return DummyUnitName
 end
 
 -- this is initialized in maphandler
@@ -32,8 +113,65 @@ function MapHasUnderwaterMetal()
 	return ai.hasUWSpots or false
 end
 
+-- check if siege units are needed
+-- check if advanced and experimental factories are needed
+-- check if nukes are needed
+-- check if reclaiming is needed
+function CheckForMapControl()
+	local f = game:Frame()
+	if (lastSiegeCheckFrame + 240) < f then
+		ai.haveAdvFactory = false
+		if ai.factoriesAtLevel[3] ~= nil then
+			ai.haveAdvFactory = #ai.factoriesAtLevel[3] ~= 0
+		end
+		ai.haveExpFactory = false
+		if ai.factoriesAtLevel[5] ~= nil then
+			ai.haveExpFactory = #ai.factoriesAtLevel[5] ~= 0
+		end
+		
+		lastSiegeCheckFrame = f
+		ai.needToReclaim = ai.Metal.full < 0.5 and ai.wreckCount > 0
+		AAUnitPerTypeLimit = math.ceil(ai.turtlehandler:GetTotalPriority() / 4)
+		heavyPlasmaLimit = math.ceil(ai.combatCount / 10)
+		nukeLimit = math.ceil(ai.combatCount / 50)
+		tacticalNukeLimit = math.ceil(ai.combatCount / 40)
+
+		local attackCounter = ai.attackhandler:GetCounter()
+		local couldAttack = ai.couldAttack >= 1 or ai.couldBomb >= 1
+		local bombingTooExpensive = ai.bomberhandler:GetCounter() == maxBomberCounter
+		local attackTooExpensive = attackCounter == maxAttackCounter
+		local controlMetalSpots = ai.mexCount > #ai.mobNetworkMetals["air"][1] * 0.4
+		local needUpgrade = couldAttack or bombingTooExpensive or attackTooExpensive
+		local lotsOfMetal = ai.Metal.income > 25 or controlMetalSpots
+
+		EchoDebug(ai.totalEnemyThreat .. " " .. ai.totalEnemyImmobileThreat .. " " .. ai.totalEnemyMobileThreat)
+		-- build siege units if the enemy is turtling, if a lot of our attackers are getting destroyed, or if we control over 40% of the metal spots
+		needSiege = (ai.totalEnemyImmobileThreat > ai.totalEnemyMobileThreat * 3.5 and ai.totalEnemyImmobileThreat > 50000) or attackCounter >= siegeAttackCounter or controlMetalSpots
+		ai.needAdvanced = (ai.Metal.income > 10 or controlMetalSpots) and ai.factories > 0 and (needUpgrade or lotsOfMetal)
+		ai.needExperimental = false
+		ai.needNukes = false
+		if ai.Metal.income > 50 and ai.haveAdvFactory and needUpgrade and ai.enemyBasePosition then
+			if not ai.haveExpFactory then
+				for i, factory in pairs(ai.factoriesAtLevel[ai.maxFactoryLevel]) do
+					if ai.maphandler:MobilityNetworkHere("bot", factory.position) == ai.maphandler:MobilityNetworkHere("bot", ai.enemyBasePosition) then
+						ai.needExperimental = true
+						break
+					end
+				end
+			end
+			ai.needNukes = true
+		end
+		EchoDebug("need experimental? " .. tostring(ai.needExperimental) .. ", need nukes? " .. tostring(ai.needNukes) .. ", have advanced? " .. tostring(ai.haveAdvFactory) .. ", need upgrade? " .. tostring(needUpgrade) .. ", have enemy base position? " .. tostring(ai.enemyBasePosition))
+		EchoDebug("metal income: " .. ai.Metal.income .. "  combat units: " .. ai.combatCount)
+		EchoDebug("have advanced? " .. tostring(ai.haveAdvFactory) .. " have experimental? " .. tostring(ai.haveExpFactory))
+		EchoDebug("need advanced? " .. tostring(ai.needAdvanced) .. "  need experimental? " .. tostring(ai.needExperimental))
+		EchoDebug("need advanced? " .. tostring(ai.needAdvanced) .. ", need upgrade? " .. tostring(needUpgrade) .. ", have attacked enough? " .. tostring(couldAttack) .. " (" .. ai.couldAttack .. "), have " .. ai.factories .. " factories, " .. math.floor(ai.Metal.income) .. " metal income")
+	end
+end
+
 function IsSiegeEquipmentNeeded()
-	return ai.overviewhandler.needSiege
+	CheckForMapControl()
+	return needSiege
 end
 
 function IsAANeeded()
@@ -69,20 +207,10 @@ function IsWaterAttackNeeded()
 	return ai.areWaterTargets or ai.needSubmergedDefense
 end
 
-function GetMtypedLv(unitName)
-	local mtype = unitTable[unitName].mtype
-	local level = unitTable[unitName].techLevel
-	local mtypedLv = mtype .. tostring(level)
-	local counter = ai.mtypeLvCount[mtypedLv] or 0
-	EchoDebug('mtypedLvmtype ' .. mtype .. ' '.. level .. ' ' .. counter)
-	return counter
-end
-
-
 function BuildAAIfNeeded(unitName)
 	if IsAANeeded() then
 		if not unitTable[unitName].isBuilding then
-			return BuildWithLimitedNumber(unitName, ai.overviewhandler.AAUnitPerTypeLimit)
+			return BuildWithLimitedNumber(unitName, AAUnitPerTypeLimit)
 		else
 			return unitName
 		end
@@ -160,7 +288,7 @@ function BuildBattleIfNeeded(unitName)
 	local attackCounter = ai.attackhandler:GetCounter(mtype)
 	EchoDebug(mtype .. " " .. attackCounter .. " " .. maxAttackCounter)
 	if attackCounter == maxAttackCounter and ai.battleCount > minBattleCount then return DummyUnitName end
-	if mtype == "veh" and MyTB.side == CORESideName and (ai.factoriesAtLevel[1] == nil or ai.factoriesAtLevel[1] == {}) then
+	if mtype == "veh" and ai.mySide == CORESideName and (ai.factoriesAtLevel[1] == nil or ai.factoriesAtLevel[1] == {}) then
 		-- core only has a lvl1 vehicle raider, so this prevents getting stuck
 		return unitName
 	end
@@ -179,6 +307,18 @@ function BuildBattleIfNeeded(unitName)
 	else
 		return unitName
 	end
+end
+
+function Lvl2BotCorRaiderArmArty(self)
+	if ai.mySide == CORESideName then
+		return Lvl2BotRaider(self)
+	else
+		return Lvl2BotArty(self)
+	end
+end
+
+local function WindSolarTidal(self)
+	LandOrWater(self, WindSolar(), TidalIfTidal())
 end
 
 function CountOwnUnits(tmpUnitName)
@@ -201,12 +341,20 @@ function BuildWithLimitedNumber(tmpUnitName, minNumber)
 	end
 end
 
-function GroundDefenseIfNeeded(unitName)
+
+function GroundDefenseIfNeeded(unitName, builder)
 	if not ai.needGroundDefense then
 		return DummyUnitName
 	else
 		return unitName
 	end
+end
+
+
+
+function corDebug(self)
+	game:SendToConsole("d")
+	return "corwin"
 end
 
 function BuildBomberIfNeeded(unitName)
@@ -229,9 +377,37 @@ function BuildTorpedoBomberIfNeeded(unitName)
 	end
 end
 
+function CheckMySideIfNeeded()
+	if ai.mySide == nil then
+		EchoDebug("commander: checkmyside")
+		return CheckMySide
+	else
+		return DummyUnitName
+	end
+end
 
-function LandOrWater(tskqbhvr, landName, waterName)
-	local builder = tskqbhvr.unit:Internal()
+function BuildAppropriateFactory()
+	return FactoryUnitName
+end
+
+function FactoryOrNano(self)
+	CheckForMapControl()
+	if ai.factories == 0 then return BuildAppropriateFactory() end
+	EchoDebug("factories: " .. ai.factories .. "  combat units: " .. ai.combatCount)
+	local unitName = DummyUnitName
+	local attackCounter = ai.attackhandler:GetCounter()
+	local couldAttack = ai.couldAttack >= 2 or ai.couldBomb >= 2
+	if (ai.combatCount > attackCounter * 0.5 and couldAttack) or ai.needAdvanced then
+		unitName = BuildAppropriateFactory()
+	end
+	if unitName == DummyUnitName and ai.combatCount > attackCounter * 0.2 then
+		unitName = NanoTurret()
+	end
+	return unitName
+end
+
+function LandOrWater(self, landName, waterName)
+	local builder = self.unit:Internal()
 	local bpos = builder:GetPosition()
 	local waterNet = ai.maphandler:MobilityNetworkSizeHere("shp", bpos)
 	if waterNet ~= nil then
@@ -242,65 +418,72 @@ function LandOrWater(tskqbhvr, landName, waterName)
 end
 
 
-local function ConsulAsFactory(tskqbhvr)
-	local unitName = DummyUnitName
-	local rnd = math.random(1,8)
-	if 	rnd == 1 then unitName=ConVehicle(tskqbhvr) 
-	elseif 	rnd == 2 then unitName=ConShip(tskqbhvr) 
-	elseif 	rnd == 3 then unitName=Lvl1BotRaider(tskqbhvr) 
-	elseif 	rnd == 4 then unitName=Lvl1AABot(tskqbhvr) 
-	elseif 	rnd == 5 then unitName=Lvl2BotArty(tskqbhvr)
-	elseif 	rnd == 6 then unitName=Lvl2BotAllTerrain(tskqbhvr)
-	elseif 	rnd == 7 then unitName=Lvl2BotMedium(tskqbhvr)
-	else unitName = Lvl1ShipDestroyerOnly(tskqbhvr)
+local function ConsulAsFactory(self)
+	local unitName=DummyUnitName
+	local rnd= math.random(1,9)
+	if 	rnd==1 then unitName=ConVehicle(self) 
+	elseif 	rnd==2 then unitName=ConShip(self) 
+	elseif 	rnd==3 then unitName=Lvl1BotRaider(self) 
+	elseif 	rnd==4 then unitName=Lvl1AABot(self) 
+	elseif 	rnd==5 then unitName=Lvl2BotArty(self)
+	-- elseif 	rnd==6 then unitName=spiders(self)
+	elseif 	rnd==7 then unitName=Lv2BotMedium(self)
+	elseif 	rnd==8 then unitName=Lvl1ShipDestroyerOnly(self)
+	else unitName=DummyUnitName
 	end
-	if unitName == nil then unitName = DummyUnitName end
+	if unitName==nil then unitName = DummyUnitName end
 	EchoDebug('Consul as factory '..unitName)
 	return unitName
 end
 
-local function FreakerAsFactory(tskqbhvr)
-	local unitName = DummyUnitName
-	local rnd = math.random(1,7)
-	if 	rnd == 1 then unitName=ConBot(tskqbhvr)
-	elseif 	rnd == 2 then unitName=ConShip(tskqbhvr)
-	elseif 	rnd == 3 then unitName=Lvl1BotRaider(tskqbhvr)
-	elseif 	rnd == 4 then unitName=Lvl1AABot(tskqbhvr)
-	elseif 	rnd == 5 then unitName=Lvl2BotRaider(tskqbhvr)
-	elseif 	rnd == 6 then unitName=Lvl2AmphBot(tskqbhvr)
-	else unitName = Lvl1ShipDestroyerOnly(tskqbhvr)
+local function FreakerAsFactory(self)
+	local unitName=DummyUnitName
+	local rnd = math.random(1,9)
+	if 	rnd==1 then unitName=ConBot(self)
+	elseif 	rnd==2 then unitName=ConShip(self)
+	elseif 	rnd==3 then unitName=Lvl1BotRaider(self)
+	elseif 	rnd==4 then unitName=Lvl1AABot(self)
+	elseif 	rnd==5 then unitName=Lvl2BotRaider(self)
+	elseif 	rnd==6 then unitName=Lv2AmphBot(self)
+	elseif 	rnd==7 then unitName=Lvl1ShipDestroyerOnly(self)
+	-- elseif 	rnd==8 then unitName=Decoy(self)
+	else unitName = DummyUnitName
 	end
-	if unitName == nil then unitName = DummyUnitName end
+	if unitName==nil then unitName = DummyUnitName end
 	EchoDebug('Freaker as factory '..unitName)
 	return unitName
 end
 
-function NavalEngineerAsFactory(tskqbhvr)
-	local unitName = DummyUnitName
-	local rnd= math.random(1,6)
-	if 	rnd == 1 then unitName=ConShip(tskqbhvr)
-	elseif 	rnd == 2 then unitName=ScoutShip(tskqbhvr)
-	elseif 	rnd == 3 then unitName=Lvl1ShipDestroyerOnly(tskqbhvr)
-	elseif 	rnd == 4 then unitName=Lvl1ShipRaider(tskqbhvr)
-	elseif 	rnd == 5 then unitName=Lvl1ShipBattle(tskqbhvr)
-	else unitName=Lvl2AmphBot(tskqbhvr)
+function NavalEngineerAsFactory(self)
+	local unitName=DummyUnitName
+	local rnd= math.random(1,9)
+	if 	rnd==1 then unitName=ConShip(self)
+	elseif 	rnd==2 then unitName=ScoutShip(self)
+	elseif 	rnd==3 then unitName=Lvl1ShipDestroyerOnly(self)
+	elseif 	rnd==4 then unitName=Lvl1ShipRaider(self)
+	elseif 	rnd==5 then unitName=Lvl1ShipBattle(self)
+	elseif 	rnd==6 then unitName=Lv2AmphBot(self)
+	else 
+		unitName=DummyUnitName
 	end
 	EchoDebug('Naval engineers as factory '..unitName)
 	return unitName
 end
 
-function EngineerAsFactory(tskqbhvr)
-	local unitName = DummyUnitName
-	if MyTB.side == CORESideName then
-		unitName = FreakerAsFactory(tskqbhvr)
-	else
-		unitName = ConsulAsFactory(tskqbhvr)
+function EngineerAsFactory(self)
+	local unitName=DummyUnitName
+	if ai.Energy.full>0.3 and ai.Energy.full<0.7 and ai.Metal.full>0.3 and ai.Metal.full<0.7 then
+		if ai.mySide == CORESideName then
+			unitName=FreakerAsFactory(self)
+		else
+			unitName=ConsulAsFactory(self)
+		end
 	end
 	return unitName
 end	
 
-local function CommanderEconomy(tskqbhvr)
-	local underwater = ai.maphandler:IsUnderWater(tskqbhvr.unit:Internal():GetPosition())
+local function CommanderEconomy(self)
+	local underwater = ai.maphandler:IsUnderWater(self.unit:Internal():GetPosition())
 	local unitName = DummyUnitName
 	if not underwater then 
 		unitName = Economy0()
@@ -312,13 +495,13 @@ local function CommanderEconomy(tskqbhvr)
 	
 end
 
-local function AmphibiousEconomy(tskqbhvr)
-	local underwater = ai.maphandler:IsUnderWater(tskqbhvr.unit:Internal():GetPosition())
+local function AmphibiousEconomy(self)
+	local underwater = ai.maphandler:IsUnderWater(self.unit:Internal():GetPosition())
 	local unitName = DummyUnitName
-	if underwater then 
-		unitName = EconomyUnderWater(tskqbhvr)
+	if here then 
+		unitName = Economy1(self)
 	else
-		unitName = Economy1(tskqbhvr)
+		unitName = EconomyUnderWater(self)
 	end
 	return unitName
 	
@@ -327,18 +510,19 @@ end
 -- mobile construction units:
 
 local anyCommander = {
-	BuildAppropriateFactory,
+	CheckMySideIfNeeded,
 	CommanderEconomy,
+	BuildAppropriateFactory,
 	BuildLLT,
 	BuildRadar,
-	CommanderAA,
+	BuildLightAA,
 	BuildPopTorpedo,
 	BuildSonar,
 }
 
 local anyConUnit = {
-	BuildAppropriateFactory,
 	Economy1,
+	BuildAppropriateFactory,
 	BuildLLT,
 	BuildSpecialLT,
 	BuildMediumAA,
@@ -351,7 +535,6 @@ local anyConUnit = {
 }
 
 local anyConAmphibious = {
-	BuildAppropriateFactory,
 	AmphibiousEconomy,
 	BuildGeo,
 	BuildSpecialLT,
@@ -370,12 +553,12 @@ local anyConAmphibious = {
 }
 
 local anyConShip = {
-	BuildAppropriateFactory,
 	EconomyUnderWater,
 	BuildFloatLightAA,
 	BuildSonar,
 	BuildLightTorpedo,
 	BuildFloatRadar,
+	BuildAppropriateFactory,
 	BuildFloatHLT,
 }
 
@@ -394,18 +577,18 @@ local anyAdvConUnit = {
 	BuildExtraHeavyAA,
 	BuildLvl2Jammer,
 	BuildMohoGeo,
+	-- DoSomethingAdvancedForTheEconomy,
 }
 
 local anyConSeaplane = {
-	BuildAppropriateFactory,
 	EconomySeaplane,
 	BuildFloatHeavyAA,
 	BuildAdvancedSonar,
 	BuildHeavyTorpedo,
+	BuildAppropriateFactory,
 }
 
 local anyAdvConSub = {
-	BuildAppropriateFactory,
 	AdvEconomyUnderWater,
 	BuildFloatHeavyAA,
 	BuildAdvancedSonar,
@@ -413,24 +596,33 @@ local anyAdvConSub = {
 }
 
 local anyNavalEngineer = {
-	BuildAppropriateFactory,
 	EconomyNavalEngineer,
 	BuildFloatHLT,
 	BuildFloatLightAA,
+	BuildAppropriateFactory,
+	Lvl1ShipBattle,
 	BuildFloatRadar,
 	BuildSonar,
+	Lvl1ShipRaider,
+	Conship,
+	ScoutShip,
 	BuildLightTorpedo,
 }
 
 local anyCombatEngineer = {
-	BuildAppropriateFactory,
 	EconomyBattleEngineer,
+	BuildAppropriateFactory,
 	BuildMediumAA,
 	BuildAdvancedRadar,
 	BuildLvl2Jammer,
 	BuildHeavyAA,
 	BuildSpecialLTOnly,
 	BuildLvl2Plasma,
+	ConCoreBotArmVehicle,
+	Lvl2BotCorRaiderArmArty,
+	Lvl1AABot,
+	ConShip,
+	Lvl1ShipDestroyerOnly,
 }
 
 
@@ -490,8 +682,8 @@ local anyAmphibiousComplex = {
 }
 
 local anyLvl2VehPlant = {
-	ConAdvVehicle,
 	Lvl2VehRaider,
+	ConAdvVehicle,
 	Lvl2VehBattle,
 	Lvl2VehBreakthrough,
 	Lvl2VehArty,
@@ -538,7 +730,6 @@ local anyLvl2ShipYard = {
 	Lvl2ShipBreakthrough,
 	Lvl2ShipMerl,
 	Lvl2ShipAssist,
-	Lvl2SubWar,
 	MegaShip,
 }
 
@@ -587,6 +778,19 @@ local anyOutmodedLvl2VehPlant = {
 	Lvl2VehAssist,
 	ConAdvVehicle,
 	Lvl2AAVeh,
+}
+
+local anyLvl1VehPlantForWater = {
+	ScoutVeh,
+	AmphibiousRaider,
+	ConVehicleAmphibious,
+	Lvl1AAVeh,
+}
+
+-- use these if it's a watery map
+wateryTaskqueues = {
+	armvp = anyLvl1VehPlantForWater,
+	corvp = anyLvl1VehPlantForWater,
 }
 
 -- fall back to these when a level 2 factory exists

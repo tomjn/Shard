@@ -1,15 +1,22 @@
+shard_include "common"
+
+
 BombardBehaviour = class(Behaviour)
 
-function BombardBehaviour:Name()
-	return "BombardBehaviour"
+local DebugEnabled = false
+
+
+local function EchoDebug(inStr)
+	if DebugEnabled then
+		game:SendToConsole("BombardBehaviour: " .. inStr)
+	end
 end
 
 local CMD_ATTACK = 20
+
 local valueThreatThreshold = 1600 -- any cell above this level of value+threat will be shot at manually
 
 function BombardBehaviour:Init()
-	self.DebugEnabled = false
-
     self.lastFireFrame = 0
     self.lastTargetFrame = 0
     self.targetFrame = 0
@@ -21,7 +28,7 @@ end
 
 function BombardBehaviour:Fire()
 	if self.target ~= nil then
-		self:EchoDebug("fire")
+		EchoDebug("fire")
 		local floats = api.vectorFloat()
 		-- populate with x, y, z of the position
 		floats:push_back(self.target.x)
@@ -37,7 +44,7 @@ function BombardBehaviour:CeaseFire()
 	self.unit:Internal():Stop()
 end
 
-function BombardBehaviour:OwnerIdle()
+function BombardBehaviour:UnitIdle(unit)
 	if self.active then
 		self.idle = true
 	end
@@ -47,7 +54,7 @@ function BombardBehaviour:Update()
 	if self.active then
 		local f = game:Frame()
 		if self.lastTargetFrame == 0 or f > self.lastTargetFrame + 300 then
-			self:EchoDebug("retarget")
+			EchoDebug("retarget")
 			local bestCell, valueThreat, buildingID = ai.targethandler:GetBestBombardCell(self.position, self.range, valueThreatThreshold)
 			if bestCell then
 				local newTarget
@@ -61,7 +68,7 @@ function BombardBehaviour:Update()
 				if newTarget ~= self.target then
 					local newAngle = AngleAtoB(self.position.x, self.position.z, newTarget.x, newTarget.z)
 					local ago = f - self.targetFrame
-					self:EchoDebug(ago, newAngle, self.targetAngle)
+					game:SendToConsole(ago, newAngle, self.targetAngle)
 					if self.targetAngle then
 						if AngleDist(self.targetAngle, newAngle) > ago * self.radsPerFrame then
 							newTarget = nil
@@ -71,12 +78,12 @@ function BombardBehaviour:Update()
 						self.target = newTarget
 						self.targetFrame = f
 						self.targetAngle = newAngle
-						self:EchoDebug("new high priority target: " .. valueThreat)
+						EchoDebug("new high priority target: " .. valueThreat)
 						self:Fire()
 					end
 				end
 			else
-				self:EchoDebug("no target, ceasing manual controlled fire")
+				EchoDebug("no target, ceasing manual controlled fire")
 				self:CeaseFire()
 			end
 			self.lastTargetFrame = f

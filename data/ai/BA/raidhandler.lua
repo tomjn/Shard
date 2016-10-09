@@ -1,3 +1,14 @@
+shard_include "common"
+
+local DebugEnabled = false
+
+
+local function EchoDebug(inStr)
+	if DebugEnabled then
+		game:SendToConsole("RaidHandler: " .. inStr)
+	end
+end
+
 RaidHandler = class(Module)
 
 function RaidHandler:Name()
@@ -8,17 +19,10 @@ function RaidHandler:internalName()
 	return "raidhandler"
 end
 
-local mCeil = math.ceil
-
--- these local variables are the same for all AI teams, in fact having them the same saves memory and processing
-
 function RaidHandler:Init()
-	self.DebugEnabled = false
-
 	self.counter = {}
-	self.ai.raiderCount = {}
-	self.ai.IDsWeAreRaiding = {}
-	self.pathValidFuncs = {}
+	ai.raiderCount = {}
+	ai.IDsWeAreRaiding = {}
 end
 
 function RaidHandler:NeedMore(mtype, add)
@@ -28,13 +32,13 @@ function RaidHandler:NeedMore(mtype, add)
 			if self.counter[mtype] == nil then self.counter[mtype] = baseRaidCounter end
 			self.counter[mtype] = self.counter[mtype] + add
 			self.counter[mtype] = math.min(self.counter[mtype], maxRaidCounter)
-			self:EchoDebug(mtype .. " raid counter: " .. self.counter[mtype])
+			EchoDebug(mtype .. " raid counter: " .. self.counter[mtype])
 		end
 	else
 		if self.counter[mtype] == nil then self.counter[mtype] = baseRaidCounter end
 		self.counter[mtype] = self.counter[mtype] + add
 		self.counter[mtype] = math.min(self.counter[mtype], maxRaidCounter)
-		self:EchoDebug(mtype .. " raid counter: " .. self.counter[mtype])
+		EchoDebug(mtype .. " raid counter: " .. self.counter[mtype])
 	end
 end
 
@@ -44,13 +48,13 @@ function RaidHandler:NeedLess(mtype)
 			if self.counter[mtype] == nil then self.counter[mtype] = baseRaidCounter end
 			self.counter[mtype] = self.counter[mtype] - 0.5
 			self.counter[mtype] = math.max(self.counter[mtype], minRaidCounter)
-			self:EchoDebug(mtype .. " raid counter: " .. self.counter[mtype])
+			EchoDebug(mtype .. " raid counter: " .. self.counter[mtype])
 		end
 	else
 		if self.counter[mtype] == nil then self.counter[mtype] = baseRaidCounter end
 		self.counter[mtype] = self.counter[mtype] - 0.5
 		self.counter[mtype] = math.max(self.counter[mtype], minRaidCounter)
-		self:EchoDebug(mtype .. " raid counter: " .. self.counter[mtype])
+		EchoDebug(mtype .. " raid counter: " .. self.counter[mtype])
 	end
 end
 
@@ -71,28 +75,17 @@ end
 
 function RaidHandler:IDsWeAreRaiding(unitIDs, mtype)
 	for i, unitID in pairs(unitIDs) do
-		self.ai.IDsWeAreRaiding[unitID] = mtype
+		ai.IDsWeAreRaiding[unitID] = mtype
 	end
 end
 
 function RaidHandler:IDsWeAreNotRaiding(unitIDs)
 	for i, unitID in pairs(unitIDs) do
-		self.ai.IDsWeAreRaiding[unitID] = nil
+		ai.IDsWeAreRaiding[unitID] = nil
 	end
 end
 
 function RaidHandler:TargetDied(mtype)
-	self:EchoDebug("target died")
+	EchoDebug("target died")
 	self:NeedMore(mtype, 0.35)
-end
-
-function RaidHandler:GetPathValidFunc(unitName)
-	if self.pathValidFuncs[unitName] then
-		return self.pathValidFuncs[unitName]
-	end
-	local valid_node_func = function ( node )
-		return ai.targethandler:IsSafePosition(node.position, unitName, 1)
-	end
-	self.pathValidFuncs[unitName] = valid_node_func
-	return valid_node_func
 end
