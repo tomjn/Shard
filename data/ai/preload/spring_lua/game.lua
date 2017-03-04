@@ -145,5 +145,12 @@ local game = {}
 		end
 		return {}
 	end
+	
+-- UnsyncedRead
+
+	function game:IsUnitAllied(unit_id)
+		return Spring.IsUnitAllied(unit_id)
+	end
+		
 
 return game
