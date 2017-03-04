@@ -74,16 +74,5 @@ function players_info:GetTeamStartPosition(team_id)
 end
 
 
-function players_info:(team_id) 
-	return
-end
-
-function players_info:(team_id) 
-	return
-end
-
-function players_info:(team_id) 
-	return
-end
 
 
