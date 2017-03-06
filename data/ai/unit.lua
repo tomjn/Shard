@@ -11,7 +11,7 @@ end
 
 function Unit:Init()
 	if self.engineUnit == nil then
-		game:SendToConsole("nil engineUnit?!")
+		game:SendToConsole("Warning: Shard Unit:Init nil engineUnit?!")
 	end
 	self.behaviours = {}
 	self.behaviourvalues = {}
