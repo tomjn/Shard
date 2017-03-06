@@ -76,3 +76,20 @@ end
 function Behaviour:EchoDebug(inStr)
 	game:SendToConsole(self:Name() .. ": " .. inStr)
 end
+
+-- if the behaviour has everything it needs to run, this
+-- returns true, but if it's missing any required dependencies,
+-- such as the unit or AI object, then something is terribly
+-- wrong, or the behaviour hasn't finished being created
+function Behaviour:IsReady()
+	if self.unit == nil then
+		return false
+	end
+	if self.ai == nil then
+		return false
+	end
+	if self.unit:Internal() == nil then
+		return false
+	end
+	return true
+end
