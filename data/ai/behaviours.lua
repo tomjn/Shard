@@ -9,6 +9,9 @@ behaviours = { }
 
 function defaultBehaviours(unit)
 	b = {}
+	if unit == nil then
+		return b
+	end
 	u = unit:Internal()
 	table.insert(b, BootBehaviour )
 	if u:CanBuild() then
