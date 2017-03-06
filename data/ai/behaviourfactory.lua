@@ -8,6 +8,7 @@ end
 
 function BehaviourFactory:AddBehaviours(unit, ai)
 	if unit == nil then
+		ai:game:SendToConsole("Warning: Shard BehaviourFactory:AddBehaviours was asked to provide behaviours to a nil unit")
 		return
 	end
 	-- add behaviours here
