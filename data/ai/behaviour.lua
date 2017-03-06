@@ -25,6 +25,11 @@ function Behaviour:UnitIdle(unit)
 end
 
 function Behaviour:SetUnit(unit)
+	if unit == nil then
+		-- this should never happen, you don't add behaviours to units you either cant
+		-- control/see or that don't exist. This was called incorrectly
+		game:SendToConsole( "Warning: Shard Behaviour:SetUnit was called with a nil unit for "..self:Name() )
+	end
 	self.unit = unit
 	self.engineID = unit.engineID
 end
