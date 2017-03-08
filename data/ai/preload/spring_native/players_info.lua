@@ -72,6 +72,6 @@ function players_info:GetTeamStartPosition(team_id)
 	return Spring.GetTeamStartPosition(team_id)
 end
 
-
+return players_info
 
 
