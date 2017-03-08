@@ -18,6 +18,7 @@ if ShardSpringLua then
 	require "preload/spring_lua/damage"
 	require "preload/spring_lua/feature"
 	require "preload/spring_lua/controlpoint"
+	require "preload/spring_lua/players_info"
 elseif game_engine then
 	shard_include "hooks"
 	shard_include "class"
@@ -25,9 +26,12 @@ elseif game_engine then
 
 	shard_include "preload/spring_native/unit"
 	shard_include "preload/spring_native/unittype"
+	shard_include "preload/spring_native/players_info"
 else
 	-- load null objects
 	require "preload/hooks"
 	require "preload/class"
 	require "preload/aibase"
+	require "preload/shard_null/players_info"
+	
 end
