@@ -90,7 +90,7 @@ bool CTestAI::LoadLuaFile(std::string filename){
 	}
 	int err = luaL_loadfile (this->L, filename.c_str());
 	if (err == 0){
-		int status = lua_epcall (this->L, 0);
+		int status = this->lua_epcall( 0);
 		if (status == 0){
 			return true;
 		} else{
