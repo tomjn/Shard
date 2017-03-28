@@ -43,5 +43,7 @@ protected:
 	swig_type_info* damagePtr;
 	bool LoadLuaFile(std::string filename);
 
+	int lua_epcall( int nargs);
+
 	IGame* game;
 };
