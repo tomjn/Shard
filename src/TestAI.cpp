@@ -159,6 +159,8 @@ void CTestAI::Init(){
 	lua_getglobal(this->L, "ai");
 	if(lua_isfunction(this->L,-2)){
 		lua_epcall(this->L, 1);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:Init failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
@@ -166,8 +168,10 @@ void CTestAI::Update(){
 	lua_getglobal(this->L, "ai");
 	lua_getfield(this->L, -1, "Update");
 	lua_getglobal(this->L, "ai");
-	if(lua_isfunction(this->L,-2)){
+	if ( lua_isfunction( this->L, -2 ) ) {
 		lua_epcall(this->L, 1);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:Update failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
@@ -175,8 +179,10 @@ void CTestAI::GameEnd(){
 	lua_getglobal(this->L, "ai");
 	lua_getfield(this->L, -1, "GameEnd");
 	lua_getglobal(this->L, "ai");
-	if(lua_isfunction(this->L,-2)){
+	if ( lua_isfunction(this->L,-2 ) ) {
 		lua_epcall(this->L, 1);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:GameEnd failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
@@ -186,8 +192,10 @@ void CTestAI::GameMessage(const char* text){
 	lua_getglobal(this->L, "ai");
 	lua_pushstring(this->L,text);
 	//SWIG_NewPointerObj(this->L,text,(char *),0);
-	if(lua_isfunction(this->L,-3)){
+	if ( lua_isfunction( this->L,-3 ) ){
 		lua_epcall(this->L, 2);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:GameMessage failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
@@ -196,8 +204,10 @@ void CTestAI::UnitGiven(IUnit* unit){
 	lua_getfield(this->L, -1, "UnitGiven");
 	lua_getglobal(this->L, "ai");
 	SWIG_NewPointerObj(this->L,unit,unittype,0);
-	if(lua_isfunction(this->L,-3)){
+	if ( lua_isfunction( this->L,-3 ) ) {
 		lua_epcall(this->L, 2);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:UnitGiven failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
@@ -206,8 +216,10 @@ void CTestAI::UnitCreated(IUnit* unit){
 	lua_getfield(this->L, -1, "UnitCreated");
 	lua_getglobal(this->L, "ai");
 	SWIG_NewPointerObj(this->L,unit,unittype,0);
-	if(lua_isfunction(this->L,-3)){
+	if ( lua_isfunction( this->L,-3 ) ) {
 		lua_epcall(this->L, 2);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:UnitCreated failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
@@ -216,8 +228,10 @@ void CTestAI::UnitBuilt(IUnit* unit){
 	lua_getfield(this->L, -1, "UnitBuilt");
 	lua_getglobal(this->L, "ai");
 	SWIG_NewPointerObj(this->L,unit,unittype,0);
-	if(lua_isfunction(this->L,-3)){
+	if ( lua_isfunction( this->L, -3 ) ) {
 		lua_epcall(this->L, 2);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:Unitbuilt failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
@@ -228,6 +242,8 @@ void CTestAI::UnitDead(IUnit* unit){
 	SWIG_NewPointerObj(this->L,unit,unittype,0);
 	if(lua_isfunction(this->L,-3)){
 		lua_epcall(this->L, 2);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:UnitDead failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
@@ -238,6 +254,8 @@ void CTestAI::UnitIdle(IUnit* unit){
 	SWIG_NewPointerObj(this->L,unit,unittype,0);
 	if(lua_isfunction(this->L,-3)){
 		lua_epcall(this->L, 2);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:UnitIdle failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
@@ -248,6 +266,8 @@ void CTestAI::UnitMoveFailed(IUnit* unit){
 	SWIG_NewPointerObj(this->L,unit,unittype,0);
 	if(lua_isfunction(this->L,-3)){
 		lua_epcall(this->L, 2);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:UnitMoveFailed failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
@@ -261,6 +281,8 @@ void CTestAI::UnitDamaged(IUnit* unit, IUnit* attacker, IDamage::Ptr damage){
 	SWIG_NewPointerObj(this->L,ptrptr,damagePtr,1);
 	if(lua_isfunction(this->L,-4)){
 		lua_epcall(this->L, 3);
+	} else {
+		this->game->SendToConsole( "ShardCPP Warning: ai:UnitDamaged failed isfunction test, make sure it's defined in lua" );
 	}
 }
 
