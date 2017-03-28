@@ -77,7 +77,7 @@ CTestAI::CTestAI(IGame* game)
 	lua_settable(this->L, -3);
 
 	// now start the wheels turning
-	if ( false === this->LoadLuaFile("boot.lua") ) {
+	if ( false == this->LoadLuaFile("boot.lua") ) {
 		this->game->SendToConsole( "ShardCPP: Error: Shard CPP tried to boot up a Shard instance, but there was a problem loading boot.lua. There may be errors or issues from this point as a result." );
 	}
 }
