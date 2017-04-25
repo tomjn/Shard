@@ -1,7 +1,0 @@
---[[
-Attackers!
-]]--
-
-attackerlist = {
-	--
-}
