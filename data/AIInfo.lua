@@ -30,7 +30,7 @@ local infos = {
 	},
 	{
 		key    = 'description',
-		value  = 'Shard by AF',
+		value  = 'Shard by AF, works with ZK,CA,KP,BA,CT, and The Cursed',
 		desc   = 'this should help noobs to find out whether this AI is what they want',
 	},
 	{
@@ -52,6 +52,11 @@ local infos = {
 		key    = 'interfaceVersion',
 		value  = '0.1', -- AI Interface version - !This comment is used for parsing!
 		desc   = 'the minimum version of the AI interface this AI needs',
+	},
+	{
+		key    = 'supportedGames',
+		value  = 'BA,KP.n,KP,The Cursed,ZK,ca,ct',
+		desc   = 'list of games supported, comma separated',
 	},
 }
 
