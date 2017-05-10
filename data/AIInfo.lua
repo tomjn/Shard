@@ -25,12 +25,12 @@ local infos = {
 	},
 	{
 		key    = 'name',
-		value  = 'Shard',
+		value  = 'Shard Native',
 		desc   = 'human readable name.',
 	},
 	{
 		key    = 'description',
-		value  = 'Shard by AF, works with ZK,CA,KP,BA,CT, and The Cursed',
+		value  = 'Shard by AF, C++ Lua AI, works with ZK,CA,KP,BA,CT, and The Cursed',
 		desc   = 'this should help noobs to find out whether this AI is what they want',
 	},
 	{
