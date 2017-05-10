@@ -37,6 +37,8 @@ public:
 
 	static IAI* ai;
 	IGame* GetGame() const { return game; }
+
+	bool IsRunning();
 protected:
 
 	swig_type_info* unittype;
@@ -48,4 +50,6 @@ protected:
 	int lua_epcall( int nargs);
 
 	IGame* game;
+
+	bool running;
 };

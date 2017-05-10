@@ -31,6 +31,7 @@ IAI* CTestAI::ai = 0;
 CTestAI::CTestAI(IGame* game)
 : game(game){
 	CTestAI::ai = this;
+	this->running = true;
 
 	// create our Lua environment
 	this->L = luaL_newstate();
@@ -82,6 +83,7 @@ CTestAI::CTestAI(IGame* game)
 		this->game->SendToConsole( "ShardCPP: Error: Shard CPP tried to boot up a Shard instance, but there was a problem loading boot.lua. There may be errors or issues from this point as a result. Shard tried to load from:" );
 		this->game->SendToConsole( location );
 		this->game->SendToConsole( "ShardCPP: This is usually caused by putting the AI lua files in the wrong place, or putting them inside a game archive where Shard cannot see them." );
+		this->running = false;
 	}
 }
 
@@ -104,7 +106,11 @@ bool CTestAI::LoadLuaFile( std::string filename ) {
 		int status = this->lua_epcall( 0);
 		if (status == 0){
 			return true;
-		} else{
+		} else {
+			std::string message = "ShardCPP: error running \"";
+			message += filename;
+			message += "\" lua_epcall responded with a nonzero value";
+			this->game->SendToConsole(message);
 			return false;
 		}
 	} else {
@@ -299,5 +305,9 @@ int CTestAI::lua_epcall( int nargs ){
 	lua_pop(L,j);
 
 	return status;
+}
+
+bool CTestAI::IsRunning() {
+	return this->running;
 }
 
