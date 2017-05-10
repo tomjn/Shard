@@ -44,6 +44,10 @@ cpptestai::CCppTestAI::~CCppTestAI() {}
 
 int cpptestai::CCppTestAI::HandleEvent(int topic, const void* data) {
 
+	if ( false == game->Me()->IsRunning() ) {
+		return 0;
+	}
+
 	switch (topic) {
 		case EVENT_INIT: {
 			game->Me()->Init();
