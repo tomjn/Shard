@@ -24,3 +24,12 @@ function shard_include( file )
 		return VFS.Include(preloadFile)
 	end
 end
+
+shard_include "preload/hooks"
+shard_include "preload/class"
+shard_include "preload/aibase"
+shard_include "preload/spring_lua/unit"
+shard_include "preload/spring_lua/unittype"
+shard_include "preload/spring_lua/damage"
+shard_include "preload/spring_lua/feature"
+shard_include "preload/spring_lua/controlpoint"
