@@ -41,6 +41,8 @@ protected:
 
 	swig_type_info* unittype;
 	swig_type_info* damagePtr;
+
+	std::string FindLuaFile( std::string filename );
 	bool LoadLuaFile(std::string filename);
 
 	int lua_epcall( int nargs);

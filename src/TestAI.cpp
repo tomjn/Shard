@@ -78,12 +78,23 @@ CTestAI::CTestAI(IGame* game)
 
 	// now start the wheels turning
 	if ( false == this->LoadLuaFile("boot.lua") ) {
-		this->game->SendToConsole( "ShardCPP: Error: Shard CPP tried to boot up a Shard instance, but there was a problem loading boot.lua. There may be errors or issues from this point as a result." );
+		std::string location = this->FindLuaFile( "boot.lua" );
+		this->game->SendToConsole( "ShardCPP: Error: Shard CPP tried to boot up a Shard instance, but there was a problem loading boot.lua. There may be errors or issues from this point as a result. Shard tried to load from:" );
+		this-game->SendToConsole( location );
+		this-game->SendToConsole( "ShardCPP: This is usually caused by putting the AI lua files in the wrong place, or putting them inside a game archive where Shard cannot see them." );
 	}
 }
 
+std::string CTestAI::FindLuaFile( std::string filename ) {
+	filename.insert(0,"ai" SLASH); //prepend "ai/"
+	if ( ! this->game->LocatePath( filename ) ) {
+		return false;
+	}
+	return filename;
+}
 
-bool CTestAI::LoadLuaFile(std::string filename){
+
+bool CTestAI::LoadLuaFile( std::string filename ) {
 	filename.insert(0,"ai" SLASH); //prepend "ai/"
 	if (!this->game->LocatePath(filename)){
 		return false;
