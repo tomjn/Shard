@@ -50,7 +50,7 @@ end
 
 function BootBehaviour:Priority()
 	-- don't apply to starting units
-	if game:Frame() < 10 then
+	if self.game:Frame() < 10 then
 		return 0
 	end
 

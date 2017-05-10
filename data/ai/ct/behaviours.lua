@@ -9,7 +9,7 @@ behaviours = {
 	},
 }
 
-function defaultBehaviours(unit)
+function defaultBehaviours(unit,ai)
 	b = {}
 	u = unit:Internal()
 	if u:CanBuild() then

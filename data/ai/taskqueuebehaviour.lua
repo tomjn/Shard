@@ -50,7 +50,7 @@ function TaskQueueBehaviour:UnitDead(unit)
 		if unit.engineID == self.unit.engineID then
 			if self.waiting ~= nil then
 				for k,v in pairs(self.waiting) do
-					ai.modules.sleep.Kill(self.waiting[k])
+					self.ai.modules.sleep.Kill(self.waiting[k])
 				end
 			end
 			self.waiting = nil
@@ -72,7 +72,7 @@ function TaskQueueBehaviour:Update()
 	if not self:IsActive() then
 		return
 	end
-	local f = game:Frame()
+	local f = self.game:Frame()
 	local s = self.countdown
 	if self.progress == true then
 	--if math.mod(f,3) == 0 then
@@ -93,7 +93,6 @@ TaskQueueWakeup = class(function(a,tqb)
 	a.tqb = tqb
 end)
 function TaskQueueWakeup:wakeup()
-	game:sendtoconsole("advancing queue from sleep1")
 	self.tqb:ProgressQueue()
 end
 function TaskQueueBehaviour:ProgressQueue()
@@ -114,7 +113,7 @@ function TaskQueueBehaviour:ProgressQueue()
 			if action == "wait" then
 				t = TaskQueueWakeup(self)
 				tqb = self
-				ai.sleep:Wait({ wakeup = function() tqb:ProgressQueue() end, },value.frames)
+				self.ai.sleep:Wait({ wakeup = function() tqb:ProgressQueue() end, },value.frames)
 				return
 			elseif action == "move" then
 				self.unit:Internal():Move(value.position)
@@ -133,7 +132,7 @@ function TaskQueueBehaviour:ProgressQueue()
 				value = val(self)
 			end
 			if utype ~= "next" then
-				utype = game:GetTypeByName(value)
+				utype = self.game:GetTypeByName(value)
 				if utype ~= nil then
 					unit = self.unit:Internal()
 					if unit:CanBuild(utype) then
@@ -141,7 +140,7 @@ function TaskQueueBehaviour:ProgressQueue()
 							-- find a free spot!
 							
 							p = unit:GetPosition()
-							p = ai.metalspothandler:ClosestFreeSpot(utype,p)
+							p = self.ai.metalspothandler:ClosestFreeSpot(utype,p)
 							if p ~= nil then
 								success = self.unit:Internal():Build(utype,p)
 								self.progress = not success
@@ -156,7 +155,7 @@ function TaskQueueBehaviour:ProgressQueue()
 						self.progress = true
 					end
 				else
-					game:SendToConsole("Cannot build:"..value..", couldnt grab the unit type from the engine")
+					self.game:SendToConsole("Cannot build:"..value..", couldnt grab the unit type from the engine")
 					self.progress = true
 				end
 			else

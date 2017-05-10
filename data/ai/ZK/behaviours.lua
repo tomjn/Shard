@@ -10,7 +10,7 @@ behaviours = {
 	},
 }
 
-function defaultBehaviours(unit)
+function defaultBehaviours(unit, ai)
 	b = {}
 	u = unit:Internal()
 	table.insert(b, BootBehaviour )

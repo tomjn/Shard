@@ -28,16 +28,10 @@ function Behaviour:SetUnit(unit)
 	if unit == nil then
 		-- this should never happen, you don't add behaviours to units you either cant
 		-- control/see or that don't exist. This was called incorrectly
-		game:SendToConsole( "Warning: Shard Behaviour:SetUnit was called with a nil unit for "..self:Name() )
+		self.game:SendToConsole( "Warning: Shard Behaviour:SetUnit was called with a nil unit for "..self:Name() )
 	end
 	self.unit = unit
 	self.engineID = unit.engineID
-end
-
-function Behaviour:SetAI(ai)
-	self.ai = ai
-	self.game = ai.game
-	self.map = ai.map
 end
 
 
@@ -74,7 +68,7 @@ function Behaviour:Name()
 end
 
 function Behaviour:EchoDebug(inStr)
-	game:SendToConsole(self:Name() .. ": " .. inStr)
+	self.game:SendToConsole(self:Name() .. ": " .. inStr)
 end
 
 -- if the behaviour has everything it needs to run, this

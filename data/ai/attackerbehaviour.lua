@@ -18,21 +18,21 @@ end
 function AttackerBehaviour:UnitBuilt(unit)
 	if unit.engineID == self.unit.engineID then
 		self.attacking = false
-		ai.attackhandler:AddRecruit(self)
+		self.ai.attackhandler:AddRecruit(self)
 	end
 end
 
 
 function AttackerBehaviour:UnitDead(unit)
 	if unit.engineID == self.unit.engineID then
-		ai.attackhandler:RemoveRecruit(self)
+		self.ai.attackhandler:RemoveRecruit(self)
 	end
 end
 
 function AttackerBehaviour:UnitIdle(unit)
 	if unit.engineID == self.unit.engineID then
 		self.attacking = false
-		ai.attackhandler:AddRecruit(self)
+		self.ai.attackhandler:AddRecruit(self)
 	end
 end
 
@@ -64,13 +64,13 @@ function AttackerBehaviour:Activate()
 		self.unit:Internal():MoveAndFire(self.target)
 		self.target = nil
 	else
-		ai.attackhandler:AddRecruit(self)
+		self.ai.attackhandler:AddRecruit(self)
 	end
 end
 
 
 function AttackerBehaviour:OwnerDied()
-	ai.attackhandler:RemoveRecruit(self)
+	self.ai.attackhandler:RemoveRecruit(self)
 	self.attacking = nil
 	self.active = nil
 	self.unit = nil
