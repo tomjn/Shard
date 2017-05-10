@@ -8,7 +8,7 @@ function AI:Init()
 	self.game.ai = self
 	self.map.ai = self
 	self.game.map = self.map
-	self.game:SendToConsole("Shard by AF - playing:"..self.game:GameName().." on:"..self.map:MapName())
+	self.game:SendToConsole("Shard by AF - playing: "..self.game:GameName().." on: "..self.map:MapName())
 
 	ai = self
 	game = self.game
