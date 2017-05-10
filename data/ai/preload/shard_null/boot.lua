@@ -6,3 +6,9 @@ function shard_include( file )
 	end
 	require( file )
 end
+
+-- load null objects
+require "preload/hooks"
+require "preload/class"
+require "preload/aibase"
+require "preload/shard_null/game"

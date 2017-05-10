@@ -25,9 +25,4 @@ elseif game_engine then
 
 	shard_include "preload/spring_cpp/unit"
 	shard_include "preload/spring_cpp/unittype"
-else
-	-- load null objects
-	require "preload/hooks"
-	require "preload/class"
-	require "preload/aibase"
 end
