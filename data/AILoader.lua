@@ -28,46 +28,19 @@ else
 end
 
 local teams = Spring.GetTeamList()
-for i =1, #teams do
-	local luaAI = Spring.GetTeamLuaAI(teams[i])
-	if luaAI ~= "" then
-		if luaAI == "Chicken: Very Easy" or 
-		luaAI == "Chicken: Easy" or 
-		luaAI == "Chicken: Normal" or 
-		luaAI == "Chicken: Hard" or 
-		luaAI == "Chicken: Very Hard" or 
-		luaAI == "Chicken: Epic!" or 
-		luaAI == "Chicken: Custom" or 
-		luaAI == "Chicken: Survival" then
-			chickensEnabled = true
-		end
-	end
-end
-
-if chickensEnabled == true then
-	Spring.Echo("[AI Loader] ShardLua bot has been deactivated because Chickens are present!")
-	return false
-else
-	Spring.Echo("[AI Loader] No Chickens present, ShardLua loaded.")
-end
 
 -- globals
 ShardSpringLua = true -- this is the AI Boot gadget, so we're in Spring Lua
-VFS.Include("luarules/gadgets/ai/preload/globals.lua")
+VFS.Include("luarules/gadgets/ai/preload/spring_lua/boot.lua")
 
 -- fake os object
-os = shard_include("spring_lua/fakeos")
+--os = shard_include("spring_lua/fakeos")
 
 -- missing math function
 function math.mod(number1, number2)
 	return number1 % number2
 end
 math.fmod = math.mod
-
-shard_include("behaviourfactory")
-shard_include("unit")
-shard_include("module")
-shard_include("modules")
 
 -- Shard object
 Shard = shard_include("spring_lua/shard")
@@ -76,7 +49,7 @@ Shard.AIsByTeamID = {}
 local AIs = Shard.AIs
 
 -- fake api object
-api = shard_include("spring_lua/fakeapi")
+--api = shard_include("spring_lua/fakeapi")
 
 -- localization
 local spEcho = Spring.Echo
@@ -117,7 +90,7 @@ function gadget:Initialize()
 				numberOfmFAITeams = numberOfmFAITeams + 1
 				spEcho("Player " .. teamList[i] .. " is " .. aiInfo)
 				-- add AI object
-				thisAI = VFS.Include("LuaRules/Gadgets/ai/AI.lua")
+				thisAI = VFS.Include("LuaRules/Gadgets/ai/ai.lua")
 				thisAI.id = id
 				thisAI.allyId = allyId
 				-- thisAI:Init()
