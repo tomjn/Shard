@@ -88,7 +88,7 @@ CTestAI::CTestAI(IGame* game)
 std::string CTestAI::FindLuaFile( std::string filename ) {
 	filename.insert(0,"ai" SLASH); //prepend "ai/"
 	if ( ! this->game->LocatePath( filename ) ) {
-		return false;
+		return "";
 	}
 	return filename;
 }
