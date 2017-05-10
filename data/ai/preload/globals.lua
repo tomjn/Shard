@@ -7,12 +7,3 @@ elseif game_engine then
 else
 	require "preload/shard_null/boot"
 end
-
-if game_engine then
-	shard_include "hooks"
-	shard_include "class"
-	shard_include "aibase"
-
-	shard_include "preload/spring_cpp/unit"
-	shard_include "preload/spring_cpp/unittype"
-end
