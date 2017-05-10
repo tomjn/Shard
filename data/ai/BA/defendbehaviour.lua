@@ -81,10 +81,6 @@ end
 function DefendBehaviour:Update()
 	if self.unit == nil then return end
 	local unit = self.unit:Internal()
-	if ShardSpringLua and not unit:GetPosition() then
-		-- game:SendToConsole(self.ai.id, "undead defend behaviour", unit:ID(), unit:Name())
-		self:UnitDead(self.unit)
-	end
 	if unit == nil then return end
 	if self.active then
 		local f = game:Frame()
