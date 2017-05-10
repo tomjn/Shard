@@ -3,7 +3,7 @@
 if ShardSpringLua then
 	require "preload/spring_lua/boot"
 elseif game_engine then
-	require "spring_native/boot"
+	require "spring_cpp/boot"
 else
 	require "preload/shard_null/boot"
 end
@@ -23,8 +23,8 @@ elseif game_engine then
 	shard_include "class"
 	shard_include "aibase"
 
-	shard_include "preload/spring_native/unit"
-	shard_include "preload/spring_native/unittype"
+	shard_include "preload/spring_cpp/unit"
+	shard_include "preload/spring_cpp/unittype"
 else
 	-- load null objects
 	require "preload/hooks"
