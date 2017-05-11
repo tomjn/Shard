@@ -99,7 +99,7 @@ function UnitHandler:AIRepresentation(engineUnit)
 	if u == nil then
 		-- self.game:SendToConsole(self.ai.id, "adding unit to unithandler tables", engineUnit:ID(), engineUnit:Name())
 		u = Unit()
-		u.SetAI( self.ai )
+		u:SetAI( self.ai )
 		self.units[engineUnit:ID()] = u
 		
 		u:SetEngineRepresentation(engineUnit)
