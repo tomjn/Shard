@@ -12,7 +12,6 @@ function ShardAI:Init()
 
 	shard_include("behaviourfactory")
 	shard_include("unit")
-	shard_include("module")
 	shard_include("modules")
 
 	self.modules = {}

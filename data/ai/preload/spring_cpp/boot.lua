@@ -21,6 +21,7 @@ end
 shard_include "hooks"
 shard_include "class"
 shard_include "aibase"
+shard_include "module"
 
 shard_include "preload/spring_cpp/unit"
 shard_include "preload/spring_cpp/unittype"
