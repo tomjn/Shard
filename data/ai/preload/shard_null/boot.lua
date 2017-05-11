@@ -11,4 +11,3 @@ end
 require "preload/hooks"
 require "preload/class"
 require "preload/aibase"
-require "preload/shard_null/game"
