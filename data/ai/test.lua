@@ -12,11 +12,8 @@ function dump(o)
 end
 require "boot"
 shard_include "ai"
-shard_include "unithandler"
 ai = ShardAI()
 ai:Init()
-print( dump( ai ) )
 u = UnitHandler()
 
-print( dump( u ) )
 u:SetAI(ai)
