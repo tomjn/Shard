@@ -25,6 +25,7 @@ function shard_include( file )
 	end
 end
 
+shard_include "preload/spring_lua/fakeos"
 shard_include "preload/hooks"
 shard_include "preload/class"
 shard_include "preload/aibase"
