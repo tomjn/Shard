@@ -1,7 +1,8 @@
 ShardAI = class(AIBase)
 
 function ShardAI:Init()
-	self.api = shard_include("preload/api")
+	api = shard_include("preload/api")
+	self.api = api
 	self.game = self.api.game
 	self.map = self.api.map
 	self.game.ai = self
