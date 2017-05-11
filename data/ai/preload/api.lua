@@ -15,7 +15,7 @@ elseif game_engine then
 else
 	-- who knows! Load a Null non-op API
 	api.game = shard_include "preload/shard_null/game"
-	api.map = {} --shard_include "preload/shard_null/map"
+	api.map = shard_include "preload/shard_null/map"
 end
 
 return api
