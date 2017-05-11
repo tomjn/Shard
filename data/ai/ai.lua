@@ -1,7 +1,6 @@
 ShardAI = class(AIBase)
 
 function ShardAI:Init()
-	ai = self
 	self.api = shard_include("preload/api")
 	self.game = self.api.game
 	self.map = self.api.map
@@ -9,10 +8,6 @@ function ShardAI:Init()
 	self.map.ai = self
 	self.game.map = self.map
 	self.game:SendToConsole("Shard by AF - playing: "..self.game:GameName().." on: "..self.map:MapName())
-
-	ai = self
-	game = self.game
-	map = self.map
 
 	shard_include("behaviourfactory")
 	shard_include("unit")
