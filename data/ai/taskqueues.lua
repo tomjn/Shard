@@ -6,7 +6,7 @@ math.randomseed( os.time() )
 math.random(); math.random(); math.random()
 
 function CoreWindSolar()
-	if game:AverageWind() > 10 then
+	if map:AverageWind() > 10 then
 		return "corwind"
 	else
 		return "corsolar"
