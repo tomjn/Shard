@@ -14,12 +14,10 @@ function AI:Init()
 	game = self.game
 	map = self.map
 
-	if not ShardSpringLua then
-		shard_include("behaviourfactory")
-		shard_include("unit")
-		shard_include("module")
-		shard_include("modules")
-	end
+	shard_include("behaviourfactory")
+	shard_include("unit")
+	shard_include("module")
+	shard_include("modules")
 
 	self.modules = {}
 	if next(modules) ~= nil then
