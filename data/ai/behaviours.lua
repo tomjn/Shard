@@ -16,7 +16,7 @@ function defaultBehaviours(unit, ai)
 	table.insert(b, BootBehaviour )
 	if u:CanBuild() then
 		table.insert(b,TaskQueueBehaviour)
-	elseg
+	else
 		if IsPointCapturer(unit, ai) then
 			table.insert(b,PointCapturerBehaviour)
 		end
