@@ -8,7 +8,7 @@ else
 	require "preload/shard_null/boot"
 end
 
-require( "ai" )
+shard_include( "ai" )
 
 -- create and use an AI
 if ShardSpringLua then
