@@ -7,7 +7,7 @@ shard_include(  "bootbehaviour" )
 
 behaviours = { }
 
-function defaultBehaviours(unit)
+function defaultBehaviours(unit, ai)
 	b = {}
 	if unit == nil then
 		return b
@@ -16,8 +16,8 @@ function defaultBehaviours(unit)
 	table.insert(b, BootBehaviour )
 	if u:CanBuild() then
 		table.insert(b,TaskQueueBehaviour)
-	else
-		if IsPointCapturer(unit) then
+	elseg
+		if IsPointCapturer(unit, ai) then
 			table.insert(b,PointCapturerBehaviour)
 		end
 		if IsAttacker(unit) then

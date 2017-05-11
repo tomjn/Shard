@@ -1,5 +1,5 @@
-function IsPointCapturer(unit)
-	local noncapturelist = game:ControlPointNonCapturingUnits()
+function IsPointCapturer(unit, ai)
+	local noncapturelist = ai.game:ControlPointNonCapturingUnits()
 	for i = 1, #noncapturelist do
 		local name = noncapturelist[i]
 		if name == unit:Internal():Name() then
