@@ -12,7 +12,7 @@ require( "ai" )
 
 -- create and use an AI
 if ShardSpringLua then
-	return AI()
+	return ShardAI()
 else
-	ai = AI()
+	ai = ShardAI()
 end

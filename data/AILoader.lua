@@ -31,7 +31,7 @@ local teams = Spring.GetTeamList()
 
 -- globals
 ShardSpringLua = true -- this is the AI Boot gadget, so we're in Spring Lua
-VFS.Include("luarules/gadgets/ai/preload/spring_lua/boot.lua")
+VFS.Include("luarules/gadgets/ai/boot.lua")
 
 -- fake os object
 --os = shard_include("spring_lua/fakeos")
@@ -90,7 +90,7 @@ function gadget:Initialize()
 				numberOfmFAITeams = numberOfmFAITeams + 1
 				spEcho("Player " .. teamList[i] .. " is " .. aiInfo)
 				-- add AI object
-				thisAI = VFS.Include("LuaRules/Gadgets/ai/ai.lua")
+				thisAI = ShardAI()
 				thisAI.id = id
 				thisAI.allyId = allyId
 				-- thisAI:Init()

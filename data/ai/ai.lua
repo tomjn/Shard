@@ -1,6 +1,6 @@
-AI = class(AIBase)
+ShardAI = class(AIBase)
 
-function AI:Init()
+function ShardAI:Init()
 	ai = self
 	self.api = shard_include("preload/api")
 	self.game = self.api.game
@@ -33,7 +33,7 @@ function AI:Init()
 	end
 end
 
-function AI:Update()
+function ShardAI:Update()
 	if self.gameend == true then
 		return
 	end
@@ -46,7 +46,7 @@ function AI:Update()
 	end
 end
 
-function AI:GameMessage(text)
+function ShardAI:GameMessage(text)
 	if self.gameend == true then
 		return
 	end
@@ -59,7 +59,7 @@ function AI:GameMessage(text)
 	end
 end
 
-function AI:UnitCreated(engineunit)
+function ShardAI:UnitCreated(engineunit)
 	if self.gameend == true then
 		return
 	end
@@ -72,7 +72,7 @@ function AI:UnitCreated(engineunit)
 	end
 end
 
-function AI:UnitBuilt(engineunit)
+function ShardAI:UnitBuilt(engineunit)
 	if self.gameend == true then
 		return
 	end
@@ -85,7 +85,7 @@ function AI:UnitBuilt(engineunit)
 	end
 end
 
-function AI:UnitDead(engineunit)
+function ShardAI:UnitDead(engineunit)
 	if self.gameend == true then
 		return
 	end
@@ -97,7 +97,7 @@ function AI:UnitDead(engineunit)
 	end
 end
 
-function AI:UnitIdle(engineunit)
+function ShardAI:UnitIdle(engineunit)
 	if self.gameend == true then
 		return
 	end
@@ -111,7 +111,7 @@ function AI:UnitIdle(engineunit)
 	end
 end
 
-function AI:UnitDamaged(engineunit,engineattacker,enginedamage)
+function ShardAI:UnitDamaged(engineunit,engineattacker,enginedamage)
 	if self.gameend == true then
 		return
 	end
@@ -124,7 +124,7 @@ function AI:UnitDamaged(engineunit,engineattacker,enginedamage)
 	end
 end
 
-function AI:UnitMoveFailed(engineunit)
+function ShardAI:UnitMoveFailed(engineunit)
 	if self.gameend == true then
 		return
 	end
@@ -136,14 +136,14 @@ function AI:UnitMoveFailed(engineunit)
 	end
 end
 
-function AI:GameEnd()
+function ShardAI:GameEnd()
 	self.gameend = true
 	for i,m in ipairs(self.modules) do
 		m:GameEnd()
 	end
 end
 
-function AI:AddModule( newmodule )
+function ShardAI:AddModule( newmodule )
 	local internalname = newmodule:internalName()
 	self[internalname] = newmodule
 	table.insert(self.modules,newmodule)
