@@ -6,8 +6,12 @@ function shard_include( file )
 	end
 	subdir = Game.gameShortName
 	if Game.gameShortName == "BAR" then
+		if VFS.FileExists("luarules/gadgets/ai/BAR/modules.lua") then
+			subdir = "BAR"
+		else
 		-- AI for BA / BAR is (atm) the same
-		subdir = "BA"
+			subdir = "BA"
+		end
 	end
 
 	local gameFile = "luarules/gadgets/ai/" ..  subdir .. "/" .. file .. ".lua"

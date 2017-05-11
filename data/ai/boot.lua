@@ -8,7 +8,7 @@ else
 	require "preload/shard_null/boot"
 end
 
-require( "ai" )
+VFS.Include( "luarules/gadgets/ai/ai.lua" )
 
 -- create and use an AI
 if ShardSpringLua then
