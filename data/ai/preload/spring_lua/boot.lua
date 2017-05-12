@@ -27,6 +27,7 @@ end
 
 shard_include "preload/spring_lua/shard"
 os = shard_include "preload/spring_lua/fakeos"
+api = shard_include "preload/spring_lua/fakeapi"
 shard_include "preload/hooks"
 shard_include "preload/class"
 shard_include "preload/aibase"

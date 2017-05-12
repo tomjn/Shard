@@ -10,8 +10,8 @@ if ShardSpringLua then
 	api.map = shard_include "spring_lua/map"
 elseif game_engine then
 	 -- it's a native AI!
-	api.game = shard_include "spring_native/game"
-	api.map = shard_include "spring_native/map"
+	api.game = shard_include "spring_cpp/game"
+	api.map = shard_include "spring_cpp/map"
 else
 	-- who knows! Load a Null non-op API
 	api.game = shard_include "preload/shard_null/game"
