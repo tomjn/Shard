@@ -1,17 +1,3 @@
-shard_include "common"
-
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		game:SendToConsole("AttackHandler: " .. inStr)
-	end
-end
-
-local floor = math.floor
-local ceil = math.ceil
-
 AttackHandler = class(Module)
 
 function AttackHandler:Name()
@@ -22,15 +8,22 @@ function AttackHandler:internalName()
 	return "attackhandler"
 end
 
+local floor = math.floor
+local ceil = math.ceil
+
 function AttackHandler:Init()
+	self.DebugEnabled = false
+
 	self.recruits = {}
 	self.count = {}
 	self.squads = {}
 	self.counter = {}
 	self.attackSent = {}
-	ai.hasAttacked = 0
-	ai.couldAttack = 0
-	ai.IDsWeAreAttacking = {}
+	self.attackCountReached = {}
+	self.potentialAttackCounted = {}
+	self.ai.hasAttacked = 0
+	self.ai.couldAttack = 0
+	self.ai.IDsWeAreAttacking = {}
 end
 
 function AttackHandler:Update()
@@ -38,337 +31,364 @@ function AttackHandler:Update()
 	if f % 150 == 0 then
 		self:DraftSquads()
 	end
-	if f % 60 == 0 then
-		self:DoMovement()
+	if #self.squads > 0 then
+		for is = 1, #self.squads do
+			local squad = self.squads[is]
+			if not squad.arrived and squad.idleTimeout and f >= squad.idleTimeout then
+				squad.arrived = true
+				squad.idleTimeout = nil
+			end
+			if squad.arrived then
+				squad.arrived = nil
+				if squad.pathStep < #squad.path - 1 then
+					local value = self.ai.targethandler:ValueHere(squad.target, squad.members[1].name)
+					local threat = self.ai.targethandler:ThreatHere(squad.target, squad.members[1].name)
+					if (value == 0 and threat == 0) or threat > squad.totalThreat * 0.67 then
+						self:SquadReTarget(squad) -- get a new target, this one isn't valuable
+					else
+						self:SquadNewPath(squad) -- see if there's a better way from the point we're going to
+					end
+				end
+				self:SquadAdvance(squad)
+			end
+		end
+		local is = (self.lastSquadPathfind or 0) + 1
+		if is > #self.squads then is = 1 end
+		local squad = self.squads[is]
+		self:SquadPathfind(squad, is)
+		self.lastSquadPathfind = is
 	end
-	if f % 30 == 0 then
-		-- actually retargets each squad every 15 seconds
-		self:ReTarget()
-	end
-end
-
-function AttackHandler:GameEnd()
-	--
-end
-
-function AttackHandler:UnitCreated(engineunit)
-	--
-end
-
-function AttackHandler:UnitBuilt(engineunit)
-	--
-end
-
-function AttackHandler:UnitIdle(engineunit)
-	--
 end
 
 function AttackHandler:DraftSquads()
-	-- if ai.incomingThreat > 0 then game:SendToConsole(ai.incomingThreat .. " " .. (ai.battleCount + ai.breakthroughCount) * 75) end
-	if ai.incomingThreat > (ai.battleCount + ai.breakthroughCount) * 75 then
-		EchoDebug("not a good time to attack")
-		return
-	end -- do not attack if we're in trouble
+	-- if self.ai.incomingThreat > 0 then game:SendToConsole(self.ai.incomingThreat .. " " .. (self.ai.battleCount + self.ai.breakthroughCount) * 75) end
+	-- if self.ai.incomingThreat > (self.ai.battleCount + self.ai.breakthroughCount) * 75 then
+		-- do not attack if we're in trouble
+		-- self:EchoDebug("not a good time to attack " .. tostring(self.ai.battleCount+self.ai.breakthroughCount) .. " " .. self.ai.incomingThreat .. " > " .. tostring((self.ai.battleCount+self.ai.breakthroughCount)*75))
+		-- return
+	-- end
 	local needtarget = {}
 	local f = game:Frame()
 	-- find which mtypes need targets
 	for mtype, count in pairs(self.count) do
-		if f > self.attackSent[mtype] + 1800 and count >= self.counter[mtype] then
+		if (f > (self.attackCountReached[mtype] or 0) + 150 or f > (self.attackSent[mtype] or 0) + 1200) and count >= self.counter[mtype] then
+			self:EchoDebug(mtype, "needs target with", count, "units of", self.counter[mtype], "needed")
+			self.attackCountReached[mtype] = f
 			table.insert(needtarget, mtype)
 		end
 	end
 	for nothing, mtype in pairs(needtarget) do
 		-- prepare a squad
-		local squad = { members = {}, notarget = 0, congregating = false, mtype = mtype, lastReTarget = f }
-		local representative
-		for _, attkbehaviour in pairs(self.recruits[mtype]) do
-			if attkbehaviour ~= nil then
-				if attkbehaviour.unit ~= nil then
-					if representative == nil then representative = attkbehaviour.unit:Internal() end
-					table.insert(squad.members, attkbehaviour)
+		local squad = { members = {}, mtype = mtype }
+		local representative, representativeBehaviour
+		self:EchoDebug(mtype, #self.recruits[mtype], "recruits")
+		for _, attkbhvr in pairs(self.recruits[mtype]) do
+			if attkbhvr ~= nil then
+				if attkbhvr.unit ~= nil then
+					representativeBehaviour = representativeBehaviour or attkbhvr
+					representative = representative or attkbhvr.unit:Internal()
+					table.insert(squad.members, attkbhvr)
+					attkbhvr.squad = squad
 				end
 			end
 		end
 		if representative ~= nil then
-			ai.couldAttack = ai.couldAttack + 1
+			self:EchoDebug(mtype, "has representative")
+			if not self.potentialAttackCounted[mtype] then
+				-- only count once per attack
+				self.ai.couldAttack = self.ai.couldAttack + 1
+				self.potentialAttackCounted[mtype] = true
+			end
 			-- don't actually draft the squad unless there's something to attack
-			local bestCell = ai.targethandler:GetBestAttackCell(representative)
+			local bestCell = self.ai.targethandler:GetNearestAttackCell(representative) or self.ai.targethandler:GetBestAttackCell(representative)
 			if bestCell ~= nil then
+				self:EchoDebug(mtype, "has target, recruiting squad...")
 				squad.target = bestCell.pos
 				self:IDsWeAreAttacking(bestCell.buildingIDs, squad.mtype)
 				squad.buildingIDs = bestCell.buildingIDs
 				self.attackSent[mtype] = f
 				table.insert(self.squads, squad)
+				self:SquadFormation(squad)
+				self:SquadNewPath(squad, representativeBehaviour)
 				-- clear recruits
 				self.count[mtype] = 0
 				self.recruits[mtype] = {}
-				ai.hasAttacked = ai.hasAttacked + 1
+				self.ai.hasAttacked = self.ai.hasAttacked + 1
+				self.potentialAttackCounted[mtype] = false
 				self.counter[mtype] = math.min(maxAttackCounter, self.counter[mtype] + 1)
 			end
 		end
 	end
 end
 
-function AttackHandler:ReTarget()
+function AttackHandler:SquadReTarget(squad, squadIndex)
 	local f = game:Frame()
-	for is, squad in pairs(self.squads) do
-		if f > squad.lastReTarget + 300 then
-			if squad.idle or squad.reachedTarget then
-				if squad.idle or f > squad.reachedTarget + 900 then
-					local representative
-					for iu, member in pairs(squad.members) do
-						if member ~= nil then
-							if member.unit ~= nil then
-								representative = member.unit:Internal()
-								if representative ~= nil then
-									break
-								end
-							end
-						end
-					end
-					if squad.buildingIDs ~= nil then
-						self:IDsWeAreNotAttacking(squad.buildingIDs)
-					end
-					if representative == nil then
-						self.attackSent[squad.mtype] = 0
-						table.remove(self.squads, is)
-					else
-						-- find a target
-						local bestCell = ai.targethandler:GetBestAttackCell(representative)
-						if bestCell == nil then
-							-- squad.notarget = squad.notarget + 1
-							-- if squad.target == nil or squad.notarget > 3 then
-								-- if no target found initially, or no target for the last three targetting checks, disassemble and recruit the squad
-								for iu, member in pairs(squad.members) do
-									self:AddRecruit(member)
-								end
-								self.attackSent[squad.mtype] = 0
-								table.remove(self.squads, is)
-							-- end
-						else
-							squad.target = bestCell.pos
-							self:IDsWeAreAttacking(bestCell.buildingIDs, squad.mtype)
-							squad.buildingIDs = bestCell.buildingIDs
-							squad.notarget = 0
-							squad.reachedTarget = nil
-						end
-					end
+	local representativeBehaviour
+	local representative
+	for iu, member in pairs(squad.members) do
+		if member ~= nil then
+			if member.unit ~= nil then
+				representativeBehaviour = member
+				representative = member.unit:Internal()
+				if representative ~= nil then
+					break
 				end
 			end
-			squad.lastReTarget = f
+		end
+	end
+	if squad.buildingIDs ~= nil then
+		self:IDsWeAreNotAttacking(squad.buildingIDs)
+	end
+	if representative == nil then
+		self:SquadDisband(squad)
+	else
+		-- find a target
+		local position
+		if squad.pathStep then
+			local step = math.min(squad.pathStep+1, #squad.path)
+			position = squad.path[step].position
+		end
+		local bestCell = self.ai.targethandler:GetNearestAttackCell(representative, position, squad.totalThreat) or self.ai.targethandler:GetBestAttackCell(representative, position, squad.totalThreat)
+		if bestCell then
+			squad.target = bestCell.pos
+			self:IDsWeAreAttacking(bestCell.buildingIDs, squad.mtype)
+			squad.buildingIDs = bestCell.buildingIDs
+			squad.reachedTarget = nil
+			self:SquadNewPath(squad, representativeBehaviour)
+		else
+			self:EchoDebug("no target found on retarget")
+			self:SquadDisband(squad, squadIndex)
 		end
 	end
 end
 
-function AttackHandler:DoMovement()
-	local f = game:Frame()
-	for is, squad in pairs(self.squads) do
-		-- get a representative and midpoint
-		local representative
-		local totalx = 0
-		local totalz = 0
-		local totalSize = 0
-		if squad.hasCongregated then
-			for iu, member in pairs(squad.members) do
-				local unit
-				if member ~= nil then
-					if member.unit ~= nil then
-						unit = member.unit:Internal()
-					end
-				end
-				if unit ~= nil then
-					if representative == nil then representative = unit end
-					local tmpPos = unit:GetPosition()
-					totalx = totalx + tmpPos.x
-					totalz = totalz + tmpPos.z
-					totalSize = totalSize + member.size
-				else 
-					table.remove(squad.members, iu)
-				end
-			end
-		end
-
-		if #squad.members == 0 then
-			self.attackSent[squad.mtype] = 0
-			table.remove(self.squads, is)
-		else
-			-- determine distances from midpoint
-			local midPos
-			if squad.hasCongregated then
-				midPos = api.Position()
-				midPos.x = totalx / #squad.members
-	 			midPos.z = totalz / #squad.members
-				midPos.y = 0
-			else
-				local representativeBehaviour = squad.members[#squad.members]
-				representative = representativeBehaviour.unit:Internal()
-				midPos = ai.frontPosition[representativeBehaviour.hits] or representative:GetPosition()
-			end
-			local congDist = sqrt(pi * totalSize) * 2
-			local stragglers = 0
-			local damaged = 0
-			local idle = 0
-			local maxRange = 0
-			for iu, member in pairs(squad.members) do
-				if member.damaged then damaged = damaged + 1 end
-				if member.idle then idle = idle + 1 end
-				if member.range > maxRange then maxRange = member.range end
-				local unit = member.unit:Internal()
-				if unit then
-					local upos = unit:GetPosition()
-					local cdist = Distance(upos, midPos)
-					if cdist > congDist then
-						if member.straggler == nil then
-							member.straggler = 1
-						else
-							member.straggler = member.straggler + 1
-						end
-						if member.straggler > 20 then
-							-- remove from squad if the unit is taking longer than 40 seconds
-							EchoDebug("leaving slowpoke behind")
-							self:AddRecruit(member)
-							table.remove(squad.members, iu)
-						else
-							stragglers = stragglers + 1
-						end
-						if member.lastpos ~= nil and member.straggler ~= nil and member.straggler ~= 0 then
-							if math.abs(upos.x - member.lastpos.x) < 3 and math.abs(upos.z - member.lastpos.z) < 3 then
-								if member.stuck == nil then
-									member.stuck = 1
-								else
-									member.stuck = member.stuck + 1
-								end
-								if member.stuck > 5 then
-									-- remove from squad if the unit is pathfinder-stuck
-									EchoDebug("leaving stuck behind")
-									self:AddRecruit(member)
-									table.remove(squad.members, iu)
-								end
-							else
-								member.stuck = 0
-							end
-						end
-					else
-						member.straggler = 0
-					end
-					if member.lastpos == nil then
-						member.lastpos = api.Position()
-						member.lastpos.y = 0
-					end
-					member.lastpos.x = upos.x
-					member.lastpos.z = upos.z
-				end
-			end
-			local congregate = false
-			EchoDebug("attack squad of " .. #squad.members .. " members, " .. stragglers .. " stragglers")
-			local tenth = math.ceil(#squad.members * 0.1)
-			local half = math.ceil(#squad.members * 0.5)
-			if stragglers >= tenth and damaged < tenth then -- don't congregate if we're being shot
-				congregate = true
-			end
-			local twiceMaxRange = maxRange * 2
-			local distToTarget = Distance(midPos, squad.target)
-			local reached = distToTarget < twiceMaxRange
-			if reached then
-				squad.reachedTarget = f
-			else
-				squad.reachedTarget = nil
-			end
-			squad.idle = idle > half
-			local realClose = false
-			if stragglers < half and squad.reachedTarget then
-				congregate = false
-				realClose = true
-			end
-			if not realClose and damaged > tenth then
-				realClose = true
-			end
-			-- attack or congregate
-			if congregate then
-				if not squad.congregating then
-					-- congregate squad
-					squad.congregating = true
-					for iu, member in pairs(squad.members) do
-						local ordered = member:Congregate(midPos)
-						if not ordered and squad.congregating then squad.congregating = false end
-					end
-					squad.hasCongregated = true
-				end
-				squad.attacking = nil
-				squad.close = nil
-			else
-				if squad.attacking ~= squad.target or squad.close ~= realClose then
-					-- squad attacks if that wasn't the last order
-					if squad.target ~= nil then
-						for iu, member in pairs(squad.members) do
-							member:Attack(squad.target, realClose)
-						end
-						squad.attacking = squad.target
-						squad.close = realClose
-					end
-				end
-				squad.congregating = false
+function AttackHandler:SquadDisband(squad, squadIndex)
+	self:EchoDebug("disband squad")
+	squad.disbanding = true
+	for iu, member in pairs(squad.members) do
+		self:AddRecruit(member)
+	end
+	self.attackSent[squad.mtype] = 0
+	if not squadIndex then
+		for is, sq in pairs(self.squads) do
+			if sq == squad then
+				squadIndex = is
+				break
 			end
 		end
 	end
+	table.remove(self.squads, squadIndex)
+end
+
+function AttackHandler:SquadFormation(squad)
+	local members = squad.members
+	local maxMemberSize
+	local lowestSpeed
+	local totalThreat = 0
+	for i = 1, #members do
+		local member = members[i]
+		if not maxMemberSize or member.congSize > maxMemberSize then
+			maxMemberSize = member.congSize
+		end
+		if not lowestSpeed or member.speed < lowestSpeed then
+			lowestSpeed = member.speed
+		end
+		totalThreat = totalThreat + member.threat
+	end
+	local backDist = maxMemberSize * 3
+	local backs = {}
+	local forwards = {}
+	for i = 1, #members do
+		local member = members[i]
+		if member.sturdy then
+			forwards[#forwards+1] = member
+		else
+			backs[#backs+1] = member
+			member.formationBack = backDist
+		end
+	end
+	local half = floor(#forwards / 2)
+	local anglePerMember = halfPi / #forwards
+	for i = 1, #forwards do
+		local member = forwards[i]
+		member.formationDist = (half - i) * maxMemberSize
+		member.formationAngle = (i - half) * anglePerMember
+	end
+	half = floor(#backs / 2)
+	anglePerMember = #backs / halfPi
+	for i = 1, #backs do
+		local member = backs[i]
+		member.formationDist = (half - i) * maxMemberSize
+		member.formationAngle = (i - half) * anglePerMember
+	end
+	squad.lowestSpeed = lowestSpeed
+	squad.totalThreat = totalThreat
+end
+
+function AttackHandler:SquadNewPath(squad, representativeBehaviour)
+	if not squad.target then return end
+	representativeBehaviour = representativeBehaviour or squad.members[#squad.members]
+	local representative = representativeBehaviour.unit:Internal()
+	if self.DebugEnabled then
+		self.map:EraseLine(nil, nil, {1,1,0}, squad.mtype, nil, 8)
+	end
+	local startPos
+	if squad.pathStep then
+		local step = math.min(squad.pathStep+1, #squad.path)
+		startPos = squad.path[step].position
+	elseif not squad.hasGottenPathOnce then
+		startPos = self.ai.frontPosition[representativeBehaviour.hits]
+		if startPos then
+			local angle = AnglePosPos(startPos, squad.target)
+			startPos = RandomAway(startPos, 150, nil, angle)
+		else
+			startPos = representative:GetPosition()
+		end
+	else
+		startPos = representative:GetPosition()
+	end
+	squad.modifierFunc = squad.modifierFunc or self.ai.targethandler:GetPathModifierFunc(representative:Name(), true)
+	if ShardSpringLua then
+		local targetModFunc = self.ai.targethandler:GetPathModifierFunc(representative:Name(), true)
+		local startHeight = Spring.GetGroundHeight(startPos.x, startPos.z)
+		squad.modifierFunc = function(node, distanceToGoal, distanceStartToGoal)
+			local hMod = math.max(0, Spring.GetGroundHeight(node.position.x, node.position.z) - startHeight) / 100
+			if distanceToGoal then
+				local dMod = math.min(1, (distanceToGoal - 500) / 500)
+				return targetModFunc(node, distanceToGoal, distanceStartToGoal) + (dMod * hMod)
+			else
+				return targetModFunc(node, distanceToGoal, distanceStartToGoal) + hMod
+			end
+		end
+	end
+	squad.graph = squad.graph or self.ai.maphandler:GetPathGraph(squad.mtype)
+	squad.pathfinder = squad.graph:PathfinderPosPos(startPos, squad.target, nil, nil, nil, squad.modifierFunc)
+end
+
+function AttackHandler:SquadPathfind(squad, squadIndex)
+	if not squad.pathfinder then return end
+	local path, remaining, maxInvalid = squad.pathfinder:Find(2)
+	if path then
+		-- path = SimplifyPath(path)
+		squad.path = path
+		squad.pathStep = 1
+		squad.targetNode = squad.path[1]
+		squad.hasMovedOnce = nil
+		squad.pathfinder = nil
+		squad.hasGottenPathOnce = true
+		self:SquadAdvance(squad)
+		if self.DebugEnabled then
+			self.map:EraseLine(nil, nil, {1,1,0}, squad.mtype, nil, 8)
+			for i = 2, #path do
+				local pos1 = path[i-1].position
+				local pos2 = path[i].position
+				local arrow = i == #path
+				self.map:DrawLine(pos1, pos2, {1,1,0}, squad.mtype, arrow, 8)
+			end
+		end
+	elseif remaining == 0 then
+		squad.pathfinder = nil
+		self:SquadReTarget(squad, squadIndex)
+	end
+end
+
+function AttackHandler:MemberIdle(attkbhvr, squad)
+	if attkbhvr then
+		squad = attkbhvr.squad
+		if not squad then return end
+		squad.idleCount = (squad.idleCount or 0) + 1
+		-- self:EchoDebug(squad.idleCount)
+	end
+	if not squad.arrived and squad.pathStep and squad.idleCount > floor(#squad.members * 0.85) then
+		squad.arrived = true
+	end
+end
+
+function AttackHandler:SquadAdvance(squad)
+	self:EchoDebug("advance")
+	squad.idleCount = 0
+	if squad.pathStep == #squad.path then
+		self:SquadReTarget(squad)
+		return
+	end
+	if squad.hasMovedOnce then
+		squad.pathStep = squad.pathStep + 1
+		squad.targetNode = squad.path[squad.pathStep]
+	end
+	local members = squad.members
+	local nextPos
+	local nextAngle
+	if squad.pathStep == #squad.path then
+		nextPos = squad.target
+		nextAngle = AnglePosPos(squad.path[squad.pathStep-1].position, nextPos)
+	else
+		nextPos = squad.targetNode.position
+		nextAngle = AnglePosPos(nextPos, squad.path[squad.pathStep+1].position)
+	end
+	local nextPerpendicularAngle = AngleAdd(nextAngle, halfPi)
+	squad.lastValidMove = nextPos -- attackers use this to correct bad move orders
+	for i = #members, 1, -1 do
+		local member = members[i]
+		local pos = nextPos
+		if member.formationBack and squad.pathStep ~= #squad.path then
+			pos = RandomAway(nextPos, -member.formationBack, nil, nextAngle)
+		end
+		local reverseAttackAngle
+		if squad.pathStep == #squad.path then
+			reverseAttackAngle = AngleAdd(nextAngle, pi)
+		end
+		member:Advance(pos, nextPerpendicularAngle, reverseAttackAngle)
+	end
+	if squad.hasMovedOnce then
+		local distToNext = Distance(squad.path[squad.pathStep-1].position, nextPos)
+		squad.idleTimeout = game:Frame() + (3 * 30 * (distToNext / squad.lowestSpeed))
+	end
+	squad.hasMovedOnce = true
 end
 
 function AttackHandler:IDsWeAreAttacking(unitIDs, mtype)
 	for i, unitID in pairs(unitIDs) do
-		ai.IDsWeAreAttacking[unitID] = mtype
+		self.ai.IDsWeAreAttacking[unitID] = mtype
 	end
 end
 
 function AttackHandler:IDsWeAreNotAttacking(unitIDs)
 	for i, unitID in pairs(unitIDs) do
-		ai.IDsWeAreAttacking[unitID] = nil
+		self.ai.IDsWeAreAttacking[unitID] = nil
 	end
 end
 
 function AttackHandler:TargetDied(mtype)
-	EchoDebug("target died")
+	self:EchoDebug("target died")
 	self:NeedLess(mtype, 0.75)
 end
 
-function AttackHandler:IsMember(attkbehaviour)
-	if attkbehaviour == nil then return false end
-	for is, squad in pairs(self.squads) do
-		for iu, member in pairs(squad.members) do
-			if member == attkbehaviour then return true end
-		end
-	end
-	return false
-end
-
-function AttackHandler:RemoveMember(attkbehaviour)
-	if attkbehaviour == nil then return false end
-	local found = false
-	for is, squad in pairs(self.squads) do
-		for iu, member in pairs(squad.members) do
-			if member == attkbehaviour then
-				table.remove(squad.members, iu)
-				found = true
-				break
-			end
-		end
-		if found then
+function AttackHandler:RemoveMember(attkbhvr)
+	if attkbhvr == nil then return end
+	if not attkbhvr.squad then return end
+	local squad = attkbhvr.squad
+	for iu = #squad.members, 1, -1 do
+		local member = squad.members[iu]
+		if member == attkbhvr then
+			table.remove(squad.members, iu)
 			if #squad.members == 0 then
-				self.attackSent[squad.mtype] = 0
-				table.remove(self.squads, is)
+				self:SquadDisband(squad)
+			else
+				self:SquadFormation(squad)
+				self:MemberIdle(nil, squad)
 			end
-			break
+			attkbhvr.squad = nil
+			return true
 		end
 	end
-	if found then return true end
-	return false
 end
 
-function AttackHandler:IsRecruit(attkbehaviour)
-	if attkbehaviour.unit == nil then return false end
-	local mtype = ai.maphandler:MobilityOfUnit(attkbehaviour.unit:Internal())
+function AttackHandler:IsRecruit(attkbhvr)
+	if attkbhvr.unit == nil then return false end
+	local mtype = self.ai.maphandler:MobilityOfUnit(attkbhvr.unit:Internal())
 	if self.recruits[mtype] ~= nil then
 		for i,v in pairs(self.recruits[mtype]) do
-			if v == attkbehaviour then
+			if v == attkbhvr then
 				return true
 			end
 		end
@@ -376,31 +396,31 @@ function AttackHandler:IsRecruit(attkbehaviour)
 	return false
 end
 
-function AttackHandler:AddRecruit(attkbehaviour)
-	if not self:IsRecruit(attkbehaviour) then
-		if attkbehaviour.unit ~= nil then
-			-- EchoDebug("adding attack recruit")
-			local mtype = ai.maphandler:MobilityOfUnit(attkbehaviour.unit:Internal())
+function AttackHandler:AddRecruit(attkbhvr)
+	if not self:IsRecruit(attkbhvr) then
+		if attkbhvr.unit ~= nil then
+			-- self:EchoDebug("adding attack recruit")
+			local mtype = self.ai.maphandler:MobilityOfUnit(attkbhvr.unit:Internal())
 			if self.recruits[mtype] == nil then self.recruits[mtype] = {} end
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
 			if self.attackSent[mtype] == nil then self.attackSent[mtype] = 0 end
 			if self.count[mtype] == nil then self.count[mtype] = 0 end
-			local level = attkbehaviour.level
+			local level = attkbhvr.level
 			self.count[mtype] = self.count[mtype] + level
-			table.insert(self.recruits[mtype], attkbehaviour)
-			attkbehaviour:SetMoveState()
-			attkbehaviour:Free()
+			table.insert(self.recruits[mtype], attkbhvr)
+			attkbhvr:SetMoveState()
+			attkbhvr:Free()
 		else
-			EchoDebug("unit is nil!")
+			self:EchoDebug("unit is nil!")
 		end
 	end
 end
 
-function AttackHandler:RemoveRecruit(attkbehaviour)
+function AttackHandler:RemoveRecruit(attkbhvr)
 	for mtype, recruits in pairs(self.recruits) do
 		for i,v in ipairs(recruits) do
-			if v == attkbehaviour then
-				local level = attkbehaviour.level
+			if v == attkbhvr then
+				local level = attkbhvr.level
 				self.count[mtype] = self.count[mtype] - level
 				table.remove(self.recruits[mtype], i)
 				return true
@@ -410,11 +430,11 @@ function AttackHandler:RemoveRecruit(attkbehaviour)
 	return false
 end
 
-function AttackHandler:NeedMore(attkbehaviour)
-	local mtype = attkbehaviour.mtype
-	local level = attkbehaviour.level
+function AttackHandler:NeedMore(attkbhvr)
+	local mtype = attkbhvr.mtype
+	local level = attkbhvr.level
 	self.counter[mtype] = math.min(maxAttackCounter, self.counter[mtype] + (level * 0.7) ) -- 0.75
-	EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
+	self:EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 end
 
 function AttackHandler:NeedLess(mtype, subtract)
@@ -423,12 +443,12 @@ function AttackHandler:NeedLess(mtype, subtract)
 		for mtype, count in pairs(self.counter) do
 			if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
 			self.counter[mtype] = math.max(self.counter[mtype] - subtract, minAttackCounter)
-			EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
+			self:EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 		end
 	else
 		if self.counter[mtype] == nil then self.counter[mtype] = baseAttackCounter end
 		self.counter[mtype] = math.max(self.counter[mtype] - subtract, minAttackCounter)
-		EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
+		self:EchoDebug(mtype .. " attack counter: " .. self.counter[mtype])
 	end
 end
 

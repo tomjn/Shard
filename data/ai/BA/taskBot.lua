@@ -12,26 +12,30 @@ end
 --LEVEL 1
 
 function ConBot()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("corck", ConUnitPerTypeLimit)
+	local unitName = DummyUnitName
+	if MyTB.side == CORESideName then
+		unitName = "corck"
 	else
-		return BuildWithLimitedNumber("armck", ConUnitPerTypeLimit)
+		unitName = "armck"
 	end
+	local mtypedLv = GetMtypedLv(unitName)
+	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 6) + 1, ai.conUnitPerTypeLimit))
 end
 
-function RezBot1(self)
-	local unitName
-	if ai.mySide == CORESideName then
+function RezBot1(tskqbhvr)
+	local unitName = DummyUnitName
+	if MyTB.side == CORESideName then
 		unitName = "cornecro"
 	else
 		unitName = "armrectr"
 	end
-	return BuildWithLimitedNumber(unitName, 1)
+	local mtypedLv = GetMtypedLv(unitName)
+	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 8) + 1 , ai.conUnitPerTypeLimit))
 end
 
-function Lvl1BotRaider(self)
+function Lvl1BotRaider(tskqbhvr)
 	local unitName = ""
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = "corak"
 	else
 		unitName = "armpw"
@@ -39,9 +43,9 @@ function Lvl1BotRaider(self)
 	return BuildRaiderIfNeeded(unitName)
 end
 
-function Lvl1BotBreakthrough(self)
+function Lvl1BotBreakthrough(tskqbhvr)
 	local unitName = ""
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = "corthud"
 	else
 		unitName = "armwar"
@@ -49,17 +53,18 @@ function Lvl1BotBreakthrough(self)
 	return BuildBreakthroughIfNeeded(unitName)
 end
 
-function Lvl1BotBattle(self)
+function Lvl1BotBattle(tskqbhvr)
 	local unitName = ""
-	local r = math.random(1, 2)
-	if r == 1 then
-		if ai.mySide == CORESideName then
+	local r = math.random()
+	local compare = ai.overviewhandler.plasmaRocketBotRatio or 1
+	if compare >= 1 or math.random() < compare then
+		if MyTB.side == CORESideName then
 			unitName = "corthud"
 		else
 			unitName = "armham"
 		end
 	else
-		if ai.mySide == CORESideName then
+		if MyTB.side == CORESideName then
 			unitName = "corstorm"
 		else
 			unitName = "armrock"
@@ -69,7 +74,7 @@ function Lvl1BotBattle(self)
 end
 
 function Lvl1AABot()
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		return BuildAAIfNeeded("corcrash")
 	else
 		return BuildAAIfNeeded("armjeth")
@@ -78,7 +83,7 @@ end
 
 function ScoutBot()
 	local unitName
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		return DummyUnitName
 	else
 		unitName = "armflea"
@@ -89,25 +94,31 @@ end
 --LEVEL 2
 
 function ConAdvBot()
-	if ai.mySide == CORESideName then
-		return BuildWithLimitedNumber("corack", ConUnitAdvPerTypeLimit)
+	local unitName = DummyUnitName
+	if MyTB.side == CORESideName then
+		unitName = "corack"
 	else
-		return BuildWithLimitedNumber("armack", ConUnitAdvPerTypeLimit)
+		unitName = "armack"
 	end
+	local mtypedLv = GetMtypedLv(unitName)
+	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 10) + 1, ai.conUnitAdvPerTypeLimit))
 end
 
 
 function Lvl2BotAssist()
-	if ai.mySide == CORESideName then
-		return "corfast"
+	unitName = DummyUnitName
+	if MyTB.side == CORESideName then
+		unitName = "corfast"
 	else
-		return "armfark"
+		unitName = "armfark"
 	end
+	local mtypedLv = GetMtypedLv(unitName)
+	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 8) + 1, ai.conUnitPerTypeLimit))
 end
 
-function NewCommanders(self)
+function NewCommanders(tskqbhvr)
 	local unitName = DummyUnitName
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = 'commando'
 	else
 		unitName = DummyUnitName
@@ -115,9 +126,9 @@ function NewCommanders(self)
 	return unitName
 end
 	
-function Decoy(self)
+function Decoy(tskqbhvr)
 	local unitName = DummyUnitName
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = 'cordecom'
 	else
 		unitName = 'armdecom'
@@ -126,9 +137,9 @@ function Decoy(self)
 end
 
 
-function Lvl2BotBreakthrough(self)
+function Lvl2BotBreakthrough(tskqbhvr)
 	local unitName = ""
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = "corsumo"
 	else
 		unitName = "armfboy"
@@ -136,9 +147,9 @@ function Lvl2BotBreakthrough(self)
 	return BuildBreakthroughIfNeeded(unitName)
 end
 
-function Lvl2BotArty(self)
+function Lvl2BotArty(tskqbhvr)
 	local unitName = ""
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = "cormort"
 	else
 		unitName = "armfido"
@@ -146,9 +157,9 @@ function Lvl2BotArty(self)
 	return BuildSiegeIfNeeded(unitName)
 end
 
-function Lvl2BotLongRange(self)
+function Lvl2BotLongRange(tskqbhvr)
 	local unitName = ""
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = "corhrk"
 	else
 		unitName = "armsnipe"
@@ -156,9 +167,9 @@ function Lvl2BotLongRange(self)
 	return BuildSiegeIfNeeded(unitName)
 end
 
-function Lvl2BotRaider(self)
+function Lvl2BotRaider(tskqbhvr)
 	local unitName = ""
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = "corpyro"
 	else
 		unitName = "armfast"
@@ -166,9 +177,17 @@ function Lvl2BotRaider(self)
 	return BuildRaiderIfNeeded(unitName)
 end
 
-function Lv2BotAllTerrain(self)
+function Lvl2BotCorRaiderArmArty(tskqbhvr)
+	if MyTB.side == CORESideName then
+		return Lvl2BotRaider(tskqbhvr)
+	else
+		return Lvl2BotArty(tskqbhvr)
+	end
+end
+
+function Lvl2BotAllTerrain(tskqbhvr)
 	local unitName=DummyUnitName
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = 'cortermite'
 	else
 		unitName = "armsptk"
@@ -176,9 +195,9 @@ function Lv2BotAllTerrain(self)
 	return unitName
 end
 
-function Lvl2BotBattle(self)
+function Lvl2BotBattle(tskqbhvr)
 	local unitName = ""
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = "corcan"
 	else
 		unitName = "armzeus"
@@ -186,26 +205,28 @@ function Lvl2BotBattle(self)
 	return BuildBattleIfNeeded(unitName)
 end
 
-function Lv2BotMedium(self)
+function Lvl2BotMedium(tskqbhvr)
 	local unitName=DummyUnitName
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = 'corcan'
 	else
 		unitName = "armmav"
 	end
+	return unitName
 end
 
-function Lv2AmphBot(self)
+function Lvl2AmphBot(tskqbhvr)
 	local unitName=DummyUnitName
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		unitName = 'coramph'
 	else
 		unitName = 'armamph'
 	end
+	return unitName
 end
 
 function Lvl2AABot()
-	if ai.mySide == CORESideName then
+	if MyTB.side == CORESideName then
 		return BuildAAIfNeeded("coraak")
 	else
 		return BuildAAIfNeeded("armaak")

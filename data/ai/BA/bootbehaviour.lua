@@ -1,8 +1,9 @@
-shard_include "common"
-
 -- Sends units out of factories and holds units in place who are being repaired after resurrection
-
 BootBehaviour = class(Behaviour)
+
+function BootBehaviour:Name()
+	return "BootBehaviour"
+end
 
 local DebugEnabled = false
 
@@ -22,7 +23,7 @@ function BootBehaviour:Init()
 	self.mobile = not unitTable[self.name].isBuilding
 	self.mtype = unitTable[self.name].mtype
 	self.lastInFactoryCheck = game:Frame()
-	self.repairedBy = ai.buildsitehandler:ResurrectionRepairedBy(self.id)
+	self.repairedBy = self.ai.buildsitehandler:ResurrectionRepairedBy(self.id)
 	-- air units don't need to leave the factory
 	self.ignoreFactories = self.mtype == "air" or not self.mobile
 	self.finished = false
@@ -30,28 +31,19 @@ function BootBehaviour:Init()
 	self.unit:ElectBehaviour()
 end
 
-function BootBehaviour:UnitBuilt(unit)
-	if unit.engineID == self.unit.engineID then
-		self.finished = true
-		if self.active then self.lastOrderFrame = game:Frame() end
-	end
+function BootBehaviour:OwnerBuilt()
+	self.finished = true
+	if self.active then self.lastOrderFrame = game:Frame() end
 end
 
-function BootBehaviour:UnitIdle(unit)
-
-end
-
-function BootBehaviour:UnitDead(unit)
-	if unit.engineID == self.unit.engineID then
-		self.factory = nil
-		if self.repairedBy then self.repairedBy:ResurrectionComplete() end
-		ai.buildsitehandler:RemoveResurrectionRepairedBy(self.id)
-		self.repairedBy = nil
-	end
+function BootBehaviour:OwnerDead()
+	self.factory = nil
+	if self.repairedBy then self.repairedBy:ResurrectionComplete() end
+	self.ai.buildsitehandler:RemoveResurrectionRepairedBy(self.id)
+	self.repairedBy = nil
 end
 
 function BootBehaviour:Update()
-
 	if not self.finished then return end
 
 	local f = game:Frame()
@@ -159,7 +151,7 @@ end
 
 function BootBehaviour:FindMyFactory()
 	local pos = self.unit:Internal():GetPosition()
-	for level, factories in pairs(ai.factoriesAtLevel) do
+	for level, factories in pairs(self.ai.factoriesAtLevel) do
 		for i, factory in pairs(factories) do
 			if PositionWithinRect(pos, factory.exitRect) then
 				self.factory = factory
@@ -192,13 +184,13 @@ function BootBehaviour:ExitFactory(side)
 		out.x = pos.x + 0
 		out.y = pos.y + outX
 		out.z = pos.z + outZ
-		if out.x > ai.maxElmosX - 1 then
-			out.x = ai.maxElmosX - 1
+		if out.x > self.ai.maxElmosX - 1 then
+			out.x = self.ai.maxElmosX - 1
 		elseif out.x < 1 then
 			out.x = 1
 		end
-		if out.z > ai.maxElmosZ - 1 then
-			out.z = ai.maxElmosZ - 1
+		if out.z > self.ai.maxElmosZ - 1 then
+			out.z = self.ai.maxElmosZ - 1
 		elseif out.z < 1 then
 			out.z = 1
 		end

@@ -1,26 +1,26 @@
-shard_include "common"
-
 -- keeps track of where enemy units seem to be moving
 
 local DebugEnabled = false
-local debugPlotTacticalFile
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		game:SendToConsole("TacticalHandler: " .. inStr)
-	end
-end
-
-local function PlotDebug(x1, z1, vx, vz, label)
-	if DebugEnabled then
-		local x2 = x1 + vx * 1200
-		local z2 = z1 + vz * 1200
-		debugPlotTacticalFile:write(ceil(x1) .. " " .. ceil(z1) .. " " .. ceil(x2) .. " " .. ceil(z2) .. " " .. label .. "\n")
-	end
-end
+local DebugDrawEnabled = false
 
 TacticalHandler = class(Module)
+
+function TacticalHandler:EchoDebug(inStr)
+	if DebugEnabled then
+		self.game:SendToConsole("TacticalHandler: " .. inStr)
+	end
+end
+
+function TacticalHandler:PlotDebug(x1, z1, vx, vz, label)
+	if DebugDrawEnabled then
+		local x2 = x1 + vx * 1200
+		local z2 = z1 + vz * 1200
+		local pos1, pos2 = api.Position(), api.Position()
+		pos1.x, pos1.z = x1, z1
+		pos2.x, pos2.z = x2, z2
+		self.map:DrawLine(pos1, pos2, {1,0,0}, label, true, 9)
+	end
+end
 
 function TacticalHandler:Name()
 	return "TacticalHandler"
@@ -38,8 +38,7 @@ function TacticalHandler:Init()
 	self.lastKnownVectors = {}
 	self.unitSamples = {}
 	self.threatLayerNames = { "ground", "air", "submerged" }
-	ai.incomingThreat = 0
-	if DebugEnabled then debugPlotTacticalFile = assert(io.open("debugtacticalplot",'w'), "Unable to write debugtacticalplot") end
+	self.ai.incomingThreat = 0
 end
 
 function TacticalHandler:NewEnemyPositions(positions)
@@ -84,19 +83,20 @@ function TacticalHandler:AverageSamples()
 	local f = game:Frame()
 	local since = f - self.lastAverageFrame
 	if since < 300 then return end
-	if DebugEnabled then debugPlotTacticalFile:close() end
-	if DebugEnabled then debugPlotTacticalFile = assert(io.open("debugtacticalplot",'w'), "Unable to write debugtacticalplot") end
-	-- ai.turtlehandler:ResetThreatForecast()
+	-- self.ai.turtlehandler:ResetThreatForecast()
+	if DebugDrawEnabled then
+		self.map:EraseAll(9)
+	end
 	for unitID, samples in pairs(self.unitSamples) do
 		local e = self.lastKnownPositions[unitID]
 		if e then
 			local vx, vz = self:AverageUnitSamples(samples)
 			self.lastKnownVectors[unitID] = { vx = vx, vz = vz } -- so that anyone using this unit table as a target will be able to lead a little
-			PlotDebug(e.position.x, e.position.z, vx, vz, "THREAT")
-			-- ai.turtlehandler:AddThreatVector(e, vx, vz)
+			self:PlotDebug(e.position.x, e.position.z, vx, vz)
+			-- self.ai.turtlehandler:AddThreatVector(e, vx, vz)
 		end
 	end
-	-- ai.turtlehandler:AlertDangers()
+	-- self.ai.turtlehandler:AlertDangers()
 	self.unitSamples = {}
 	self.lastAverageFrame = f
 end
@@ -116,16 +116,4 @@ function TacticalHandler:UnitDead(unit)
 	self.lastKnownPositions[unitID] = nil
 	self.lastKnownVectors[unitID] = nil
 	self.unitSamples[unitID] = nil
-end
-
-function TacticalHandler:PlotPositionDebug(position, label)
-	if DebugEnabled then
-		debugPlotTacticalFile:write(ceil(position.x) .. " " .. ceil(position.z) .. " " .. label .. "\n")
-	end
-end
-
-function TacticalHandler:PlotABDebug(x1, z1, x2, z2, label)
-	if DebugEnabled then
-		debugPlotTacticalFile:write(ceil(x1) .. " " .. ceil(z1) .. " " .. ceil(x2) .. " " .. ceil(z2) .. " " .. label .. "\n")
-	end
 end

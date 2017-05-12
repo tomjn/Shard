@@ -1,8 +1,5 @@
-
-shard_include "common"
-
 local DebugEnabled = false
-local debugPlotLosFile
+local DebugDrawEnabled = false
 
 
 local function EchoDebug(inStr)
@@ -11,25 +8,43 @@ local function EchoDebug(inStr)
 	end
 end
 
+local mapColors = {
+	[1] = { 1, 1, 0 },
+	[2] = { 0, 0, 1 },
+	[3] = { 1, 0, 0 },
+	JAM = { 0, 0, 0 },
+	known = { 1, 1, 1 },
+}
+
+local function GetColorFromLabel(label)
+	local color = mapColors[label] or { 1, 1, 1 }
+	color[4] = color[4] or 0.5
+	return color
+end
+
 local function PlotDebug(x, z, label)
-	if DebugEnabled then
-		if label == nil then label= "nil" end
-		local string = math.ceil(x) .. " " .. math.ceil(z) .. " " .. label .. "\n"
-		debugPlotLosFile:write(string)
+	if DebugDrawEnabled then
+		x = math.ceil(x)
+		z = math.ceil(z)
+		local pos = api.Position()
+		pos.x, pos.z = x, z
+		map:DrawPoint(pos, GetColorFromLabel(label), label, 3)
 	end
 end
 
 local function PlotSquareDebug(x, z, size, label)
-	if DebugEnabled then
+	if DebugDrawEnabled then
 		x = math.ceil(x)
 		z = math.ceil(z)
 		size = math.ceil(size)
-		-- if debugSquares[x .. "  " .. z .. " " .. size] == nil then
-			if label == nil then label = "nil" end
-			local string = x .. " " .. z .. " " .. size .. " " .. label .. "\n"
-			debugPlotLosFile:write(string)
-			-- debugSquares[x .. "  " .. z .. " " .. size] = true
-		-- end
+		local pos1 = api.Position()
+		local pos2 = api.Position()
+		local halfSize = size / 2
+		pos1.x = x - halfSize
+		pos1.z = z - halfSize
+		pos2.x = x + halfSize
+		pos2.z = z + halfSize
+		map:DrawRectangle(pos1, pos2, GetColorFromLabel(label), label, false, 3)
 	end
 end
 
@@ -60,13 +75,11 @@ end
 
 function LosHandler:Init()
 	self.losGrid = {}
-	ai.knownEnemies = {}
-	ai.knownWrecks = {}
-	ai.wreckCount = 0
-	ai.enemyList = {}
-	ai.blips = {}
-	ai.lastLOSUpdate = 0
-	ai.friendlyTeamID = {}
+	self.ai.knownEnemies = {}
+	self.ai.knownWrecks = {}
+	self.ai.wreckCount = 0
+	self.ai.lastLOSUpdate = 0
+	self.ai.friendlyTeamID = {}
 	self:Update()
 end
 
@@ -81,9 +94,6 @@ function LosHandler:Update()
 				self.ai.friendlyTeamID[teamID] = true
 			end
 		else
-			if DebugEnabled then 
-				debugPlotLosFile = assert(io.open("debuglosplot",'w'), "Unable to write debuglosplot")
-			end 
 			-- game:SendToConsole("updating los")
 			self.losGrid = {}
 			-- note: this could be more effecient by using a behaviour
@@ -91,11 +101,11 @@ function LosHandler:Update()
 			-- if the unit moves, the behaviours can be polled rather than GetFriendlies()
 			-- except for allies' units
 			local friendlies = game:GetFriendlies()
-			ai.friendlyTeamID = {}
-			ai.friendlyTeamID[game:GetTeamID()] = true
+			self.ai.friendlyTeamID = {}
+			self.ai.friendlyTeamID[game:GetTeamID()] = true
 			if friendlies ~= nil then
 				for _, unit in pairs(friendlies) do
-					ai.friendlyTeamID[unit:Team()] = true -- because I can't get allies' teamIDs directly
+					self.ai.friendlyTeamID[unit:Team()] = true -- because I can't get allies' teamIDs directly
 					local uname = unit:Name()
 					local utable = unitTable[uname]
 					local upos = unit:GetPosition()
@@ -130,15 +140,14 @@ function LosHandler:Update()
 					end
 				end
 				-- so that we only have to poll GetEnemies() once
-				table.insert(enemyList, { unitName = uname, position = upos, unitID = e:ID(), cloaked = e:IsCloaked(), beingBuilt = e:IsBeingBuilt(), health = e:GetHealth(), los = 0 })
+				table.insert(enemyList, { unit = e, unitName = uname, position = upos, unitID = e:ID(), cloaked = e:IsCloaked(), beingBuilt = e:IsBeingBuilt(), health = e:GetHealth(), los = 0 })
 			end
 			-- update known enemies
 			self:UpdateEnemies(enemyList)
 		end
 		-- update known wrecks
 		self:UpdateWrecks()
-		ai.lastLOSUpdate = f
-		if DebugEnabled then debugPlotLosFile:close() end
+		self.ai.lastLOSUpdate = f
 	end
 end
 
@@ -198,23 +207,29 @@ function LosHandler:UpdateEnemies(enemyList)
 				persist = true
 			elseif los == 2 then
 				known[id] = los
-				ai.knownEnemies[id] = e
+				self.ai.knownEnemies[id] = e
 				e.los = los
 			end
 			if persist == true then
-				if ai.knownEnemies[id] ~= nil then
-					if ai.knownEnemies[id].los == 2 then
-						known[id] = ai.knownEnemies[id].los
+				if self.ai.knownEnemies[id] ~= nil then
+					if self.ai.knownEnemies[id].los == 2 then
+						known[id] = self.ai.knownEnemies[id].los
 					end
 				end
 			end
-			if los == 1 then
-				ai.knownEnemies[id] = e
+			if los == 1 and not known[id] and self.ai.knownEnemies[id] ~= 2 then
+				-- don't overwrite seen with radar-seen unless it was previously not known
+				self.ai.knownEnemies[id] = e
 				e.los = los
 				known[id] = los
 			end
-			if ai.knownEnemies[id] ~= nil and DebugEnabled then
-				if known[id] == 2 and ai.knownEnemies[id].los == 2 then PlotDebug(pos.x, pos.z, "known") end
+			if self.ai.knownEnemies[id] ~= nil and DebugDrawEnabled then
+				if known[id] == 2 and self.ai.knownEnemies[id].los == 2 then
+					e.unit:EraseHighlight({1,0,0}, 'known', 3)
+					e.unit:DrawHighlight({1,0,0}, 'known', 3)
+					-- self.map:DrawUnit(id, {1,0,0}, 'known', 3)
+					-- PlotDebug(pos.x, pos.z, "known")
+				end
 			end
 		end
 	end
@@ -223,31 +238,44 @@ function LosHandler:UpdateEnemies(enemyList)
 	-- also populate moving blips (whether in radar or in sight) for analysis
 	local blips = {}
 	local f = game:Frame()
-	for id, e in pairs(ai.knownEnemies) do
+	for id, e in pairs(self.ai.knownEnemies) do
 		if not exists[id] then
 			-- enemy died
-			if ai.IDsWeAreAttacking[id] then
-				ai.attackhandler:TargetDied(ai.IDsWeAreAttacking[id])
+			if self.ai.IDsWeAreAttacking[id] then
+				self.ai.attackhandler:TargetDied(self.ai.IDsWeAreAttacking[id])
 			end
-			if ai.IDsWeAreRaiding[id] then
-				ai.raidhandler:TargetDied(ai.IDsWeAreRaiding[id])
+			if self.ai.IDsWeAreRaiding[id] then
+				self.ai.raidhandler:TargetDied(self.ai.IDsWeAreRaiding[id])
 			end
 			EchoDebug("enemy " .. e.unitName .. " died!")	
 			local mtypes = UnitWeaponMtypeList(e.unitName)
 			for i, mtype in pairs(mtypes) do
-				ai.raidhandler:NeedMore(mtype)
-				ai.attackhandler:NeedLess(mtype)
-				if mtype == "air" then ai.bomberhandler:NeedLess() end
+				self.ai.raidhandler:NeedMore(mtype)
+				self.ai.attackhandler:NeedLess(mtype)
+				if mtype == "air" then self.ai.bomberhandler:NeedLess() end
 			end
-			ai.knownEnemies[id] = nil
+			if DebugDrawEnabled then self.map:ErasePoint(nil, nil, id, 3) end
+			self.ai.knownEnemies[id] = nil
 		elseif not known[id] then
-			if not e.ghost then
-				e.ghost = { frame = f, position = e.position }
-			else
-				-- expire ghost
-				if f > e.ghost.frame + 600 then
-					ai.knownEnemies[id] = nil
+			if e.ghost then
+				local gpos = e.ghost.position
+				if gpos then
+					if self:IsInLos(gpos) or self:IsInRadar(gpos) then
+						-- the ghost is not where it was last seen, but it's still somewhere
+						e.ghost.position = nil
+						if DebugDrawEnabled then self.map:ErasePoint(nil, nil, id, 3) end
+					end
 				end
+				-- expire ghost
+				-- if f > e.ghost.frame + 600 then
+					-- self.ai.knownEnemies[id] = nil
+				-- end
+			else
+				if DebugDrawEnabled then
+					self.map:ErasePoint(nil, nil, id, 3)
+					self.map:DrawPoint(e.position, {0.5,0.5,0.5,1}, id, 3)
+				end
+				e.ghost = { frame = f, position = e.position }
 			end
 		else
 			if not unitTable[e.unitName].isBuilding then
@@ -262,21 +290,22 @@ function LosHandler:UpdateEnemies(enemyList)
 				end
 				if count then table.insert(blips, e) end
 			end
+			if DebugDrawEnabled then self.map:ErasePoint(nil, nil, id, 3) end
 			e.ghost = nil
 		end
 	end
 	-- send blips off for analysis
-	ai.tacticalhandler:NewEnemyPositions(blips)
+	self.ai.tacticalhandler:NewEnemyPositions(blips)
 end
 
 function LosHandler:UpdateWrecks()
 	local wrecks = game.map:GetMapFeatures()
 	if wrecks == nil then
-		ai.knownWrecks = {}
+		self.ai.knownWrecks = {}
 		return
 	end
 	if #wrecks == 0 then
-		ai.knownWrecks = {}
+		self.ai.knownWrecks = {}
 		return
 	end
 	-- game:SendToConsole("updating known wrecks")
@@ -305,17 +334,17 @@ function LosHandler:UpdateWrecks()
 				local los = self:GroundLos(position)
 				local id = feature:ID()
 				local persist = false
-				local wreck = { los = los, featureName = featureName, position = position }
+				local wreck = { feature = feature, los = los, featureName = featureName, position = position}
 				if los == 0 or los == 1 then
 					-- don't remove from knownenemies if it was once seen
 					persist = true
 				elseif los == 2 then
 					known[id] = true
-					ai.knownWrecks[id] = wreck
+					self.ai.knownWrecks[id] = wreck
 				end
 				if persist == true then
-					if ai.knownWrecks[id] ~= nil then
-						if ai.knownWrecks[id].los == 2 then
+					if self.ai.knownWrecks[id] ~= nil then
+						if self.ai.knownWrecks[id].los == 2 then
 							known[id] = true
 						end
 					end
@@ -323,15 +352,15 @@ function LosHandler:UpdateWrecks()
 			end
 		end
 	end
-	ai.wreckCount = 0
+	self.ai.wreckCount = 0
 	-- remove wreck ghosts that aren't there anymore
-	for id, los in pairs(ai.knownWrecks) do
+	for id, los in pairs(self.ai.knownWrecks) do
 		-- game:SendToConsole("known enemy " .. id .. " " .. los)
 		if known[id] == nil then
 			-- game:SendToConsole("removed")
-			ai.knownWrecks[id] = nil
+			self.ai.knownWrecks[id] = nil
 		else
-			ai.wreckCount = ai.wreckCount + 1
+			self.ai.wreckCount = self.ai.wreckCount + 1
 		end
 	end
 	-- cleanup
@@ -344,7 +373,7 @@ function LosHandler:HorizontalLine(x, z, tx, val, jam)
 		if jam then
 			if self.losGrid[ix] == nil then return end
 			if self.losGrid[ix][z] == nil then return end
-			if DebugEnabled then
+			if DebugDrawEnabled then
 				if self.losGrid[ix][z][val] == true then PlotSquareDebug(ix * losGridElmos, z * losGridElmos, losGridElmos, "JAM") end
 			end
 			if self.losGrid[ix][z][val] then self.losGrid[ix][z][val] = false end
@@ -353,7 +382,7 @@ function LosHandler:HorizontalLine(x, z, tx, val, jam)
 			if self.losGrid[ix][z] == nil then
 				self.losGrid[ix][z] = EmptyLosTable()
 			end
-			if self.losGrid[ix][z][val] == false and DebugEnabled then PlotSquareDebug(ix * losGridElmos, z * losGridElmos, losGridElmos, val) end
+			if self.losGrid[ix][z][val] == false and DebugDrawEnabled then PlotSquareDebug(ix * losGridElmos, z * losGridElmos, losGridElmos, val) end
 			self.losGrid[ix][z][val] = true
 		end
 	end
@@ -391,6 +420,22 @@ function LosHandler:FillCircle(cx, cz, radius, val, jam)
 	end
 end
 
+function LosHandler:IsInLos(pos)
+	return self:GroundLos(pos) == 2
+end
+
+function LosHandler:IsInRadar(pos)
+	return self:GroundLos(pos) == 1
+end
+
+function LosHandler:IsInSonar(pos)
+	return self:GroundLos(pos) == 3
+end
+
+function LosHandler:IsInAirLos(pos)
+	return self:GroundLos(pos) == 4
+end
+
 function LosHandler:GroundLos(upos)
 	if ShardSpringLua then
 		local LosOrRadar, inLos, inRadar, jammed = Spring.GetPositionLosState(upos.x, upos.y, upos.z, self.ai.allyId)
@@ -412,7 +457,7 @@ function LosHandler:GroundLos(upos)
 	elseif self.losGrid[gx][gz] == nil then
 		return 0
 	else
-		if ai.maphandler:IsUnderWater(upos) then
+		if self.ai.maphandler:IsUnderWater(upos) then
 			if self.losGrid[gx][gz][3] then
 				return 3
 			else
@@ -458,8 +503,8 @@ end
 
 function LosHandler:IsKnownEnemy(unit)
 	local id = unit:ID()
-	if ai.knownEnemies[id] then
-		return ai.knownEnemies[id].los
+	if self.ai.knownEnemies[id] then
+		return self.ai.knownEnemies[id].los
 	else
 		return 0
 	end
@@ -467,8 +512,8 @@ end
 
 function LosHandler:IsKnownWreck(feature)
 	local id = feature:ID()
-	if ai.knownWrecks[id] then
-		return ai.knownWrecks[id]
+	if self.ai.knownWrecks[id] then
+		return self.ai.knownWrecks[id]
 	else
 		return 0
 	end
@@ -476,10 +521,24 @@ end
 
 function LosHandler:GhostPosition(unit)
 	local id = unit:ID()
-	if ai.knownEnemies[id] then
-		if ai.knownEnemies[id].ghost then
-			return ai.knownEnemies[id].position
+	if self.ai.knownEnemies[id] then
+		if self.ai.knownEnemies[id].ghost then
+			return self.ai.knownEnemies[id].position
 		end
 	end
 	return nil
+end
+
+function LosHandler:KnowEnemy(unit, los)
+	los = los or 2
+	local knownEnemy = self.ai.knownEnemies[unit:ID()]
+	if knownEnemy and knownEnemy.los >= los then
+		return
+	end
+	local upos = unit:GetPosition()
+	if not upos or not upos.x then
+		return
+	end
+	local enemy = { unit = unit, unitName = unit:Name(), position = upos, unitID = unit:ID(), cloaked = unit:IsCloaked(), beingBuilt = unit:IsBeingBuilt(), health = unit:GetHealth(), los = los }
+	self.ai.knownEnemies[unit:ID()] = enemy
 end

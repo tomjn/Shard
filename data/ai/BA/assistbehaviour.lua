@@ -1,6 +1,3 @@
--- shard_include "taskqueues"
-shard_include "common"
-
 local DebugEnabled = false
 
 
@@ -15,8 +12,12 @@ local CMD_PATROL = 15
 
 AssistBehaviour = class(Behaviour)
 
+function AssistBehaviour:Name()
+	return "AssistBehaviour"
+end
+
 function AssistBehaviour:DoIAssist()
-	if ai.nonAssistant[self.id] ~= true or self.isNanoTurret then
+	if self.ai.nonAssistant[self.id] ~= true or self.isNanoTurret then
 		return true
 	else
 		return false
@@ -34,15 +35,13 @@ function AssistBehaviour:Init()
 	self.id = self.unit:Internal():ID()
 	ai.assisthandler:AssignIDByName(self)
 	-- game:SendToConsole("assistbehaviour:init", ai, ai.id, self.ai, self.ai.id)
-	EchoDebug(uname .. " " .. ai.IDByName[self.id])
+	EchoDebug(uname .. " " .. self.ai.IDByName[self.id])
 	EchoDebug("added to unit "..uname)
 end
 
-function AssistBehaviour:UnitIdle(unit)
-	if unit.engineID == self.unit.engineID then
-		self.patroling = false
-		self.assisting = nil
-	end
+function AssistBehaviour:OwnerIdle()
+	self.patroling = false
+	self.assisting = nil
 end
 
 function AssistBehaviour:Update()
@@ -56,15 +55,17 @@ function AssistBehaviour:Update()
 		local uname = self.name
 		if self.isCommander then
 			-- turn commander into build assister if you control more than half the mexes or if it's damaged
-			if ai.nonAssistant[self.id] then
-				if (IsSiegeEquipmentNeeded() or unit:GetHealth() < unit:GetMaxHealth() * 0.9) and ai.factories ~= 0 and ai.conCount > 2 then
-					ai.nonAssistant[self.id] = nil
+			if self.ai.nonAssistant[self.id] then
+				if ( self.ai.overviewhandler.keepCommanderSafe or self.ai.overviewhandler.needSiege or unit:GetHealth() < unit:GetMaxHealth() * 0.9) and self.ai.factories ~= 0 and self.ai.conCount > 2 then
+					EchoDebug("turn commander into assistant")
+					self.ai.nonAssistant[self.id] = nil
 					self.unit:ElectBehaviour()
 				end
 			else
 				-- switch commander back to building
-				if (not IsSiegeEquipmentNeeded() and unit:GetHealth() >= unit:GetMaxHealth() * 0.9) or ai.factories == 0 or ai.conCount <= 2 then
-					ai.nonAssistant[self.id] = true
+				if (not self.ai.overviewhandler.keepCommanderSafe and not self.ai.overviewhandler.needSiege and unit:GetHealth() >= unit:GetMaxHealth() * 0.9) or self.ai.factories == 0 or self.ai.conCount <= 2 then
+					EchoDebug("turn commander into builder")
+					self.ai.nonAssistant[self.id] = true
 					self.unit:ElectBehaviour()
 				end
 			end
@@ -143,10 +144,8 @@ function AssistBehaviour:Priority()
 	end
 end
 
-function AssistBehaviour:UnitDead(unit)
-	if unit.engineID == self.unit.engineID then
-		ai.assisthandler:RemoveAssistant(self)
-	end
+function AssistBehaviour:OwnerDead()
+	ai.assisthandler:RemoveAssistant(self)
 end
 
 function AssistBehaviour:Assign(builderID)
