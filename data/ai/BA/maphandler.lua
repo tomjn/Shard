@@ -230,11 +230,10 @@ local function Flood8Topology(x, z, mtype, network)
 	end
 end
 
-function MapHandler:MapMobility()
+function MapHandler:MapMobility(map)
 	-- check for water map works like this:
 	-- the map is divided into sectors, then center of each sector is tested if specific unit can be built there (water, kbot, vehicle)
-	print(tostring(self))
-	local mapSize = self.ai.map:MapDimensions()
+	local mapSize = map:MapDimensions()
 	mobilityGridSize = math.floor(math.max(mapSize.x * 8, mapSize.z * 8) / 128)
 	mobilityGridSize = math.max(mobilityGridSize, 32) -- don't make grids smaller than 32
 	mobilityGridSizeHalf = mobilityGridSize/ 2
@@ -466,7 +465,7 @@ function MapHandler:Init()
 	UWMetalSpotCheckUnitType = self.ai.game:GetTypeByName(UWMetalSpotCheckUnit)
 
 	if not mobMap then
-		totalCount, mobilityGridMaxX, mobilityGridMaxZ, mobCount = MapHandler:MapMobility()
+		totalCount, mobilityGridMaxX, mobilityGridMaxZ, mobCount = MapHandler:MapMobility(self.ai.map)
 	end
 	mobilityGridArea = totalCount
 	self.ai.mobilityGridArea = totalCount
