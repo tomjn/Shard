@@ -34,7 +34,7 @@ function EconHandler:Update()
 	-- because resource data is stored as userdata
 	for i = 1, resourceCount do
 		local name = resourceNames[i]
-		local udata = game:GetResourceByName(name)
+		local udata = self.ai.game:GetResourceByName(name)
 		sample[name] = { income = udata.income, usage = udata.usage, reserves = udata.reserves }
 		self.ai[name].capacity = udata.capacity -- capacity is not something that fluctuates wildly
 	end
