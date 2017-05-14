@@ -307,7 +307,7 @@ local function InitializeTopology()
 	end
 end
 
-local function MapSpotMobility(metals, geos)
+local function MapSpotMobility(metals, geos,map)
 	local half = mobilityGridSizeHalf
 	networkSize = {}
 	mobNetworkGeos = {}
@@ -341,7 +341,7 @@ local function MapSpotMobility(metals, geos)
 		for i, spot in pairs(spots) do
 			local landOrWater
 			if metalOrGeo == 1 then
-				if game.map:CanBuildHere(UWMetalSpotCheckUnitType, spot) then
+				if map:CanBuildHere(UWMetalSpotCheckUnitType, spot) then
 					table.insert(UWMetalSpots, spot)
 					landOrWater = 2
 				else
@@ -486,7 +486,7 @@ function MapHandler:Init()
 		EchoDebug("map " .. mtype .. "-ness is " .. ness .. " and total grids: " .. count)
 	end
 
-	self.spots = game.map:GetMetalSpots()
+	self.spots = self.ai.map:GetMetalSpots()
 	-- copy metal spots
 	local metalSpots = {}
 	for k, v in pairs(self.spots) do table.insert(metalSpots, v) end
@@ -520,7 +520,7 @@ function MapHandler:Init()
 	if not didMapSpotMobility then
 		UWMetalSpots = {}
 		landMetalSpots = {}
-		mobSpots, mobNetworkMetals, mobNetworks, mobNetworkCount = MapSpotMobility(metalSpots, geoSpots)
+		mobSpots, mobNetworkMetals, mobNetworks, mobNetworkCount = MapSpotMobility(metalSpots, geoSpots,self.ai.map)
 	end
 	self.ai.landMetalSpots = landMetalSpots
 	self.ai.UWMetalSpots = UWMetalSpots
@@ -528,7 +528,7 @@ function MapHandler:Init()
 	self.ai.mobNetworkMetals = mobNetworkMetals
 	self.ai.mobNetworks = mobNetworks
 	if not hotSpot then
-		hotSpot = self:SpotSimplyfier(metalSpots,geoSpots)
+		hotSpot = self:SpotSimplyfier(metalSpots,geoSpots,self.ai.map)
 	end
 	self.ai.hotSpot = hotSpot
 	if ShardSpringLua and not spotPathMobRank then
@@ -653,10 +653,10 @@ end
 -- 	return factMobs
 -- end
 
-function MapHandler:SpotSimplyfier(metalSpots,geoSpots)
+function MapHandler:SpotSimplyfier(metalSpots,geoSpots,map)
 	local spots = {}
 	local mirrorspots = {}
-	local limit = (map:MapDimensions())
+	local limit = map:MapDimensions()
 	local limit = limit.x/2  + limit.z/2
 	for i,v in pairs(metalSpots) do 
 		table.insert(spots,v)
