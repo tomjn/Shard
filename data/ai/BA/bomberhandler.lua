@@ -23,8 +23,8 @@ function BomberHandler:Init()
 	self.recruits = {}
 	self.needsTargetting = {}
 	self.counter = baseBomberCounter
-	ai.hasBombed = 0
-	ai.couldBomb = 0
+	self.ai.hasBombed = 0
+	self.ai.couldBomb = 0
 	self.pathValidFuncs = {}
 	self.plans = {}
 end
@@ -44,7 +44,7 @@ function BomberHandler:Update()
 					local pos1 = path[i-1].position
 					local pos2 = path[i].position
 					local arrow = i == #path
-					self.map:DrawLine(pos1, pos2, {1,1,1}, nil, arrow, 8)
+					self.ai.map:DrawLine(pos1, pos2, {1,1,1}, nil, arrow, 8)
 				end
 			end
 			if maxInvalid == 0 or #path < 3 then
