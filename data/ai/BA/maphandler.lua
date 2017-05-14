@@ -17,6 +17,9 @@ local function EchoDebug(inStr)
 	end
 end
 
+local map
+local game
+
 local mapColors = {
 	veh = { 1, 0, 0 },
 	bot = { 0, 1, 0 },
@@ -433,17 +436,18 @@ function MapHandler:Init()
 	if DebugDrawEnabled then
 		self.map:EraseAll(4, 5)
 	end
-
+	map = self.ai.map
+	game = self.ai.game
 	local mapSize = self.map:MapDimensions()
 	self.ai.elmoMapSizeX = mapSize.x * 8
 	self.ai.elmoMapSizeZ = mapSize.z * 8
 
 	-- factoryMobilities = self:GetFactoryMobilities()
 
-	ai.conUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)--add here cause map:spotcount not correctly load or so
-	ai.conUnitAdvPerTypeLimit = math.max(map:SpotCount() / 8, 2)
-	ai.activeMobTypes = {}
-	ai.factoryListMap = {}
+	self.ai.conUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)--add here cause map:spotcount not correctly load or so
+	self.ai.conUnitAdvPerTypeLimit = math.max(map:SpotCount() / 8, 2)
+	self.ai.activeMobTypes = {}
+	self.ai.factoryListMap = {}
 
 	-- local dataloaded = self:LoadMapData()
 
@@ -500,14 +504,14 @@ function MapHandler:Init()
 	-- supposedly they have "geo" in names (don't know of a better way)
 	if not geoSpots then
 		local tmpFeatures = map:GetMapFeatures()
-		ai.mapHasGeothermal = false
+		self.ai.mapHasGeothermal = false
 		geoSpots = {}
 		if tmpFeatures then
 			for _, feature in pairs(tmpFeatures) do
 				if feature then
 					tmpName = feature:Name()
 					if tmpName == "geovent" then
-						ai.mapHasGeothermal = true
+						self.ai.mapHasGeothermal = true
 						table.insert(geoSpots, feature:GetPosition())
 					end
 				end
@@ -529,7 +533,7 @@ function MapHandler:Init()
 	if not hotSpot then
 		hotSpot = self:SpotSimplyfier(metalSpots,geoSpots)
 	end
-	ai.hotSpot = hotSpot
+	self.ai.hotSpot = hotSpot
 	if ShardSpringLua and not spotPathMobRank then
 		spotPathMobRank, spotPathMobRankSuccessOnly = self:SpotPathMobRank(scoutSpots.air[1])
 	end
@@ -593,29 +597,29 @@ function MapHandler:Init()
 	EchoDebug('rating floor: ' .. ratingFloor)
 	mobilityRatingFloor = ratingFloor
 
-	ai.mobRating = mobRating
+	self.ai.mobRating = mobRating
 
-	ai.hasUWSpots = #mobSpots["sub"] > 0
+	self.ai.hasUWSpots = #mobSpots["sub"] > 0
 
-	if ai.hasUWSpots then
+	if self.ai.hasUWSpots then
 		EchoDebug("MapHandler: Submerged metal spots detected")
 	end
 
 	-- find start locations (loading them into air's list for later localization)
-	ai.startLocations = {}
-	if ai.startLocations["air"] == nil then ai.startLocations["air"] = {} end
-	ai.startLocations["air"][1] = self:GuessStartLocations(metalSpots)
-	if ai.startLocations["air"][1] ~= nil then
+	self.ai.startLocations = {}
+	if self.ai.startLocations["air"] == nil then self.ai.startLocations["air"] = {} end
+	self.ai.startLocations["air"][1] = self:GuessStartLocations(metalSpots)
+	if self.ai.startLocations["air"][1] ~= nil then
 		-- localize start locations into mobility networks
-		for i, start in pairs(ai.startLocations["air"][1]) do
+		for i, start in pairs(self.ai.startLocations["air"][1]) do
 			EchoDebug("start location guessed at: " .. start.x .. ", " .. start.z)
 			PlotDebug(start.x, start.z, "start")
 			for mtype, networkList in pairs(scoutSpots) do
 				if mtype ~= "air" then -- air list is already filled
 					for n, spots in pairs(networkList) do
-						if ai.startLocations[mtype] == nil then ai.startLocations[mtype] = {} end
-						if ai.startLocations[mtype][n] == nil then ai.startLocations[mtype][n] = {} end
-						table.insert(ai.startLocations[mtype][n], start)
+						if self.ai.startLocations[mtype] == nil then self.ai.startLocations[mtype] = {} end
+						if self.ai.startLocations[mtype][n] == nil then self.ai.startLocations[mtype][n] = {} end
+						table.insert(self.ai.startLocations[mtype][n], start)
 					end
 				end
 			end
@@ -843,33 +847,33 @@ end
 function MapHandler:factoriesRating()
 	local mtypesMapRatings = {}
 	local factoryRating = {}
-	ai.factoryBuilded = {}
-	ai.factoryBuilded['air'] = {}
+	self.ai.factoryBuilded = {}
+	self.ai.factoryBuilded['air'] = {}
 	for mtype, networks in pairs(networkSize) do
-		ai.factoryBuilded[mtype] = {}
+		self.ai.factoryBuilded[mtype] = {}
 		for network, size in pairs(networks) do
-			local spots = ai.mobNetworkMetals[mtype][network] or {}
+			local spots = self.ai.mobNetworkMetals[mtype][network] or {}
 			spots = #spots
 			if size > mobilityGridArea * 0.20 and spots > (#landMetalSpots + #UWMetalSpots) * 0.4 then
 				-- area large enough and enough metal spots
-				ai.factoryBuilded[mtype][network] = 0 
+				self.ai.factoryBuilded[mtype][network] = 0 
 			end
 		end
 	end
-	ai.factoryBuilded['air'][1] = 0
+	self.ai.factoryBuilded['air'][1] = 0
 	for mtype, unames in pairs(mobUnitNames) do
 		local realMetals = 0
 		local realSize = 0
 		local realGeos = 0
 		local spots = 0
 		local geos= 0
-		local realRating = ai.mobRating[mtype] / 100
-		if ai.mobCount[mtype] ~= 0 then
-			realSize = ai.mobCount[mtype] / mobilityGridArea --relative area occupable
+		local realRating = self.ai.mobRating[mtype] / 100
+		if self.ai.mobCount[mtype] ~= 0 then
+			realSize = self.ai.mobCount[mtype] / mobilityGridArea --relative area occupable
 		end
 		
 		if #landMetalSpots + #UWMetalSpots ~= 0 then
-			for network, index in pairs(ai.mobNetworkMetals[mtype]) do
+			for network, index in pairs( self.ai.mobNetworkMetals[mtype]) do
 				spots=spots + #index
 			end
 			realMetals = spots / (#landMetalSpots + #UWMetalSpots)--relative metals occupable
@@ -880,7 +884,7 @@ function MapHandler:factoriesRating()
 		end 
 		
 		-- mtypesMapRatings[mtype] = (( realMetals + realSize + realGeos) / 3) * realRating
-		mtypesMapRatings[mtype] = (ai.mobRating[mtype] / ai.mobRating['air']) * mobilityEffeciencyMultiplier[mtype]
+		mtypesMapRatings[mtype] = ( self.ai.mobRating[mtype] / self.ai.mobRating['air']) * mobilityEffeciencyMultiplier[mtype]
 		-- area is not as important as number of metal and geo
 		-- mtypesMapRatings[mtype] = (( realMetals + (realSize*0.5) + realGeos) / 2.5) * mobilityEffeciencyMultiplier[mtype]
 		EchoDebug('mtypes map rating ' ..mtype .. ' = ' .. mtypesMapRatings[mtype])
@@ -897,8 +901,8 @@ function MapHandler:factoriesRating()
 			for index, unit in pairs(unitTable[factory].unitsCanBuild) do
 				local mtype = unitTable[unit].mtype
 				if unitTable[unit].buildOptions then
-					if (ai.hasUWSpots and mtype ~= 'veh') or (not ai.hasUWSpots and mtype ~= 'amp') then
-					-- if ai.hasUWSpots or not (mtype == 'amp' and mtypes[1] == 'veh') then
+					if ( self.ai.hasUWSpots and mtype ~= 'veh') or (not self.ai.hasUWSpots and mtype ~= 'amp') then
+					-- if self.ai.hasUWSpots or not (mtype == 'amp' and mtypes[1] == 'veh') then
 						factoryBuildsCons = true
 						break
 					end
@@ -913,8 +917,8 @@ function MapHandler:factoriesRating()
 				local mclass = unitTable[unit].mclass
 				if unitTable[unit].buildOptions or not factoryBuildsCons then
 					local ok = true
-					-- if ai.hasUWSpots or not (mtype == 'amp' and mtypes[1] == 'veh') then
-					if (ai.hasUWSpots and mtype ~= 'veh') or (not ai.hasUWSpots and mtype ~= 'amp') then
+					-- if self.ai.hasUWSpots or not (mtype == 'amp' and mtypes[1] == 'veh') then
+					if ( self.ai.hasUWSpots and mtype ~= 'veh') or (not self.ai.hasUWSpots and mtype ~= 'amp') then
 						count = count + 1
 						factoryMtypeRating = factoryMtypeRating + mtypesMapRatings[mtype]
 						-- EchoDebug(factory .. ' ' .. unit .. ' ' .. unitTable[unit].mtype .. ' ' .. mtypesMapRatings[unitTable[unit].mtype])
@@ -960,7 +964,7 @@ function MapHandler:factoriesRating()
 		end
 
 		if factoryMobilities[factory][1] == ('hov') then
-			Rating = Rating * (ai.mobCount['shp'] /mobilityGridArea)
+			Rating = Rating * ( self.ai.mobCount['shp'] /mobilityGridArea)
 		end
 		if factory == 'armfhp' or factory == 'corfhp' then 
 			Rating = Rating * 0.999 -- better a ground one, nanos around
@@ -1010,21 +1014,21 @@ function MapHandler:SaveMapData()
 		EchoData("mobilityGridSize", mobilityGridSize)
 		EchoData("mobilityGridMaxX", mobilityGridMaxX)
 		EchoData("mobilityGridMaxZ", mobilityGridMaxZ)
-		EchoData("ai.waterMap", ai.waterMap)
-		EchoData("ai.mapHasGeothermal", ai.mapHasGeothermal)
+		EchoData("ai.waterMap", self.ai.waterMap)
+		EchoData("ai.mapHasGeothermal", self.ai.mapHasGeothermal)
 		EchoData("mobilityRatingFloor", mobilityRatingFloor)
-		EchoData("ai.hasUWSpots", ai.hasUWSpots)
+		EchoData("ai.hasUWSpots", self.ai.hasUWSpots)
 		EchoData("mobilityGridSizeHalf", mobilityGridSizeHalf)
-		EchoData("ai.mobilityGridArea", ai.mobilityGridArea)
-		EchoData("ai.mobRating", ai.mobRating)
-		EchoData("ai.mobCount", ai.mobCount)
-		EchoData("ai.mobNetworks", ai.mobNetworks)
+		EchoData("ai.mobilityGridArea", self.ai.mobilityGridArea)
+		EchoData("ai.mobRating", self.ai.mobRating)
+		EchoData("ai.mobCount", self.ai.mobCount)
+		EchoData("ai.mobNetworks", self.ai.mobNetworks)
 		EchoData("networkSize", networkSize)
 		EchoData("landMetalSpots", landMetalSpots)
 		EchoData("UWMetalSpots", UWMetalSpots)
 		EchoData("geoSpots", geoSpots)
-		EchoData("ai.startLocations", ai.startLocations)
-		EchoData("ai.mobNetworkMetals", ai.mobNetworkMetals)
+		EchoData("ai.startLocations", self.ai.startLocations)
+		EchoData("ai.mobNetworkMetals", self.ai.mobNetworkMetals)
 		EchoData("scoutSpots", scoutSpots)
 		EchoData("topology", topology)
 		mapdatafile:close()
@@ -1140,25 +1144,25 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 		local network = self:MobilityNetworkHere("bot", pos)
 		if network ~= nil then
 			-- EchoDebug("found bot metal spot network for commander")
-			spots = ai.mobNetworkMetals["bot"][network]
+			spots = self.ai.mobNetworkMetals["bot"][network]
 		end
 		network = self:MobilityNetworkHere("hov", pos)
 		if network ~= nil then
 			-- EchoDebug("found hover metal spot network for commander")
 			if #spots == 0 then
-				spots = ai.mobNetworkMetals["hov"][network]
+				spots = self.ai.mobNetworkMetals["hov"][network]
 			else
-				for i, p in pairs(ai.mobNetworkMetals["hov"][network]) do
+				for i, p in pairs( self.ai.mobNetworkMetals["hov"][network]) do
 					table.insert(spots, p)
 				end
 			end
 		end
 		-- give the commander all metal spots if shp or bot doesn't work out
-		if #spots == 0 then spots = ai.mobNetworkMetals["air"][1] end
+		if #spots == 0 then spots = self.ai.mobNetworkMetals["air"][1] end
 	else
 		local mtype, network = self:MobilityOfUnit(builder)
-		if ai.mobNetworkMetals[mtype][network] ~= nil then
-			spots = ai.mobNetworkMetals[mtype][network]
+		if self.ai.mobNetworkMetals[mtype][network] ~= nil then
+			spots = self.ai.mobNetworkMetals[mtype][network]
 		end
 	end
 	if spots == nil then 
@@ -1175,7 +1179,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
  	-- check for armed enemy units nearby
 	local uw = nil
 	local uwutype = nil
-	if ai.hasUWSpots then
+	if self.ai.hasUWSpots then
 		-- underwater mex check
 		-- EchoDebug("map has uw spots")
 		local coruwtype
@@ -1199,7 +1203,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 	local f = game:Frame()
 	for i,p in pairs(spots) do
 		-- dont use this spot if we're already building there
-		local alreadyPlanned = ai.buildsitehandler:PlansOverlap(p, uname)
+		local alreadyPlanned = self.ai.buildsitehandler:PlansOverlap(p, uname)
 		if not alreadyPlanned then
 			local dist = Distance(position, p)
 			-- don't add if it's already too high
@@ -1212,8 +1216,8 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 				end
 				if game.map:CanBuildHere(unittype, p) or uwcheck then
 					-- EchoDebug("can build mex at" .. p.x .. " " .. p.z)
-					-- game:SendToConsole("before builder gets safe position", self.ai.id, ai.id, builder:Team())
-					if ai.targethandler:IsSafePosition(p, builder) then
+					-- game:SendToConsole("before builder gets safe position", self.ai.id, self.ai.id, builder:Team())
+					if self.ai.targethandler:IsSafePosition(p, builder) then
 						bestDistance = dist
 						pos = p
 						reclaimEnemyMex = false
@@ -1224,9 +1228,9 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 							uw = nil
 						end
 					end
-				elseif ai.targethandler:IsSafePosition(p, builder, 200) then
+				elseif self.ai.targethandler:IsSafePosition(p, builder, 200) then
 					-- is it an enemy mex that's blocking a safe position (or an unknown radar blip)?
-					for i, enemySpot in pairs(ai.enemyMexSpots) do
+					for i, enemySpot in pairs( self.ai.enemyMexSpots) do
 						local epos = enemySpot.position
 						if p.x > epos.x - 100 and p.x < epos.x + 100 and p.z > epos.z - 100 and p.z < epos.z + 100 then
 							bestDistance = dist
@@ -1261,7 +1265,7 @@ function MapHandler:ClosestFreeGeo(unittype, builder, position)
 	local bestDistance, bestPos
 	for i,p in pairs(geoSpots) do
 		-- dont use this spot if we're already building there
-		if not ai.buildsitehandler:PlansOverlap(p, uname) and self:UnitCanGoHere(builder, p) and game.map:CanBuildHere(unittype, p) and ai.targethandler:IsSafePosition(p, builder) then
+		if not self.ai.buildsitehandler:PlansOverlap(p, uname) and self:UnitCanGoHere(builder, p) and game.map:CanBuildHere(unittype, p) and self.ai.targethandler:IsSafePosition(p, builder) then
 			local dist = Distance(position, p)
 			if not bestDistance or dist < bestDistance then
 				bestDistance = dist
@@ -1287,7 +1291,7 @@ function MapHandler:MobilityOfUnit(unit)
 	local position = unit:GetPosition()
 	local name = unit:Name()
 	local mtype = unitTable[name].mtype
-	if ai.activeMobTypes[mtype] == nil then ai.activeMobTypes[mtype] = true end
+	if self.ai.activeMobTypes[mtype] == nil then self.ai.activeMobTypes[mtype] = true end
 	return mtype, self:MobilityNetworkHere(mtype, position)
 end
 
@@ -1380,7 +1384,7 @@ function MapHandler:OutmodedFactoryHere(mtype, position, network)
 	if network == nil then
 		return false
 	else
-		if networkSize[mtype][network] < ai.mobCount[mtype] * 0.67 and ai.mobNetworks[mtype] > 1 then
+		if networkSize[mtype][network] < self.ai.mobCount[mtype] * 0.67 and self.ai.mobNetworks[mtype] > 1 then
 	 		return true
 		else
 			return false
