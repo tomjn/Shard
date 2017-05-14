@@ -4,7 +4,7 @@ local DebugDrawEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("LosHandler: " .. inStr)
+		self.ai.game:SendToConsole("LosHandler: " .. inStr)
 	end
 end
 
@@ -84,25 +84,25 @@ function LosHandler:Init()
 end
 
 function LosHandler:Update()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 
 	if f % 23 == 0 then
 		if ShardSpringLua and self.ai.alliedTeamIds then
 			self.ai.friendlyTeamID = {}
-			self.ai.friendlyTeamID[self.game:GetTeamID()] = true
+			self.ai.friendlyTeamID[self.ai.game:GetTeamID()] = true
 			for teamID, _ in pairs(self.ai.alliedTeamIds) do
 				self.ai.friendlyTeamID[teamID] = true
 			end
 		else
-			-- game:SendToConsole("updating los")
+			-- self.ai.game:SendToConsole("updating los")
 			self.losGrid = {}
 			-- note: this could be more effecient by using a behaviour
 			-- if the unit is a building, we know it's LOS contribution forever
 			-- if the unit moves, the behaviours can be polled rather than GetFriendlies()
 			-- except for allies' units
-			local friendlies = game:GetFriendlies()
+			local friendlies = self.ai.game:GetFriendlies()
 			self.ai.friendlyTeamID = {}
-			self.ai.friendlyTeamID[game:GetTeamID()] = true
+			self.ai.friendlyTeamID[self.ai.game:GetTeamID()] = true
 			if friendlies ~= nil then
 				for _, unit in pairs(friendlies) do
 					self.ai.friendlyTeamID[unit:Team()] = true -- because I can't get allies' teamIDs directly
@@ -127,7 +127,7 @@ function LosHandler:Update()
 			end
 		end
 		-- update enemy jamming and populate list of enemies
-		local enemies = game:GetEnemies()
+		local enemies = self.ai.game:GetEnemies()
 		if enemies ~= nil then
 			local enemyList = {}
 			for i, e in pairs(enemies) do
@@ -154,7 +154,7 @@ end
 function LosHandler:UpdateEnemies(enemyList)
 	if enemyList == nil then return end
 	if #enemyList == 0 then return end
-	-- game:SendToConsole("updating known enemies")
+	-- self.ai.game:SendToConsole("updating known enemies")
 	local known = {}
 	local exists = {}
 	for i, e  in pairs(enemyList) do
@@ -237,7 +237,7 @@ function LosHandler:UpdateEnemies(enemyList)
 	-- this is cheating a little bit, because dead units outside of sight will automatically be removed
 	-- also populate moving blips (whether in radar or in sight) for analysis
 	local blips = {}
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	for id, e in pairs(self.ai.knownEnemies) do
 		if not exists[id] then
 			-- enemy died
@@ -299,7 +299,7 @@ function LosHandler:UpdateEnemies(enemyList)
 end
 
 function LosHandler:UpdateWrecks()
-	local wrecks = game.map:GetMapFeatures()
+	local wrecks = self.ai.map:GetMapFeatures()
 	if wrecks == nil then
 		self.ai.knownWrecks = {}
 		return
@@ -308,7 +308,7 @@ function LosHandler:UpdateWrecks()
 		self.ai.knownWrecks = {}
 		return
 	end
-	-- game:SendToConsole("updating known wrecks")
+	-- self.ai.game:SendToConsole("updating known wrecks")
 	local known = {}
 	for i, feature  in pairs(wrecks) do
 		if feature ~= nil then
@@ -355,9 +355,9 @@ function LosHandler:UpdateWrecks()
 	self.ai.wreckCount = 0
 	-- remove wreck ghosts that aren't there anymore
 	for id, los in pairs(self.ai.knownWrecks) do
-		-- game:SendToConsole("known enemy " .. id .. " " .. los)
+		-- self.ai.game:SendToConsole("known enemy " .. id .. " " .. los)
 		if known[id] == nil then
-			-- game:SendToConsole("removed")
+			-- self.ai.game:SendToConsole("removed")
 			self.ai.knownWrecks[id] = nil
 		else
 			self.ai.wreckCount = self.ai.wreckCount + 1
