@@ -13,12 +13,10 @@ local DebugDrawEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("MapHandler: " .. inStr)
+		self.ai.game:SendToConsole("MapHandler: " .. inStr)
 	end
 end
 
-local map
-local game
 
 local mapColors = {
 	veh = { 1, 0, 0 },
@@ -80,7 +78,7 @@ end
 
 local function MapDataFilename()
 	local mapName = string.gsub(map:MapName(), "%W", "_")
-	return "cache/Shard-" .. game:GameName() .. "-" .. mapName .. ".lua"
+	return "cache/Shard-" .. self.ai.game:GameName() .. "-" .. mapName .. ".lua"
 end
 
 local function serialize (o, keylist)
@@ -232,10 +230,11 @@ local function Flood8Topology(x, z, mtype, network)
 	end
 end
 
-local function MapMobility()
+function MapHandler:MapMobility()
 	-- check for water map works like this:
 	-- the map is divided into sectors, then center of each sector is tested if specific unit can be built there (water, kbot, vehicle)
-	local mapSize = map:MapDimensions()
+	print(tostring(self))
+	local mapSize = self.ai.map:MapDimensions()
 	mobilityGridSize = math.floor(math.max(mapSize.x * 8, mapSize.z * 8) / 128)
 	mobilityGridSize = math.max(mobilityGridSize, 32) -- don't make grids smaller than 32
 	mobilityGridSizeHalf = mobilityGridSize/ 2
@@ -425,7 +424,7 @@ end
 
 function MapHandler:Update()
 	-- workaround for shifting metal spots: map data is reloaded every two minutess
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	if f > self.lastDataResetFrame + 3600 then
 		-- self:LoadMapData()
 		self.lastDataResetFrame = f
@@ -434,24 +433,23 @@ end
 
 function MapHandler:Init()
 	if DebugDrawEnabled then
-		self.map:EraseAll(4, 5)
+		self.ai.map:EraseAll(4, 5)
 	end
-	map = self.ai.map
-	game = self.ai.game
-	local mapSize = self.map:MapDimensions()
+
+	local mapSize = self.ai.map:MapDimensions()
 	self.ai.elmoMapSizeX = mapSize.x * 8
 	self.ai.elmoMapSizeZ = mapSize.z * 8
 
 	-- factoryMobilities = self:GetFactoryMobilities()
 
-	self.ai.conUnitPerTypeLimit = math.max(map:SpotCount() / 6, 4)--add here cause map:spotcount not correctly load or so
-	self.ai.conUnitAdvPerTypeLimit = math.max(map:SpotCount() / 8, 2)
+	self.ai.conUnitPerTypeLimit = math.max(self.ai.map:SpotCount() / 6, 4)--add here cause self.ai.map:spotcount not correctly load or so
+	self.ai.conUnitAdvPerTypeLimit = math.max(self.ai.map:SpotCount() / 8, 2)
 	self.ai.activeMobTypes = {}
 	self.ai.factoryListMap = {}
 
 	-- local dataloaded = self:LoadMapData()
 
-	self.lastDataResetFrame = game:Frame()
+	self.lastDataResetFrame = self.ai.game:Frame()
 
 	if dataloaded then
 		return
@@ -462,13 +460,13 @@ function MapHandler:Init()
 	for mtype, unames in pairs(mobUnitNames) do
 		mobUnitTypes[mtype] = {}
 		for i, uname in pairs(unames) do
-			mobUnitTypes[mtype][i] = game:GetTypeByName(uname)
+			mobUnitTypes[mtype][i] = self.ai.game:GetTypeByName(uname)
 		end
 	end
-	UWMetalSpotCheckUnitType = game:GetTypeByName(UWMetalSpotCheckUnit)
+	UWMetalSpotCheckUnitType = self.ai.game:GetTypeByName(UWMetalSpotCheckUnit)
 
 	if not mobMap then
-		totalCount, mobilityGridMaxX, mobilityGridMaxZ, mobCount = MapMobility()
+		totalCount, mobilityGridMaxX, mobilityGridMaxZ, mobCount = MapHandler:MapMobility()
 	end
 	mobilityGridArea = totalCount
 	self.ai.mobilityGridArea = totalCount
@@ -503,7 +501,7 @@ function MapHandler:Init()
 	-- and add them to allSpots
 	-- supposedly they have "geo" in names (don't know of a better way)
 	if not geoSpots then
-		local tmpFeatures = map:GetMapFeatures()
+		local tmpFeatures = self.ai.map:GetMapFeatures()
 		self.ai.mapHasGeothermal = false
 		geoSpots = {}
 		if tmpFeatures then
@@ -517,7 +515,7 @@ function MapHandler:Init()
 				end
 			end
 		end
-		game:SendToConsole(#geoSpots, "geovents")
+		self.ai.game:SendToConsole(#geoSpots, "geovents")
 	end
 
 	if not didMapSpotMobility then
@@ -703,7 +701,7 @@ function MapHandler:SpotSimplyfier(metalSpots,geoSpots)
 		mirrorspots[i].x = x
 		mirrorspots[i].y = y
 		mirrorspots[i].z = z
-		if DebugDrawEnabled then self.map:DrawPoint(mirrorspots[i], {1,0,1}, 'hotspot', 6) end
+		if DebugDrawEnabled then self.ai.map:DrawPoint(mirrorspots[i], {1,0,1}, 'hotspot', 6) end
 	end
 	return mirrorspots
 end
@@ -738,7 +736,7 @@ function MapHandler:SpotPathMobRank(spotscleaned)
 					local dist  = Distance3d(pos1,pos2)
 					if waypoints and #waypoints > 0 and dist > 0 then
 						-- if mclass == 'tank2' then
-							-- self.map:DrawLine(pos1, pos2, {0,0,0,1}, nil, true, 1)
+							-- self.ai.map:DrawLine(pos1, pos2, {0,0,0,1}, nil, true, 1)
 						-- end
 						local waypointsNumber = #waypoints
 						local last = waypoints[#waypoints]
@@ -753,7 +751,7 @@ function MapHandler:SpotPathMobRank(spotscleaned)
 								local segDist = math.sqrt(dx*dx + dy*dy + dz*dz)
 								totalPathDist = totalPathDist + segDist
 								-- if mclass == 'tank2' then
-									-- self.map:DrawLine({x=wp1[1], y=wp1[2], z=wp1[3]}, {x=wp2[1], y=wp2[2], z=wp2[3]}, {1,1,1,1}, nil, true, 1)
+									-- self.ai.map:DrawLine({x=wp1[1], y=wp1[2], z=wp1[3]}, {x=wp2[1], y=wp2[2], z=wp2[3]}, {1,1,1,1}, nil, true, 1)
 								-- end
 							end
 							pathDistRatios[mclass] = pathDistRatios[mclass] + (dist / totalPathDist)
@@ -1096,10 +1094,10 @@ function MapHandler:DebugDrawMobilities()
 			-- Spring.Echo(x, z, colorA[1], colorA[2], colorA[3], colorA[4], channels[4])
 			colorA[4], colorB[4] = 0.33, 0.33
 			if channels[4] then
-				self.map:DrawRectangle(pos1, pos2, colorA, nil, true, 4)
+				self.ai.map:DrawRectangle(pos1, pos2, colorA, nil, true, 4)
 			end
 			if channels[5] then
-				self.map:DrawRectangle(pos1, pos2, colorB, nil, true, 5)
+				self.ai.map:DrawRectangle(pos1, pos2, colorB, nil, true, 5)
 			end
 		end
 	end
@@ -1108,7 +1106,7 @@ end
 function MapHandler:SimplifyMetalSpots(metalSpots, number)
 	-- for maps that are all metal for example
 	-- pretend for the sake of calculations that there are only 100 metal spots
-	local mapSize = self.map:MapDimensions()
+	local mapSize = self.ai.map:MapDimensions()
 	local maxX = mapSize.x * 8
 	local maxZ = mapSize.z * 8
 	local divisor = math.ceil(math.sqrt(number))
@@ -1133,7 +1131,7 @@ end
 function MapHandler:ClosestFreeSpot(unittype, builder, position)
 
 	-- local kbytes, threshold = gcinfo()
-	-- game:SendToConsole("maphandler gcinfo: " .. kbytes .. " (before ClosestFreeSpot)")
+	-- self.ai.game:SendToConsole("maphandler gcinfo: " .. kbytes .. " (before ClosestFreeSpot)")
 
 	if position == nil then position = builder:GetPosition() end
 	local spots = {}
@@ -1185,11 +1183,11 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 		local coruwtype
 		local armuwtype
 		if uname == "cormex" or uname == "armmex" then
-			coruwtype = game:GetTypeByName("coruwmex")
-			armuwtype = game:GetTypeByName("armuwmex")
+			coruwtype = self.ai.game:GetTypeByName("coruwmex")
+			armuwtype = self.ai.game:GetTypeByName("armuwmex")
 		elseif uname == "cormoho" or uname == "armoho" then
-			coruwtype = game:GetTypeByName("coruwmme")
-			armuwtype = game:GetTypeByName("armuwmme")
+			coruwtype = self.ai.game:GetTypeByName("coruwmme")
+			armuwtype = self.ai.game:GetTypeByName("armuwmme")
 		end
 		if coruwtype ~= nil then
 			if builder:CanBuild(coruwtype) then
@@ -1200,7 +1198,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 		end
 		-- if uwutype ~= nil then EchoDebug("builder can build uw mexes") end
 	end
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	for i,p in pairs(spots) do
 		-- dont use this spot if we're already building there
 		local alreadyPlanned = self.ai.buildsitehandler:PlansOverlap(p, uname)
@@ -1216,7 +1214,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 				end
 				if game.map:CanBuildHere(unittype, p) or uwcheck then
 					-- EchoDebug("can build mex at" .. p.x .. " " .. p.z)
-					-- game:SendToConsole("before builder gets safe position", self.ai.id, self.ai.id, builder:Team())
+					-- self.ai.game:SendToConsole("before builder gets safe position", self.ai.id, self.ai.id, builder:Team())
 					if self.ai.targethandler:IsSafePosition(p, builder) then
 						bestDistance = dist
 						pos = p
@@ -1251,7 +1249,7 @@ function MapHandler:ClosestFreeSpot(unittype, builder, position)
 	end
 	
 	-- local kbytes, threshold = gcinfo()
-	-- game:SendToConsole("maphandler gcinfo: " .. kbytes .. " (after ClosestFreeSpot)")
+	-- self.ai.game:SendToConsole("maphandler gcinfo: " .. kbytes .. " (after ClosestFreeSpot)")
 
 	-- if uw then EchoDebug("uw mex is final best distance") end
 	return pos, uw, reclaimEnemyMex
@@ -1471,7 +1469,7 @@ function MapHandler:GetPathGraph(mtype, targetNodeSize)
 				local nodeX = mCeil(cx / cellsPerNodeSide)
 				local nodeY = mCeil(cz / cellsPerNodeSide)
 				local node = { x = nodeX, y = nodeY, id = id, position = position }
-				-- self.map:DrawPoint(position, {1,1,1,1}, mtype .. " " .. nodeX .. ", " .. nodeY, 8)
+				-- self.ai.map:DrawPoint(position, {1,1,1,1}, mtype .. " " .. nodeX .. ", " .. nodeY, 8)
 				graph[id] = node
 				id = id + 1
 			end
