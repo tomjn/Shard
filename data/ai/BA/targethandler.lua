@@ -373,12 +373,12 @@ function TargetHandler:InitializeDangers()
 	self.dangers["landtarget"] = NewDangerLayer()
 	self.dangers["landtarget"].duration = 2400
 	self.dangers["landtarget"].present = true
-	self.dangers["landtarget"].obsolesce = game:Frame() + 5400
+	self.dangers["landtarget"].obsolesce = self.ai.game:Frame() + 5400
 	self.dangers["ground"] = NewDangerLayer()
 	self.dangers["ground"].duration = 2400 -- keep ground threat alive for one and a half minutes
 	-- assume there are ground threats for the first three minutes
 	self.dangers["ground"].present = true
-	self.dangers["ground"].obsolesce = game:Frame() + 5400
+	self.dangers["ground"].obsolesce = self.ai.game:Frame() + 5400
 	self.dangers["air"] = NewDangerLayer()
 	self.dangers["submerged"] = NewDangerLayer()
 	self.dangers["plasma"] = NewDangerLayer()
@@ -388,7 +388,7 @@ function TargetHandler:InitializeDangers()
 end
 
 function TargetHandler:UpdateDangers()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 
 	for layer, danger in pairs(self.dangers) do
 		if danger.count >= danger.threshold then
@@ -562,7 +562,7 @@ function TargetHandler:UpdateMetalGeoSpots()
 end
 
 function TargetHandler:UpdateBadPositions()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	for i = #self.badPositions, 1, -1 do
 		local r = self.badPositions[i]
 		if self.cells[r.px] then
@@ -704,7 +704,7 @@ function TargetHandler:UnitDamaged(unit, attacker, damage)
 end
 
 function TargetHandler:Update()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	if f > self.lastEnemyThreatUpdateFrame + 1800 or self.lastEnemyThreatUpdateFrame == 0 then
 		-- store and reset the threat count
 		-- self:EchoDebug(self.currentEnemyThreatCount .. " enemy threat last 2000 frames")
@@ -725,7 +725,7 @@ function TargetHandler:AddBadPosition(position, mtype, threat, duration)
 	duration = duration or 1800
 	local px, pz = GetCellPosition(position)
 	local gas = WhatHurtsUnit(nil, mtype, position)
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	for groundAirSubmerged, yes in pairs(gas) do
 		if yes then
 			local newRecord =
@@ -744,7 +744,7 @@ end
 
 function TargetHandler:UpdateMap()
 	if self.ai.lastLOSUpdate > self.lastUpdateFrame then
-		-- game:SendToConsole("before target update", collectgarbage("count")/1024)
+		-- self.ai.game:SendToConsole("before target update", collectgarbage("count")/1024)
 		self.raiderCounted = {}
 		self.cells = {}
 		self.cellList = {}
@@ -756,10 +756,10 @@ function TargetHandler:UpdateMap()
 		-- self:UpdateMetalGeoSpots()
 		self:UpdateFronts(3)
 		self:UpdateDebug()
-		self.lastUpdateFrame = game:Frame()
-		-- game:SendToConsole("after target update", collectgarbage("count")/1024)
+		self.lastUpdateFrame = self.ai.game:Frame()
+		-- self.ai.game:SendToConsole("after target update", collectgarbage("count")/1024)
 		-- collectgarbage()
-		-- game:SendToConsole("after collectgarbage", collectgarbage("count")/1024)
+		-- self.ai.game:SendToConsole("after collectgarbage", collectgarbage("count")/1024)
 	end
 end
 
@@ -994,7 +994,7 @@ end
 
 function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignoreValue, ignoreThreat)
 	if ignoreValue and ignoreThreat then
-		game:SendToConsole("trying to find a place to bombard but ignoring both value and threat doesn't work")
+		self.ai.game:SendToConsole("trying to find a place to bombard but ignoring both value and threat doesn't work")
 		return
 	end
 	self:UpdateMap()
@@ -1026,7 +1026,7 @@ function TargetHandler:GetBestBombardCell(position, range, minValueThreat, ignor
 	if best then
 		local bestBuildingID, bestBuildingVT
 		for i, buildingID in pairs(best.buildingIDs) do
-			local building = game:GetUnitByID(buildingID)
+			local building = self.ai.game:GetUnitByID(buildingID)
 			if building then
 				local uname = building:Name()
 				local value = Value(uname)
@@ -1229,7 +1229,7 @@ end
 function TargetHandler:ValueHere(position, unitOrName)
 	self:UpdateMap()
 	if unitOrName == nil then
-		game:SendToConsole("nil unit or name given to ThreatHere")
+		self.ai.game:SendToConsole("nil unit or name given to ThreatHere")
 		return
 	end
 	local uname
@@ -1239,7 +1239,7 @@ function TargetHandler:ValueHere(position, unitOrName)
 		uname = unitOrName:Name()
 	end
 	if uname == nil then
-		game:SendToConsole("nil unit name give nto ThreatHere")
+		self.ai.game:SendToConsole("nil unit name give nto ThreatHere")
 		return
 	end
 	local cell, px, pz = self:GetCellHere(position)
@@ -1251,7 +1251,7 @@ end
 function TargetHandler:ThreatHere(position, unitOrName, adjacent)
 	self:UpdateMap()
 	if unitOrName == nil then
-		game:SendToConsole("nil unit or name given to ThreatHere")
+		self.ai.game:SendToConsole("nil unit or name given to ThreatHere")
 		return
 	end
 	local uname
@@ -1261,7 +1261,7 @@ function TargetHandler:ThreatHere(position, unitOrName, adjacent)
 		uname = unitOrName:Name()
 	end
 	if uname == nil then
-		game:SendToConsole("nil unit name give nto ThreatHere")
+		self.ai.game:SendToConsole("nil unit name give nto ThreatHere")
 		return
 	end
 	local cell, px, pz = self:GetCellHere(position)
@@ -1333,7 +1333,7 @@ function TargetHandler:BestAdjacentPosition(unit, targetPosition)
 	local best
 	local notsafe = false
 	local uname = unit:Name()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	local maxThreat = baseUnitThreat
 	local uthreat, urange = ThreatRange(uname)
 	self:EchoDebug(uname .. ": " .. uthreat .. " " .. urange)
