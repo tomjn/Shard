@@ -4,13 +4,13 @@ local DebugEnabledDraw = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("BuildSiteHandler: " .. inStr)
+		self.ai.game:SendToConsole("BuildSiteHandler: " .. inStr)
 	end
 end
 
 local function EchoDebugPlans(inStr)
 	if DebugEnabledPlans then
-		game:SendToConsole("BuildSiteHandler Plans: " .. inStr)
+		self.ai.game:SendToConsole("BuildSiteHandler Plans: " .. inStr)
 	end
 end
 
@@ -25,7 +25,7 @@ local function PlotRectDebug(rect)
 		end
 		local pos1 = {x=rect.x1, y=0, z=rect.z1}
 		local pos2 = {x=rect.x2, y=0, z=rect.z2}
-		local id = map:DrawRectangle(pos1, pos2, color)
+		local id = self.ai.map:DrawRectangle(pos1, pos2, color)
 		rect.drawn = color
 		self.debugPlotDrawn[#self.debugPlotDrawn+1] = rect
 	end
@@ -46,7 +46,7 @@ end
 
 function BuildSiteHandler:Init()
 	self.debugPlotDrawn = {}
-	local mapSize = map:MapDimensions()
+	local mapSize = self.ai.map:MapDimensions()
 	self.ai.maxElmosX = mapSize.x * 8
 	self.ai.maxElmosZ = mapSize.z * 8
 	self.ai.maxElmosDiag = sqrt(self.ai.maxElmosX^2 + self.ai.maxElmosZ^2)
@@ -124,7 +124,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	end
 	-- sanity check: is it REALLY possible to build here?
 	if pos ~= nil then
-		local s = map:CanBuildHere(unitTypeToBuild, pos)
+		local s = self.ai.map:CanBuildHere(unitTypeToBuild, pos)
 		if not s then
 			EchoDebug("cannot build " .. unitTypeToBuild:Name() .. " here: " .. pos.x .. ", " .. pos.z)
 			pos = nil
@@ -223,9 +223,9 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 		searchPos.z = position.z + searchRadius * math.cos(searchAngle)
 		searchPos.y = position.y + 0
 		-- EchoDebug(math.ceil(searchPos.x) .. ", " .. math.ceil(searchPos.z))
-		pos = map:FindClosestBuildSite(unitTypeToBuild, searchPos, searchRadius / 2, minDistance)
+		pos = self.ai.map:FindClosestBuildSite(unitTypeToBuild, searchPos, searchRadius / 2, minDistance)
 	else
-		pos = map:FindClosestBuildSite(unitTypeToBuild, position, buildDistance, minDistance)
+		pos = self.ai.map:FindClosestBuildSite(unitTypeToBuild, position, buildDistance, minDistance)
 	end
 
 	-- if pos == nil then EchoDebug("pos is nil before check") end
@@ -412,7 +412,7 @@ function BuildSiteHandler:UnitCreated(unit)
 				-- tell the builder behaviour that construction has begun
 				plan.behaviour:ConstructionBegun(unitID, plan.unitName, plan.position)
 				-- pass on to the table of what we're actually building
-				plan.frame = game:Frame()
+				plan.frame = self.ai.game:Frame()
 				self.constructing[unitID] = plan
 				table.remove(self.plans, i)
 			end
@@ -422,7 +422,7 @@ function BuildSiteHandler:UnitCreated(unit)
 	end
 	if not planned and (unitTable[unitName].isBuilding or nanoTurretList[unitName]) then
 		-- for when we're restarting the AI, or other contingency
-		-- game:SendToConsole("unplanned building creation " .. unitName .. " " .. unitID .. " " .. position.x .. ", " .. position.z)
+		-- self.ai.game:SendToConsole("unplanned building creation " .. unitName .. " " .. unitID .. " " .. position.x .. ", " .. position.z)
 		local rect = { position = position, unitName = unitName }
 		self:CalculateRect(rect)
 		self:DontBuildRectangle(rect.x1, rect.z1, rect.x2, rect.z2, unitID)
@@ -459,7 +459,7 @@ function BuildSiteHandler:UnitBuilt(unit)
 	if done then
 		EchoDebugPlans(done.behaviour.name .. " " .. done.behaviour.id ..  " completed " .. done.unitName .. " " .. unitID)
 		done.behaviour:ConstructionComplete()
-		done.frame = game:Frame()
+		done.frame = self.ai.game:Frame()
 		-- table.insert(self.history, done)
 		self.constructing[unitID] = nil
 	end
