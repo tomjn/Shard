@@ -1,4 +1,4 @@
-local DebugEnabled = false
+local DebugEnabled = true
 
 
 local function EchoDebug(inStr)
@@ -213,11 +213,11 @@ function TaskQueueBehaviour:HasQueues()
 	return (taskqueues[self.name] ~= nil)
 end
 
-function TaskQueueBehaviour:OwnerBuilt()
+function TaskQueueBehaviour:UnitBuilt()
 	if self:IsActive() then self.progress = true end
 end
 
-function TaskQueueBehaviour:OwnerIdle()
+function TaskQueueBehaviour:UnitIdle()
 	if not self:IsActive() then
 		return
 	end
@@ -228,12 +228,12 @@ function TaskQueueBehaviour:OwnerIdle()
 	self.unit:ElectBehaviour()
 end
 
-function TaskQueueBehaviour:OwnerMoveFailed()
+function TaskQueueBehaviour:UnitMoveFailed()
 	-- sometimes builders get stuck
-	self:OwnerIdle()
+	self:UnitIdle()
 end
 
-function TaskQueueBehaviour:OwnerDead()
+function TaskQueueBehaviour:UnitDead()
 	if self.unit ~= nil then
 		-- game:SendToConsole("taskqueue-er " .. self.name .. " died")
 		if self.outmodedFactory then ai.outmodedFactories = ai.outmodedFactories - 1 end

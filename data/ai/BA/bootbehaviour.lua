@@ -31,12 +31,12 @@ function BootBehaviour:Init()
 	self.unit:ElectBehaviour()
 end
 
-function BootBehaviour:OwnerBuilt()
+function BootBehaviour:UnitBuilt()
 	self.finished = true
 	if self.active then self.lastOrderFrame = game:Frame() end
 end
 
-function BootBehaviour:OwnerDead()
+function BootBehaviour:UnitDead()
 	self.factory = nil
 	if self.repairedBy then self.repairedBy:ResurrectionComplete() end
 	self.ai.buildsitehandler:RemoveResurrectionRepairedBy(self.id)

@@ -34,12 +34,12 @@ function BomberBehaviour:Init()
 	self:SetIdleMode()
 end
 
-function BomberBehaviour:OwnerBuilt()
+function BomberBehaviour:UnitBuilt()
 	self:EchoDebug("built")
 	ai.bomberhandler:AddRecruit(self)
 end
 
-function BomberBehaviour:OwnerDead()
+function BomberBehaviour:UnitDead()
 	self:EchoDebug("dead")
 	-- game:SendToConsole("bomber " .. self.name .. " died")
 	ai.bomberhandler:RemoveRecruit(self)
@@ -53,7 +53,7 @@ function BomberBehaviour:OwnerDead()
 	end
 end
 
-function BomberBehaviour:OwnerIdle()
+function BomberBehaviour:UnitIdle()
 	self:EchoDebug("idle")
 	self.target = nil
 	self.ai.bomberhandler:AddRecruit(self)
@@ -94,7 +94,7 @@ function BomberBehaviour:Update()
 	end
 	if game:Frame() > self.lastOrderFrame + 1000 then
 		self.lastOrderFrame = nil
-		self:OwnerIdle()
+		self:UnitIdle()
 	end
 end
 

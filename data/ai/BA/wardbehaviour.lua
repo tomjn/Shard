@@ -35,19 +35,19 @@ function WardBehaviour:Init()
 	EchoDebug("WardBehaviour: added to unit "..self.name)
 end
 
-function WardBehaviour:OwnerBuilt()
+function WardBehaviour:UnitBuilt()
 	if self.mobile and not self.isScout then
 		self.ai.defendhandler:AddWard(self) -- just testing 
 	end
 end
 
-function WardBehaviour:OwnerDead()
+function WardBehaviour:UnitDead()
 	if self.mobile and not self.isScout then
 		self.ai.defendhandler:RemoveWard(self) -- just testing 
 	end
 end
 
-function WardBehaviour:OwnerIdle()
+function WardBehaviour:UnitIdle()
 	if self:IsActive() then
 		self.underFire = false
 		self.unit:ElectBehaviour()
@@ -152,7 +152,7 @@ function WardBehaviour:Priority()
 	end
 end
 
-function WardBehaviour:OwnerDamaged(attacker,damage)
+function WardBehaviour:UnitDamaged(attacker,damage)
 	if not self.underFire then
 		if self.unit:Internal():GetHealth() < self.unit:Internal():GetMaxHealth() * 0.8 then
 			self.underFire = true

@@ -56,7 +56,7 @@ function RaiderBehaviour:Init()
 	self.lastPathCheckFrame = 0
 end
 
-function RaiderBehaviour:OwnerDead()
+function RaiderBehaviour:UnitDead()
 	-- game:SendToConsole("raider " .. self.name .. " died")
 	if self.DebugEnabled then
 		self.map:EraseLine(nil, nil, nil, self.unit:Internal():ID(), nil, 8)
@@ -68,7 +68,7 @@ function RaiderBehaviour:OwnerDead()
 	self.ai.raiderCount[self.mtype] = self.ai.raiderCount[self.mtype] - 1
 end
 
-function RaiderBehaviour:OwnerIdle()
+function RaiderBehaviour:UnitIdle()
 	-- does recursion, which is bad
 	-- if self.active then
 	-- 	self:ResumeCourse()

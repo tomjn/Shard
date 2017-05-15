@@ -41,16 +41,16 @@ function AttackerBehaviour:Init()
 	self.threat = ut.metalCost
 end
 
-function AttackerBehaviour:OwnerBuilt()
+function AttackerBehaviour:UnitBuilt()
 	self.attacking = false
 	self.ai.attackhandler:AddRecruit(self)
 end
 
-function AttackerBehaviour:OwnerDamaged(attacker,damage)
+function AttackerBehaviour:UnitDamaged(attacker,damage)
 	self.damaged = game:Frame()
 end
 
-function AttackerBehaviour:OwnerDead()
+function AttackerBehaviour:UnitDead()
 	self.attacking = nil
 	self.active = nil
 	self.unit = nil
@@ -59,7 +59,7 @@ function AttackerBehaviour:OwnerDead()
 	self.ai.attackhandler:RemoveMember(self)
 end
 
-function AttackerBehaviour:OwnerIdle()
+function AttackerBehaviour:UnitIdle()
 	self.idle = true
 	self.timeout = nil
 	if self.active then
@@ -67,8 +67,8 @@ function AttackerBehaviour:OwnerIdle()
 	end
 end
 
-function AttackerBehaviour:OwnerMoveFailed()
-	self:OwnerIdle()
+function AttackerBehaviour:UnitMoveFailed()
+	self:UnitIdle()
 end
 
 function AttackerBehaviour:Priority()

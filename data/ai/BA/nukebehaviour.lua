@@ -32,7 +32,7 @@ function NukeBehaviour:Init()
     self.finished = false
 end
 
-function NukeBehaviour:OwnerBuilt()
+function NukeBehaviour:UnitBuilt()
 	self.finished = true
 end
 

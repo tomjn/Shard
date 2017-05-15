@@ -32,11 +32,11 @@ function ReclaimBehaviour:Init()
 	self.lastCheckFrame = 0
 end
 
-function ReclaimBehaviour:OwnerBuilt()
+function ReclaimBehaviour:UnitBuilt()
 	self:EchoDebug("got new reclaimer")
 end
 
-function ReclaimBehaviour:OwnerDead()
+function ReclaimBehaviour:UnitDead()
 	-- notify the command that area is too hot
 	-- self:EchoDebug("reclaimer " .. self.name .. " died")
 	if self.target then
@@ -45,7 +45,7 @@ function ReclaimBehaviour:OwnerDead()
 	self.ai.buildsitehandler:ClearMyPlans(self)
 end
 
-function ReclaimBehaviour:OwnerIdle()
+function ReclaimBehaviour:UnitIdle()
 	if self.active then
 		if self.myFeature then
 			self.ai.targethandler:RemoveFeature(self.myFeature, self.myFeaturePos)

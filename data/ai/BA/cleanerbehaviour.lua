@@ -47,7 +47,7 @@ function CleanerBehaviour:Update()
 	end
 end
 
-function CleanerBehaviour:OwnerIdle()
+function CleanerBehaviour:UnitIdle()
 	-- self:EchoDebug("idle")
 	self.cleanThis = nil
 	self:Search()
@@ -110,6 +110,6 @@ function CleanerBehaviour:Search()
 	end
 end
 
-function CleanerBehaviour:OwnerMoveFailed()
+function CleanerBehaviour:UnitMoveFailed()
 	self.moveFailed = true
 end
