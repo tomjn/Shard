@@ -24,7 +24,7 @@ function AssistHandler:Init()
 	self.magnets = {}
 	self.ai.IDByName = {}
 	self.IDByNameTaken = {}
-	self.lastAllocation = game:Frame()
+	self.lastAllocation = self.ai.game:Frame()
 	self.ai.nonAssistantsPerName = 2
 	self.ai.nonAssistant = {}
 end
