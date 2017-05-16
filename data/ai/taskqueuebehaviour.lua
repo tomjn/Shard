@@ -18,47 +18,38 @@ function TaskQueueBehaviour:HasQueues()
 	return (taskqueues[self.name] ~= nil)
 end
 
-function TaskQueueBehaviour:UnitBuilt(unit)
+function TaskQueueBehaviour:OwnerBuilt(unit)
 	if not self:IsActive() then
 		return
 	end
-	if unit.engineID == self.unit.engineID then
-		self.progress = true
-	end
+	self.progress = true
 end
 
-function TaskQueueBehaviour:UnitIdle(unit)
+function TaskQueueBehaviour:OwnerIdle(unit)
 	if not self:IsActive() then
 		return
 	end
-	if unit.engineID == self.unit.engineID then
-		self.progress = true
-		self.countdown = 0
+	self.progress = true
+	self.countdown = 0
 		--self.unit:ElectBehaviour()
-	end
 end
 
-function TaskQueueBehaviour:UnitMoveFailed(unit)
+function TaskQueueBehaviour:OwnerMoveFailed(unit)
 	if not self:IsActive() then
 		return
 	end
-	self:UnitIdle(unit)
+	self:OwnerIdle(unit)
 end
 
-function TaskQueueBehaviour:UnitDead(unit)
-	if self.unit ~= nil then
-		if unit.engineID == self.unit.engineID then
-			if self.waiting ~= nil then
-				for k,v in pairs(self.waiting) do
-					self.ai.modules.sleep.Kill(self.waiting[k])
-				end
-			end
-			self.waiting = nil
-			self.unit = nil
-		end
-	end
-end
-
+function TaskQueueBehaviour:OwnerDead()
+	if self.waiting ~= nil then
+		for k,v in pairs(self.waiting) do
+			ai.modules.sleep.Kill(self.waiting[k])
+ 		end
+ 	end
+	self.waiting = nil
+	self.unit = nil
+ end
 function TaskQueueBehaviour:GetQueue()
 	q = taskqueues[self.name]
 	if type(q) == "function" then
