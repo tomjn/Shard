@@ -1,19 +1,11 @@
-shard_include "common"
-
 local DebugEnabled = false
-local DebugPlotEnabled = false
-local debugPlotTurtleFile
+local DebugDrawEnabled = false
 
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
 		game:SendToConsole("TurtleHandler: " .. inStr)
 	end
-end
-
-local function PlotPointDebug(x, z, label)
-	if type(label) ~= "string" then label = string.format("%.1f", label) end
-	debugPlotTurtleFile:write(math.ceil(x) .. " " .. math.ceil(z) .. " " .. label .. "\n")
 end
 
 local maxOrganDistance = 400
@@ -104,11 +96,25 @@ function TurtleHandler:Init()
 	self.totalPriority = 0
 end
 
+function TurtleHandler:UnitDead(unit)
+	local unitName = unit:Name()
+	local ut = unitTable[unitName]
+	local unitID = unit:ID()
+	if ut.isBuilding or nanoTurretList[unitName] then
+		if ut.isWeapon or shieldList[unitName] then
+			self:RemoveShell(unitID)
+		else
+			self:RemoveOrgan(unitID)
+		end
+		self.turtlesByUnitID[unitID] = nil
+	end
+end
+
 -- received from buildsitehandler
 -- also applies to plans, in which case the plan is the unitID
 function TurtleHandler:NewUnit(unitName, position, unitID)
 	local ut = unitTable[unitName]
-	if ut.isBuilding then
+	if ut.isBuilding or nanoTurretList[unitName] then
 		if ut.isWeapon and not ut.buildOptions and not antinukeList[unitName] and not nukeList[unitName] and not bigPlasmaList[unitName] then
 			self:AddDefense(position, unitID, unitName)
 		else
@@ -133,7 +139,7 @@ function TurtleHandler:PlanCreated(plan, unitID)
 	local found = false
 	local unitName = plan.unitName
 	local ut = unitTable[unitName]
-	if ut.isBuilding then
+	if ut.isBuilding or nanoTurretList[unitName] then
 		if ut.isWeapon or shieldList[unitName] then
 			for si, shell in pairs(self.shells) do
 				if shell.unitID == plan then
@@ -162,7 +168,7 @@ end
 function TurtleHandler:PlanCancelled(plan)
 	local unitName = plan.unitName
 	local ut = unitTable[unitName]
-	if ut.isBuilding then
+	if ut.isBuilding or nanoTurretList[unitName] then
 		if ut.isWeapon or shieldList[unitName] then
 			self:RemoveShell(plan)
 		else
@@ -172,26 +178,13 @@ function TurtleHandler:PlanCancelled(plan)
 	end
 end
 
-function TurtleHandler:UnitDead(unit)
-	local unitName = unit:Name()
-	local ut = unitTable[unitName]
-	local unitID = unit:ID()
-	if ut.isBuilding then
-		if ut.isWeapon or shieldList[unitName] then
-			self:RemoveShell(unitID)
-		else
-			self:RemoveOrgan(unitID)
-		end
-		self.turtlesByUnitID[unitID] = nil
-	end
-end
-
 function TurtleHandler:AddOrgan(position, unitID, unitName)
 	-- calculate priority
 	local priority = Priority(unitName)
 	local ut = unitTable[unitName]
+	local volume = ut.xsize * ut.zsize * 64
 	-- create the organ
-	local organ = { priority = priority, position = position, unitID = unitID }
+	local organ = { priority = priority, position = position, unitID = unitID, volume = volume }
 	-- find a turtle to attach to
 	local nearestDist = maxOrganDistance
 	local nearestTurtle
@@ -223,15 +216,18 @@ end
 function TurtleHandler:RemoveOrgan(unitID)
 	local foundOrgan = false
 	local emptyTurtle = false
-	for ti, turtle in pairs(self.turtles) do
-		for oi, organ in pairs(turtle.organs) do
+	for ti = #self.turtles, 1, -1 do
+		local turtle = self.turtles[ti]
+		for oi = #turtle.organs, 1, -1 do
+			local organ = turtle.organs[oi]
 			if organ.unitID == unitID then
 				turtle.priority = turtle.priority - organ.priority
 				self.totalPriority = self.totalPriority - organ.priority
+				turtle.organVolume = turtle.organVolume - organ.volume
 				table.remove(turtle.organs, oi)
 				if #turtle.organs == 0 then
 					emptyTurtle = turtle
-					ai.defendhandler:RemoveWard(nil, turtle)
+					self.ai.defendhandler:RemoveWard(nil, turtle)
 					table.remove(self.turtles, ti)
 				end
 				foundOrgan = true
@@ -242,7 +238,8 @@ function TurtleHandler:RemoveOrgan(unitID)
 	end
 	if emptyTurtle then
 		for si, shell in pairs(self.shells) do
-			for ti, turtle in pairs(shell.attachments) do
+			for ti = #shell.attachments, 1, -1 do
+				local turtle = shell.attachments[ti]
 				if turtle == emptyTurtle then
 					table.remove(shell.attachments, ti)
 				end
@@ -256,6 +253,8 @@ end
 function TurtleHandler:Transplant(turtle, organ)
 	table.insert(turtle.organs, organ)
 	turtle.priority = turtle.priority + organ.priority
+	turtle.organVolume = turtle.organVolume + organ.volume
+	-- game:SendToConsole("organ volume:", organ.volume, "new turtle organ volume:", turtle.organVolume, "max:", turtle.maxOrganVolume)
 	if #turtle.organs > 1 then
 		if #turtle.limbs < baseLimbs and turtle.priority >= basePriority then
 			self:Base(turtle, baseSize, baseLimbs)
@@ -302,6 +301,7 @@ end
 
 function TurtleHandler:Base(turtle, size, limbs)
 	turtle.size = size
+	turtle.maxOrganVolume = math.ceil(size * size * math.pi * 0.15) -- less than area to account for building spacing
 	for li, limb in pairs(turtle.limbs) do
 		if limb ~= turtle.firstLimb then
 			self:InitializeInteriorLayers(limb)
@@ -328,7 +328,7 @@ function TurtleHandler:Base(turtle, size, limbs)
 		-- make sure the limb is in an acceptable position (not near the map edge, and not inside another turtle)
 		for aroundTheClock = 1, 12 do
 			local offMapCheck = RandomAway(turtle.position, size * 1.33, false, angle)
-			if offMapCheck.x ~= 1 and offMapCheck.x ~= ai.maxElmosX - 1 and offMapCheck.z ~= 1 and offMapCheck.z ~= ai.maxElmosZ - 1 then
+			if offMapCheck.x ~= 1 and offMapCheck.x ~= self.ai.maxElmosX - 1 and offMapCheck.z ~= 1 and offMapCheck.z ~= self.ai.maxElmosZ - 1 then
 				limb.position = RandomAway(turtle.position, size, false, angle)
 				local inAnotherTurtle = false
 				for ti, turt in pairs(self.turtles) do
@@ -364,8 +364,9 @@ end
 function TurtleHandler:AddTurtle(position, water, priority)
 	if priority == nil then priority = 0 end
 	local firstLimb = { position = position, nameCounts = {}, ground = 0, submerged = 0 }
+	local maxOrganVolume = math.ceil(babySize * babySize * math.pi * 0.15)
 	self:InitializeInteriorLayers(firstLimb)
-	local turtle = {position = position, size = babySize, organs = {}, limbs = { firstLimb }, interiorLimbs = { firstLimb }, firstLimb = firstLimb, water = water, nameCounts = {}, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
+	local turtle = {position = position, size = babySize, maxOrganVolume = maxOrganVolume, organs = {}, organVolume = 0, limbs = { firstLimb }, interiorLimbs = { firstLimb }, firstLimb = firstLimb, water = water, nameCounts = {}, priority = priority, ground = 0, air = 0, submerged = 0, antinuke = 0, shield = 0, jam = 0, radar = 0, sonar = 0}
 	firstLimb.turtle = turtle
 	for i, shell in pairs(self.shells) do
 		local dist = Distance(position, shell.position)
@@ -375,7 +376,7 @@ function TurtleHandler:AddTurtle(position, water, priority)
 	end
 	table.insert(self.turtles, turtle)
 	self.totalPriority = self.totalPriority + priority
-	ai.defendhandler:AddWard(nil, turtle)
+	self.ai.defendhandler:AddWard(nil, turtle)
 	return turtle
 end
 
@@ -427,7 +428,8 @@ function TurtleHandler:AddShell(position, unitID, uname, value, layer, radius)
 end
 
 function TurtleHandler:RemoveShell(unitID)
-	for si, shell in pairs(self.shells) do
+	for si = #self.shells, 1, -1 do
+		local shell = self.shells[si]
 		if shell.unitID == unitID then
 			for li, limb in pairs(shell.attachments) do
 				self:Detach(limb, shell)
@@ -439,7 +441,7 @@ function TurtleHandler:RemoveShell(unitID)
 end
 
 function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
-	-- if 1 then return end -- ai might actually be more effective without defenses
+	-- if 1 then return end -- ai might actually be more effective without defenses, uncomment to disable all defense emplacements
 	if builder == nil then return end
 	EchoDebug("checking for least turtled from " .. builder:Name() .. " for " .. tostring(unitName) .. " bombard: " .. tostring(bombard))
 	if unitName == nil then return end
@@ -509,10 +511,10 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
 				end
 				local okay = false
 				if not enough then
-					okay = ai.maphandler:UnitCanGoHere(builder, limb.position) 
+					okay = self.ai.maphandler:UnitCanGoHere(builder, limb.position) 
 				end
 				if okay and bombard and unitName ~= nil then 
-					okay = ai.targethandler:IsBombardPosition(limb.position, unitName)
+					okay = self.ai.targethandler:IsBombardPosition(limb.position, unitName)
 				end
 				if okay then
 					local mod
@@ -567,7 +569,19 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
 	end
 end
 
-function TurtleHandler:MostTurtled(builder, unitName, bombard, oneOnly)
+function TurtleHandler:GetIsBombardPosition(turtle, unitName)
+	turtle.bombardFor = turtle.bombardFor or {}
+	turtle.bombardForFrame = turtle.bombardForFrame or {}
+	local f = game:Frame()
+	if not turtle.bombardForFrame[unitName]
+	or (turtle.bombardForFrame[unitName] and f > turtle.bombardForFrame[unitName] + 450) then
+		turtle.bombardFor[unitName] = self.ai.targethandler:IsBombardPosition(turtle.position, unitName)
+		turtle.bombardForFrame[unitName] = f
+	end
+	return turtle.bombardFor[unitName]
+end
+
+function TurtleHandler:MostTurtled(builder, unitName, bombard, oneOnly, ignoreDistance)
 	local modDist = modDistance
 	if unitName then modDist = modDist * Priority(unitName) end
 	if builder == nil then return end
@@ -577,27 +591,26 @@ function TurtleHandler:MostTurtled(builder, unitName, bombard, oneOnly)
 	local best
 	local bydistance = {}
 	for i, turtle in pairs(self.turtles) do
-		if ai.maphandler:UnitCanGoHere(builder, turtle.position) then
-			local okay = true
-			if bombard then 
-				okay = ai.targethandler:IsBombardPosition(turtle.position, bombard)
-			end
-			if okay then
-				local mod = turtle.ground + turtle.air + turtle.submerged + (turtle.shield * layerMod["shield"]) + (turtle.jam * layerMod["jam"])
-				EchoDebug("turtled: " .. mod .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
-				if mod ~= 0 then
-					local dist = Distance(position, turtle.position)
-					dist = dist - (mod * modDist)
-					EchoDebug("distance: " .. dist)
-					if oneOnly then
-						if dist < bestDist then
-							EchoDebug("best distance")
-							bestDist = dist
-							best = turtle.position
-						end
-					else
-						bydistance[dist] = turtle.position
+		if (not unitName or turtle.organVolume < turtle.maxOrganVolume)
+		and self.ai.maphandler:UnitCanGoHere(builder, turtle.position)
+		and (not bombard or self:GetIsBombardPosition(turtle, unitName)) then
+			local mod = turtle.ground + turtle.air + turtle.submerged + (turtle.shield * layerMod["shield"]) + (turtle.jam * layerMod["jam"])
+			EchoDebug("turtled: " .. mod .. ", priority: " .. turtle.priority .. ", total priority: " .. self.totalPriority)
+			if mod ~= 0 then
+				local dist = 0
+				if not ignoreDistance then
+					dist = Distance(position, turtle.position)
+				end
+				dist = dist - (mod * modDist)
+				EchoDebug("distance: " .. dist)
+				if oneOnly then
+					if dist < bestDist then
+						EchoDebug("best distance")
+						bestDist = dist
+						best = turtle.position
 					end
+				else
+					bydistance[dist] = turtle.position
 				end
 			end
 		end
@@ -653,17 +666,18 @@ function TurtleHandler:GetUnitTurtle(unitID)
 end
 
 function TurtleHandler:PlotAllDebug()
-	if DebugPlotEnabled then
-		debugPlotTurtleFile= assert(io.open("debugturtleplot",'w'), "Unable to write debugturtleplot")
+	if DebugDrawEnabled then
+		self.map:EraseAll(2)
 		for i, turtle in pairs(self.turtles) do
-			PlotPointDebug(turtle.position.x, turtle.position.z, turtle.priority)
-			for li, limb in pairs(turtle.limbs) do
-				PlotPointDebug(limb.position.x, limb.position.z, "LIMB")
-			end
+			local tcolor = {0,1,0}
 			if turtle.front then
-				PlotPointDebug(turtle.position.x, turtle.position.z, "DANGER")
+				tcolor = {1,0,0}
+			end
+			local label = string.format("%.1f", tostring(turtle.priority)) .. "\n" .. turtle.organVolume .. "/" .. turtle.maxOrganVolume
+			self.map:DrawCircle(turtle.position, turtle.size, tcolor, label, false, 2)
+			for li, limb in pairs(turtle.limbs) do
+				self.map:DrawPoint(limb.position, {1,1,0,1}, "L", 2)
 			end
 		end
-		debugPlotTurtleFile:close()
 	end
 end

@@ -1,3 +1,5 @@
+shard_include("astarclass")
+
 sqrt = math.sqrt
 random = math.random
 pi = math.pi
@@ -62,6 +64,12 @@ function RandomAway(pos, dist, opposite, angle)
 	end
 end
 
+function DistanceSq(pos1,pos2)
+	local xd = pos1.x-pos2.x
+	local yd = pos1.z-pos2.z
+	return xd*xd + yd*yd
+end
+
 function Distance(pos1,pos2)
 	local xd = pos1.x-pos2.x
 	local yd = pos1.z-pos2.z
@@ -100,6 +108,10 @@ function AngleAtoB(x1, z1, x2, z2)
 	local dx = x2 - x1
 	local dz = z2 - z1
 	return atan2(-dz, dx)
+end
+
+function AnglePosPos(pos1, pos2)
+	return AngleAtoB(pos1.x, pos1.z, pos2.x, pos2.z)
 end
 
 function CheckRect(rect)
@@ -306,3 +318,95 @@ function BehaviourPosition(behaviour)
 	if unit == nil then return end
 	return unit:GetPosition()
 end
+
+function HorizontalLine(grid, x, z, tx, sets, adds)
+	for ix = x, tx do
+		grid[ix] = grid[ix] or {}
+		if type(sets) == 'table' or type(adds) == 'table' then
+			grid[ix][z] = grid[ix][z] or {}
+			local cell = grid[ix][z]
+			if sets then
+				for k, v in pairs(sets) do
+					cell[k] = v
+				end
+			end
+			if adds then
+				for k, v in pairs(adds) do
+					cell[k] = (cell[k] or 0) + v
+				end
+			end
+		else
+			if sets then
+				grid[ix][z] = sets
+			end
+			if adds then
+				grid[ix][z] = (grid[ix][z] or 0) + adds
+				if grid[ix][z] == 0 then grid[ix][z] = nil end
+			end
+		end
+	end
+	return grid
+end
+
+function Plot4(grid, cx, cz, x, z, sets, adds)
+	grid = HorizontalLine(grid, cx - x, cz + z, cx + x, sets, adds)
+	if x ~= 0 and z ~= 0 then
+        grid = HorizontalLine(grid, cx - x, cz - z, cx + x, sets, adds)
+    end
+    return grid
+end
+
+function FillCircle(grid, gridElmos, position, radius, sets, adds)
+	local cx = ceil(position.x / gridElmos)
+	local cz = ceil(position.z / gridElmos)
+	radius = max( 0, radius - (gridElmos/2) )
+	local cradius = floor(radius / gridElmos)
+	if cradius > 0 then
+		local err = -cradius
+		local x = cradius
+		local z = 0
+		while x >= z do
+	        local lastZ = z
+	        err = err + z
+	        z = z + 1
+	        err = err + z
+	        grid = Plot4(grid, cx, cz, x, lastZ, sets, adds)
+	        if err >= 0 then
+	            if x ~= lastZ then grid = Plot4(grid, cx, cz, lastZ, x, sets, adds) end
+	            err = err - x
+	            x = x - 1
+	            err = err - x
+	        end
+	    end
+	end
+	return grid
+end
+
+function SimplifyPath(path)
+	if #path < 3 then
+		return path
+	end
+	local lastAngle
+	local removeIds = {}
+	for i = 1, #path-1 do
+		local node1 = path[i]
+		local node2 = path[i+1]
+		local angle = AngleAtoB(node1.position.x, node1.position.z, node2.position.x, node2.position.z)
+		if lastAngle then
+			local adist = AngleDist(angle, lastAngle)
+			if adist < 0.2 then
+				removeIds[node1.id] = true
+			end
+		end
+		lastAngle = angle
+	end
+	for i = #path-1, 2, -1 do
+		local node = path[i]
+		if removeIds[node.id] then
+			table.remove(path, i)
+		end
+	end 
+	return path
+end
+
+CommonFunctionsLoaded = true -- so that SpringShardLua doesn't load them multiple times

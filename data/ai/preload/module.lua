@@ -10,6 +10,6 @@ end
 
 function Module:EchoDebug(...)
 	if self.DebugEnabled then
-		self.game:SendToConsole(self:Name(), ...)
+		self.game:SendToConsole(self.game:GetTeamID(), self:Name(), ...)
 	end
 end

@@ -1,5 +1,3 @@
-shard_include "common"
-
 local DebugEnabled = false
 
 
@@ -259,7 +257,8 @@ function DefendHandler:AssignAll(GAS, mtype) -- Ground Air Submerged (weapon), m
 			end
 			-- put into table to sort by distance
 			local bydistance = {}
-			for di, dfndbehaviour in pairs(defendersToAssign) do
+			for di = #defendersToAssign, 1, -1 do
+				local dfndbehaviour = defendersToAssign[di]
 				local okay = true
 				for nothing, removedfndbehaviour in pairs(defendersToRemove) do
 					if removedfndbehaviour == dfndbehaviour then
@@ -450,7 +449,7 @@ function DefendHandler:RemoveDefender(dfndbehaviour)
 				-- return
 			end
 		end
-	else
+	elseif self.loiterers[dfndbehaviour.mtype] then
 		for i = #self.loiterers[dfndbehaviour.mtype], 1, -1 do
 			local db = self.loiterers[dfndbehaviour.mtype][i]
 			if db == dfndbehaviour then
@@ -508,6 +507,7 @@ function DefendHandler:Unscramble()
 end
 
 function DefendHandler:FindFronts(troublingCells)
+	if not troublingCells then return end
 	local number = #troublingCells
 	for n = 1, number do
 		local tcells = troublingCells[n]
@@ -518,17 +518,22 @@ function DefendHandler:FindFronts(troublingCells)
 				local nearestMobile
 				local nearestTurtleDist = 100000
 				local nearestTurtle
-				for wi, ward in pairs(self.wards) do
+				for wi = #self.wards, 1, -1 do
+					local ward = self.wards[wi]
 					if ward.behaviour ~= nil then
 						local behaviour = ward.behaviour
-						if water == behaviour.water then
-							local dist = Distance(behaviour.unit:Internal():GetPosition(), cell.pos)
-							if dist < nearestMobileDist then
-								nearestMobileDist = dist
-								nearestMobile = ward
+						if not ward.behaviour.unit or not ward.behaviour.unit:Internal() then
+							table.remove(self.wards, wi)
+						else
+							if water == behaviour.water then
+								local dist = Distance(behaviour.unit:Internal():GetPosition(), cell.pos)
+								if dist < nearestMobileDist then
+									nearestMobileDist = dist
+									nearestMobile = ward
+								end
 							end
+							if ward.frontNumber[GAS] > 0 then self:SetDangerZone(ward, 0, number, GAS) end
 						end
-						if ward.frontNumber[GAS] > 0 then self:SetDangerZone(ward, 0, number, GAS) end
 					elseif n == 1 and ward.turtle ~= nil then
 						local turtle = ward.turtle
 						turtle.threatForecastAngle = nil

@@ -29,12 +29,12 @@ factoryMobilities = {
 	armsy = {"shp", "sub"},
 	corasy = {"shp", "sub"},
 	armasy = {"shp", "sub"},
-	csubpen = {"sub", "amp"},
-	asubpen = {"sub", "amp"},
-	corgant = {"bot"},
-	armshltx = {"bot"},
-	corgantuw = {"bot"},
-	armshltxuw = {"bot"},
+	csubpen = {"amp","sub"},
+	asubpen = {"amp","sub"},
+	corgant = {"bot", "amp"},
+	armshltx = {"bot", "amp"},
+	corgantuw = {"amp"},
+	armshltxuw = {"amp"},
 }
 
 -- for calculating what factories to build
@@ -47,18 +47,6 @@ mobilityEffeciencyMultiplier = {
 	hov = 0.7,
 	amp = 0.4,
 	air = 0.55,
-}
-
--- for calculating what factories to build
--- higher values mean slower
-mobilitySlowMultiplier = {
-	veh = 1,
-	shp = 1,
-	sub = 1.3,
-	bot = 1.3,
-	hov = 0.75,
-	amp = 1.5,
-	air = 0.25,
 }
 
 factoryExitSides = {
@@ -264,93 +252,126 @@ breakthroughList = {
 
 -- for milling about next to con units and factories only
 defenderList = {
-	"armaak",
-	"corcrash",
-	"armjeth",
-	"corsent",
-	"armyork",
-	"corah",
-	"armaas",
-	"armah",
-	"corarch",
-	"armaser",
-	"armjam",
-	"armsjam",
-	"coreter",
-	"corsjam",
-	"corspec",
-	"armfig",
-	"armhawk",
-	"armsfig",
-	"corveng",
-	"corvamp",
-	"corsfig",
+	armaak = 1 ,
+	corcrash = 1 ,
+	armjeth = 1 ,
+	corsent = 1 ,
+	armyork = 1 ,
+	corah = 1 ,
+	armaas = 1 ,
+	armah = 1 ,
+	corarch = 1 ,
+	armaser = 1 ,
+	armjam = 1 ,
+	armsjam = 1 ,
+	coreter = 1 ,
+	corsjam = 1 ,
+	corspec = 1 ,
+	armfig = 1 ,
+	armhawk = 1 ,
+	armsfig = 1 ,
+	corveng = 1 ,
+	corvamp = 1 ,
+	corsfig = 1 ,
 }
 
 attackerlist = {
-	"armsam",
-	"corwolv",
-	"tawf013",
-	"armjanus",
-	"corlvlr",
-	"corthud",
-	"armham",
-	"corraid",
-	"armstump",
-	"correap",
-	"armbull",
-	"corstorm",
-	"armrock",
-	"cormart",
-	"armmart",
-	"cormort",
-	"armwar",
-	"armsnipe",
-	"armzeus",
-	"corlevlr",
-	"corsumo",
-	"corcan",
-	"corhrk",
-	"corgol",
-	"corvroc",
-	"cormh",
-	"armmanni",
-	"armmerl",
-	"armfido",
-	"armsptk",
-	"armmh",
-	"corwolv",
-	"cormist",
-	"armfboy",
-	"corcrw",
+	armsam = 1 ,
+	corwolv = 1 ,
+	tawf013 = 1 ,
+	armjanus = 1 ,
+	corlvlr = 1 ,
+	corthud = 1 ,
+	armham = 1 ,
+	corraid = 1 ,
+	armstump = 1 ,
+	correap = 1 ,
+	armbull = 1 ,
+	corstorm = 1 ,
+	armrock = 1 ,
+	cormart = 1 ,
+	armmart = 1 ,
+	cormort = 1 ,
+	armwar = 1 ,
+	armsnipe = 1 ,
+	armzeus = 1 ,
+	corlevlr = 1 ,
+	corsumo = 1 ,
+	corcan = 1 ,
+	corhrk = 1 ,
+	corgol = 1 ,
+	corvroc = 1 ,
+	cormh = 1 ,
+	armmanni = 1 ,
+	armmerl = 1 ,
+	armfido = 1 ,
+	armsptk = 1 ,
+	armmh = 1 ,
+	corwolv = 1 ,
+	cormist = 1 ,
+	armfboy = 1 ,
+	corcrw = 1 ,
 	-- experimentals
-	"armraz",
-	"armshock",
-	"armbanth",
-	"shiva",
-	"armraven",
-	"corkarg",
-	"gorg",
-	"corkrog",
+	armraz = 1 ,
+	armshock = 1 ,
+	armbanth = 1 ,
+	shiva = 1 ,
+	armraven = 1 ,
+	corkarg = 1 ,
+	gorg = 1 ,
+	corkrog = 1 ,
 	-- ships
-	"coresupp",
-	"decade",
-	"corroy",
-	"armroy",
-	"corcrus",
-	"armcrus",
-	"corblackhy",
-	"aseadragon",
+	coresupp = 1 ,
+	decade = 1 ,
+	corroy = 1 ,
+	armroy = 1 ,
+	corcrus = 1 ,
+	armcrus = 1 ,
+	corblackhy = 1 ,
+	aseadragon = 1 ,
+	tawf009 = 1 ,
+	corssub = 1 ,
 	-- hover
-	"corsnap",
-	"armanac",
-	"nsaclash",
+	corsnap = 1 ,
+	armanac = 1 ,
+	nsaclash = 1 ,
 	-- amphib
-	"corseal",
-	"armcroc",
-	"corparrow",
+	corseal = 1 ,
+	armcroc = 1 ,
+	corparrow = 1 ,
 }
 
+-- these units will be used to raid weakly defended spots
+raiderList = {
+	armfast = 1,
+	corgator = 1,
+	armflash = 1,
+	corpyro = 1,
+	armlatnk = 1,
+	armpw = 1,
+	corak = 1,
+	marauder = 1,
+	-- amphibious
+	corgarp = 1,
+	armpincer = 1,
+	-- hover
+	corsh = 1,
+	armsh = 1,
+	-- air gunships
+	armbrawl = 1,
+	armkam = 1,
+	armsaber = 1,
+	blade = 1,
+	bladew = 1,
+	corape = 1,
+	corcut = 1,
+	corcrw = 1,
+	-- subs
+	corsub = 1,
+	armsub = 1,
+	armsubk = 1,
+	corshark = 1,
+}
 
 scoutList = {
 	corfink = 1,
@@ -364,6 +385,25 @@ scoutList = {
 	armpt = 1,
 	corhunt = 1,
 	armsehak = 1,
+}
+
+raiderDisarms = {
+	bladew = 1,
+}
+
+-- units in this list are bombers or torpedo bombers
+bomberList = {
+	corshad = 1,
+	armthund = 1,
+	corhurc = 2,
+	armpnix = 2,
+	armcybr = 3,
+	corsb = 2,
+	armsb = 2,
+	cortitan = 2,
+	armlance = 2,
+	corseap = 2,
+	armseap = 2,
 }
 
 antinukeList = {
@@ -412,6 +452,8 @@ advConList = {
 	armacv = 1,
 	coraca = 1,
 	armaca = 1,
+	coracsub = 1,
+	armacsub = 1,
 }
 
 groundFacList = {
@@ -470,57 +512,6 @@ nukeList = {
 	corsilo = 5400,
 	armemp = 2700,
 	cortron = 2250,
-}	
-
--- these units will be used to raid weakly defended spots
-raiderList = {
-	"armfast",
-	"corgator",
-	"armflash",
-	"corpyro",
-	"armlatnk",
-	"armpw",
-	"corak",
-	"marauder",
-	-- amphibious
-	"corgarp",
-	"armpincer",
-	-- hover
-	"corsh",
-	"armsh",
-	-- air gunships
-	"armbrawl",
-	"armkam",
-	"armsaber",
-	"blade",
-	"bladew",
-	"corape",
-	"corcut",
-	"corcrw",
-	-- subs
-	"corsub",
-	"armsub",
-	"armsubk",
-	"corsubk",
-}
-
-raiderDisarms = {
-	bladew = 1,
-}
-
--- units in this list are bombers or torpedo bombers
-bomberList = {
-	corshad = 1,
-	armthund = 1,
-	corhurc = 2,
-	armpnix = 2,
-	armcybr = 3,
-	corsb = 2,
-	armsb = 2,
-	cortitan = 2,
-	armlance = 2,
-	corseap = 2,
-	armseap = 2,
 }
 
 seaplaneConList = {
@@ -540,8 +531,8 @@ Eco1={
 	coradvsol=1,
 	cortide=1,
 
-	-- corgeo=1,
-	-- armgeo=1,
+	corgeo=1,
+	armgeo=1,
 
 	--store
 
@@ -578,37 +569,37 @@ Eco1={
 
 Eco2={
 	--metalli
-	armmoho=1,
-	cormoho=1,
-	cormexp=1,
+	armmoho=4,
+	cormoho=4,
+	cormexp=4,
 
-	coruwmme=1,
-	armuwmme=1,
+	coruwmme=0,
+	armuwmme=0,
 
 	--magazzini 
-	armuwadves=1,
-	armuwadvms=1,
+	armuwadves=3,
+	armuwadvms=3,
 
-	coruwadves=1,
-	coruwadvms=1,
+	coruwadves=3,
+	coruwadvms=3,
 
-	cmgeo = 1,
-	amgeo = 1,
-	corbhmth =1,
-	armgmm =1,
+	cmgeo = 4,
+	amgeo = 4,
+	corbhmth = 4,
+	armgmm = 4,
 
 	corfus = 1,
 	armfus = 1,
 	cafus = 1,
 	aafus = 1,
-	armuwfus = 1,
-	coruwfus = 1,
+	armuwfus = 0,
+	coruwfus = 0,
 
 	--convertitori
 	cormmkr=1,
 	armmmkr=1,
-	corfmmm=1,
-	armfmmm=1,
+	corfmmm=0,
+	armfmmm=0,
 }
 
 cleaners = {
@@ -621,8 +612,8 @@ cleaners = {
 }
 
 cleanable = {
-	armsolar='ground',
-	corsolar='ground',
+	armsolar= 'ground',
+	corsolar= 'ground',
 	armadvsol = 'ground',
 	coradvsol = 'ground',
 	armtide = 'floating',
@@ -631,6 +622,8 @@ cleanable = {
 	corfmkr = 'floating',
 	cormakr = 'ground',
 	armmakr = 'ground',
+	corwin = 'ground',
+	armwin = 'ground',
 }
 
 -- minimum, maximum, starting point units required to attack, bomb
@@ -650,10 +643,6 @@ breakthroughBomberCounter = 8 -- build atomic bombers or air fortresses
 minRaidCounter = 0
 maxRaidCounter = 8
 baseRaidCounter = 5
-
--- how many mobile con units of one type is allowed
-ConUnitPerTypeLimit = 4 --max(map:SpotCount() / 10, 2)
-ConUnitAdvPerTypeLimit = 4
 
 -- Taskqueuebehaviour was modified to skip this name
 DummyUnitName = "skipthisorder"
@@ -691,3 +680,5 @@ ARMSideName = "arm"
 
 -- how much metal to assume features with these strings in their names have
 baseFeatureMetal = { rock = 30, heap = 80, wreck = 150 }
+
+UnitListsLoaded = true -- so that SpringShardLua doesn't load them multiple times

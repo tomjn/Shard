@@ -1,5 +1,3 @@
-shard_include "common"
-
 local DebugEnabled = false
 
 
@@ -10,6 +8,10 @@ local function EchoDebug(inStr)
 end
 
 WardBehaviour = class(Behaviour)
+
+function WardBehaviour:Name()
+	return "WardBehaviour"
+end
 
 function WardBehaviour:Init()
 	self.minFleeDistance = 500
@@ -23,7 +25,7 @@ function WardBehaviour:Init()
 	self.mobile = not unitTable[self.name].isBuilding and not nanoTurretList[self.name] -- for some reason nano turrets are not buildings
 	self.isScout = scoutList[self.name]
 	if self.isCommander then
-		self.threshold = 0.25
+		self.threshold = 0.2
 	elseif self.isScout then
 		self.threshold = 1
 	elseif self.mobile then
@@ -33,28 +35,22 @@ function WardBehaviour:Init()
 	EchoDebug("WardBehaviour: added to unit "..self.name)
 end
 
-function WardBehaviour:UnitBuilt(unit)
-	if unit.engineID == self.unit.engineID then
-		if self.mobile and not self.isScout then
-			ai.defendhandler:AddWard(self) -- just testing 
-		end
+function WardBehaviour:OwnerBuilt()
+	if self.mobile and not self.isScout then
+		self.ai.defendhandler:AddWard(self) -- just testing 
 	end
 end
 
-function WardBehaviour:UnitDead(unit)
-	if unit.engineID == self.unit.engineID then
-		if self.mobile and not self.isScout then
-			ai.defendhandler:RemoveWard(self) -- just testing 
-		end
+function WardBehaviour:OwnerDead()
+	if self.mobile and not self.isScout then
+		self.ai.defendhandler:RemoveWard(self) -- just testing 
 	end
 end
 
-function WardBehaviour:UnitIdle(unit)
-	if unit.engineID == self.unit.engineID then
-		if self:IsActive() then
-			self.underFire = false
-			self.unit:ElectBehaviour()
-		end
+function WardBehaviour:OwnerIdle()
+	if self:IsActive() then
+		self.underFire = false
+		self.unit:ElectBehaviour()
 	end
 end
 
@@ -76,7 +72,7 @@ function WardBehaviour:Update()
 			else
 				position = unit:GetPosition()
 			end
-			local safe, response = ai.targethandler:IsSafePosition(position, unit, self.threshold)
+			local safe, response = self.ai.targethandler:IsSafePosition(position, unit, self.threshold)
 			if safe then
 				self.underFire = false
 				self.response = nil
@@ -85,9 +81,9 @@ function WardBehaviour:Update()
 				self.underFire = true
 				self.response = response
 				self.lastAttackedFrame = game:Frame()
-				if not self.mobile then ai.defendhandler:Danger(self) end
+				if not self.mobile then self.ai.defendhandler:Danger(self) end
 			end
-			if self.mobile then self.withinTurtle = ai.turtlehandler:SafeWithinTurtle(position, self.name) end
+			if self.mobile then self.withinTurtle = self.ai.turtlehandler:SafeWithinTurtle(position, self.name) end
 			self.unit:ElectBehaviour()
 		end
 	end
@@ -125,10 +121,10 @@ function WardBehaviour:NearestCombat()
 	local bestDistance = 10000
 	for i,unit in pairs(ownUnits) do
 		local un = unit:Name()
-		if unit:ID() ~= fid and un ~= "corcom" and un ~= "armcom" and not ai.defendhandler:IsDefendingMe(unit, self) then
+		if unit:ID() ~= fid and un ~= "corcom" and un ~= "armcom" and not self.ai.defendhandler:IsDefendingMe(unit, self) then
 			if unitTable[un].isWeapon and (battleList[un] or breakthroughList[un]) then
 				local upos = unit:GetPosition()
-				if ai.targethandler:IsSafePosition(upos, fleeing) and unit:GetHealth() > unit:GetMaxHealth() * 0.9 and ai.maphandler:UnitCanGetToUnit(fleeing, unit) and not unit:IsBeingBuilt() then
+				if self.ai.targethandler:IsSafePosition(upos, fleeing) and unit:GetHealth() > unit:GetMaxHealth() * 0.9 and self.ai.maphandler:UnitCanGetToUnit(fleeing, unit) and not unit:IsBeingBuilt() then
 					local dist = Distance(fpos, upos) - unitTable[un].metalCost
 					if dist < bestDistance then
 						bestDistance = dist
@@ -156,15 +152,13 @@ function WardBehaviour:Priority()
 	end
 end
 
-function WardBehaviour:UnitDamaged(unit,attacker,damage)
-	if unit:Internal():ID() == self.unit:Internal():ID() then
-		if not self.underFire then
-			if unit:Internal():GetHealth() < unit:Internal():GetMaxHealth() * 0.8 then
-				self.underFire = true
-				self.lastAttackedFrame = game:Frame()
-				if not self.mobile then ai.defendhandler:Danger(self) end
-				self.unit:ElectBehaviour()
-			end
+function WardBehaviour:OwnerDamaged(attacker,damage)
+	if not self.underFire then
+		if self.unit:Internal():GetHealth() < self.unit:Internal():GetMaxHealth() * 0.8 then
+			self.underFire = true
+			self.lastAttackedFrame = game:Frame()
+			if not self.mobile then self.ai.defendhandler:Danger(self) end
+			self.unit:ElectBehaviour()
 		end
 	end
 end

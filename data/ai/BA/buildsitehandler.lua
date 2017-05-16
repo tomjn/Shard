@@ -1,32 +1,33 @@
-shard_include "common"
-
 local DebugEnabled = false
 local DebugEnabledPlans = false
-local debugPlotBuildFile
-
+local DebugEnabledDraw = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("BuildSiteHandler: " .. inStr)
+		self.ai.game:SendToConsole("BuildSiteHandler: " .. inStr)
 	end
 end
 
 local function EchoDebugPlans(inStr)
 	if DebugEnabledPlans then
-		game:SendToConsole("BuildSiteHandler Plans: " .. inStr)
+		self.ai.game:SendToConsole("BuildSiteHandler Plans: " .. inStr)
 	end
 end
 
 local function PlotRectDebug(rect)
-	if DebugEnabledPlans then
+	if DebugEnabledDraw and not rect.drawn then
 		local label
+		local color
 		if rect.unitName then
-			label = "PLAN"
+			color = {0, 1, 0} -- plan
 		else
-			label = "NOBUILD"
+			color = {1, 0, 0} -- don't build here
 		end
-		local string = rect.x1 .. " " .. rect.z1 .. " " .. rect.x2 .. " " .. rect.z2 .. " " .. label .. "\n"
-		debugPlotBuildFile:write(string)
+		local pos1 = {x=rect.x1, y=0, z=rect.z1}
+		local pos2 = {x=rect.x2, y=0, z=rect.z2}
+		local id = self.ai.map:DrawRectangle(pos1, pos2, color)
+		rect.drawn = color
+		self.debugPlotDrawn[#self.debugPlotDrawn+1] = rect
 	end
 end
 
@@ -44,16 +45,17 @@ function BuildSiteHandler:internalName()
 end
 
 function BuildSiteHandler:Init()
-	local mapSize = map:MapDimensions()
-	ai.maxElmosX = mapSize.x * 8
-	ai.maxElmosZ = mapSize.z * 8
-	ai.maxElmosDiag = sqrt(ai.maxElmosX^2 + ai.maxElmosZ^2)
-	ai.lvl1Mexes = 1 -- this way mexupgrading doesn't revert to taskqueuing before it has a chance to find mexes to upgrade
+	self.debugPlotDrawn = {}
+	local mapSize = self.ai.map:MapDimensions()
+	self.ai.maxElmosX = mapSize.x * 8
+	self.ai.maxElmosZ = mapSize.z * 8
+	self.ai.maxElmosDiag = sqrt(self.ai.maxElmosX^2 + self.ai.maxElmosZ^2)
+	self.ai.lvl1Mexes = 1 -- this way mexupgrading doesn't revert to taskqueuing before it has a chance to find mexes to upgrade
 	self.resurrectionRepair = {}
 	self.dontBuildRects = {}
 	self.plans = {}
 	self.constructing = {}
-	self.history = {}
+	-- self.history = {}
 	self:DontBuildOnMetalOrGeoSpots()
 end
 
@@ -83,7 +85,7 @@ function BuildSiteHandler:LandWaterFilter(pos, unitTypeToBuild, builder)
 	end
 	-- where is the con?
 	local builderPos = builder:GetPosition()
-	local water = ai.maphandler:MobilityNetworkHere("shp", builderPos)
+	local water = self.ai.maphandler:MobilityNetworkHere("shp", builderPos)
 	-- is this a land or a water unit we're building?
 	local waterBuildOrder = unitTable[unitName].needsWater
 	-- if this is a movement from land to water or water to land, check the distance
@@ -122,7 +124,7 @@ function BuildSiteHandler:CheckBuildPos(pos, unitTypeToBuild, builder, originalP
 	end
 	-- sanity check: is it REALLY possible to build here?
 	if pos ~= nil then
-		local s = map:CanBuildHere(unitTypeToBuild, pos)
+		local s = self.ai.map:CanBuildHere(unitTypeToBuild, pos)
 		if not s then
 			EchoDebug("cannot build " .. unitTypeToBuild:Name() .. " here: " .. pos.x .. ", " .. pos.z)
 			pos = nil
@@ -196,7 +198,8 @@ function BuildSiteHandler:GetBuildSpacing(unitTypeToBuild)
 	return spacing
 end
 
-function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, minimumDistance, attemptNumber, buildDistance)
+function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, minimumDistance, attemptNumber, buildDistance, maximumDistance)
+	maximumDistance = maximumDistance or 400
 	-- return self:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, position)
 	if attemptNumber == nil then EchoDebug("looking for build spot for " .. builder:Name() .. " to build " .. unitTypeToBuild:Name()) end
 	local minDistance = minimumDistance or self:GetBuildSpacing(unitTypeToBuild)
@@ -207,22 +210,22 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 			-- Spring.Echo(pos.x, pos.y, pos.z, unitTypeToBuild:Name(), builder:Name(), position.x, position.y, position.z, vpos)
 			return vpos
 		end
-		return self.map:FindClosestBuildSite(unitTypeToBuild, position, 400, minDistance, validFunction)
+		return self.map:FindClosestBuildSite(unitTypeToBuild, position, maximumDistance, minDistance, validFunction)
 	end
 	local tmpAttemptNumber = attemptNumber or 0
 	local pos = nil
 
 	if tmpAttemptNumber > 0 then
 		local searchAngle = (tmpAttemptNumber - 1) / 3 * math.pi
-		local searchRadius = 2 * buildDistance / 3
+		local searchRadius = maximumDistance or 2 * buildDistance / 3
 		local searchPos = api.Position()
 		searchPos.x = position.x + searchRadius * math.sin(searchAngle)
 		searchPos.z = position.z + searchRadius * math.cos(searchAngle)
 		searchPos.y = position.y + 0
 		-- EchoDebug(math.ceil(searchPos.x) .. ", " .. math.ceil(searchPos.z))
-		pos = map:FindClosestBuildSite(unitTypeToBuild, searchPos, searchRadius / 2, minDistance)
+		pos = self.ai.map:FindClosestBuildSite(unitTypeToBuild, searchPos, searchRadius / 2, minDistance)
 	else
-		pos = map:FindClosestBuildSite(unitTypeToBuild, position, buildDistance, minDistance)
+		pos = self.ai.map:FindClosestBuildSite(unitTypeToBuild, position, buildDistance, minDistance)
 	end
 
 	-- if pos == nil then EchoDebug("pos is nil before check") end
@@ -242,11 +245,11 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 					minDistance = minDistance - 4
 				end
 			end
-			pos = self:ClosestBuildSpot(builder, position, unitTypeToBuild, minDistance, tmpAttemptNumber + 1, buildDistance)
+			pos = self:ClosestBuildSpot(builder, position, unitTypeToBuild, minDistance, tmpAttemptNumber + 1, buildDistance, maximumDistance)
 		else
 			-- check manually check in a spiral
 			EchoDebug("trying spiral check")
-			pos = self:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, position, minDistance * 16)
+			pos = self:ClosestBuildSpotInSpiral(builder, unitTypeToBuild, position, maximumDistance or minDistance * 16)
 		end
 	else
 		EchoDebug(builder:Name() .. " building " .. unitTypeToBuild:Name() .. " build position found in " .. tmpAttemptNumber .. " attempts")
@@ -304,26 +307,27 @@ end
 function BuildSiteHandler:ClosestHighestLevelFactory(builderPos, maxDist)
 	if not builderPos then return end
 	local minDist = maxDist
-	local maxLevel = ai.maxFactoryLevel
+	local maxLevel = self.ai.maxFactoryLevel
 	EchoDebug(maxLevel .. " max factory level")
-	local factoryPos = nil
-	if ai.factoriesAtLevel[maxLevel] ~= nil then
-		for i, factory in pairs(ai.factoriesAtLevel[maxLevel]) do
-			if not ai.outmodedFactoryID[factory.id] then
+	local factorybhvr
+	if self.ai.factoriesAtLevel[maxLevel] ~= nil then
+		for i, factory in pairs(self.ai.factoriesAtLevel[maxLevel]) do
+			if not self.ai.outmodedFactoryID[factory.id] then
 				local dist = Distance(builderPos, factory.position)
 				if dist < minDist then
 					minDist = dist
-					factoryPos = factory.position
+					factorybhvr = factory
 				end
 			end
 		end
 	end
-	if factoryPos then
+	if factorybhvr then
+		local factoryPos = factorybhvr.position
 		local newpos = api.Position()
 		newpos.x = factoryPos.x
 		newpos.z = factoryPos.z
 		newpos.y = factoryPos.y
-		return newpos
+		return newpos, factorybhvr.unit:Internal()
 	else
 		return
 	end
@@ -339,7 +343,8 @@ end
 
 -- handle deaths
 function BuildSiteHandler:DoBuildRectangleByUnitID(unitID)
-	for i, rect in pairs(self.dontBuildRects) do
+	for i = #self.dontBuildRects, 1, -1 do
+		local rect = self.dontBuildRects[i]
 		if rect.unitID == unitID then
 			table.remove(self.dontBuildRects, i)
 		end
@@ -348,11 +353,41 @@ function BuildSiteHandler:DoBuildRectangleByUnitID(unitID)
 end
 
 function BuildSiteHandler:DontBuildOnMetalOrGeoSpots()
-	local spots = ai.scoutSpots["air"][1]
+	local spots = self.ai.scoutSpots["air"][1]
 	for i, p in pairs(spots) do
 		self:DontBuildRectangle(p.x-40, p.z-40, p.x+40, p.z+40)
 	end
 	self:PlotAllDebug()
+end
+
+function BuildSiteHandler:BuildNearNano(builder, utype)
+	EchoDebug("looking for spot near nano hotspots")
+	local nanoHots = self.ai.nanohandler:GetHotSpots()
+	if nanoHots then
+		EchoDebug("got " .. #nanoHots .. " nano hotspots")
+		local hotRadius = self.ai.nanohandler:HotBuildRadius()
+		for i = 1, #nanoHots do
+			local hotPos = nanoHots[i]
+			-- find somewhere within hotspot
+			local p = self:ClosestBuildSpot(builder, hotPos, utype, 10, nil, nil, hotRadius)
+			if p then 
+				EchoDebug('found Position for near nano hotspot at: ' .. hotPos.x ..' ' ..hotPos.z)
+				return p
+			end
+		end
+	end
+	return self:BuildNearLastNano(builder, utype)
+end
+
+function BuildSiteHandler:BuildNearLastNano(builder, utype)
+	EchoDebug("looking for spot near last nano")
+	local p = nil
+	if self.ai.lastNanoBuild then
+		EchoDebug('found position near last nano')
+		-- find somewhere at most 400 away
+		p = self:ClosestBuildSpot(builder, self.ai.lastNanoBuild, utype, 30, nil, nil, 400)
+	end
+	return p
 end
 
 function BuildSiteHandler:UnitCreated(unit)
@@ -360,7 +395,8 @@ function BuildSiteHandler:UnitCreated(unit)
 	local position = unit:GetPosition()
 	local unitID = unit:ID()
 	local planned = false
-	for i, plan in pairs(self.plans) do
+	for i = #self.plans, 1, -1 do
+		local plan = self.plans[i]
 		if plan.unitName == unitName and PositionWithinRect(position, plan) then
 			if plan.resurrect then
 				-- so that bootbehaviour will hold it in place while it gets repaired
@@ -368,15 +404,15 @@ function BuildSiteHandler:UnitCreated(unit)
 				self.resurrectionRepair[unitID] = plan.behaviour
 			else
 				EchoDebug(plan.behaviour.name .. " began constructing " .. unitName)
-				if unitTable[unitName].isBuilding then
+				if unitTable[unitName].isBuilding or nanoTurretList[unitName] then
 					-- so that oversized factory lane rectangles will overlap with existing buildings
 					self:DontBuildRectangle(plan.x1, plan.z1, plan.x2, plan.z2, unitID)
-					ai.turtlehandler:PlanCreated(plan, unitID)
+					self.ai.turtlehandler:PlanCreated(plan, unitID)
 				end
 				-- tell the builder behaviour that construction has begun
 				plan.behaviour:ConstructionBegun(unitID, plan.unitName, plan.position)
 				-- pass on to the table of what we're actually building
-				plan.frame = game:Frame()
+				plan.frame = self.ai.game:Frame()
 				self.constructing[unitID] = plan
 				table.remove(self.plans, i)
 			end
@@ -384,12 +420,13 @@ function BuildSiteHandler:UnitCreated(unit)
 			break
 		end
 	end
-	if not planned and unitTable[unitName].isBuilding then
+	if not planned and (unitTable[unitName].isBuilding or nanoTurretList[unitName]) then
 		-- for when we're restarting the AI, or other contingency
+		-- self.ai.game:SendToConsole("unplanned building creation " .. unitName .. " " .. unitID .. " " .. position.x .. ", " .. position.z)
 		local rect = { position = position, unitName = unitName }
 		self:CalculateRect(rect)
 		self:DontBuildRectangle(rect.x1, rect.z1, rect.x2, rect.z2, unitID)
-		ai.turtlehandler:NewUnit(unitName, position, unitID)
+		self.ai.turtlehandler:NewUnit(unitName, position, unitID)
 	end
 	self:PlotAllDebug()
 end
@@ -411,28 +448,7 @@ function BuildSiteHandler:CheckForDuplicates(unitName)
 	end
 	EchoDebugPlans("looking for duplicate construction for " .. unitName)
 	for unitID, construct in pairs(self.constructing) do
-		local thisIsFactory = unitTable[construct.unitName].isBuilding and unitTable[construct.unitName].buildOptions
-		if isFactory and thisIsFactory then return true end
 		if isExpensive and construct.unitName == unitName then return true end
-	end
-	EchoDebugPlans("looking for duplicate history " .. unitName)
-	if isFactory then
-		-- look through history for factories built recently
-		local f = game:Frame()
-		for i, done in pairs(self.history) do
-			if f > done.frame + 1800 then
-				-- clear history older than a minute
-				table.remove(self.history, i)
-			end
-			local thisIsFactory = unitTable[done.unitName].isBuilding and unitTable[done.unitName].buildOptions
-			if thisIsFactory then
-				if f < done.frame + 600 then
-					-- don't build factories within 20 seconds of one another
-					EchoDebug("found a factory too recently")
-					return true
-				end
-			end
-		end
 	end
 	return false
 end
@@ -443,8 +459,8 @@ function BuildSiteHandler:UnitBuilt(unit)
 	if done then
 		EchoDebugPlans(done.behaviour.name .. " " .. done.behaviour.id ..  " completed " .. done.unitName .. " " .. unitID)
 		done.behaviour:ConstructionComplete()
-		done.frame = game:Frame()
-		table.insert(self.history, done)
+		done.frame = self.ai.game:Frame()
+		-- table.insert(self.history, done)
 		self.constructing[unitID] = nil
 	end
 end
@@ -503,18 +519,19 @@ function BuildSiteHandler:NewPlan(unitName, position, behaviour, resurrect)
 	end
 	local plan = {unitName = unitName, position = position, behaviour = behaviour, resurrect = resurrect}
 	self:CalculateRect(plan)
-	if not resurrect and unitTable[unitName].isBuilding then
-		ai.turtlehandler:NewUnit(unitName, position, plan)
+	if unitTable[unitName].isBuilding or nanoTurretList[unitName] then
+		self.ai.turtlehandler:NewUnit(unitName, position, plan)
 	end
 	table.insert(self.plans, plan)
 	self:PlotAllDebug()
 end
 
 function BuildSiteHandler:ClearMyPlans(behaviour)
-	for i, plan in pairs(self.plans) do
+	for i = #self.plans, 1, -1 do
+		local plan = self.plans[i]
 		if plan.behaviour == behaviour then
-			if not plan.resurrect and unitTable[plan.unitName].isBuilding then
-				ai.turtlehandler:PlanCancelled(plan)
+			if not plan.resurrect and (unitTable[plan.unitName].isBuilding or nanoTurretList[unitName]) then
+				self.ai.turtlehandler:PlanCancelled(plan)
 			end
 			table.remove(self.plans, i)
 		end
@@ -540,14 +557,24 @@ function BuildSiteHandler:ResurrectionRepairedBy(unitID)
 end
 
 function BuildSiteHandler:PlotAllDebug()
-	if DebugEnabledPlans then
-		debugPlotBuildFile = assert(io.open("debugbuildplot",'w'), "Unable to write debugbuildplot")
+	if DebugEnabledDraw then
+		local isThere = {}
 		for i, plan in pairs(self.plans) do
 			PlotRectDebug(plan)
+			isThere[plan] = true
 		end
 		for i, rect in pairs(self.dontBuildRects) do
 			PlotRectDebug(rect)
+			isThere[rect] = true
 		end
-		debugPlotBuildFile:close()
+		for i = #self.debugPlotDrawn, 1, -1 do
+			local rect = self.debugPlotDrawn[i]
+			if not isThere[rect] then
+				local pos1 = {x=rect.x1, y=0, z=rect.z1}
+				local pos2 = {x=rect.x2, y=0, z=rect.z2}
+				self.map:EraseRectangle(pos1, pos2, rect.drawn)
+				table.remove(self.debugPlotDrawn, i)
+			end
+		end
 	end
 end

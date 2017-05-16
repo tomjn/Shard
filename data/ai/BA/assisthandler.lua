@@ -1,11 +1,9 @@
-shard_include "common"
-
 local DebugEnabled = false
 
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("AssistHandler: " .. inStr)
+		self.ai.game:SendToConsole("AssistHandler: " .. inStr)
 	end
 end
 
@@ -24,31 +22,32 @@ function AssistHandler:Init()
 	self.working = {}
 	self.totalAssignments = 0
 	self.magnets = {}
-	ai.IDByName = {}
+	self.ai.IDByName = {}
 	self.IDByNameTaken = {}
-	self.lastAllocation = game:Frame()
-	ai.nonAssistantsPerName = 2
-	ai.nonAssistant = {}
+	self.lastAllocation = self.ai.game:Frame()
+	self.ai.nonAssistantsPerName = 2
+	self.ai.nonAssistant = {}
 end
 
 function AssistHandler:Update()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	if f > self.lastAllocation + 1800 then
 		self.lastAllocation = f
-		if ai.Metal.full > 0.33 then
-			ai.nonAssistantsPerName = math.max(ai.nonAssistantsPerName - 1, 2)
-		elseif ai.Metal.tics < 2 or ai.Metal.full < 0.1 then
-			ai.nonAssistantsPerName = math.min(ai.nonAssistantsPerName + 1, ConUnitPerTypeLimit)
-			for fi, asstbehaviour in pairs(self.free) do
-				if ai.IDByName[asstbehaviour.id] == nil then self:AssignIDByName(asstbehaviour) end
-				if ai.IDByName[asstbehaviour.id] <= ai.nonAssistantsPerName then
-					ai.nonAssistant[asstbehaviour.id] = true
+		if self.ai.Metal.full > 0.33 then
+			self.ai.nonAssistantsPerName = math.max(self.ai.nonAssistantsPerName - 1, 2)
+		elseif self.ai.Metal.tics < 2 or self.ai.Metal.full < 0.1 then
+			self.ai.nonAssistantsPerName = math.min(self.ai.nonAssistantsPerName + 1, self.ai.conUnitPerTypeLimit)
+			for fi = #self.free, 1, -1 do
+				local asstbehaviour = self.free[fi]
+				if self.ai.IDByName[asstbehaviour.id] == nil then self:AssignIDByName(asstbehaviour) end
+				if self.ai.IDByName[asstbehaviour.id] <= self.ai.nonAssistantsPerName then
+					self.ai.nonAssistant[asstbehaviour.id] = true
 					asstbehaviour.unit:ElectBehaviour()
 					table.remove(self.free, fi)
 				end
 			end
 		end
-		EchoDebug("nonassistants per name: " .. ai.nonAssistantsPerName)
+		EchoDebug("nonassistants per name: " .. self.ai.nonAssistantsPerName)
 	end
 end
 
@@ -180,16 +179,11 @@ function AssistHandler:TakeUpSlack(builder)
 	if #self.free == 0 then return end
 	local builderPos = builder:GetPosition()
 	self.lastPullPosition = builderPos -- so that any newly free assistants can be sent to a non-dumb place
-	for i, asstbehaviour in pairs(self.free) do
-		local skip = false
-		if asstbehaviour.unit == nil then
+	for i = #self.free, 1, -1 do
+		local asstbehaviour = self.free[i]
+		if not asstbehaviour.unit or not asstbehaviour.unit:Internal() then
 			table.remove(self.free, i)
-			skip = true
-		elseif asstbehaviour.unit:Internal() == nil then
-			table.remove(self.free, i)
-			skip = true
-		end
-		if not skip then
+		else
 			if self:IsLocal(asstbehaviour, builderPos) then
 				asstbehaviour:SoftAssign(builder:ID())
 			end
@@ -199,7 +193,8 @@ end
 
 -- assign any free assistants to really important ongoing projects
 function AssistHandler:DoMagnets()
-	for fi, asstbehaviour in pairs(self.free) do
+	for fi = #self.free, 1, -1 do
+		local asstbehaviour = self.free[fi]
 		if #self.magnets == 0 then break end
 		local skip = false
 		if asstbehaviour.unit == nil then
@@ -257,9 +252,9 @@ function AssistHandler:Release(builder, bid, dead)
 		local asstbehaviour = table.remove(self.working[bid])
 		if dead then asstbehaviour:Assign(nil) end
 		table.insert(self.free, asstbehaviour)
-		if ai.IDByName[asstbehaviour.id] ~= nil then
-			if ai.IDByName[asstbehaviour.id] <= ai.nonAssistantsPerName then
-				ai.nonAssistant[asstbehaviour.id] = true
+		if self.ai.IDByName[asstbehaviour.id] ~= nil then
+			if self.ai.IDByName[asstbehaviour.id] <= self.ai.nonAssistantsPerName then
+				self.ai.nonAssistant[asstbehaviour.id] = true
 			end
 		end
 		-- self.ai:UnitIdle(asstbehaviour.unit:Internal())
@@ -268,7 +263,8 @@ function AssistHandler:Release(builder, bid, dead)
 	self.working[bid] = nil
 	self.totalAssignments = self.totalAssignments - 1
 	EchoDebug("demagnetizing " .. bid)
-	for i, magnet in pairs(self.magnets) do
+	for i = #self.magnets, 1, -1 do
+		local magnet = self.magnets[i]
 		if magnet.bid == bid then
 			EchoDebug("removing a magnet")
 			table.remove(self.magnets, i)
@@ -331,11 +327,11 @@ function AssistHandler:RemoveWorking(asstbehaviour)
 end
 
 function AssistHandler:AssignIDByName(asstbehaviour)
-	-- game:SendToConsole("assisthandler:assignidbyname", ai, ai.id, self.ai, self.ai.id)
+	-- self.ai.game:SendToConsole("assisthandler:assignidbyname", ai, ai.id, self.ai, self.ai.id)
 	local uname = asstbehaviour.name
 	if self.IDByNameTaken[uname] == nil then
 		asstbehaviour.IDByName = 1
-		ai.IDByName[asstbehaviour.id] = 1
+		self.ai.IDByName[asstbehaviour.id] = 1
 		self.IDByNameTaken[uname] = {}
 		self.IDByNameTaken[uname][1] = asstbehaviour.id
 	else
@@ -343,18 +339,18 @@ function AssistHandler:AssignIDByName(asstbehaviour)
 			self.IDByNameTaken[uname][asstbehaviour.IDByName] = nil
 		end
 		local id = 1
-		while id <= ai.nameCount[uname] do
+		while id <= self.ai.nameCount[uname] do
 			id = id + 1
 			if not self.IDByNameTaken[uname][id] then break end
 		end
 		asstbehaviour.IDByName = id
-		ai.IDByName[asstbehaviour.id] = id
+		self.ai.IDByName[asstbehaviour.id] = id
 		self.IDByNameTaken[uname][id] = asstbehaviour.id
 	end
-	if ai.IDByName[asstbehaviour.id] > ai.nonAssistantsPerName then
-		ai.nonAssistant[asstbehaviour.id] = nil
+	if self.ai.IDByName[asstbehaviour.id] > self.ai.nonAssistantsPerName then
+		self.ai.nonAssistant[asstbehaviour.id] = nil
 	else
-		ai.nonAssistant[asstbehaviour.id] = true
+		self.ai.nonAssistant[asstbehaviour.id] = true
 	end
 	if asstbehaviour.active then
 		if asstbehaviour:DoIAssist() then
@@ -368,7 +364,7 @@ function AssistHandler:RemoveAssistant(asstbehaviour)
 	self:RemoveFree(asstbehaviour)
 	local uname = asstbehaviour.name
 	local uid = asstbehaviour.id
-	-- game:SendToConsole("assistant " .. uname .. " died")
-	if self.IDByNameTaken[uname] ~= nil then self.IDByNameTaken[uname][ai.IDByName[uid]] = nil end
-	ai.IDByName[uid] = nil
+	-- self.ai.game:SendToConsole("assistant " .. uname .. " died")
+	if self.IDByNameTaken[uname] ~= nil then self.IDByNameTaken[uname][self.ai.IDByName[uid]] = nil end
+	self.ai.IDByName[uid] = nil
 end
