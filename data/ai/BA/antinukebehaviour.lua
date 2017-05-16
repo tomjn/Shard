@@ -19,7 +19,7 @@ function AntinukeBehaviour:Init()
     self.finished = false
 end
 
-function AntinukeBehaviour:UnitBuilt()
+function AntinukeBehaviour:OwnerBuilt()
 	self.finished = true
 end
 

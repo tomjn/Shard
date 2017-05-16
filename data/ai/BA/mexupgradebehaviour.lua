@@ -19,7 +19,7 @@ function MexUpgradeBehaviour:Init()
 	EchoDebug("MexUpgradeBehaviour: added to unit "..self.name)
 end
 
-function MexUpgradeBehaviour:UnitIdle()
+function MexUpgradeBehaviour:OwnerIdle()
 	if self:IsActive() then
 		local builder = self.unit:Internal()
 		EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." is idle")

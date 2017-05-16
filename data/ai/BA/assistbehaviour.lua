@@ -1,4 +1,4 @@
-local DebugEnabled = true
+local DebugEnabled = false
 
 
 local function EchoDebug(inStr)
@@ -39,7 +39,7 @@ function AssistBehaviour:Init()
 	EchoDebug("added to unit "..uname)
 end
 
-function AssistBehaviour:UnitIdle()
+function AssistBehaviour:OwnerIdle()
 	self.patroling = false
 	self.assisting = nil
 end
@@ -144,7 +144,7 @@ function AssistBehaviour:Priority()
 	end
 end
 
-function AssistBehaviour:UnitDead()
+function AssistBehaviour:OwnerDead()
 	ai.assisthandler:RemoveAssistant(self)
 end
 

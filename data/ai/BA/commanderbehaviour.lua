@@ -30,11 +30,11 @@ function CommanderBehaviour:Update()
 	end
 end
 
-function CommanderBehaviour:UnitIdle()
+function CommanderBehaviour:OwnerIdle()
 	self.unit:ElectBehaviour()
 end
 
-function CommanderBehaviour:UnitDamaged(attacker,damage)
+function CommanderBehaviour:OwnerDamaged(attacker,damage)
 	if not self.lowHealth then
 		if self.unit:Internal():GetHealth() < self.unit:Internal():GetMaxHealth() * 0.75 then
 			self.lowHealth = true

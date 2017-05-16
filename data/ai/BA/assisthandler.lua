@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("AssistHandler: " .. inStr)
+		self.ai.game:SendToConsole("AssistHandler: " .. inStr)
 	end
 end
 
@@ -30,7 +30,7 @@ function AssistHandler:Init()
 end
 
 function AssistHandler:Update()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	if f > self.lastAllocation + 1800 then
 		self.lastAllocation = f
 		if self.ai.Metal.full > 0.33 then
@@ -327,7 +327,7 @@ function AssistHandler:RemoveWorking(asstbehaviour)
 end
 
 function AssistHandler:AssignIDByName(asstbehaviour)
-	-- game:SendToConsole("assisthandler:assignidbyname", ai, ai.id, self.ai, self.ai.id)
+	-- self.ai.game:SendToConsole("assisthandler:assignidbyname", ai, ai.id, self.ai, self.ai.id)
 	local uname = asstbehaviour.name
 	if self.IDByNameTaken[uname] == nil then
 		asstbehaviour.IDByName = 1
@@ -364,7 +364,7 @@ function AssistHandler:RemoveAssistant(asstbehaviour)
 	self:RemoveFree(asstbehaviour)
 	local uname = asstbehaviour.name
 	local uid = asstbehaviour.id
-	-- game:SendToConsole("assistant " .. uname .. " died")
+	-- self.ai.game:SendToConsole("assistant " .. uname .. " died")
 	if self.IDByNameTaken[uname] ~= nil then self.IDByNameTaken[uname][self.ai.IDByName[uid]] = nil end
 	self.ai.IDByName[uid] = nil
 end

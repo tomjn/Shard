@@ -51,7 +51,7 @@ function CountBehaviour:Init()
 	self.unit:ElectBehaviour()
 end
 
-function CountBehaviour:UnitBuilt()
+function CountBehaviour:OwnerBuilt()
 	-- game:SendToConsole(self.name .. " " .. self.id .. " built")
 	if self.ai.nameCountFinished[self.name] == nil then
 		self.ai.nameCountFinished[self.name] = 1
@@ -93,7 +93,7 @@ function CountBehaviour:Priority()
 	return 0
 end
 
-function CountBehaviour:UnitDead()
+function CountBehaviour:OwnerDead()
 	self.ai.nameCount[self.name] = self.ai.nameCount[self.name] - 1
 	if self.finished then
 		self.ai.nameCountFinished[self.name] = self.ai.nameCountFinished[self.name] - 1

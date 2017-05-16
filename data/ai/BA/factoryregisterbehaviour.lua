@@ -26,7 +26,7 @@ function FactoryRegisterBehaviour:Init()
 	EchoDebug('starting building of ' ..self.name)
 end
 
-function FactoryRegisterBehaviour:UnitBuilt()
+function FactoryRegisterBehaviour:OwnerBuilt()
 	-- don't add factories to factory location table until they're done
 	self.finished = true
 	self:Register()
@@ -38,7 +38,7 @@ function FactoryRegisterBehaviour:Priority()
 	return 0
 end
 
-function FactoryRegisterBehaviour:UnitDead()
+function FactoryRegisterBehaviour:OwnerDead()
 	if self.ai.factoryUnderConstruction == self.id then self.ai.factoryUnderConstruction = false end
 	-- game:SendToConsole("factory " .. self.name .. " died")
 	if self.finished then
