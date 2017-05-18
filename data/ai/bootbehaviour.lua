@@ -21,10 +21,8 @@ function BootBehaviour:Init()
 	self.count = 150
 end
 
-function BootBehaviour:UnitBuilt(unit)
-	if unit.engineID == self.unit.engineID then
-		self.finished = true
-	end
+function BootBehaviour:OwnerBuilt()
+	self.finished = true
 end
 
 function BootBehaviour:Update()
