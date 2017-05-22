@@ -348,7 +348,16 @@ SResourceData CSpringGame::GetResourceByName(std::string name){
 }
 
 IUnit* CSpringGame::getUnitByID( int unit_id ) {
-	return ai->GetGame()->getUnitByID( unit_id );
+	if (id < 0) {
+		return NULL;
+	}
+
+	std::map<int, CSpringUnit*>::iterator i = aliveUnits.find(id);
+	if (i == aliveUnits.end()) {
+		return NULL;
+	} else {
+		return i->second;
+	}
 }
 
 /*void CSpringGame::removeUnit( IUnit* dead_unit ) {
