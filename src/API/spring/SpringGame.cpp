@@ -348,11 +348,11 @@ SResourceData CSpringGame::GetResourceByName(std::string name){
 }
 
 IUnit* CSpringGame::getUnitByID( int unit_id ) {
-	if (id < 0) {
+	if ( unit_id < 0) {
 		return NULL;
 	}
 
-	std::map<int, CSpringUnit*>::iterator i = aliveUnits.find(id);
+	std::map<int, CSpringUnit*>::iterator i = aliveUnits.find(unit_id);
 	if (i == aliveUnits.end()) {
 		return NULL;
 	} else {
