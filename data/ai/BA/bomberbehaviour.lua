@@ -129,7 +129,12 @@ function BomberBehaviour:FollowPathToTarget(path, unit)
 				floats:push_back(cmdPos.y)
 				floats:push_back(cmdPos.z)
 				-- self.unit:Internal():ExecuteCustomCommand(CMD_INSERT, floats, optFloats)
-				self.unit:Internal():ExecuteCustomCommand(CMD_MOVE, floats, {"shift"})
+				
+				if ShardSpringLua then
+					self.unit:Internal():ExecuteCustomCommand(CMD_MOVE, floats, {"shift"})
+				else
+					self.unit:Internal():ExecuteCustomCommand(CMD_MOVE, floats, 32)
+			end				
 				secondMoved = true
 			else
 				self.unit:Internal():Move(cmdPos)

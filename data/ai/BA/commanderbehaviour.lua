@@ -82,7 +82,11 @@ function CommanderBehaviour:HelpFactory()
 		floats:push_back(pos.x)
 		floats:push_back(pos.y)
 		floats:push_back(pos.z)
-		self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats, {"shift"})
+		if ShardSpringLua then
+			self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats, {"shift"})
+		else
+			self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats, 32)
+		end
 	end
 	-- CustomCommand(self.unit:Internal(), CMD_GUARD, {self.factoryToHelp:ID()})
 end
