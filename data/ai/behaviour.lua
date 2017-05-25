@@ -31,14 +31,14 @@ end
 function Behaviour:OwnerDamaged(attacker,damage)
 end
 
-function Behaviour:UnitIdle(unit)
+function Behaviour:UnitIdle()
 end
 
 function Behaviour:OwnerIdle()
 end
 
-function Behaviour:UnitMoveFailed(unit)
-	self:UnitIdle(unit)
+function Behaviour:UnitMoveFailed()
+	self:UnitIdle()
 end
 
 function Behaviour:OwnerMoveFailed()
