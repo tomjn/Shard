@@ -111,8 +111,8 @@ end
 function BomberBehaviour:FollowPathToTarget(path, unit)
 	self:EchoDebug("follow path to target")
 	-- self.unit:Internal():Move(path[2].position)
-	local optFloats = api.vectorFloat()
-	optFloats:push_back("alt")
+	--local optFloats = api.vectorFloat()
+	--optFloats:push_back("alt")
 	local firstMoved, secondMoved
 	local myPos = self.unit:Internal():GetPosition()
 	for i = 1, #path do
@@ -148,7 +148,12 @@ function BomberBehaviour:FollowPathToTarget(path, unit)
 	-- floats:push_back(CMD_OPT_SHIFT)
 	floats:push_back(unit:ID())
 	-- self.unit:Internal():ExecuteCustomCommand(CMD_INSERT, floats, optFloats)
-	self.unit:Internal():ExecuteCustomCommand(CMD_ATTACK, floats, {"shift"})
+	if ShardSpringLua then
+		self.unit:Internal():ExecuteCustomCommand(CMD_ATTACK, floats, {"shift"})
+	else
+		self.unit:Internal():ExecuteCustomCommand(CMD_ATTACK, floats, 32)
+	end
+		
 end
 
    -- Spring.GiveOrderToUnit(unitID,
