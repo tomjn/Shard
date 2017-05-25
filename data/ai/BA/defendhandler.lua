@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("DefendHandler: " .. inStr)
+		ai.game:SendToConsole("DefendHandler: " .. inStr)
 	end
 end
 
@@ -117,7 +117,7 @@ function DefendHandler:RemoveWard(behaviour, turtle)
 end
 
 function DefendHandler:Update()
-	local f = game:Frame()
+	local f = ai.game:Frame()
 	if f % 30 == 0 then
 		local scrambleCalls = 0
 		for i, ward in pairs(self.wards) do
@@ -284,7 +284,7 @@ function DefendHandler:AssignAll(GAS, mtype) -- Ground Air Submerged (weapon), m
 							bydistance[dist] = dfndbehaviour -- the probability of the same distance is near zero
 						end
 					else
-						-- game:SendToConsole(self.ai.id, "defender unit nil position", defender:ID(), defender:Name())
+						-- ai.game:SendToConsole(self.ai.id, "defender unit nil position", defender:ID(), defender:Name())
 					end
 				end
 			end
@@ -582,7 +582,7 @@ end
 
 -- receive a signal that a building is threatened or a turtle is on the front
 function DefendHandler:Danger(behaviour, turtle, GAS)
-	local f = game:Frame()
+	local f = ai.game:Frame()
 	if turtle == nil and behaviour ~= nil then turtle = self.ai.turtlehandler:GetUnitTurtle(behaviour.id) end
 	if turtle ~= nil then
 		for i, ward in pairs(self.wards) do
@@ -614,7 +614,7 @@ function DefendHandler:Danger(behaviour, turtle, GAS)
 end
 
 function DefendHandler:WardSafe(ward)
-	local f = game:Frame()
+	local f = ai.game:Frame()
 	local behaviour = ward.behaviour
 	local threatened = ward.threatened
 	if behaviour ~= nil then

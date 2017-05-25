@@ -63,7 +63,7 @@ function FactoryBuildersHandler:AvailableFactories(factoriesPreCleaned)
 	self.factories = {}
 	for order = 1, #factoriesPreCleaned do
 		local factoryName = factoriesPreCleaned[order]
-		local utype = game:GetTypeByName(factoryName)
+		local utype = ai.game:GetTypeByName(factoryName)
 		for name, typeAndCount in pairs(self.conTypesByName) do
 			if typeAndCount.type:CanBuild(utype) then
 				self.factories[#self.factories+1] = factoryName
@@ -182,7 +182,7 @@ end
 function FactoryBuildersHandler:GetBuilderFactory(builder)
 	local builderID = builder:ID()
 	local builderName = builder:Name()
-	local f = game:Frame()
+	local f = ai.game:Frame()
 	if self.lastCheckFrameForConName[builderName] and f - self.lastCheckFrameForConName[builderName] < 450 then
 		-- update every 15 seconds
 		-- between updates return the last factories we got for this builder
@@ -210,7 +210,7 @@ function FactoryBuildersHandler:GetBuilderFactory(builder)
 end
 
 function FactoryBuildersHandler:FactoryPosition(factoryName,builder)
-	local utype = game:GetTypeByName(factoryName)
+	local utype = ai.game:GetTypeByName(factoryName)
 	local mtype = factoryMobilities[factoryName][1]
 	local builderPos = builder:GetPosition()
 	local factoryPos

@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("AssistBehaviour: " .. inStr)
+		ai.game:SendToConsole("AssistBehaviour: " .. inStr)
 	end
 end
 
@@ -34,7 +34,7 @@ function AssistBehaviour:Init()
 	if commanderList[uname] then self.isCommander = true end
 	self.id = self.unit:Internal():ID()
 	ai.assisthandler:AssignIDByName(self)
-	-- game:SendToConsole("assistbehaviour:init", ai, ai.id, self.ai, self.ai.id)
+	-- ai.game:SendToConsole("assistbehaviour:init", ai, ai.id, self.ai, self.ai.id)
 	EchoDebug(uname .. " " .. self.ai.IDByName[self.id])
 	EchoDebug("added to unit "..uname)
 end
@@ -48,7 +48,7 @@ function AssistBehaviour:Update()
 	-- nano turrets don't need updating, they already have a patrol order
 	if self.isNanoTurret then return end
 
-	local f = game:Frame()
+	local f = ai.game:Frame()
 
 	if f % 180 == 0 then
 		local unit = self.unit:Internal()
@@ -71,7 +71,7 @@ function AssistBehaviour:Update()
 			end
 		else
 			-- fill empty spots after con units die
-			-- if not self.ai.IDByName[self.id] or not self.ai.nameCount[uname] then game:SendToConsole(self.id, uname, self.ai.IDByName[self.id], self.ai.nameCount[uname]) end
+			-- if not self.ai.IDByName[self.id] or not self.ai.nameCount[uname] then ai.game:SendToConsole(self.id, uname, self.ai.IDByName[self.id], self.ai.nameCount[uname]) end
 			if self.ai.IDByName[self.id] > self.ai.nameCount[uname] then
 				EchoDebug("filling empty spots with " .. uname .. " " .. self.ai.IDByName[self.id])
 				self.ai.assisthandler:AssignIDByName(self)
@@ -150,7 +150,7 @@ end
 
 function AssistBehaviour:Assign(builderID)
 	self.target = builderID
-	self.lastAssignFrame = game:Frame()
+	self.lastAssignFrame = ai.game:Frame()
 end
 
 function AssistBehaviour:SetFallback(position)
@@ -165,7 +165,7 @@ function AssistBehaviour:SoftAssign(builderID)
 		if self.lastAssignFrame == nil then
 			self.target = builderID
 		else
-			local f = game:Frame()
+			local f = ai.game:Frame()
 			if f > self.lastAssignFrame + 900 then
 				self.target = builderID
 			end

@@ -57,7 +57,7 @@ function RaiderBehaviour:Init()
 end
 
 function RaiderBehaviour:OwnerDead()
-	-- game:SendToConsole("raider " .. self.name .. " died")
+	-- ai.game:SendToConsole("raider " .. self.name .. " died")
 	if self.DebugEnabled then
 		self.map:EraseLine(nil, nil, nil, self.unit:Internal():ID(), nil, 8)
 	end
@@ -98,7 +98,7 @@ function RaiderBehaviour:Deactivate()
 end
 
 function RaiderBehaviour:Update()
-	local f = game:Frame()
+	local f = ai.game:Frame()
 	if self.active then
 		if self.path and f > self.lastPathCheckFrame + 90 then
 			self.lastPathCheckFrame = f

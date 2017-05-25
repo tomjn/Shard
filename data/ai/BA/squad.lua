@@ -67,7 +67,7 @@ end
 
 
 function Squad:ReTarget(squad, squadIndex)
-	local f = game:Frame()
+	local f = ai.game:Frame()
 	local representativeBehaviour
 	local representative
 	for iu, member in pairs(squad.members) do

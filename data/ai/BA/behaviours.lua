@@ -27,7 +27,7 @@ function defaultBehaviours(unit, ai)
 	local b = {}
 	local u = unit:Internal()
 	local un = u:Name()
-	-- game:SendToConsole(un, "getting default behaviours")
+	-- ai.game:SendToConsole(un, "getting default behaviours")
 
 	-- keep track of how many of each kind of unit we have
 	table.insert(b, CountBehaviour)
@@ -55,18 +55,18 @@ function defaultBehaviours(unit, ai)
 	end
 
 	if u:CanBuild() then
-		-- game:SendToConsole(u:Name() .. " can build")
+		-- ai.game:SendToConsole(u:Name() .. " can build")
 		-- moho engineer doesn't need the queue!
 		if advConList[un] then
-			-- game:SendToConsole(u:Name() .. " is advanced construction unit")
+			-- ai.game:SendToConsole(u:Name() .. " is advanced construction unit")
 			-- half advanced engineers upgrade mexes instead of building things
 			if ai.advCons == nil then ai.advCons = 0 end
 			if ai.advCons == 0 then
-				-- game:SendToConsole(u:Name() .. " taskqueuing")
+				-- ai.game:SendToConsole(u:Name() .. " taskqueuing")
 				table.insert(b, MexUpgradeBehaviour)
 				ai.advCons = 1
 			else
-				-- game:SendToConsole(u:Name() .. " mexupgrading")
+				-- ai.game:SendToConsole(u:Name() .. " mexupgrading")
 				ai.advCons = 0
 			end
 			table.insert(b,TaskQueueBehaviour)
@@ -113,13 +113,13 @@ function defaultBehaviours(unit, ai)
 	for i = #b, 1, -1 do
 		local behaviour = b[i]
 		if alreadyHave[behaviour] then
-			-- game:SendToConsole(ai.id, "duplicate behaviour", u:ID(), u:Name())
+			-- ai.game:SendToConsole(ai.id, "duplicate behaviour", u:ID(), u:Name())
 			table.remove(b, i)
 		else
 			alreadyHave[behaviour] = true
 		end
 	end
-	-- game:SendToConsole(ai.id, #b, "behaviours", u:ID(), u:Name())
+	-- ai.game:SendToConsole(ai.id, #b, "behaviours", u:ID(), u:Name())
 	
 	return b
 end

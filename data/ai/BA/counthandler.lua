@@ -52,7 +52,7 @@ function CountHandler:UnitDamaged(unit, attacker,damage)
 	end
 	local aname = "nil"
 	if attacker then 
-		if attacker:Team() ~= game:GetTeamID() then
+		if attacker:Team() ~= ai.game:GetTeamID() then
 			self:EchoDebug(unit:Name() .. " on team " .. unit:Team() .. " damaged by " .. attacker:Name() .. " on team " .. attacker:Team())
 		end
 	end

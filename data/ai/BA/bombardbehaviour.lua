@@ -28,7 +28,7 @@ function BombardBehaviour:Fire()
 		floats:push_back(self.target.y)
 		floats:push_back(self.target.z)
 		self.unit:Internal():ExecuteCustomCommand(CMD_ATTACK, floats)
-		self.lastFireFrame = game:Frame()
+		self.lastFireFrame = ai.game:Frame()
 	end
 end
 
@@ -45,14 +45,14 @@ end
 
 function BombardBehaviour:Update()
 	if self.active then
-		local f = game:Frame()
+		local f = ai.game:Frame()
 		if self.lastTargetFrame == 0 or f > self.lastTargetFrame + 300 then
 			self:EchoDebug("retarget")
 			local bestCell, valueThreat, buildingID = ai.targethandler:GetBestBombardCell(self.position, self.range, valueThreatThreshold)
 			if bestCell then
 				local newTarget
 				if buildingID then
-					local building = game:GetUnitByID(buildingID)
+					local building = ai.game:GetUnitByID(buildingID)
 					if building then
 						newTarget = building:GetPosition()
 					end

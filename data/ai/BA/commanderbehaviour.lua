@@ -14,7 +14,7 @@ function CommanderBehaviour:Init()
 end
 
 function CommanderBehaviour:Update()
-	local f = game:Frame()
+	local f = ai.game:Frame()
 	if self.lowHealth and f >= self.nextHealthCheck then
 		if self.unit:Internal():GetHealth() >= self.unit:Internal():GetMaxHealth() * 0.75 then
 			self.lowHealth = false

@@ -2,7 +2,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("taskBuild: " .. inStr)
+		ai.game:SendToConsole("taskBuild: " .. inStr)
 	end
 end
 

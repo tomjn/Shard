@@ -16,11 +16,11 @@ local DebugEnabled = false
 local function EchoDebug(inStr)
 	if DebugEnabled then
 		if not inStr then return end
-		game:SendToConsole("Taskqueues: " .. inStr)
+		ai.game:SendToConsole("Taskqueues: " .. inStr)
 	end
 end
 random = math.random
-math.randomseed( os.time() + game:GetTeamID() )
+math.randomseed( os.time() + ai.game:GetTeamID() )
 random(); random(); random()
 
 function MapHasWater()

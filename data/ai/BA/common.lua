@@ -11,7 +11,7 @@ if ShardSpringLua then
 	end
 else
 	shard_include "unitlists"
-	shard_include("unittable-" .. game:GameName())
-	shard_include("featuretable-" .. game:GameName())
+	shard_include("unittable-" .. ai.game:GameName())
+	shard_include("featuretable-" .. ai.game:GameName())
 	shard_include "commonfunctions"
 end

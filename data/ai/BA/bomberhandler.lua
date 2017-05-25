@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("BomberHandler: " .. inStr)
+		ai.game:SendToConsole("BomberHandler: " .. inStr)
 	end
 end
 
@@ -30,7 +30,7 @@ function BomberHandler:Init()
 end
 
 function BomberHandler:Update()
-	local f = game:Frame()
+	local f = ai.game:Frame()
 	if f % 30 == 0 then self:DoTargetting() end
 	for i = #self.plans, 1, -1 do
 		local plan = self.plans[i]

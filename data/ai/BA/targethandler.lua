@@ -23,7 +23,7 @@ local function PlotSquareDebug(x, z, size, color, label, filled)
 		local pos1, pos2 = api.Position(), api.Position()
 		pos1.x, pos1.z = x - halfSize, z - halfSize
 		pos2.x, pos2.z = x + halfSize, z + halfSize
-		map:DrawRectangle(pos1, pos2, color, label, filled, 8)
+		ai.map:DrawRectangle(pos1, pos2, color, label, filled, 8)
 	end
 end
 
@@ -651,8 +651,8 @@ end
 
 function TargetHandler:UpdateDebug()
 	if DebugDrawEnabled then
-		map:EraseRectangle(nil, nil, nil, nil, true, 8)
-		map:EraseRectangle(nil, nil, nil, nil, false, 8)
+		ai.map:EraseRectangle(nil, nil, nil, nil, true, 8)
+		ai.map:EraseRectangle(nil, nil, nil, nil, false, 8)
 		local maxThreat = 0
 		local maxValue = 0
 		for cx, czz in pairs(self.cells) do

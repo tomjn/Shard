@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("ScoutHandler: " .. inStr)
+		ai.game:SendToConsole("ScoutHandler: " .. inStr)
 	end
 end
 

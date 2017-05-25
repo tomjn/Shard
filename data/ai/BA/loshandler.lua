@@ -28,7 +28,7 @@ local function PlotDebug(x, z, label)
 		z = math.ceil(z)
 		local pos = api.Position()
 		pos.x, pos.z = x, z
-		map:DrawPoint(pos, GetColorFromLabel(label), label, 3)
+		ai.map:DrawPoint(pos, GetColorFromLabel(label), label, 3)
 	end
 end
 
@@ -44,7 +44,7 @@ local function PlotSquareDebug(x, z, size, label)
 		pos1.z = z - halfSize
 		pos2.x = x + halfSize
 		pos2.z = z + halfSize
-		map:DrawRectangle(pos1, pos2, GetColorFromLabel(label), label, false, 3)
+		ai.map:DrawRectangle(pos1, pos2, GetColorFromLabel(label), label, false, 3)
 	end
 end
 

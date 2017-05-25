@@ -2,7 +2,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("taskEco: " .. inStr)
+		ai.game:SendToConsole("taskEco: " .. inStr)
 	end
 end
 
@@ -112,7 +112,7 @@ end
 
 function TidalIfTidal()
 	local unitName = DummyUnitName
-	local tidalPower = map:TidalStrength()
+	local tidalPower = ai.map:TidalStrength()
 	EchoDebug("tidal power is " .. tidalPower)
 	if tidalPower >= 10 then
 		unitName = Tidal()
@@ -121,8 +121,8 @@ function TidalIfTidal()
 end
 
 function windLimit()
-	if map:AverageWind() >= 10 then
-		local minWind = map:MinimumWindSpeed()
+	if ai.map:AverageWind() >= 10 then
+		local minWind = ai.map:MinimumWindSpeed()
 		if minWind >= 8 then
 			EchoDebug("minimum wind high enough to build only wind")
 			return true

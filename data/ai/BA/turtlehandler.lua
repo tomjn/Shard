@@ -4,7 +4,7 @@ local DebugDrawEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("TurtleHandler: " .. inStr)
+		ai.game:SendToConsole("TurtleHandler: " .. inStr)
 	end
 end
 
@@ -254,7 +254,7 @@ function TurtleHandler:Transplant(turtle, organ)
 	table.insert(turtle.organs, organ)
 	turtle.priority = turtle.priority + organ.priority
 	turtle.organVolume = turtle.organVolume + organ.volume
-	-- game:SendToConsole("organ volume:", organ.volume, "new turtle organ volume:", turtle.organVolume, "max:", turtle.maxOrganVolume)
+	-- ai.game:SendToConsole("organ volume:", organ.volume, "new turtle organ volume:", turtle.organVolume, "max:", turtle.maxOrganVolume)
 	if #turtle.organs > 1 then
 		if #turtle.limbs < baseLimbs and turtle.priority >= basePriority then
 			self:Base(turtle, baseSize, baseLimbs)
@@ -447,7 +447,7 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
 	if unitName == nil then return end
 	local position = builder:GetPosition()
 	local ut = unitTable[unitName]
-	local Metal = game:GetResourceByName("Metal")
+	local Metal = ai.game:GetResourceByName("Metal")
 	local priorityFloor = 1
 	local layer
 	if ut.isWeapon and not antinukeList[unitName] then
@@ -572,7 +572,7 @@ end
 function TurtleHandler:GetIsBombardPosition(turtle, unitName)
 	turtle.bombardFor = turtle.bombardFor or {}
 	turtle.bombardForFrame = turtle.bombardForFrame or {}
-	local f = game:Frame()
+	local f = ai.game:Frame()
 	if not turtle.bombardForFrame[unitName]
 	or (turtle.bombardForFrame[unitName] and f > turtle.bombardForFrame[unitName] + 450) then
 		turtle.bombardFor[unitName] = self.ai.targethandler:IsBombardPosition(turtle.position, unitName)

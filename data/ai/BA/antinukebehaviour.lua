@@ -8,7 +8,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		game:SendToConsole("AntinukeBehaviour: " .. inStr)
+		ai.game:SendToConsole("AntinukeBehaviour: " .. inStr)
 	end
 end
 
@@ -27,7 +27,7 @@ function AntinukeBehaviour:Update()
 	if not self.active then return end
 
 	if self.finished and self.ai.needAntinuke then
-		local f = game:Frame()
+		local f = ai.game:Frame()
 		if self.lastStockpileFrame == 0 or f > self.lastStockpileFrame + 1000 then
 			local floats = api.vectorFloat()
 			floats:push_back(1)
