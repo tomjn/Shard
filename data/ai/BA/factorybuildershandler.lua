@@ -26,7 +26,7 @@ function FactoryBuildersHandler:UnitBuilt(engineUnit)
 		-- it's not a construction unit
 		return
 	end
-	self.finishedConIDs[engineUnit:ID()] = true
+	self.finishedConIDs[engineUnit:ID()] = engineUnit
 	if not self.conTypesByName[uname] then
 		self:EchoDebug("new con type: " .. uname)
 		doUpdate = true
@@ -64,8 +64,8 @@ function FactoryBuildersHandler:AvailableFactories(factoriesPreCleaned)
 	for order = 1, #factoriesPreCleaned do
 		local factoryName = factoriesPreCleaned[order]
 		local utype = ai.game:GetTypeByName(factoryName)
-		for name, typeAndCount in pairs(self.conTypesByName) do
-			if typeAndCount.type:CanBuild(utype) then
+		for name, typeAndCount in pairs(self.finishedConIDs) do
+			if typeAndCount:CanBuild(utype) then
 				self.factories[#self.factories+1] = factoryName
 				break
 			end
@@ -158,7 +158,7 @@ function FactoryBuildersHandler:ConditionsToBuildFactories(builder)
 			and ai.Energy.income > (factoryCountSq * 200) + (sameFactoryEnergy * 2)
 		) then
 			self:EchoDebug(factoryName .. ' conditions met')
-			local canBuild = builder:CanBuild(game:GetTypeByName(factoryName))
+			local canBuild = builder:CanBuild(self.ai.game:GetTypeByName(factoryName))
 			if canBuild then
 				factories[#factories+1] = factoryName
 				self:EchoDebug(#factories .. ' ' .. factoryName .. ' can be built by builder ' .. builder:Name())
