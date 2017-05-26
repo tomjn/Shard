@@ -4,7 +4,14 @@ function shard_include( file )
 	if type(file) ~= 'string' then
 		return nil
 	end
-	local ok1, mod1 = pcall( require, game_engine:GameName().."/"..file )
+	local gameName = game_engine:GameName()
+	local ok1
+	local mod1
+	if gameName == 'BAR' then
+		ok1, mod1 = pcall( require, "BA/"..file )
+	else
+		ok1, mod1 = pcall( require, gameName.."/"..file )
+	end
 	if ok1 then
 		return mod1
 	else
