@@ -2,7 +2,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("unitLists: " .. inStr)
+		self.ai.game:SendToConsole("unitLists: " .. inStr)
 	end
 end
 

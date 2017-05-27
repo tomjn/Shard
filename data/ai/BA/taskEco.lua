@@ -143,7 +143,7 @@ function WindSolar()
 end
 
 function Energy1()
-	if ai.Energy.income > math.max(map:AverageWind() * 20, 150) then --and ai.Metal.reserves >50
+	if ai.Energy.income > math.max( ai.map:AverageWind() * 20, 150) then --and ai.Metal.reserves >50
 		return SolarAdv()
 	else
 		return WindSolar()

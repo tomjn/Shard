@@ -28,7 +28,7 @@ local function PlotDebug(x, z, label)
 		z = math.ceil(z)
 		local pos = api.Position()
 		pos.x, pos.z = x, z
-		ai.map:DrawPoint(pos, GetColorFromLabel(label), label, 3)
+		self.ai.map:DrawPoint(pos, GetColorFromLabel(label), label, 3)
 	end
 end
 
@@ -44,7 +44,7 @@ local function PlotSquareDebug(x, z, size, label)
 		pos1.z = z - halfSize
 		pos2.x = x + halfSize
 		pos2.z = z + halfSize
-		ai.map:DrawRectangle(pos1, pos2, GetColorFromLabel(label), label, false, 3)
+		self.ai.map:DrawRectangle(pos1, pos2, GetColorFromLabel(label), label, false, 3)
 	end
 end
 
@@ -227,7 +227,7 @@ function LosHandler:UpdateEnemies(enemyList)
 				if known[id] == 2 and self.ai.knownEnemies[id].los == 2 then
 					e.unit:EraseHighlight({1,0,0}, 'known', 3)
 					e.unit:DrawHighlight({1,0,0}, 'known', 3)
-					-- self.map:DrawUnit(id, {1,0,0}, 'known', 3)
+					-- self.ai.map:DrawUnit(id, {1,0,0}, 'known', 3)
 					-- PlotDebug(pos.x, pos.z, "known")
 				end
 			end
@@ -254,7 +254,7 @@ function LosHandler:UpdateEnemies(enemyList)
 				self.ai.attackhandler:NeedLess(mtype)
 				if mtype == "air" then self.ai.bomberhandler:NeedLess() end
 			end
-			if DebugDrawEnabled then self.map:ErasePoint(nil, nil, id, 3) end
+			if DebugDrawEnabled then self.ai.map:ErasePoint(nil, nil, id, 3) end
 			self.ai.knownEnemies[id] = nil
 		elseif not known[id] then
 			if e.ghost then
@@ -263,7 +263,7 @@ function LosHandler:UpdateEnemies(enemyList)
 					if self:IsInLos(gpos) or self:IsInRadar(gpos) then
 						-- the ghost is not where it was last seen, but it's still somewhere
 						e.ghost.position = nil
-						if DebugDrawEnabled then self.map:ErasePoint(nil, nil, id, 3) end
+						if DebugDrawEnabled then self.ai.map:ErasePoint(nil, nil, id, 3) end
 					end
 				end
 				-- expire ghost
@@ -272,8 +272,8 @@ function LosHandler:UpdateEnemies(enemyList)
 				-- end
 			else
 				if DebugDrawEnabled then
-					self.map:ErasePoint(nil, nil, id, 3)
-					self.map:DrawPoint(e.position, {0.5,0.5,0.5,1}, id, 3)
+					self.ai.map:ErasePoint(nil, nil, id, 3)
+					self.ai.map:DrawPoint(e.position, {0.5,0.5,0.5,1}, id, 3)
 				end
 				e.ghost = { frame = f, position = e.position }
 			end
@@ -290,7 +290,7 @@ function LosHandler:UpdateEnemies(enemyList)
 				end
 				if count then table.insert(blips, e) end
 			end
-			if DebugDrawEnabled then self.map:ErasePoint(nil, nil, id, 3) end
+			if DebugDrawEnabled then self.ai.map:ErasePoint(nil, nil, id, 3) end
 			e.ghost = nil
 		end
 	end

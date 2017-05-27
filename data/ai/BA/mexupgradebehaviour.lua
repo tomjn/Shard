@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("MexUpgradeBehaviour: " .. inStr)
+		self.ai.game:SendToConsole("MexUpgradeBehaviour: " .. inStr)
 	end
 end
 
@@ -14,7 +14,7 @@ function MexUpgradeBehaviour:Init()
 	self.mohoStarted = false
 	self.released = false
 	self.mexPos = nil
-	self.lastFrame = ai.game:Frame()
+	self.lastFrame = self.ai.game:Frame()
 	self.name = self.unit:Internal():Name()
 	EchoDebug("MexUpgradeBehaviour: added to unit "..self.name)
 end
@@ -37,22 +37,22 @@ function MexUpgradeBehaviour:OwnerIdle()
 		if self.mexPos ~= nil and not self.mohoStarted then
 			-- maybe we're ARM and not CORE?
 			local mohoName = "cormoho"
-			tmpType = ai.game:GetTypeByName("armmoho")
+			tmpType = self.ai.game:GetTypeByName("armmoho")
 			if builder:CanBuild(tmpType) then
 				mohoName = "armmoho"
 			end
 			-- maybe we're underwater?
-			tmpType = ai.game:GetTypeByName("coruwmme")
+			tmpType = self.ai.game:GetTypeByName("coruwmme")
 			if builder:CanBuild(tmpType) then
 				mohoName = "coruwmme"
 			end
-			tmpType = ai.game:GetTypeByName("armuwmme")
+			tmpType = self.ai.game:GetTypeByName("armuwmme")
 			if builder:CanBuild(tmpType) then
 				mohoName = "armuwmme"
 			end
-			tmpType = ai.game:GetTypeByName(mohoName)
+			tmpType = self.ai.game:GetTypeByName(mohoName)
 			-- check if the moho can be built there at all
-			local s = ai.map:CanBuildHere(tmpType, self.mexPos)
+			local s = self.ai.map:CanBuildHere(tmpType, self.mexPos)
 			if s then
 				s = builder:Build(mohoName, self.mexPos)
 			end
@@ -81,7 +81,7 @@ end
 
 function MexUpgradeBehaviour:Update()
 	if not self.active then
-		if (self.lastFrame or 0) + 30 < ai.game:Frame() then
+		if (self.lastFrame or 0) + 30 < self.ai.game:Frame() then
 			self:StartUpgradeProcess()
 		end
 	end
@@ -109,7 +109,7 @@ end
 
 function MexUpgradeBehaviour:StartUpgradeProcess()
 	-- try to find nearest mex
-	local ownUnits = ai.game:GetFriendlies()
+	local ownUnits = self.ai.game:GetFriendlies()
 	local selfUnit = self.unit:Internal()
 	local selfPos = selfUnit:GetPosition()
 	local mexUnit = nil
@@ -121,7 +121,7 @@ function MexUpgradeBehaviour:StartUpgradeProcess()
 		if mexUpgrade[un] then
 			EchoDebug(un .. " " .. mexUpgrade[un])
 			-- make sure you can build the upgrade
-			local upgradetype = ai.game:GetTypeByName(mexUpgrade[un])
+			local upgradetype = self.ai.game:GetTypeByName(mexUpgrade[un])
 			if selfUnit:CanBuild(upgradetype) then
 				-- make sure you can reach it
 				if self.ai.maphandler:UnitCanGetToUnit(selfUnit, unit) then
@@ -166,7 +166,7 @@ function MexUpgradeBehaviour:StartUpgradeProcess()
 	else
 		mexUnit = nil
 		self.active = false
-		self.lastFrame = ai.game:Frame()
+		self.lastFrame = self.ai.game:Frame()
 		EchoDebug("MexUpgradeBehaviour: unit ".. self.name .." failed to start reclaiming")
 	end
 end

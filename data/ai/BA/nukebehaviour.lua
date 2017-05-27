@@ -9,7 +9,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("NukeBehaviour: " .. inStr)
+		self.ai.game:SendToConsole("NukeBehaviour: " .. inStr)
 	end
 end
 
@@ -39,7 +39,7 @@ end
 function NukeBehaviour:Update()
 	if not self.active then return end
 
-	local f = ai.game:Frame()
+	local f = self.ai.game:Frame()
 
 	if self.finished then
 		if f > self.lastLaunchFrame + 100 then

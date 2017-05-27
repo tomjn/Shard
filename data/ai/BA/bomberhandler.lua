@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("BomberHandler: " .. inStr)
+		self.ai.game:SendToConsole("BomberHandler: " .. inStr)
 	end
 end
 
@@ -30,7 +30,7 @@ function BomberHandler:Init()
 end
 
 function BomberHandler:Update()
-	local f = ai.game:Frame()
+	local f = self.ai.game:Frame()
 	if f % 30 == 0 then self:DoTargetting() end
 	for i = #self.plans, 1, -1 do
 		local plan = self.plans[i]
@@ -39,7 +39,7 @@ function BomberHandler:Update()
 		if path then
 			-- path = SimplifyPath(path)
 			if self.DebugEnabled then
-				self.map:EraseLine(nil, nil, {1,1,1}, nil, nil, 8)
+				self.ai.map:EraseLine(nil, nil, {1,1,1}, nil, nil, 8)
 				for i = 2, #path do
 					local pos1 = path[i-1].position
 					local pos2 = path[i].position

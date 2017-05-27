@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("WardBehaviour: ", inStr)
+		self.ai.game:SendToConsole("WardBehaviour: ", inStr)
 	end
 end
 
@@ -15,7 +15,7 @@ end
 
 function WardBehaviour:Init()
 	self.minFleeDistance = 500
-	self.lastAttackedFrame = ai.game:Frame()
+	self.lastAttackedFrame = self.ai.game:Frame()
 	self.initialLocation = self.unit:Internal():GetPosition()
 	self.name = self.unit:Internal():Name()
 	self.id = self.unit:Internal():ID()
@@ -55,7 +55,7 @@ function WardBehaviour:OwnerIdle()
 end
 
 function WardBehaviour:Update()
-	local f = ai.game:Frame()
+	local f = self.ai.game:Frame()
 
 	-- timeout on underFire condition
 	if self.underFire then
@@ -80,7 +80,7 @@ function WardBehaviour:Update()
 				EchoDebug(self.name .. " is not safe")
 				self.underFire = true
 				self.response = response
-				self.lastAttackedFrame = ai.game:Frame()
+				self.lastAttackedFrame = self.ai.game:Frame()
 				if not self.mobile then self.ai.defendhandler:Danger(self) end
 			end
 			if self.mobile then self.withinTurtle = self.ai.turtlehandler:SafeWithinTurtle(position, self.name) end
@@ -113,7 +113,7 @@ end
 
 function WardBehaviour:NearestCombat()
 	local best
-	local ownUnits = self.game:GetFriendlies()
+	local ownUnits = self.ai.game:GetFriendlies()
 	local fleeing = self.unit:Internal()
 	local fn = fleeing:Name()
 	local fid = fleeing:ID()
@@ -156,7 +156,7 @@ function WardBehaviour:OwnerDamaged(attacker,damage)
 	if not self.underFire then
 		if self.unit:Internal():GetHealth() < self.unit:Internal():GetMaxHealth() * 0.8 then
 			self.underFire = true
-			self.lastAttackedFrame = ai.game:Frame()
+			self.lastAttackedFrame = self.ai.game:Frame()
 			if not self.mobile then self.ai.defendhandler:Danger(self) end
 			self.unit:ElectBehaviour()
 		end

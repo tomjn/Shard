@@ -20,7 +20,7 @@ function CleanerBehaviour:EchoDebug(...)
 				s = s .. ", "
 			end
 		end
-		ai.game:SendToConsole("CleanerBehaviour " .. self.unit:Internal():Name() .. " " .. self.unit:Internal():ID() .. " : " .. s)
+		self.ai.game:SendToConsole("CleanerBehaviour " .. self.unit:Internal():Name() .. " " .. self.unit:Internal():ID() .. " : " .. s)
 	end
 end
 

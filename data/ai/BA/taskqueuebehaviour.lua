@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("TaskQueueBehaviour: " .. inStr)
+		self.ai.game:SendToConsole("TaskQueueBehaviour: " .. inStr)
 	end
 end
 
@@ -146,7 +146,7 @@ function TaskQueueBehaviour:Init()
 
 	self.active = false
 	self.currentProject = nil
-	self.lastWatchdogCheck = ai.game:Frame()
+	self.lastWatchdogCheck = self.ai.game:Frame()
 	self.watchdogTimeout = 1800
 	local u = self.unit:Internal()
 	local mtype, network = ai.maphandler:MobilityOfUnit(u)
@@ -235,7 +235,7 @@ end
 
 function TaskQueueBehaviour:OwnerDead()
 	if self.unit ~= nil then
-		-- ai.game:SendToConsole("taskqueue-er " .. self.name .. " died")
+		-- self.ai.game:SendToConsole("taskqueue-er " .. self.name .. " died")
 		if self.outmodedFactory then ai.outmodedFactories = ai.outmodedFactories - 1 end
 		-- self.unit = nil
 		if self.target then ai.targethandler:AddBadPosition(self.target, self.mtype) end
@@ -344,12 +344,12 @@ function TaskQueueBehaviour:LocationFilter(utype, value)
 						if ai.targethandler:IsBombardPosition(p, "corbhmth") then
 							-- instead build geothermal plasma battery if it's a good spot for it
 							value = "corbhmth"
-							utype = ai.game:GetTypeByName(value)
+							utype = self.ai.game:GetTypeByName(value)
 						end
 					else
 						-- instead build a safe geothermal
 						value = "armgmm"
-						utype = ai.game:GetTypeByName(value)
+						utype = self.ai.game:GetTypeByName(value)
 					end
 				end
 			end
@@ -532,7 +532,7 @@ function TaskQueueBehaviour:GetQueue()
 	end
 	q = q or taskqueues[self.name]
 	if type(q) == "function" then
-		-- ai.game:SendToConsole("function table found!")
+		-- self.ai.game:SendToConsole("function table found!")
 		q = q(self)
 	end
 	return q
@@ -550,9 +550,9 @@ end
 
 function TaskQueueBehaviour:Update()
 	if self.failOut then
-		local f = ai.game:Frame()
+		local f = self.ai.game:Frame()
 		if f > self.failOut + 300 then
-			-- ai.game:SendToConsole("getting back to work " .. self.name .. " " .. self.id)
+			-- self.ai.game:SendToConsole("getting back to work " .. self.name .. " " .. self.id)
 			self.failOut = nil
 			self.failures = 0
 		end
@@ -560,7 +560,7 @@ function TaskQueueBehaviour:Update()
 	if not self:IsActive() then
 		return
 	end
-	local f = ai.game:Frame()
+	local f = self.ai.game:Frame()
 	if self.isFactory and f % 311 == 0 and (factoryMobilities[self.name][1] == 'bot' or factoryMobilities[self.name][1] == 'veh') then
 		self.AmpOrGroundWeapon = self:GetAmpOrGroundWeapon()
 	end
@@ -586,7 +586,7 @@ end
 
 function TaskQueueBehaviour:ProgressQueue()
 	EchoDebug(self.name .. " " .. self.id .. " progress queue")
-	self.lastWatchdogCheck = ai.game:Frame()
+	self.lastWatchdogCheck = self.ai.game:Frame()
 	self.constructing = false
 	self.progress = false
 	local builder = self.unit:Internal()
@@ -645,7 +645,7 @@ function TaskQueueBehaviour:ProgressQueue()
 			end
 			if value ~= DummyUnitName then
 				if value ~= nil then
-					utype = ai.game:GetTypeByName(value)
+					utype = self.ai.game:GetTypeByName(value)
 				else
 					utype = nil
 					value = "nil"
@@ -676,10 +676,10 @@ function TaskQueueBehaviour:ProgressQueue()
 							end
 						end
 					else
-						ai.game:SendToConsole("WARNING: bad taskque: "..self.name.." cannot build "..value)
+						self.ai.game:SendToConsole("WARNING: bad taskque: "..self.name.." cannot build "..value)
 					end
 				else
-					ai.game:SendToConsole(self.name .. " cannot build:"..value..", couldnt grab the unit type from the engine")
+					self.ai.game:SendToConsole(self.name .. " cannot build:"..value..", couldnt grab the unit type from the engine")
 				end
 			end
 			-- DebugEnabled = false -- debugging plasma
@@ -709,8 +709,8 @@ function TaskQueueBehaviour:ProgressQueue()
 				local limit = 20
 				if self.queue then limit = #self.queue * 2 end
 				if self.failures > limit then
-					-- ai.game:SendToConsole("taking a break after " .. limit .. " tries. " .. self.name .. " " .. self.id)
-					self.failOut = ai.game:Frame()
+					-- self.ai.game:SendToConsole("taking a break after " .. limit .. " tries. " .. self.name .. " " .. self.id)
+					self.failOut = self.ai.game:Frame()
 					self.unit:ElectBehaviour()
 				end
 			end

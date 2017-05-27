@@ -20,7 +20,7 @@ local IDLEMODE_FLY = 0
 function BomberBehaviour:Init()
 	self.DebugEnabled = false
 
-	self.lastOrderFrame = ai.game:Frame()
+	self.lastOrderFrame = self.ai.game:Frame()
 	self.name = self.unit:Internal():Name()
 	if unitTable[self.name].submergedRange > 0 then
 		self.weapon = "torpedo"
@@ -41,7 +41,7 @@ end
 
 function BomberBehaviour:OwnerDead()
 	self:EchoDebug("dead")
-	-- ai.game:SendToConsole("bomber " .. self.name .. " died")
+	-- self.ai.game:SendToConsole("bomber " .. self.name .. " died")
 	ai.bomberhandler:RemoveRecruit(self)
 	ai.bomberhandler:NeedMore()
 	-- notify the command that area is too hot
@@ -71,7 +71,7 @@ function BomberBehaviour:Activate()
 	self:EchoDebug("activate")
 	self.active = true
 	if self.target then
-		self.lastOrderFrame = ai.game:Frame()
+		self.lastOrderFrame = self.ai.game:Frame()
 		if self.path then
 			self:FollowPathToTarget(self.path, self.target)
 		else
@@ -92,7 +92,7 @@ function BomberBehaviour:Update()
 	if not self.lastOrderFrame then
 		return
 	end
-	if ai.game:Frame() > self.lastOrderFrame + 1000 then
+	if self.ai.game:Frame() > self.lastOrderFrame + 1000 then
 		self.lastOrderFrame = nil
 		self:OwnerIdle()
 	end
@@ -181,7 +181,7 @@ function BomberBehaviour:BombTarget(targetUnit, path)
 	self.target = targetUnit
 	self.path = path
 	if self.active then
-		self.lastOrderFrame = ai.game:Frame()
+		self.lastOrderFrame = self.ai.game:Frame()
 		if path then
 			self:FollowPathToTarget(path, targetUnit)
 		else

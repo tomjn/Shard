@@ -5,7 +5,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("FactoryRegisterBehaviour: " .. inStr)
+		self.ai.game:SendToConsole("FactoryRegisterBehaviour: " .. inStr)
 	end
 end
 
@@ -40,7 +40,7 @@ end
 
 function FactoryRegisterBehaviour:OwnerDead()
 	if self.ai.factoryUnderConstruction == self.id then self.ai.factoryUnderConstruction = false end
-	-- ai.game:SendToConsole("factory " .. self.name .. " died")
+	-- self.ai.game:SendToConsole("factory " .. self.name .. " died")
 	if self.finished then
 		self:Unregister()
 		self.ai.overviewhandler:EvaluateSituation()
@@ -67,7 +67,7 @@ function FactoryRegisterBehaviour:Unregister()
     	end
     end
     self.ai.maxFactoryLevel = maxLevel
-	-- ai.game:SendToConsole(self.ai.factories .. " factories")
+	-- self.ai.game:SendToConsole(self.ai.factories .. " factories")
 	
 	if self.ai.factoryUnderConstruction == self.id then self.ai.factoryUnderConstruction = false end
 	local mtype = factoryMobilities[self.name][1]
@@ -102,7 +102,7 @@ function FactoryRegisterBehaviour:Register()
 		-- set the current maximum factory level
 		self.ai.maxFactoryLevel = level
 	end
-	-- ai.game:SendToConsole(self.ai.factories .. " factories")
+	-- self.ai.game:SendToConsole(self.ai.factories .. " factories")
 	
 	if self.ai.factoryUnderConstruction == self.id then self.ai.factoryUnderConstruction = false end
 	local mtype = factoryMobilities[self.name][1]

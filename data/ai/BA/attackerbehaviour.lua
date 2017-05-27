@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("AttackerBehaviour: " .. inStr)
+		self.ai.game:SendToConsole("AttackerBehaviour: " .. inStr)
 	end
 end
 
@@ -47,7 +47,7 @@ function AttackerBehaviour:OwnerBuilt()
 end
 
 function AttackerBehaviour:OwnerDamaged(attacker,damage)
-	self.damaged = ai.game:Frame()
+	self.damaged = self.ai.game:Frame()
 end
 
 function AttackerBehaviour:OwnerDead()
@@ -93,14 +93,14 @@ end
 
 function AttackerBehaviour:Update()
 	if self.damaged then
-		local f = ai.game:Frame()
+		local f = self.ai.game:Frame()
 		if f > self.damaged + 450 then
 			self.damaged = nil
 		end
 	end
 	if self.timeout then
-		if ai.game:Frame() >= self.timeout	then
-			ai.game:SendToConsole("timeout triggered")
+		if self.ai.game:Frame() >= self.timeout	then
+			self.ai.game:SendToConsole("timeout triggered")
 			self.timeout = nil
 			-- self.ai.attackhandler:RemoveMember(self)
 			self.ai.attackhandler:AddRecruit(self)
@@ -137,8 +137,8 @@ function AttackerBehaviour:Advance(pos, perpendicularAttackAngle, reverseAttackA
 	end
 	if self.active and canMoveThere then
 		-- local framesToArrive = 30 * (Distance(self.unit:Internal():GetPosition(), self.target) / self.speed) * 2
-		-- ai.game:SendToConsole("frames to arrive", framesToArrive)
-		-- self.timeout = ai.game:Frame() + framesToArrive
+		-- self.ai.game:SendToConsole("frames to arrive", framesToArrive)
+		-- self.timeout = self.ai.game:Frame() + framesToArrive
 		self.unit:Internal():Move(self.target)
 	end
 	return canMoveThere

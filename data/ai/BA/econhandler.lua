@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("EconHandler: " .. inStr)
+		self.ai.game:SendToConsole("EconHandler: " .. inStr)
 	end
 end
 

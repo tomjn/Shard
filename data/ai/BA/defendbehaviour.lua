@@ -5,7 +5,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("DefendBehaviour: " .. inStr)
+		self.ai.game:SendToConsole("DefendBehaviour: " .. inStr)
 	end
 end
 
@@ -59,7 +59,7 @@ function DefendBehaviour:Init()
 end
 
 function DefendBehaviour:OwnerDead()
-	-- ai.game:SendToConsole("defender " .. self.name .. " died")
+	-- self.ai.game:SendToConsole("defender " .. self.name .. " died")
 	if self.scramble then
 		self.ai.defendhandler:RemoveScramble(self)
 		if self.scrambled then
@@ -78,12 +78,12 @@ function DefendBehaviour:Update()
 	if self.unit == nil then return end
 	local unit = self.unit:Internal()
 	if ShardSpringLua and not unit:GetPosition() then
-		-- ai.game:SendToConsole(self.ai.id, "undead defend behaviour", unit:ID(), unit:Name())
+		-- self.ai.game:SendToConsole(self.ai.id, "undead defend behaviour", unit:ID(), unit:Name())
 		self:UnitDead(self.unit)
 	end
 	if unit == nil then return end
 	if self.active then
-		local f = ai.game:Frame()
+		local f = self.ai.game:Frame()
 		if f % 60 == 0 then
 			if self.target == nil then return end
 			local targetPos = self.target.position or BehaviourPosition(self.target.behaviour)
@@ -93,7 +93,7 @@ function DefendBehaviour:Update()
 			if not self.tough then guardDistance = guardDistance * 0.33 end
 			local guardPos = RandomAway(targetPos, guardDistance, false, self.guardAngle)
 			local safe = self.ai.defendhandler:WardSafe(self.target)
-			-- if targetPos.y > 100 then ai.game:SendToConsole(targetPos.y .. " " .. type(self.target.behaviour)) end
+			-- if targetPos.y > 100 then self.ai.game:SendToConsole(targetPos.y .. " " .. type(self.target.behaviour)) end
 			local unitPos = unit:GetPosition()
 			local dist = Distance(unitPos, guardPos)
 			local behaviour = self.target.behaviour

@@ -210,7 +210,7 @@ function BuildSiteHandler:ClosestBuildSpot(builder, position, unitTypeToBuild, m
 			-- Spring.Echo(pos.x, pos.y, pos.z, unitTypeToBuild:Name(), builder:Name(), position.x, position.y, position.z, vpos)
 			return vpos
 		end
-		return self.map:FindClosestBuildSite(unitTypeToBuild, position, maximumDistance, minDistance, validFunction)
+		return self.ai.map:FindClosestBuildSite(unitTypeToBuild, position, maximumDistance, minDistance, validFunction)
 	end
 	local tmpAttemptNumber = attemptNumber or 0
 	local pos = nil
@@ -572,7 +572,7 @@ function BuildSiteHandler:PlotAllDebug()
 			if not isThere[rect] then
 				local pos1 = {x=rect.x1, y=0, z=rect.z1}
 				local pos2 = {x=rect.x2, y=0, z=rect.z2}
-				self.map:EraseRectangle(pos1, pos2, rect.drawn)
+				self.ai.map:EraseRectangle(pos1, pos2, rect.drawn)
 				table.remove(self.debugPlotDrawn, i)
 			end
 		end

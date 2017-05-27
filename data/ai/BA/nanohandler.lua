@@ -37,7 +37,7 @@ end
 
 function NanoHandler:DrawDebug()
 	if not self.DebugEnabled then return end
-	self.map:EraseAll(2)
+	self.ai.map:EraseAll(2)
 	local highestCount = 0
 	for cx, czz in pairs(self.densityMap) do
 		for cz, count in pairs(czz) do
@@ -58,7 +58,7 @@ function NanoHandler:DrawDebug()
 			cellPosMax.z = z
 			local green = count / highestCount
 			local blue = 1 - green
-			self.map:DrawRectangle(cellPosMin, cellPosMax, {0,green,blue}, count, true, 2)
+			self.ai.map:DrawRectangle(cellPosMin, cellPosMax, {0,green,blue}, count, true, 2)
 		end
 	end
 end

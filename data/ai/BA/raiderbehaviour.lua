@@ -57,9 +57,9 @@ function RaiderBehaviour:Init()
 end
 
 function RaiderBehaviour:OwnerDead()
-	-- ai.game:SendToConsole("raider " .. self.name .. " died")
+	-- self.ai.game:SendToConsole("raider " .. self.name .. " died")
 	if self.DebugEnabled then
-		self.map:EraseLine(nil, nil, nil, self.unit:Internal():ID(), nil, 8)
+		self.ai.map:EraseLine(nil, nil, nil, self.unit:Internal():ID(), nil, 8)
 	end
 	if self.target then
 		self.ai.targethandler:AddBadPosition(self.target, self.mtype)
@@ -93,12 +93,12 @@ function RaiderBehaviour:Deactivate()
 	self:EchoDebug("deactivate")
 	self.active = false
 	if self.DebugEnabled then
-		self.map:EraseLine(nil, nil, nil, self.unit:Internal():ID(), nil, 8)
+		self.ai.map:EraseLine(nil, nil, nil, self.unit:Internal():ID(), nil, 8)
 	end
 end
 
 function RaiderBehaviour:Update()
-	local f = ai.game:Frame()
+	local f = self.ai.game:Frame()
 	if self.active then
 		if self.path and f > self.lastPathCheckFrame + 90 then
 			self.lastPathCheckFrame = f
@@ -217,7 +217,7 @@ function RaiderBehaviour:GetTarget()
 	self.offPath = nil
 	self.arrived = nil
 	if self.DebugEnabled then
-		self.map:EraseLine(nil, nil, nil, self.unit:Internal():ID(), nil, 8)
+		self.ai.map:EraseLine(nil, nil, nil, self.unit:Internal():ID(), nil, 8)
 	end
 	local unit = self.unit:Internal()
 	local bestCell = self.ai.targethandler:GetBestRaidCell(unit)
@@ -293,12 +293,12 @@ end
 function RaiderBehaviour:ReceivePath(path)
 	if not path then return end
 	-- if self.DebugEnabled then
-	-- 	self.map:EraseLine(nil, nil, {0,0,1}, self.unit:Internal():ID(), nil, 8)
+	-- 	self.ai.map:EraseLine(nil, nil, {0,0,1}, self.unit:Internal():ID(), nil, 8)
 	-- 	for i = 2, #path do
 	-- 		local pos1 = path[i-1].position
 	-- 		local pos2 = path[i].position
 	-- 		local arrow = i == #path
-	-- 		self.map:DrawLine(pos1, pos2, {0,0,1}, self.unit:Internal():ID(), arrow, 8)
+	-- 		self.ai.map:DrawLine(pos1, pos2, {0,0,1}, self.unit:Internal():ID(), arrow, 8)
 	-- 	end
 	-- end
 	-- path = SimplifyPathByAngle(path)
@@ -311,12 +311,12 @@ function RaiderBehaviour:ReceivePath(path)
 	self.targetNode = self.path[self.pathStep]
 	self:ResumeCourse()
 	if self.DebugEnabled then
-		self.map:EraseLine(nil, nil, {0,1,1}, self.unit:Internal():ID(), nil, 8)
+		self.ai.map:EraseLine(nil, nil, {0,1,1}, self.unit:Internal():ID(), nil, 8)
 		for i = 2, #self.path do
 			local pos1 = self.path[i-1].position
 			local pos2 = self.path[i].position
 			local arrow = i == #self.path
-			self.map:DrawLine(pos1, pos2, {0,1,1}, self.unit:Internal():ID(), arrow, 8)
+			self.ai.map:DrawLine(pos1, pos2, {0,1,1}, self.unit:Internal():ID(), arrow, 8)
 		end
 	end
 end

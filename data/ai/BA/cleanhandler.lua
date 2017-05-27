@@ -179,7 +179,7 @@ function CleanHandler:UnitMoveFailed(unit)
 	local obstructions = self:CleanablesWithinRadius(unit:GetPosition(), 80)
 	self:EchoDebug(#obstructions, "obstructions")
 	if self.DebugEnabled then
-		self.map:DrawCircle(unit:GetPosition(), 80, {0,0,1}, #obstructions, false, 9)
+		self.ai.map:DrawCircle(unit:GetPosition(), 80, {0,0,1}, #obstructions, false, 9)
 	end
 	for i = 1, #obstructions do
 		local obstruction = obstructions[i]
@@ -201,7 +201,7 @@ function CleanHandler:Update()
 		for id, counter in pairs(self.hasHighlight) do
 			self.hasHighlight[id] = self.hasHighlight[id] + 1
 			if self.hasHighlight[id] > 150 then
-				local unit = self.game:GetUnitByID(id)
+				local unit = self.ai.game:GetUnitByID(id)
 				unit:EraseHighlight({1,0,0}, "movefailed", 9)
 				self.hasHighlight[id] = nil
 			end

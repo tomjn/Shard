@@ -3,7 +3,7 @@ local DebugEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("ScoutBehaviour: " .. inStr)
+		self.ai.game:SendToConsole("ScoutBehaviour: " .. inStr)
 	end
 end
 
@@ -32,9 +32,9 @@ function ScoutBehaviour:Init()
 	self.keepYourDistance = unitTable[self.name].losRadius * 0.5
 	if mtype == "air" then
 		self.airDistance = unitTable[self.name].losRadius * 1.5
-		self.lastCircleFrame = ai.game:Frame()
+		self.lastCircleFrame = self.ai.game:Frame()
 	end
-	self.lastUpdateFrame = ai.game:Frame()
+	self.lastUpdateFrame = self.ai.game:Frame()
 end
 
 function ScoutBehaviour:Priority()
@@ -57,7 +57,7 @@ end
 
 function ScoutBehaviour:Update()
 	if self.active then
-		local f = ai.game:Frame()
+		local f = self.ai.game:Frame()
 		if f > self.lastUpdateFrame + 30 then
 			local unit = self.unit:Internal()
 			-- reset target if it's in sight
@@ -71,7 +71,7 @@ function ScoutBehaviour:Update()
 			-- attack small targets along the way if the scout is armed
 			local attackTarget
 			if self.armed then
-				-- ai.game:SendToConsole(unit:GetPosition(), unit)
+				-- self.ai.game:SendToConsole(unit:GetPosition(), unit)
 				if ai.targethandler:IsSafePosition(unit:GetPosition(), unit, 1) then
 					attackTarget = ai.targethandler:NearbyVulnerable(unit)
 				end
@@ -117,7 +117,7 @@ function ScoutBehaviour:Update()
 	
 	-- keep air units circling
 	if self.mtype == "air" and self.active then
-		local f = ai.game:Frame()
+		local f = self.ai.game:Frame()
 		if f > self.lastCircleFrame + 60 then
 			local unit = self.unit:Internal()
 			local upos = unit:GetPosition()

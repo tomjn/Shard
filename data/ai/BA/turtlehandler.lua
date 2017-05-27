@@ -4,7 +4,7 @@ local DebugDrawEnabled = false
 
 local function EchoDebug(inStr)
 	if DebugEnabled then
-		ai.game:SendToConsole("TurtleHandler: " .. inStr)
+		self.ai.game:SendToConsole("TurtleHandler: " .. inStr)
 	end
 end
 
@@ -254,7 +254,7 @@ function TurtleHandler:Transplant(turtle, organ)
 	table.insert(turtle.organs, organ)
 	turtle.priority = turtle.priority + organ.priority
 	turtle.organVolume = turtle.organVolume + organ.volume
-	-- ai.game:SendToConsole("organ volume:", organ.volume, "new turtle organ volume:", turtle.organVolume, "max:", turtle.maxOrganVolume)
+	-- self.ai.game:SendToConsole("organ volume:", organ.volume, "new turtle organ volume:", turtle.organVolume, "max:", turtle.maxOrganVolume)
 	if #turtle.organs > 1 then
 		if #turtle.limbs < baseLimbs and turtle.priority >= basePriority then
 			self:Base(turtle, baseSize, baseLimbs)
@@ -447,7 +447,7 @@ function TurtleHandler:LeastTurtled(builder, unitName, bombard, oneOnly)
 	if unitName == nil then return end
 	local position = builder:GetPosition()
 	local ut = unitTable[unitName]
-	local Metal = ai.game:GetResourceByName("Metal")
+	local Metal = self.ai.game:GetResourceByName("Metal")
 	local priorityFloor = 1
 	local layer
 	if ut.isWeapon and not antinukeList[unitName] then
@@ -572,7 +572,7 @@ end
 function TurtleHandler:GetIsBombardPosition(turtle, unitName)
 	turtle.bombardFor = turtle.bombardFor or {}
 	turtle.bombardForFrame = turtle.bombardForFrame or {}
-	local f = ai.game:Frame()
+	local f = self.ai.game:Frame()
 	if not turtle.bombardForFrame[unitName]
 	or (turtle.bombardForFrame[unitName] and f > turtle.bombardForFrame[unitName] + 450) then
 		turtle.bombardFor[unitName] = self.ai.targethandler:IsBombardPosition(turtle.position, unitName)
@@ -667,16 +667,16 @@ end
 
 function TurtleHandler:PlotAllDebug()
 	if DebugDrawEnabled then
-		self.map:EraseAll(2)
+		self.ai.map:EraseAll(2)
 		for i, turtle in pairs(self.turtles) do
 			local tcolor = {0,1,0}
 			if turtle.front then
 				tcolor = {1,0,0}
 			end
 			local label = string.format("%.1f", tostring(turtle.priority)) .. "\n" .. turtle.organVolume .. "/" .. turtle.maxOrganVolume
-			self.map:DrawCircle(turtle.position, turtle.size, tcolor, label, false, 2)
+			self.ai.map:DrawCircle(turtle.position, turtle.size, tcolor, label, false, 2)
 			for li, limb in pairs(turtle.limbs) do
-				self.map:DrawPoint(limb.position, {1,1,0,1}, "L", 2)
+				self.ai.map:DrawPoint(limb.position, {1,1,0,1}, "L", 2)
 			end
 		end
 	end
