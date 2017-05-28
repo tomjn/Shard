@@ -1,14 +1,5 @@
 -- keeps track of hits to our units
 
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		self.ai.game:SendToConsole("DamageHandler: " .. inStr)
-	end
-end
-
 DamageHandler = class(Module)
 
 function DamageHandler:Name()

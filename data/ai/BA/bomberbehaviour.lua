@@ -134,7 +134,7 @@ function BomberBehaviour:FollowPathToTarget(path, unit)
 					self.unit:Internal():ExecuteCustomCommand(CMD_MOVE, floats, {"shift"})
 				else
 					self.unit:Internal():ExecuteCustomCommand(CMD_MOVE, floats, 32)
-			end				
+				end
 				secondMoved = true
 			else
 				self.unit:Internal():Move(cmdPos)

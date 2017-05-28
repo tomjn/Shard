@@ -1,12 +1,3 @@
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		self.ai.game:SendToConsole("BomberHandler: " .. inStr)
-	end
-end
-
 BomberHandler = class(Module)
 
 function BomberHandler:Name()
@@ -77,13 +68,13 @@ function BomberHandler:DoTargetting()
 		local recruits = self.recruits[weapon]
 		ai.couldBomb = ai.couldBomb + 1
 		-- find somewhere to attack
-		EchoDebug("getting target for " .. weapon)
+		self:EchoDebug("getting target for " .. weapon)
 		local torpedo = weapon == 'torpedo'
 		local targetUnit = ai.targethandler:GetBestBomberTarget(torpedo)
 		if targetUnit ~= nil then
 			local tupos = targetUnit:GetPosition()
 			if tupos and tupos.x then
-				EchoDebug("got target for " .. weapon)
+				self:EchoDebug("got target for " .. weapon)
 				local sumX = 0
 				local sumZ = 0
 				local validFunc
@@ -151,13 +142,13 @@ end
 function BomberHandler:NeedMore()
 	self.counter = self.counter + 1
 	self.counter = math.min(self.counter, maxBomberCounter)
-	-- EchoDebug("bomber counter: " .. self.counter .. " (bomber died)")
+	-- self:EchoDebug("bomber counter: " .. self.counter .. " (bomber died)")
 end
 
 function BomberHandler:NeedLess()
 	self.counter = self.counter - 1
 	self.counter = math.max(self.counter, minBomberCounter)
-	EchoDebug("bomber counter: " .. self.counter .. " (AA died)")
+	self:EchoDebug("bomber counter: " .. self.counter .. " (AA died)")
 end
 
 function BomberHandler:GetCounter()

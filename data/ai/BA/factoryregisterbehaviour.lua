@@ -1,14 +1,5 @@
 FactoryRegisterBehaviour = class(Behaviour)
 
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		self.ai.game:SendToConsole("FactoryRegisterBehaviour: " .. inStr)
-	end
-end
-
 function FactoryRegisterBehaviour:Init()
     self.name = self.unit:Internal():Name()
     self.id = self.unit:Internal():ID()
@@ -23,7 +14,7 @@ function FactoryRegisterBehaviour:Init()
     self.level = unitTable[self.name].techLevel
 
     self.ai.factoryUnderConstruction = self.id
-	EchoDebug('starting building of ' ..self.name)
+	self:EchoDebug('starting building of ' ..self.name)
 end
 
 function FactoryRegisterBehaviour:OwnerBuilt()
@@ -52,7 +43,7 @@ function FactoryRegisterBehaviour:Unregister()
 	self.ai.factories = self.ai.factories - 1
 	local un = self.name
     local level = self.level
-   	EchoDebug("factory " .. un .. " level " .. level .. " unregistering")
+   	self:EchoDebug("factory " .. un .. " level " .. level .. " unregistering")
    	for i, factory in pairs(self.ai.factoriesAtLevel[level]) do
    		if factory == self then
    			table.remove(self.ai.factoriesAtLevel[level], i)
@@ -72,11 +63,11 @@ function FactoryRegisterBehaviour:Unregister()
 	if self.ai.factoryUnderConstruction == self.id then self.ai.factoryUnderConstruction = false end
 	local mtype = factoryMobilities[self.name][1]
 	local network = self.ai.maphandler:MobilityNetworkHere(mtype,self.position)
-	-- EchoDebug(mtype, network, self.ai.factoryBuilded[mtype], self.ai.factoryBuilded[mtype][network], self.name, unitTable[self.name], unitTable[self.name].techLevel)
+	-- self:EchoDebug(mtype, network, self.ai.factoryBuilded[mtype], self.ai.factoryBuilded[mtype][network], self.name, unitTable[self.name], unitTable[self.name].techLevel)
 	if self.ai.factoryBuilded[mtype] and self.ai.factoryBuilded[mtype][network] then
 		self.ai.factoryBuilded[mtype][network] = self.ai.factoryBuilded[mtype][network] - self.level
 	end
-	EchoDebug('factory '  ..self.name.. ' network '  .. mtype .. '-' .. network .. ' level ' .. self.ai.factoryBuilded[mtype][network] .. ' subtract tech '.. self.level)
+	self:EchoDebug('factory '  ..self.name.. ' network '  .. mtype .. '-' .. network .. ' level ' .. self.ai.factoryBuilded[mtype][network] .. ' subtract tech '.. self.level)
 end
 
 function FactoryRegisterBehaviour:Register()
@@ -88,7 +79,7 @@ function FactoryRegisterBehaviour:Register()
 	-- register maximum factory level
     local un = self.name
     local level = self.level
-    EchoDebug("factory " .. un .. " level " .. level .. " registering")
+    self:EchoDebug("factory " .. un .. " level " .. level .. " registering")
 	if self.ai.factoriesAtLevel[level] == nil then
 		self.ai.factoriesAtLevel[level] = {}
 	end
@@ -108,5 +99,5 @@ function FactoryRegisterBehaviour:Register()
 	local mtype = factoryMobilities[self.name][1]
 	local network = self.ai.maphandler:MobilityNetworkHere(mtype,self.position) or 0
 	self.ai.factoryBuilded[mtype][network] = (self.ai.factoryBuilded[mtype][network] or 0) + self.level
-	EchoDebug('factory '  ..self.name.. ' network '  .. mtype .. '-' .. network .. ' level ' .. self.ai.factoryBuilded[mtype][network] .. ' adding tech '.. self.level)
+	self:EchoDebug('factory '  ..self.name.. ' network '  .. mtype .. '-' .. network .. ' level ' .. self.ai.factoryBuilded[mtype][network] .. ' adding tech '.. self.level)
 end

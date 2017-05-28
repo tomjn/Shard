@@ -1,12 +1,3 @@
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		self.ai.game:SendToConsole("WardBehaviour: ", inStr)
-	end
-end
-
 WardBehaviour = class(Behaviour)
 
 function WardBehaviour:Name()
@@ -32,7 +23,7 @@ function WardBehaviour:Init()
 		self.threshold = 0.5
 	end
 	-- any threat whatsoever will trigger for buildings
-	EchoDebug("WardBehaviour: added to unit "..self.name)
+	self:EchoDebug("WardBehaviour: added to unit "..self.name)
 end
 
 function WardBehaviour:OwnerBuilt()
@@ -77,7 +68,7 @@ function WardBehaviour:Update()
 				self.underFire = false
 				self.response = nil
 			else
-				EchoDebug(self.name .. " is not safe")
+				self:EchoDebug(self.name .. " is not safe")
 				self.underFire = true
 				self.response = response
 				self.lastAttackedFrame = self.ai.game:Frame()
@@ -90,21 +81,21 @@ function WardBehaviour:Update()
 end
 
 function WardBehaviour:Activate()
-	EchoDebug("activated on unit "..self.name)
+	self:EchoDebug("activated on unit "..self.name)
 
 	-- can we move at all?
 	if self.mobile then
 		-- run to the most defended base location
 		local salvation = self.ai.turtlehandler:MostTurtled(self.unit:Internal(), nil, nil, true) or self:NearestCombat()
-		EchoDebug(tostring(salvation), "salvation")
+		self:EchoDebug(tostring(salvation), "salvation")
 		if salvation and Distance(self.unit:Internal():GetPosition(), salvation) > self.minFleeDistance then
 			self.unit:Internal():Move(RandomAway(salvation,150))
 			self.noSalvation = false
 			self.active = true
-			EchoDebug("unit ".. self.name .." runs away from danger")
+			self:EchoDebug("unit ".. self.name .." runs away from danger")
 		else
 			-- we're already as safe as we can get
-			EchoDebug("no salvation for", self.name)
+			self:EchoDebug("no salvation for", self.name)
 			self.noSalvation = true
 			self.unit:ElectBehaviour()
 		end
@@ -134,12 +125,12 @@ function WardBehaviour:NearestCombat()
 			end
 		end
 	end
-	if best then EchoDebug("got NearestCombat for ", fn, bestDistance, "away") end
+	if best then self:EchoDebug("got NearestCombat for ", fn, bestDistance, "away") end
 	return best
 end
 
 function WardBehaviour:Deactivate()
-	EchoDebug("WardBehaviour: deactivated on unit "..self.name)
+	self:EchoDebug("WardBehaviour: deactivated on unit "..self.name)
 	self.active = false
 	self.underFire = false
 end

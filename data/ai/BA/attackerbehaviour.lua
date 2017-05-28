@@ -1,12 +1,3 @@
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		self.ai.game:SendToConsole("AttackerBehaviour: " .. inStr)
-	end
-end
-
 function IsAttacker(unit)
 	return attackerlist[unit:Internal():Name()] or false
 end

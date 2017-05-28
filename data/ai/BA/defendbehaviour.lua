@@ -1,14 +1,3 @@
-
-
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		self.ai.game:SendToConsole("DefendBehaviour: " .. inStr)
-	end
-end
-
 local CMD_GUARD = 25
 local CMD_PATROL = 15
 local CMD_MOVE_STATE = 50
@@ -46,7 +35,7 @@ function DefendBehaviour:Init()
 	end
 	for i, name in pairs(raiderList) do
 		if name == self.name then
-			EchoDebug(self.name .. " is scramble")
+			self:EchoDebug(self.name .. " is scramble")
 			self.scramble = true
 			if self.mtype ~= "air" then
 				self.ai.defendhandler:AddScramble(self)
@@ -55,7 +44,7 @@ function DefendBehaviour:Init()
 		end
 	end
 	-- keeping track of how many of each type of unit
-	EchoDebug("added to unit "..self.name)
+	self:EchoDebug("added to unit "..self.name)
 end
 
 function DefendBehaviour:OwnerDead()
@@ -155,19 +144,19 @@ function DefendBehaviour:Assign(ward, angle, dist)
 end
 
 function DefendBehaviour:Scramble()
-	EchoDebug(self.name .. " scrambled")
+	self:EchoDebug(self.name .. " scrambled")
 	self.scrambled = true
 	self.unit:ElectBehaviour()
 end
 
 function DefendBehaviour:Unscramble()
-	EchoDebug(self.name .. " unscrambled")
+	self:EchoDebug(self.name .. " unscrambled")
 	self.scrambled = false
 	self.unit:ElectBehaviour()
 end
 
 function DefendBehaviour:Activate()
-	EchoDebug("active on "..self.name)
+	self:EchoDebug("active on "..self.name)
 	self.active = true
 	self.target = nil
 	self.targetPos = nil
@@ -177,7 +166,7 @@ function DefendBehaviour:Activate()
 end
 
 function DefendBehaviour:Deactivate()
-	EchoDebug("inactive on "..self.name)
+	self:EchoDebug("inactive on "..self.name)
 	self.active = false
 	self.target = nil
 	self.targetPos = nil

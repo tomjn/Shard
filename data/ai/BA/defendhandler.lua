@@ -1,12 +1,3 @@
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		self.ai.game:SendToConsole("DefendHandler: " .. inStr)
-	end
-end
-
 local techLevelPriority = 1
 local commanderPriority = 2
 local threatenedPriority = 4
@@ -110,7 +101,7 @@ function DefendHandler:RemoveWard(behaviour, turtle)
 				self:MarkAllMtypesForAssignment(GAS)
 			end
 			table.remove(self.wards, i)
-			EchoDebug("ward removed from table. there are " .. #self.wards .. " wards total")
+			self:EchoDebug("ward removed from table. there are " .. #self.wards .. " wards total")
 			break
 		end
 	end
@@ -212,14 +203,14 @@ end
 function DefendHandler:AssignAll(GAS, mtype) -- Ground Air Submerged (weapon), mobility type
 	if #self.wards == 0 then 
 		-- if nothing to defend, make sure defenders aren't defending ghosts (this causes a crash)
-		EchoDebug("nothing to defend")
+		self:EchoDebug("nothing to defend")
 		for di, dfndbehaviour in pairs(self.defenders[GAS][mtype]) do
 			dfndbehaviour:Assign(nil)
 			self.wardsByDefenderID[dfndbehaviour.id] = nil
 		end
 		return
 	end
-	EchoDebug("assigning all defenders...")
+	self:EchoDebug("assigning all defenders...")
 	-- assign defenders to wards
 	local defenders = self.defenders[GAS][mtype]
 	local defendersPerPriority = #defenders / self.totalPriority[GAS]
@@ -337,7 +328,7 @@ function DefendHandler:AssignAll(GAS, mtype) -- Ground Air Submerged (weapon), m
 			end
 		end
 	end
-	EchoDebug("all defenders assigned")
+	self:EchoDebug("all defenders assigned")
 end
 
 function DefendHandler:AssignLoiterers(ward)

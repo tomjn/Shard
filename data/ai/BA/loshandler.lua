@@ -1,12 +1,4 @@
-local DebugEnabled = false
 local DebugDrawEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		self.ai.game:SendToConsole("LosHandler: " .. inStr)
-	end
-end
 
 local mapColors = {
 	[1] = { 1, 1, 0 },
@@ -247,7 +239,7 @@ function LosHandler:UpdateEnemies(enemyList)
 			if self.ai.IDsWeAreRaiding[id] then
 				self.ai.raidhandler:TargetDied(self.ai.IDsWeAreRaiding[id])
 			end
-			EchoDebug("enemy " .. e.unitName .. " died!")	
+			self:EchoDebug("enemy " .. e.unitName .. " died!")	
 			local mtypes = UnitWeaponMtypeList(e.unitName)
 			for i, mtype in pairs(mtypes) do
 				self.ai.raidhandler:NeedMore(mtype)
@@ -368,7 +360,7 @@ function LosHandler:UpdateWrecks()
 end
 
 function LosHandler:HorizontalLine(x, z, tx, val, jam)
-	-- EchoDebug("horizontal line from " .. x .. " to " .. tx .. " along z " .. z .. " with value " .. val)
+	-- self:EchoDebug("horizontal line from " .. x .. " to " .. tx .. " along z " .. z .. " with value " .. val)
 	for ix = x, tx do
 		if jam then
 			if self.losGrid[ix] == nil then return end
