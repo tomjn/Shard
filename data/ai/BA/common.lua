@@ -9,9 +9,7 @@ function CommonHandler:internalName()
 end
 
 function CommonHandler:Init()
-
 	shard_include "unitlists"
-
 	if ShardSpringLua then
 		if not unitTable or not featureTable then
 			unitTable, featureTable = shard_include("getunitfeaturetable")
@@ -23,7 +21,6 @@ function CommonHandler:Init()
 			shard_include "unitlists"
 		end
 	else
-		shard_include "unitlists"
 		shard_include("unittable-" .. self.ai.game:GameName())
 		shard_include("featuretable-" .. self.ai.game:GameName())
 		shard_include "commonfunctions"
