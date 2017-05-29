@@ -1,21 +1,14 @@
-local DebugEnabled = false
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		ai.game:SendToConsole("taskShp: " .. inStr)
-	end
-end
 --LEVEL 1
 
-function ConShip()
+function ConShip(tskqbhvr)
 	local unitName = DummyUnitName
 	if MyTB.side == CORESideName then
 		unitName = "corcs"
 	else
 		unitName = "armcs"
 	end
-	local mtypedLv = GetMtypedLv(unitName) + GetMtypedLv('correcl') --need count sub too
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 5) + 2, ai.conUnitPerTypeLimit))
+	local mtypedLv = GetMtypedLv(tskqbhvr, unitName) + GetMtypedLv(tskqbhvr, 'correcl') --need count sub too
+	return BuildWithLimitedNumber(tskqbhvr, unitName, math.min((mtypedLv / 5) + 2, tskqbhvr.ai.conUnitPerTypeLimit))
 end
 
 function RezSub1(tskqbhvr)
@@ -25,8 +18,8 @@ function RezSub1(tskqbhvr)
 	else
 		unitName = "armrecl"
 	end
-	local mtypedLv = GetMtypedLv(unitName) + GetMtypedLv('armcs') --need count shp too
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 8) + 2, ai.conUnitPerTypeLimit))
+	local mtypedLv = GetMtypedLv(tskqbhvr, unitName) + GetMtypedLv(tskqbhvr, 'armcs') --need count shp too
+	return BuildWithLimitedNumber(tskqbhvr, unitName, math.min((mtypedLv / 8) + 2, tskqbhvr.ai.conUnitPerTypeLimit))
 end
 
 function Lvl1ShipRaider(tskqbhvr)
@@ -36,7 +29,7 @@ function Lvl1ShipRaider(tskqbhvr)
 	else
 		unitName = "armsub"
 	end
-	return BuildRaiderIfNeeded(unitName)
+	return BuildRaiderIfNeeded(tskqbhvr, unitName)
 end
 
 function Lvl1ShipDestroyerOnly(tskqbhvr)
@@ -46,13 +39,13 @@ function Lvl1ShipDestroyerOnly(tskqbhvr)
 	else
 		unitName = "armroy"
 	end
-	local mtypedLv = GetMtypedLv(unitName) + GetMtypedLv('armcs')
-	return BuildWithLimitedNumber(unitName,mtypedLv * 0.7)
+	local mtypedLv = GetMtypedLv(tskqbhvr, unitName) + GetMtypedLv(tskqbhvr, 'armcs')
+	return BuildWithLimitedNumber(tskqbhvr, unitName,mtypedLv * 0.7)
 end
 
 function Lvl1ShipBattle(tskqbhvr)
 	local unitName = ""
-	if ai.Metal.full < 0.5 then
+	if tskqbhvr.ai.Metal.full < 0.5 then
 		if MyTB.side == CORESideName then
 			unitName = "coresupp"
 		else
@@ -65,45 +58,45 @@ function Lvl1ShipBattle(tskqbhvr)
 			unitName = "armroy"
 		end
 	end
-	return BuildBattleIfNeeded(unitName)
+	return BuildBattleIfNeeded(tskqbhvr, unitName)
 end
 
-function ScoutShip()
+function ScoutShip(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corpt"
 	else
 		unitName = "armpt"
 	end
-	local scout = BuildWithLimitedNumber(unitName, 1)
+	local scout = BuildWithLimitedNumber(tskqbhvr, unitName, 1)
 	if scout == DummyUnitName then
-		return BuildAAIfNeeded(unitName)
+		return BuildAAIfNeeded(tskqbhvr, unitName)
 	else
 		return unitName
 	end
 end
 
 --LEVEL 2
-function ConAdvSub()
+function ConAdvSub(tskqbhvr)
 	local unitName = DummyUnitName
 	if MyTB.side == CORESideName then
 		unitName = "coracsub"
 	else
 		unitName = "armacsub"
 	end
-	local mtypedLv = GetMtypedLv(unitName) + GetMtypedLv('cormls') --need count shp too
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 6) + 2, ai.conUnitPerTypeLimit))
+	local mtypedLv = GetMtypedLv(tskqbhvr, unitName) + GetMtypedLv(tskqbhvr, 'cormls') --need count shp too
+	return BuildWithLimitedNumber(tskqbhvr, unitName, math.min((mtypedLv / 6) + 2, tskqbhvr.ai.conUnitPerTypeLimit))
 end
 
-function Lvl2ShipAssist()
+function Lvl2ShipAssist(tskqbhvr)
 	local unitName = DummyUnitName
 	if MyTB.side == CORESideName then
 		unitName = "cormls"
 	else
 		unitName = "armmls"
 	end
-	local mtypedLv = GetMtypedLv(unitName) + GetMtypedLv('coracsub') --need count sub too
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 6) + 2, ai.conUnitPerTypeLimit))
+	local mtypedLv = GetMtypedLv(tskqbhvr, unitName) + GetMtypedLv(tskqbhvr, 'coracsub') --need count sub too
+	return BuildWithLimitedNumber(tskqbhvr, unitName, math.min((mtypedLv / 6) + 2, tskqbhvr.ai.conUnitPerTypeLimit))
 end
 
 function Lvl2ShipBreakthrough(tskqbhvr)
@@ -113,7 +106,7 @@ function Lvl2ShipBreakthrough(tskqbhvr)
 	else
 		unitName = "armbats"
 	end
-	return BuildBreakthroughIfNeeded(unitName)
+	return BuildBreakthroughIfNeeded(tskqbhvr, unitName)
 end
 
 function Lvl2ShipMerl(tskqbhvr)
@@ -123,17 +116,17 @@ function Lvl2ShipMerl(tskqbhvr)
 	else
 		unitName = "armmship"
 	end
-	return BuildSiegeIfNeeded(unitName)
+	return BuildSiegeIfNeeded(tskqbhvr, unitName)
 end
 
-function MegaShip()
+function MegaShip(tskqbhvr)
 	local unitName = ""
 	if MyTB.side == CORESideName then
 		unitName = "corblackhy"
 	else
 		unitName = "aseadragon"
 	end
-	return BuildBreakthroughIfNeeded(BuildWithLimitedNumber(unitName, 1))
+	return BuildBreakthroughIfNeeded(tskqbhvr, BuildWithLimitedNumber(tskqbhvr, unitName, 1))
 end
 
 function Lvl2ShipRaider(tskqbhvr)
@@ -144,7 +137,7 @@ function Lvl2ShipRaider(tskqbhvr)
 			unitName = "armsubk"
 		end
 
-	return BuildRaiderIfNeeded(unitName)
+	return BuildRaiderIfNeeded(tskqbhvr, unitName)
 end
 
 function Lvl2SubWar(tskqbhvr)
@@ -155,7 +148,7 @@ function Lvl2SubWar(tskqbhvr)
 			unitName = "tawf009"
 		end
 
-	return BuildBattleIfNeeded(unitName)
+	return BuildBattleIfNeeded(tskqbhvr, unitName)
 end
 
 function Lvl2ShipBattle(tskqbhvr)
@@ -165,14 +158,14 @@ function Lvl2ShipBattle(tskqbhvr)
 	else
 		unitName = "armcrus"
 	end
-	return BuildBattleIfNeeded(unitName)
+	return BuildBattleIfNeeded(tskqbhvr, unitName)
 end
 
 function Lvl2AAShip()
 	if MyTB.side == CORESideName then
-		return BuildAAIfNeeded("corarch")
+		return BuildAAIfNeeded(tskqbhvr, "corarch")
 	else
-		return BuildAAIfNeeded("armaas")
+		return BuildAAIfNeeded(tskqbhvr, "armaas")
 	end
 end
 

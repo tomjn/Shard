@@ -1,11 +1,3 @@
-local DebugEnabled = false
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		ai.game:SendToConsole("taskExp: " .. inStr)
-	end
-end
-
 --SOME FUNCTIONS ARE DUPLICATE HERE
 function Lvl3Merl(tskqbhvr)
 	local unitName = ""
@@ -14,7 +6,7 @@ function Lvl3Merl(tskqbhvr)
 	else
 		unitName = DummyUnitName
 	end
-	return BuildSiegeIfNeeded(unitName)
+	return BuildSiegeIfNeeded(tskqbhvr, unitName)
 end
 
 function Lvl3Arty(tskqbhvr)
@@ -24,7 +16,7 @@ function Lvl3Arty(tskqbhvr)
 	else
 		unitName = "armshock"
 	end
-	return BuildSiegeIfNeeded(unitName)
+	return BuildSiegeIfNeeded(tskqbhvr, unitName)
 end
 
 function lv3Amp(tskqbhvr)
@@ -34,26 +26,26 @@ function lv3Amp(tskqbhvr)
 	else
 		unitName = "marauder"
 	end
-	return BuildSiegeIfNeeded(unitName)
+	return BuildSiegeIfNeeded(tskqbhvr, unitName)
 end
 
 function Lvl3Breakthrough(tskqbhvr)
 	local unitName = ""
 	if MyTB.side == CORESideName then
-		unitName = BuildWithLimitedNumber("corkrog", 1)
+		unitName = BuildWithLimitedNumber(tskqbhvr, "corkrog", 1)
 		if unitName == DummyUnitName then
-			unitName = BuildWithLimitedNumber("gorg", 2)
+			unitName = BuildWithLimitedNumber(tskqbhvr, "gorg", 2)
 		end
 		if unitName == DummyUnitName then
 			unitName = "corkarg"
 		end
 	else
-		unitName = BuildWithLimitedNumber("armbanth", 5)
+		unitName = BuildWithLimitedNumber(tskqbhvr, "armbanth", 5)
 		if unitName == DummyUnitName then
 			unitName = "armraz"
 		end
 	end
-	return BuildBreakthroughIfNeeded(unitName)
+	return BuildBreakthroughIfNeeded(tskqbhvr, unitName)
 end
 
 function lv3bigamp(tskqbhvr)
@@ -73,8 +65,8 @@ function Lvl3Raider(tskqbhvr)
 	else
 		unitName = "marauder"
 	end
-	EchoDebug(unitName)
-	return BuildRaiderIfNeeded(unitName)
+	tskqbhvr:EchoDebug(unitName)
+	return BuildRaiderIfNeeded(tskqbhvr, unitName)
 end
 
 function Lvl3Battle(tskqbhvr)
@@ -84,7 +76,7 @@ function Lvl3Battle(tskqbhvr)
 	else
 		unitName = "armraz"
 	end
-	return BuildBattleIfNeeded(unitName)
+	return BuildBattleIfNeeded(tskqbhvr, unitName)
 end
 
 function Lvl3Hov(tskqbhvr)
@@ -94,13 +86,13 @@ function Lvl3Hov(tskqbhvr)
 	else
 		unitName = "armlun"
 	end
-	return BuildBattleIfNeeded(unitName)
+	return BuildBattleIfNeeded(tskqbhvr, unitName)
 end
 	
 function Lv3VehAmp(tskqbhvr)
 	local unitName = DummyUnitName
 	if MyTB.side == CORESideName then
-		if ai.Metal.full < 0.5 then
+		if tskqbhvr.ai.Metal.full < 0.5 then
 			unitName = "corseal"
 		else
 			unitName = "corparrow"
@@ -108,7 +100,7 @@ function Lv3VehAmp(tskqbhvr)
 	else
 		unitName = "armcroc"
 	end
-	return BuildSiegeIfNeeded(unitName)
+	return BuildSiegeIfNeeded(tskqbhvr, unitName)
 end
 	
 	
@@ -119,6 +111,6 @@ function Lv3Special(tskqbhvr)
 	else
 		unitName = "armshock"
 	end
-	return BuildBattleIfNeeded(unitName)
+	return BuildBattleIfNeeded(tskqbhvr, unitName)
 end
 	

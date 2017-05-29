@@ -1,19 +1,11 @@
-local DebugEnabled = false
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		ai.game:SendToConsole("taskHov: " .. inStr)
-	end
-end
-
-function ConHover()
+function ConHover(tskqbhvr)
 	if MyTB.side == CORESideName then
 		unitName = "corch"
 	else
 		unitName = "armch"
 	end
-	local mtypedLv = GetMtypedLv(unitName)
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 6) + 1, ai.conUnitPerTypeLimit))
+	local mtypedLv = GetMtypedLv(tskqbhvr, unitName)
+	return BuildWithLimitedNumber(tskqbhvr, unitName, math.min((mtypedLv / 6) + 1, tskqbhvr.ai.conUnitPerTypeLimit))
 end
 
 function HoverMerl(tskqbhvr)
@@ -23,7 +15,7 @@ function HoverMerl(tskqbhvr)
 	else
 		unitName = "armmh"
 	end
-	return BuildSiegeIfNeeded(unitName)
+	return BuildSiegeIfNeeded(tskqbhvr, unitName)
 end
 
 function HoverRaider(tskqbhvr)
@@ -33,7 +25,7 @@ function HoverRaider(tskqbhvr)
 	else
 		unitName = "armsh"
 	end
-	return BuildRaiderIfNeeded(unitName)
+	return BuildRaiderIfNeeded(tskqbhvr, unitName)
 end
 
 function HoverBattle(tskqbhvr)
@@ -43,7 +35,7 @@ function HoverBattle(tskqbhvr)
 	else
 		unitName = "armanac"
 	end
-	return BuildBattleIfNeeded(unitName)
+	return BuildBattleIfNeeded(tskqbhvr, unitName)
 end
 
 function HoverBreakthrough(tskqbhvr)
@@ -53,14 +45,14 @@ function HoverBreakthrough(tskqbhvr)
 	else
 		unitName = "armanac"
 	end
-	BuildBreakthroughIfNeeded(unitName)
+	BuildBreakthroughIfNeeded(tskqbhvr, unitName)
 end
 
-function AAHover()
+function AAHover(tskqbhvr)
 	if MyTB.side == CORESideName then
-		return BuildAAIfNeeded("corah")
+		return BuildAAIfNeeded(tskqbhvr, "corah")
 	else
-		return BuildAAIfNeeded("armah")
+		return BuildAAIfNeeded(tskqbhvr, "armah")
 	end
 end
 
