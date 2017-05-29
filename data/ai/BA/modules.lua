@@ -22,6 +22,7 @@ shard_include "nanohandler"
 shard_include "overviewhandler"
 
 modules = {
+	CommonHandler,
 	Sleep,
 	MapHandler,
 	EconHandler,

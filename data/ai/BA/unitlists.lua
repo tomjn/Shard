@@ -1,11 +1,3 @@
-local DebugEnabled = false
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		game:SendToConsole("unitLists: " .. inStr)
-	end
-end
-
 factoryMobilities = {
 	corap = {"air"},
 	armap = {"air"},

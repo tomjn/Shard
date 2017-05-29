@@ -4,15 +4,6 @@ function NukeBehaviour:Name()
 	return "NukeBehaviour"
 end
 
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		game:SendToConsole("NukeBehaviour: " .. inStr)
-	end
-end
-
 local CMD_STOCKPILE = 100
 local CMD_ATTACK = 20
 
@@ -39,7 +30,7 @@ end
 function NukeBehaviour:Update()
 	if not self.active then return end
 
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 
 	if self.finished then
 		if f > self.lastLaunchFrame + 100 then
@@ -62,7 +53,7 @@ function NukeBehaviour:Update()
 					floats:push_back(position.z)
 					self.unit:Internal():ExecuteCustomCommand(CMD_ATTACK, floats)
 					self.gotTarget = true
-					EchoDebug("got target")
+					self:EchoDebug("got target")
 				end
 			end
 			self.lastLaunchFrame = f

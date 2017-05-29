@@ -1,22 +1,14 @@
-local DebugEnabled = false
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		game:SendToConsole("taskAir: " .. inStr)
-	end
-end
-
 --LEVEL 1
 
-function ConAir()
+function ConAir(tskqbhvr)
 	unitName = DummyUnitName
 	if MyTB.side == CORESideName then
 		unitName = "corca"
 	else
 		unitName = "armca"
 	end
-	local mtypedLv = GetMtypedLv(unitName)
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 6) + 1, ai.conUnitPerTypeLimit))
+	local mtypedLv = GetMtypedLv(tskqbhvr, unitName)
+	return BuildWithLimitedNumber(tskqbhvr, unitName, math.min((mtypedLv / 6) + 1, tskqbhvr.ai.conUnitPerTypeLimit))
 end
 
 function Lvl1AirRaider(tskqbhvr)
@@ -26,59 +18,59 @@ function Lvl1AirRaider(tskqbhvr)
 	else
 		unitName = "armkam"
 	end
-	return BuildRaiderIfNeeded(unitName)
+	return BuildRaiderIfNeeded(tskqbhvr, unitName)
 end
 
-function Lvl1Fighter()
+function Lvl1Fighter(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corveng"
 	else
 		unitName = "armfig"
 	end
-	return BuildAAIfNeeded(unitName)
+	return BuildAAIfNeeded(tskqbhvr, unitName)
 end
 
-function Lvl1Bomber()
+function Lvl1Bomber(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corshad"
 	else
 		unitName = "armthund"
 	end
-	return BuildBomberIfNeeded(unitName)
+	return BuildBomberIfNeeded(tskqbhvr, unitName)
 end
 
-function ScoutAir()
+function ScoutAir(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corfink"
 	else
 		unitName = "armpeep"
 	end
-	return BuildWithLimitedNumber(unitName, 1)
+	return BuildWithLimitedNumber(tskqbhvr, unitName, 1)
 end
 
 --LEVEL 2
-function ConAdvAir()
+function ConAdvAir(tskqbhvr)
 	unitName = DummyUnitName
 	if MyTB.side == CORESideName then
 		unitName = "coraca"
 	else
 		unitName = "armaca"
 	end
-	local mtypedLv = GetMtypedLv(unitName)
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 8) + 1, ai.conUnitAdvPerTypeLimit))
+	local mtypedLv = GetMtypedLv(tskqbhvr, unitName)
+	return BuildWithLimitedNumber(tskqbhvr, unitName, math.min((mtypedLv / 8) + 1, tskqbhvr.ai.conUnitAdvPerTypeLimit))
 end
 
-function Lvl2Fighter()
+function Lvl2Fighter(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corvamp"
 	else
 		unitName = "armhawk"
 	end
-	return BuildAAIfNeeded(unitName)
+	return BuildAAIfNeeded(tskqbhvr, unitName)
 end
 
 function Lvl2AirRaider(tskqbhvr)
@@ -87,96 +79,96 @@ function Lvl2AirRaider(tskqbhvr)
 		unitName = "corape"
 	else
 		-- spedical case: arm has an ubergunship
-		local raidCounter = ai.raidhandler:GetCounter("air")
+		local raidCounter = tskqbhvr.ai.raidhandler:GetCounter("air")
 		if raidCounter < baseRaidCounter and raidCounter > minRaidCounter then
 			return "blade"
 		else
 			unitName = "armbrawl"
 		end
 	end
-	return BuildRaiderIfNeeded(unitName)
+	return BuildRaiderIfNeeded(tskqbhvr, unitName)
 end
 
-function Lvl2Bomber()
+function Lvl2Bomber(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corhurc"
 	else
 		unitName = "armpnix"
 	end
-	return BuildBomberIfNeeded(unitName)
+	return BuildBomberIfNeeded(tskqbhvr, unitName)
 end
 
 
-function Lvl2TorpedoBomber()
+function Lvl2TorpedoBomber(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "cortitan"
 	else
 		unitName = "armlance"
 	end
-	return BuildTorpedoBomberIfNeeded(unitName)
+	return BuildTorpedoBomberIfNeeded(tskqbhvr, unitName)
 end
 
-function MegaAircraft()
+function MegaAircraft(tskqbhvr)
 	if MyTB.side == CORESideName then
-		return BuildBreakthroughIfNeeded("corcrw")
+		return BuildBreakthroughIfNeeded(tskqbhvr, "corcrw")
 	else
-		return BuildBreakthroughIfNeeded("armcybr")
+		return BuildBreakthroughIfNeeded(tskqbhvr, "armcybr")
 	end
 end
 
 
-function ScoutAdvAir()
+function ScoutAdvAir(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corawac"
 	else
 		unitName = "armawac"
 	end
-	return BuildWithLimitedNumber(unitName, 1)
+	return BuildWithLimitedNumber(tskqbhvr, unitName, 1)
 end
 
 --SEAPLANE
-function ConSeaAir()
+function ConSeaAir(tskqbhvr)
 	unitName = DummyUnitName
 	if MyTB.side == CORESideName then
 		unitName = "corcsa"
 	else
 		unitName = "armcsa"
 	end
-	local mtypedLv = GetMtypedLv(unitName)
-	return BuildWithLimitedNumber(unitName, math.min((mtypedLv / 9) + 1, ai.conUnitAdvPerTypeLimit))
+	local mtypedLv = GetMtypedLv(tskqbhvr, unitName)
+	return BuildWithLimitedNumber(tskqbhvr, unitName, math.min((mtypedLv / 9) + 1, tskqbhvr.ai.conUnitAdvPerTypeLimit))
 end
 
-function SeaBomber()
+function SeaBomber(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corsb"
 	else
 		unitName = "armsb"
 	end
-	return BuildBomberIfNeeded(unitName)
+	return BuildBomberIfNeeded(tskqbhvr, unitName)
 end
 
-function SeaTorpedoBomber()
+function SeaTorpedoBomber(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corseap"
 	else
 		unitName = "armseap"
 	end
-	return BuildTorpedoBomberIfNeeded(unitName)
+	return BuildTorpedoBomberIfNeeded(tskqbhvr, unitName)
 end
 
-function SeaFighter()
+function SeaFighter(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corsfig"
 	else
 		unitName = "armsfig"
 	end
-	return BuildAAIfNeeded(unitName)
+	return BuildAAIfNeeded(tskqbhvr, unitName)
 end
 
 function SeaAirRaider(tskqbhvr)
@@ -186,25 +178,25 @@ function SeaAirRaider(tskqbhvr)
 	else
 		unitName = "armsaber"
 	end
-	return BuildRaiderIfNeeded(unitName)
+	return BuildRaiderIfNeeded(tskqbhvr, unitName)
 end
 
-function ScoutSeaAir()
+function ScoutSeaAir(tskqbhvr)
 	local unitName
 	if MyTB.side == CORESideName then
 		unitName = "corhunt"
 	else
 		unitName = "armsehak"
 	end
-	return BuildWithLimitedNumber(unitName, 1)
+	return BuildWithLimitedNumber(tskqbhvr, unitName, 1)
 end
 
 --AIRPAD
-function AirRepairPadIfNeeded()
+function AirRepairPadIfNeeded(tskqbhvr)
 	local tmpUnitName = DummyUnitName
 
 	-- only make air pads if the team has at least 1 air fac
-	if CountOwnUnits("corap") > 0 or CountOwnUnits("armap") > 0 or CountOwnUnits("coraap") > 0 or CountOwnUnits("armaap") > 0 then
+	if CountOwnUnits(tskqbhvr, "corap") > 0 or CountOwnUnits(tskqbhvr, "armap") > 0 or CountOwnUnits(tskqbhvr, "coraap") > 0 or CountOwnUnits(tskqbhvr, "armaap") > 0 then
 		if MyTB.side == CORESideName then
 			tmpUnitName = "corasp"
 		else
@@ -212,5 +204,5 @@ function AirRepairPadIfNeeded()
 		end
 	end
 	
-	return BuildWithLimitedNumber(tmpUnitName, ai.conUnitPerTypeLimit)
+	return BuildWithLimitedNumber(tskqbhvr, tmpUnitName, tskqbhvr.ai.conUnitPerTypeLimit)
 end

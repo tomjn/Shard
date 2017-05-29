@@ -67,7 +67,7 @@ end
 
 
 function Squad:ReTarget(squad, squadIndex)
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	local representativeBehaviour
 	local representative
 	for iu, member in pairs(squad.members) do
@@ -175,7 +175,7 @@ function AttackHandler:SquadNewPath(squad, representativeBehaviour)
 	representativeBehaviour = representativeBehaviour or squad.members[#squad.members]
 	local representative = representativeBehaviour.unit:Internal()
 	if self.DebugEnabled then
-		self.map:EraseLine(nil, nil, {1,1,0}, squad.mtype, nil, 8)
+		self.ai.map:EraseLine(nil, nil, {1,1,0}, squad.mtype, nil, 8)
 	end
 	local startPos
 	if squad.pathStep then
@@ -223,12 +223,12 @@ function AttackHandler:SquadPathfind(squad, squadIndex)
 		squad.hasGottenPathOnce = true
 		self:SquadAdvance(squad)
 		if self.DebugEnabled then
-			self.map:EraseLine(nil, nil, {1,1,0}, squad.mtype, nil, 8)
+			self.ai.map:EraseLine(nil, nil, {1,1,0}, squad.mtype, nil, 8)
 			for i = 2, #path do
 				local pos1 = path[i-1].position
 				local pos2 = path[i].position
 				local arrow = i == #path
-				self.map:DrawLine(pos1, pos2, {1,1,0}, squad.mtype, arrow, 8)
+				self.ai.map:DrawLine(pos1, pos2, {1,1,0}, squad.mtype, arrow, 8)
 			end
 		end
 	elseif remaining == 0 then

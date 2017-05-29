@@ -7,7 +7,7 @@ TacticalHandler = class(Module)
 
 function TacticalHandler:EchoDebug(inStr)
 	if DebugEnabled then
-		self.game:SendToConsole("TacticalHandler: " .. inStr)
+		self.ai.game:SendToConsole("TacticalHandler: " .. inStr)
 	end
 end
 
@@ -18,7 +18,7 @@ function TacticalHandler:PlotDebug(x1, z1, vx, vz, label)
 		local pos1, pos2 = api.Position(), api.Position()
 		pos1.x, pos1.z = x1, z1
 		pos2.x, pos2.z = x2, z2
-		self.map:DrawLine(pos1, pos2, {1,0,0}, label, true, 9)
+		self.ai.map:DrawLine(pos1, pos2, {1,0,0}, label, true, 9)
 	end
 end
 
@@ -42,7 +42,7 @@ function TacticalHandler:Init()
 end
 
 function TacticalHandler:NewEnemyPositions(positions)
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	local since = f - self.lastPositionsFrame
 	local update = {}
 	for i, e in pairs(positions) do
@@ -80,12 +80,12 @@ function TacticalHandler:AverageUnitSamples(samples)
 end
 
 function TacticalHandler:AverageSamples()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	local since = f - self.lastAverageFrame
 	if since < 300 then return end
 	-- self.ai.turtlehandler:ResetThreatForecast()
 	if DebugDrawEnabled then
-		self.map:EraseAll(9)
+		self.ai.map:EraseAll(9)
 	end
 	for unitID, samples in pairs(self.unitSamples) do
 		local e = self.lastKnownPositions[unitID]

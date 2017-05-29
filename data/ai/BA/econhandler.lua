@@ -1,12 +1,3 @@
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		game:SendToConsole("EconHandler: " .. inStr)
-	end
-end
-
 EconHandler = class(Module)
 
 function EconHandler:Name()
@@ -83,7 +74,7 @@ function EconHandler:DebugAll()
 		for i, name in pairs(resourceNames) do
 			local resource = self.ai[name]
 			for property, value in pairs(resource) do
-				EchoDebug(name .. "." .. property .. ": " .. value)
+				self:EchoDebug(name .. "." .. property .. ": " .. value)
 			end
 		end
 	end

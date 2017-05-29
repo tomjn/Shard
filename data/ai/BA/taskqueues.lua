@@ -11,78 +11,70 @@ shard_include("taskExp")
 shard_include("taskBuild")
 shard_include("taskEco")
 
-local DebugEnabled = false
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		if not inStr then return end
-		game:SendToConsole("Taskqueues: " .. inStr)
-	end
-end
 random = math.random
-math.randomseed( os.time() + game:GetTeamID() )
+math.randomseed( os.time() + ai.game:GetTeamID() )
 random(); random(); random()
 
-function MapHasWater()
-	return (ai.waterMap or ai.hasUWSpots) or false
+function MapHasWater(tskqbhvr)
+	return (tskqbhvr.ai.waterMap or tskqbhvr.ai.hasUWSpots) or false
 end
 
 -- this is initialized in maphandler
-function MapHasUnderwaterMetal()
-	return ai.hasUWSpots or false
+function MapHasUnderwaterMetal(tskqbhvr)
+	return tskqbhvr.ai.hasUWSpots or false
 end
 
-function IsSiegeEquipmentNeeded()
-	return ai.overviewhandler.needSiege
+function IsSiegeEquipmentNeeded(tskqbhvr)
+	return tskqbhvr.ai.overviewhandler.needSiege
 end
 
-function IsAANeeded()
-	return ai.needAirDefense
+function IsAANeeded(tskqbhvr)
+	return tskqbhvr.ai.needAirDefense
 end
 
-function IsShieldNeeded()
-	return ai.needShields
+function IsShieldNeeded(tskqbhvr)
+	return tskqbhvr.ai.needShields
 end
 
-function IsTorpedoNeeded()
-	return ai.needSubmergedDefense
+function IsTorpedoNeeded(tskqbhvr)
+	return tskqbhvr.ai.needSubmergedDefense
 end
 
-function IsJammerNeeded()
-	return ai.needJammers
+function IsJammerNeeded(tskqbhvr)
+	return tskqbhvr.ai.needJammers
 end
 
-function IsAntinukeNeeded()
-	return ai.needAntinuke
+function IsAntinukeNeeded(tskqbhvr)
+	return tskqbhvr.ai.needAntinuke
 end
 
-function IsNukeNeeded()
-	local nuke = ai.needNukes and ai.canNuke
+function IsNukeNeeded(tskqbhvr)
+	local nuke = tskqbhvr.ai.needNukes and tskqbhvr.ai.canNuke
 	return nuke
 end
 
-function IsLandAttackNeeded()
-	return ai.areLandTargets or ai.needGroundDefense
+function IsLandAttackNeeded(tskqbhvr)
+	return tskqbhvr.ai.areLandTargets or tskqbhvr.ai.needGroundDefense
 end
 
-function IsWaterAttackNeeded()
-	return ai.areWaterTargets or ai.needSubmergedDefense
+function IsWaterAttackNeeded(tskqbhvr)
+	return tskqbhvr.ai.areWaterTargets or tskqbhvr.ai.needSubmergedDefense
 end
 
-function GetMtypedLv(unitName)
+function GetMtypedLv(tskqbhvr, unitName)
 	local mtype = unitTable[unitName].mtype
 	local level = unitTable[unitName].techLevel
 	local mtypedLv = mtype .. tostring(level)
-	local counter = ai.mtypeLvCount[mtypedLv] or 0
-	EchoDebug('mtypedLvmtype ' .. mtype .. ' '.. level .. ' ' .. counter)
+	local counter = tskqbhvr.ai.mtypeLvCount[mtypedLv] or 0
+	tskqbhvr:EchoDebug('mtypedLvmtype ' .. mtype .. ' '.. level .. ' ' .. counter)
 	return counter
 end
 
 
-function BuildAAIfNeeded(unitName)
-	if IsAANeeded() then
+function BuildAAIfNeeded(tskqbhvr, unitName)
+	if IsAANeeded(tskqbhvr) then
 		if not unitTable[unitName].isBuilding then
-			return BuildWithLimitedNumber(unitName, ai.overviewhandler.AAUnitPerTypeLimit)
+			return BuildWithLimitedNumber(tskqbhvr, unitName, tskqbhvr.ai.overviewhandler.AAUnitPerTypeLimit)
 		else
 			return unitName
 		end
@@ -91,38 +83,38 @@ function BuildAAIfNeeded(unitName)
 	end
 end
 
-function BuildTorpedoIfNeeded(unitName)
-	if IsTorpedoNeeded() then
+function BuildTorpedoIfNeeded(tskqbhvr,unitName)
+	if IsTorpedoNeeded(tskqbhvr) then
 		return unitName
 	else
 		return DummyUnitName
 	end
 end
 
-function BuildSiegeIfNeeded(unitName)
+function BuildSiegeIfNeeded(tskqbhvr, unitName)
 	if unitName == DummyUnitName then return DummyUnitName end
-	if IsSiegeEquipmentNeeded() then
-		if ai.siegeCount < (ai.battleCount + ai.breakthroughCount) * 0.35 then
+	if IsSiegeEquipmentNeeded(tskqbhvr) then
+		if tskqbhvr.ai.siegeCount < (tskqbhvr.ai.battleCount + tskqbhvr.ai.breakthroughCount) * 0.35 then
 			return unitName
 		end
 	end
 	return DummyUnitName
 end
 
-function BuildBreakthroughIfNeeded(unitName)
+function BuildBreakthroughIfNeeded(tskqbhvr, unitName)
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
-	if IsSiegeEquipmentNeeded() then return unitName end
+	if IsSiegeEquipmentNeeded(tskqbhvr) then return unitName end
 	local mtype = unitTable[unitName].mtype
 	if mtype == "air" then
-		local bomberCounter = ai.bomberhandler:GetCounter()
+		local bomberCounter = tskqbhvr.ai.bomberhandler:GetCounter()
 		if bomberCounter >= breakthroughBomberCounter and bomberCounter < maxBomberCounter then
 			return unitName
 		else
 			return DummyUnitName
 		end
 	else
-		if ai.battleCount <= minBattleCount then return DummyUnitName end
-		local attackCounter = ai.attackhandler:GetCounter(mtype)
+		if tskqbhvr.ai.battleCount <= minBattleCount then return DummyUnitName end
+		local attackCounter = tskqbhvr.ai.attackhandler:GetCounter(mtype)
 		if attackCounter == maxAttackCounter then
 			return unitName
 		elseif attackCounter >= breakthroughAttackCounter then
@@ -133,67 +125,67 @@ function BuildBreakthroughIfNeeded(unitName)
 	end
 end
 
-function BuildRaiderIfNeeded(unitName)
-	EchoDebug("build raider if needed: " .. unitName)
+function BuildRaiderIfNeeded(tskqbhvr, unitName)
+	tskqbhvr:EchoDebug("build raider if needed: " .. unitName)
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
 	local mtype = unitTable[unitName].mtype
-	if ai.factoriesAtLevel[3] ~= nil and ai.factoriesAtLevel[3] ~= {} then
+	if tskqbhvr.ai.factoriesAtLevel[3] ~= nil and tskqbhvr.ai.factoriesAtLevel[3] ~= {} then
 		-- if we have a level 2 factory, don't build raiders until we have some battle units
-		local attackCounter = ai.attackhandler:GetCounter(mtype)
-		if ai.battleCount + ai.breakthroughCount < attackCounter / 2 then
+		local attackCounter = tskqbhvr.ai.attackhandler:GetCounter(mtype)
+		if tskqbhvr.ai.battleCount + tskqbhvr.ai.breakthroughCount < attackCounter / 2 then
 			return DummyUnitName
 		end
 	end
-	local counter = ai.raidhandler:GetCounter(mtype)
+	local counter = tskqbhvr.ai.raidhandler:GetCounter(mtype)
 	if counter == minRaidCounter then return DummyUnitName end
-	if ai.raiderCount[mtype] == nil then
+	if tskqbhvr.ai.raiderCount[mtype] == nil then
 		-- fine
-	elseif ai.raiderCount[mtype] >= counter then
+	elseif tskqbhvr.ai.raiderCount[mtype] >= counter then
 		unitName = DummyUnitName
 	end
 	return unitName
 end
 
-function BuildBattleIfNeeded(unitName)
+function BuildBattleIfNeeded(tskqbhvr, unitName)
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
 	local mtype = unitTable[unitName].mtype
-	local attackCounter = ai.attackhandler:GetCounter(mtype)
-	EchoDebug(mtype .. " " .. attackCounter .. " " .. maxAttackCounter)
-	if attackCounter == maxAttackCounter and ai.battleCount > minBattleCount then return DummyUnitName end
-	if mtype == "veh" and MyTB.side == CORESideName and (ai.factoriesAtLevel[1] == nil or ai.factoriesAtLevel[1] == {}) then
+	local attackCounter = tskqbhvr.ai.attackhandler:GetCounter(mtype)
+	tskqbhvr:EchoDebug(mtype .. " " .. attackCounter .. " " .. maxAttackCounter)
+	if attackCounter == maxAttackCounter and tskqbhvr.ai.battleCount > minBattleCount then return DummyUnitName end
+	if mtype == "veh" and MyTB.side == CORESideName and (tskqbhvr.ai.factoriesAtLevel[1] == nil or tskqbhvr.ai.factoriesAtLevel[1] == {}) then
 		-- core only has a lvl1 vehicle raider, so this prevents getting stuck
 		return unitName
 	end
-	if ai.factoriesAtLevel[3] ~= nil and ai.factoriesAtLevel[3] ~= {} then
+	if tskqbhvr.ai.factoriesAtLevel[3] ~= nil and tskqbhvr.ai.factoriesAtLevel[3] ~= {} then
 		-- if we have a level 2 factory, don't wait to build raiders first
 		return unitName
 	end
-	local raidCounter = ai.raidhandler:GetCounter(mtype)
-	EchoDebug(mtype .. " " .. raidCounter .. " " .. maxRaidCounter)
+	local raidCounter = tskqbhvr.ai.raidhandler:GetCounter(mtype)
+	tskqbhvr:EchoDebug(mtype .. " " .. raidCounter .. " " .. maxRaidCounter)
 	if raidCounter == minRaidCounter then return unitName end
-	EchoDebug(ai.raiderCount[mtype])
-	if ai.raiderCount[mtype] == nil then
+	tskqbhvr:EchoDebug(tskqbhvr.ai.raiderCount[mtype])
+	if tskqbhvr.ai.raiderCount[mtype] == nil then
 		return unitName
-	elseif ai.raiderCount[mtype] < raidCounter / 2 then
+	elseif tskqbhvr.ai.raiderCount[mtype] < raidCounter / 2 then
 		return DummyUnitName
 	else
 		return unitName
 	end
 end
 
-function CountOwnUnits(tmpUnitName)
+function CountOwnUnits(tskqbhvr, tmpUnitName)
 	if tmpUnitName == DummyUnitName then return 0 end -- don't count no-units
-	if ai.nameCount[tmpUnitName] == nil then return 0 end
-	return ai.nameCount[tmpUnitName]
+	if tskqbhvr.ai.nameCount[tmpUnitName] == nil then return 0 end
+	return tskqbhvr.ai.nameCount[tmpUnitName]
 end
 
-function BuildWithLimitedNumber(tmpUnitName, minNumber)
+function BuildWithLimitedNumber(tskqbhvr, tmpUnitName, minNumber)
 	if tmpUnitName == DummyUnitName then return DummyUnitName end
 	if minNumber == 0 then return DummyUnitName end
-	if ai.nameCount[tmpUnitName] == nil then
+	if tskqbhvr.ai.nameCount[tmpUnitName] == nil then
 		return tmpUnitName
 	else
-		if ai.nameCount[tmpUnitName] == 0 or ai.nameCount[tmpUnitName] < minNumber then
+		if tskqbhvr.ai.nameCount[tmpUnitName] == 0 or tskqbhvr.ai.nameCount[tmpUnitName] < minNumber then
 			return tmpUnitName
 		else
 			return DummyUnitName
@@ -201,28 +193,28 @@ function BuildWithLimitedNumber(tmpUnitName, minNumber)
 	end
 end
 
-function GroundDefenseIfNeeded(unitName)
-	if not ai.needGroundDefense then
+function GroundDefenseIfNeeded(tskqbhvr, unitName)
+	if not tskqbhvr.ai.needGroundDefense then
 		return DummyUnitName
 	else
 		return unitName
 	end
 end
 
-function BuildBomberIfNeeded(unitName)
-	if not IsLandAttackNeeded() then return DummyUnitName end
+function BuildBomberIfNeeded(tskqbhvr, unitName)
+	if not IsLandAttackNeeded(tskqbhvr) then return DummyUnitName end
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
-	if ai.bomberhandler:GetCounter() == maxBomberCounter then
+	if tskqbhvr.ai.bomberhandler:GetCounter() == maxBomberCounter then
 		return DummyUnitName
 	else
 		return unitName
 	end
 end
 
-function BuildTorpedoBomberIfNeeded(unitName)
-	if not IsWaterAttackNeeded() then return DummyUnitName end
+function BuildTorpedoBomberIfNeeded(tskqbhvr, unitName)
+	if not IsWaterAttackNeeded(tskqbhvr) then return DummyUnitName end
 	if unitName == DummyUnitName or unitName == nil then return DummyUnitName end
-	if ai.bomberhandler:GetCounter() == maxBomberCounter then
+	if tskqbhvr.ai.bomberhandler:GetCounter() == maxBomberCounter then
 		return DummyUnitName
 	else
 		return unitName
@@ -233,7 +225,7 @@ end
 function LandOrWater(tskqbhvr, landName, waterName)
 	local builder = tskqbhvr.unit:Internal()
 	local bpos = builder:GetPosition()
-	local waterNet = ai.maphandler:MobilityNetworkSizeHere("shp", bpos)
+	local waterNet = tskqbhvr.ai.maphandler:MobilityNetworkSizeHere("shp", bpos)
 	if waterNet ~= nil then
 		return waterName
 	else
@@ -255,7 +247,7 @@ local function ConsulAsFactory(tskqbhvr)
 	else unitName = Lvl1ShipDestroyerOnly(tskqbhvr)
 	end
 	if unitName == nil then unitName = DummyUnitName end
-	EchoDebug('Consul as factory '..unitName)
+	tskqbhvr:EchoDebug('Consul as factory '..unitName)
 	return unitName
 end
 
@@ -271,7 +263,7 @@ local function FreakerAsFactory(tskqbhvr)
 	else unitName = Lvl1ShipDestroyerOnly(tskqbhvr)
 	end
 	if unitName == nil then unitName = DummyUnitName end
-	EchoDebug('Freaker as factory '..unitName)
+	tskqbhvr:EchoDebug('Freaker as factory '..unitName)
 	return unitName
 end
 
@@ -285,7 +277,7 @@ function NavalEngineerAsFactory(tskqbhvr)
 	elseif 	rnd == 5 then unitName=Lvl1ShipBattle(tskqbhvr)
 	else unitName=Lvl2AmphBot(tskqbhvr)
 	end
-	EchoDebug('Naval engineers as factory '..unitName)
+	tskqbhvr:EchoDebug('Naval engineers as factory '..unitName)
 	return unitName
 end
 
@@ -300,12 +292,12 @@ function EngineerAsFactory(tskqbhvr)
 end	
 
 local function CommanderEconomy(tskqbhvr)
-	local underwater = ai.maphandler:IsUnderWater(tskqbhvr.unit:Internal():GetPosition())
+	local underwater = tskqbhvr.ai.maphandler:IsUnderWater(tskqbhvr.unit:Internal():GetPosition())
 	local unitName = DummyUnitName
 	if not underwater then 
-		unitName = Economy0()
+		unitName = Economy0(tskqbhvr)
 	else
-		unitName = EconomyUnderWater()
+		unitName = EconomyUnderWater(tskqbhvr)
 	end
 	return unitName
 	
@@ -313,7 +305,7 @@ local function CommanderEconomy(tskqbhvr)
 end
 
 local function AmphibiousEconomy(tskqbhvr)
-	local underwater = ai.maphandler:IsUnderWater(tskqbhvr.unit:Internal():GetPosition())
+	local underwater = tskqbhvr.ai.maphandler:IsUnderWater(tskqbhvr.unit:Internal():GetPosition())
 	local unitName = DummyUnitName
 	if underwater then 
 		unitName = EconomyUnderWater(tskqbhvr)

@@ -14,7 +14,7 @@ function CommanderBehaviour:Init()
 end
 
 function CommanderBehaviour:Update()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	if self.lowHealth and f >= self.nextHealthCheck then
 		if self.unit:Internal():GetHealth() >= self.unit:Internal():GetMaxHealth() * 0.75 then
 			self.lowHealth = false
@@ -38,7 +38,7 @@ function CommanderBehaviour:OwnerDamaged(attacker,damage)
 	if not self.lowHealth then
 		if self.unit:Internal():GetHealth() < self.unit:Internal():GetMaxHealth() * 0.75 then
 			self.lowHealth = true
-			self.nextHealthCheck = self.game:Frame() + 900
+			self.nextHealthCheck = self.ai.game:Frame() + 900
 			self:FindSafeHouse()
 		end
 	end
@@ -82,7 +82,11 @@ function CommanderBehaviour:HelpFactory()
 		floats:push_back(pos.x)
 		floats:push_back(pos.y)
 		floats:push_back(pos.z)
-		self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats, {"shift"})
+		if ShardSpringLua then
+			self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats, {"shift"})
+		else
+			self.unit:Internal():ExecuteCustomCommand(CMD_PATROL, floats, 32)
+		end
 	end
 	-- CustomCommand(self.unit:Internal(), CMD_GUARD, {self.factoryToHelp:ID()})
 end
@@ -110,7 +114,7 @@ function CommanderBehaviour:FindSafeHouse()
 	elseif not factoryUnit and safeNew then
 		self:MoveToSafety()
 	end
-	self.nextFactoryCheck = self.game:Frame() + 500
+	self.nextFactoryCheck = self.ai.game:Frame() + 500
 	self:EchoDebug(safePos, factoryUnit, factoryPos)
 	self.unit:ElectBehaviour()
 end

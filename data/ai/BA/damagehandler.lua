@@ -1,14 +1,5 @@
 -- keeps track of hits to our units
 
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		game:SendToConsole("DamageHandler: " .. inStr)
-	end
-end
-
 DamageHandler = class(Module)
 
 function DamageHandler:Name()
@@ -26,7 +17,7 @@ end
 
 function DamageHandler:UnitDamaged(engineUnit, attacker, damage)
 	local teamID = engineUnit:Team()
-	if teamID ~= self.game:GetTeamID() and not self.ai.friendlyTeamID[teamID] then
+	if teamID ~= self.ai.game:GetTeamID() and not self.ai.friendlyTeamID[teamID] then
 		return
 	end
 	local unitID = engineUnit:ID()
@@ -34,7 +25,7 @@ function DamageHandler:UnitDamaged(engineUnit, attacker, damage)
 end
 
 function DamageHandler:Update()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	if f > self.lastDamageCheckFrame + 90 then
 		for unitID, engineUnit in pairs(self.isDamaged) do
 			local health = engineUnit:GetHealth()
@@ -58,8 +49,8 @@ end
 -- note: unitdamaged will not be called on self-destruct
 --[[
 function DamageHandler:UnitDamaged(unit, attacker, damage)
-	-- if unit ~= nil then game:SendToConsole(unit:Team() .. " attacked (" .. game:GetTeamID() .. ")") end
-	-- if attacker ~= nil then game:SendToConsole("by " .. attacker:Team() .. " (" .. game:GetTeamID() .. ")") end
+	-- if unit ~= nil then self.ai.game:SendToConsole(unit:Team() .. " attacked (" .. self.ai.game:GetTeamID() .. ")") end
+	-- if attacker ~= nil then self.ai.game:SendToConsole("by " .. attacker:Team() .. " (" .. self.ai.game:GetTeamID() .. ")") end
 	local friendlyFire = false
 	if attacker ~= nil then
 		if ai.friendlyTeamID[attacker:Team()] then friendlyFire = true end
@@ -70,7 +61,7 @@ function DamageHandler:UnitDamaged(unit, attacker, damage)
 		local last = self.lastHealth[unitID]
 		if last then
 			local damage = self.lastHealth[unitID] - health
-			-- game:SendToConsole(damage .. " damage to " .. unit:Name())
+			-- self.ai.game:SendToConsole(damage .. " damage to " .. unit:Name())
 			-- self:DamageReport(damage, unit:GetPosition(), unit:Name())
 		end
 		self.lastHealth[unitID] = health

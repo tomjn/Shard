@@ -4,20 +4,12 @@ function CountBehaviour:Name()
 	return "CountBehaviour"
 end
 
-local DebugEnabled = false
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		game:SendToConsole("CountBehaviour: " .. inStr)
-	end
-end
-
 function CountBehaviour:Init()
 	self.finished = false
 	self.name = self.unit:Internal():Name()
 	self.id = self.unit:Internal():ID()
 	local uTn = unitTable[self.name]
-	-- game:SendToConsole(self.name .. " " .. self.id .. " init")
+	-- self.ai.game:SendToConsole(self.name .. " " .. self.id .. " init")
 	if uTn.isBuilding then
 		self.position = self.unit:Internal():GetPosition() -- buildings don't move
 		self.isBuilding = true
@@ -46,13 +38,13 @@ function CountBehaviour:Init()
 	else
 		self.ai.nameCount[self.name] = self.ai.nameCount[self.name] + 1
 	end
-	EchoDebug(self.ai.nameCount[self.name] .. " " .. self.name .. " created")
-	self.ai.lastNameCreated[self.name] = game:Frame()
+	self:EchoDebug(self.ai.nameCount[self.name] .. " " .. self.name .. " created")
+	self.ai.lastNameCreated[self.name] = self.ai.game:Frame()
 	self.unit:ElectBehaviour()
 end
 
 function CountBehaviour:OwnerBuilt()
-	-- game:SendToConsole(self.name .. " " .. self.id .. " built")
+	-- self.ai.game:SendToConsole(self.name .. " " .. self.id .. " built")
 	if self.ai.nameCountFinished[self.name] == nil then
 		self.ai.nameCountFinished[self.name] = 1
 	else
@@ -75,8 +67,8 @@ function CountBehaviour:OwnerBuilt()
 		self.ai.nanoList[self.id] = self.unit:Internal():GetPosition() 
 		self.ai.lastNanoBuild = self.unit:Internal():GetPosition()
 	end
-	self.ai.lastNameFinished[self.name] = game:Frame()
-	EchoDebug(self.ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
+	self.ai.lastNameFinished[self.name] = self.ai.game:Frame()
+	self:EchoDebug(self.ai.nameCountFinished[self.name] .. " " .. self.name .. " finished")
 	self.finished = true
 	--mtyped leveled counters
 	if self.mobileMtyped then ai.mtypeCount[self.mobileMtyped] = ai.mtypeCount[self.mobileMtyped] + 1 end

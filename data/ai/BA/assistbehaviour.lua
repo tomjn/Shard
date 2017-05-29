@@ -1,12 +1,3 @@
-local DebugEnabled = false
-
-
-local function EchoDebug(inStr)
-	if DebugEnabled then
-		game:SendToConsole("AssistBehaviour: " .. inStr)
-	end
-end
-
 local CMD_GUARD = 25
 local CMD_PATROL = 15
 
@@ -34,9 +25,9 @@ function AssistBehaviour:Init()
 	if commanderList[uname] then self.isCommander = true end
 	self.id = self.unit:Internal():ID()
 	ai.assisthandler:AssignIDByName(self)
-	-- game:SendToConsole("assistbehaviour:init", ai, ai.id, self.ai, self.ai.id)
-	EchoDebug(uname .. " " .. self.ai.IDByName[self.id])
-	EchoDebug("added to unit "..uname)
+	-- self.ai.game:SendToConsole("assistbehaviour:init", ai, ai.id, self.ai, self.ai.id)
+	self:EchoDebug(uname .. " " .. self.ai.IDByName[self.id])
+	self:EchoDebug("added to unit "..uname)
 end
 
 function AssistBehaviour:OwnerIdle()
@@ -48,7 +39,7 @@ function AssistBehaviour:Update()
 	-- nano turrets don't need updating, they already have a patrol order
 	if self.isNanoTurret then return end
 
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 
 	if f % 180 == 0 then
 		local unit = self.unit:Internal()
@@ -57,25 +48,25 @@ function AssistBehaviour:Update()
 			-- turn commander into build assister if you control more than half the mexes or if it's damaged
 			if self.ai.nonAssistant[self.id] then
 				if ( self.ai.overviewhandler.keepCommanderSafe or self.ai.overviewhandler.needSiege or unit:GetHealth() < unit:GetMaxHealth() * 0.9) and self.ai.factories ~= 0 and self.ai.conCount > 2 then
-					EchoDebug("turn commander into assistant")
+					self:EchoDebug("turn commander into assistant")
 					self.ai.nonAssistant[self.id] = nil
 					self.unit:ElectBehaviour()
 				end
 			else
 				-- switch commander back to building
 				if (not self.ai.overviewhandler.keepCommanderSafe and not self.ai.overviewhandler.needSiege and unit:GetHealth() >= unit:GetMaxHealth() * 0.9) or self.ai.factories == 0 or self.ai.conCount <= 2 then
-					EchoDebug("turn commander into builder")
+					self:EchoDebug("turn commander into builder")
 					self.ai.nonAssistant[self.id] = true
 					self.unit:ElectBehaviour()
 				end
 			end
 		else
 			-- fill empty spots after con units die
-			-- if not self.ai.IDByName[self.id] or not self.ai.nameCount[uname] then game:SendToConsole(self.id, uname, self.ai.IDByName[self.id], self.ai.nameCount[uname]) end
+			-- if not self.ai.IDByName[self.id] or not self.ai.nameCount[uname] then self.ai.game:SendToConsole(self.id, uname, self.ai.IDByName[self.id], self.ai.nameCount[uname]) end
 			if self.ai.IDByName[self.id] > self.ai.nameCount[uname] then
-				EchoDebug("filling empty spots with " .. uname .. " " .. self.ai.IDByName[self.id])
+				self:EchoDebug("filling empty spots with " .. uname .. " " .. self.ai.IDByName[self.id])
 				self.ai.assisthandler:AssignIDByName(self)
-				EchoDebug("ID now: " .. self.ai.IDByName[self.id])
+				self:EchoDebug("ID now: " .. self.ai.IDByName[self.id])
 				self.unit:ElectBehaviour()
 			end
 		end
@@ -108,7 +99,7 @@ function AssistBehaviour:Update()
 end
 
 function AssistBehaviour:Activate()
-	EchoDebug("activated on unit "..self.name)
+	self:EchoDebug("activated on unit "..self.name)
 	if self:DoIAssist() then
 		ai.assisthandler:Release(self.unit:Internal())
 		ai.assisthandler:AddFree(self)
@@ -128,7 +119,7 @@ function AssistBehaviour:Activate()
 end
 
 function AssistBehaviour:Deactivate()
-	EchoDebug("deactivated on unit "..self.name)
+	self:EchoDebug("deactivated on unit "..self.name)
 	ai.assisthandler:RemoveWorking(self)
 	ai.assisthandler:RemoveFree(self)
 	self.active = false
@@ -150,7 +141,7 @@ end
 
 function AssistBehaviour:Assign(builderID)
 	self.target = builderID
-	self.lastAssignFrame = game:Frame()
+	self.lastAssignFrame = self.ai.game:Frame()
 end
 
 function AssistBehaviour:SetFallback(position)
@@ -165,7 +156,7 @@ function AssistBehaviour:SoftAssign(builderID)
 		if self.lastAssignFrame == nil then
 			self.target = builderID
 		else
-			local f = game:Frame()
+			local f = self.ai.game:Frame()
 			if f > self.lastAssignFrame + 900 then
 				self.target = builderID
 			end

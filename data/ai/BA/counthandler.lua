@@ -47,12 +47,12 @@ function CountHandler:InitializeNameCounts()
 end
 
 function CountHandler:UnitDamaged(unit, attacker,damage)
-	if unit:Team() ~= self.game:GetTeamID() then
+	if unit:Team() ~= self.ai.game:GetTeamID() then
 		self:EchoDebug("unit damaged", unit:Team(), unit:Name(), unit:ID())
 	end
 	local aname = "nil"
 	if attacker then 
-		if attacker:Team() ~= game:GetTeamID() then
+		if attacker:Team() ~= self.ai.game:GetTeamID() then
 			self:EchoDebug(unit:Name() .. " on team " .. unit:Team() .. " damaged by " .. attacker:Name() .. " on team " .. attacker:Team())
 		end
 	end

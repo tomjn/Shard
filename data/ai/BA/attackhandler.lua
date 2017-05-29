@@ -27,7 +27,7 @@ function AttackHandler:Init()
 end
 
 function AttackHandler:Update()
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	if f % 150 == 0 then
 		self:DraftSquads()
 	end
@@ -61,14 +61,14 @@ function AttackHandler:Update()
 end
 
 function AttackHandler:DraftSquads()
-	-- if self.ai.incomingThreat > 0 then game:SendToConsole(self.ai.incomingThreat .. " " .. (self.ai.battleCount + self.ai.breakthroughCount) * 75) end
+	-- if self.ai.incomingThreat > 0 then self.ai.game:SendToConsole(self.ai.incomingThreat .. " " .. (self.ai.battleCount + self.ai.breakthroughCount) * 75) end
 	-- if self.ai.incomingThreat > (self.ai.battleCount + self.ai.breakthroughCount) * 75 then
 		-- do not attack if we're in trouble
 		-- self:EchoDebug("not a good time to attack " .. tostring(self.ai.battleCount+self.ai.breakthroughCount) .. " " .. self.ai.incomingThreat .. " > " .. tostring((self.ai.battleCount+self.ai.breakthroughCount)*75))
 		-- return
 	-- end
 	local needtarget = {}
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	-- find which mtypes need targets
 	for mtype, count in pairs(self.count) do
 		if (f > (self.attackCountReached[mtype] or 0) + 150 or f > (self.attackSent[mtype] or 0) + 1200) and count >= self.counter[mtype] then
@@ -122,7 +122,7 @@ function AttackHandler:DraftSquads()
 end
 
 function AttackHandler:SquadReTarget(squad, squadIndex)
-	local f = game:Frame()
+	local f = self.ai.game:Frame()
 	local representativeBehaviour
 	local representative
 	for iu, member in pairs(squad.members) do
@@ -230,7 +230,7 @@ function AttackHandler:SquadNewPath(squad, representativeBehaviour)
 	representativeBehaviour = representativeBehaviour or squad.members[#squad.members]
 	local representative = representativeBehaviour.unit:Internal()
 	if self.DebugEnabled then
-		self.map:EraseLine(nil, nil, {1,1,0}, squad.mtype, nil, 8)
+		self.ai.map:EraseLine(nil, nil, {1,1,0}, squad.mtype, nil, 8)
 	end
 	local startPos
 	if squad.pathStep then
@@ -278,12 +278,12 @@ function AttackHandler:SquadPathfind(squad, squadIndex)
 		squad.hasGottenPathOnce = true
 		self:SquadAdvance(squad)
 		if self.DebugEnabled then
-			self.map:EraseLine(nil, nil, {1,1,0}, squad.mtype, nil, 8)
+			self.ai.map:EraseLine(nil, nil, {1,1,0}, squad.mtype, nil, 8)
 			for i = 2, #path do
 				local pos1 = path[i-1].position
 				local pos2 = path[i].position
 				local arrow = i == #path
-				self.map:DrawLine(pos1, pos2, {1,1,0}, squad.mtype, arrow, 8)
+				self.ai.map:DrawLine(pos1, pos2, {1,1,0}, squad.mtype, arrow, 8)
 			end
 		end
 	elseif remaining == 0 then
@@ -341,7 +341,7 @@ function AttackHandler:SquadAdvance(squad)
 	end
 	if squad.hasMovedOnce then
 		local distToNext = Distance(squad.path[squad.pathStep-1].position, nextPos)
-		squad.idleTimeout = game:Frame() + (3 * 30 * (distToNext / squad.lowestSpeed))
+		squad.idleTimeout = self.ai.game:Frame() + (3 * 30 * (distToNext / squad.lowestSpeed))
 	end
 	squad.hasMovedOnce = true
 end
