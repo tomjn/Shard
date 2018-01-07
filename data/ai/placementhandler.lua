@@ -162,9 +162,9 @@ function PlacementHandler:IterateJob( job )
 	local step = job.step
 	local spos = job.spiral[step]
 	local pos = { x=0,y=0,z=0}
-	pos.x = spos.x * job.increment
-	pos.y = spos.y * job.increment
-	pos.z = 0
+	pos.x = spos.x * job.increment + job.start_position.x
+	pos.y = spos.y * job.increment + job.start_position.y
+	pos.z = job.start_position.z
 
 	-- test this particular step of the spiral
 	local buildable = self.ai.map:CanBuildHere(job.unittype, pos )
