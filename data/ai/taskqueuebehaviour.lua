@@ -146,7 +146,7 @@ function TaskQueueBehaviour:ProgressQueue()
 								max_radius=500,
 								onSuccess=function( job, pos ) tqb:OnBuildingPlacementSuccess( job, pos ) end,
 								onFail=function( job ) tqb:OnBuildingPlacementFailure( job ) end,
-								unittype=unittype,
+								unittype=utype,
 								cleanup_on_unit_death=self.unit.engineID
 							}
 							local success = ai.placementhandler:NewJob( job )
