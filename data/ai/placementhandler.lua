@@ -126,7 +126,7 @@ function PlacementHandler:Update()
 	end
 
 	self:RunIterations()
-	self:CleanupJobs()
+	--self:CleanupJobs()
 end
 
 function PlacementHandler:RunIterations()
