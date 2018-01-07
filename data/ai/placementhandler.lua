@@ -226,4 +226,5 @@ function PlacementHandler:GenerateSpiral( width, height)
 		x = x + dx
 		y = y + dy
 	end
+	return result
 end
