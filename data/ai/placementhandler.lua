@@ -137,7 +137,7 @@ function PlacementHandler:RunIterations()
 end
 
 function PlacementHandler:RunJobIterations( job )
-	local stillGotTime = 20
+	local stillGotTime = 500
 	-- given this particular job, lets give it a time budget and do as many
 	-- iterations as we can
 	while ( stillGotTime > 0 ) and ( job.status ~= 'cleanup' ) do
