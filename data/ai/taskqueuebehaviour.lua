@@ -141,6 +141,7 @@ function TaskQueueBehaviour:ProgressQueue()
 						else
 							--p = self.map:FindClosestBuildSite(utype, unit:GetPosition())
 							--self.progress = not self.unit:Internal():Build(utype,p)
+							tqb = self
 							local job = {
 								start_position=unit:GetPosition(),
 								max_radius=500,
