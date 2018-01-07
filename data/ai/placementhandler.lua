@@ -150,6 +150,14 @@ end
 
 function PlacementHandler:IterateJob( job )
 	-- setup this run
+	if job.step > #job.spiral then
+		-- we reached the end of the search pattern, we failed to
+		-- find a location, tell the requested and end the job
+		job.onFail( job )
+		job.status = 'cleanup'
+		job.result = false
+		return
+	end
 	job.status = 'running'
 	local step = job.step
 	local spos = job.spiral[step]
@@ -216,7 +224,7 @@ function PlacementHandler:GenerateSpiral( width, height)
 	local result = {}
 	for i=0, maxI do
 		if  ((-width/2 <= x) and (x <= width/2) and (-height/2 <= y) and (y <= height/2)) then
-			table.insert( result, {x,y} )
+			table.insert( result, {x=x,y=y} )
 		end
 		if ( ( x == y ) or ( ( x < 0 ) and ( x == -y ) ) or ( (x > 0) and ( x == 1-y ) ) ) then
 			t = dx
