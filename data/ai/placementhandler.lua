@@ -80,7 +80,7 @@ function PlacementHandler:NewJob( details )
 	-- figure out the spiral search pattern necessary 
 	local max_width = details.max_radius * 2
 	local spiral_width = max_width/details.increment
-	details.spiral = self.GenerateSpiral(spiral_width, spiral_width )
+	details.spiral = self:GenerateSpiral(spiral_width, spiral_width )
 
 	table.insert( self.jobs, details )
 
@@ -125,15 +125,15 @@ function PlacementHandler:Update()
 		return
 	end
 
-	self.RunIterations()
-	self.CleanupJobs()
+	self:RunIterations()
+	self:CleanupJobs()
 end
 
 function PlacementHandler:RunIterations()
 	for i,j in ipairs(self.jobs) do
 		if j.status ~= 'cleanup' then
 			local job = self.jobs[i]
-			self.RunJobIterations( job )
+			self:RunJobIterations( job )
 		end
 	end
 end
