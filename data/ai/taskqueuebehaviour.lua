@@ -149,7 +149,7 @@ function TaskQueueBehaviour:ProgressQueue()
 								unittype=unittype,
 								cleanup_on_unit_death=self.unit.engineID
 							}
-							local success = ai.placementhandler.NewJob( job )
+							local success = ai.placementhandler:NewJob( job )
 							if success == false then
 								-- something went wrong
 								self.game:SendToConsole("Cannot build:"..value..", there was a problem and the placement algorithm rejected our request outright")
