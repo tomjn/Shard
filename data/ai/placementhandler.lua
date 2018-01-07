@@ -183,16 +183,27 @@ function PlacementHandler:IterateJob( job )
 	end
 end
 
-function PlacementHandler:CleanupJobs()
-	-- try and clean up dead recruits where possible
-	while true do
-		for i,j in ipairs(self.jobs) do
-			if j.status == 'cleanup' then
-				table.remove(self.jobs,i)
-				break
-			end
-		end
+function is_not_cleanup( job ) then
+	if job.status ~= 'cleanup' then
+		return true
 	end
+	return false
+end
+ -- filter(function, table)
+ -- e.g: filter(is_even, {1,2,3,4}) -> {2,4}
+ function filter(func, tbl)
+     local newtbl= {}
+     for i,v in pairs(tbl) do
+         if func(v) then
+	     newtbl[i]=v
+         end
+     end
+     return newtbl
+ end
+function PlacementHandler:CleanupJobs()
+	--
+	-- try and clean up dead recruits where possible
+	self.jobs = filter( is_not_cleanup, self.jobs )
 end
 
 --[[
