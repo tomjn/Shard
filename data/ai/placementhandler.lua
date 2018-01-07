@@ -56,10 +56,10 @@ function PlacementHandler:NewJob( details )
 		cleanup_on_unit_death
 	}
 	]]--
-	if details[start_position] == nil then
+	if details["start_position"] == nil then
 		return false
 	end
-	if details[unittype] == nil then
+	if details["unittype"] == nil then
 		return false
 	end
 	if details["max_radius"] == nil then
