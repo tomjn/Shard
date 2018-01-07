@@ -139,8 +139,22 @@ function TaskQueueBehaviour:ProgressQueue()
 								self.progress = true
 							end
 						else
-							p = self.map:FindClosestBuildSite(utype, unit:GetPosition())
-							self.progress = not self.unit:Internal():Build(utype,p)
+							--p = self.map:FindClosestBuildSite(utype, unit:GetPosition())
+							--self.progress = not self.unit:Internal():Build(utype,p)
+							local job = {
+								start_position=unit:GetPosition(),
+								max_radius=500,
+								onSuccess=function( job, pos ) tqb:OnBuildingPlacementSuccess( job, pos ) end,
+								onFail=function( job ) tqb:OnBuildingPlacementFailure( job ) end,
+								unittype=unittype,
+								cleanup_on_unit_death=self.unit.engineID
+							}
+							local success = ai.placementhandler.NewJob( job )
+							if success == false then
+								-- something went wrong
+								self.game:SendToConsole("Cannot build:"..value..", there was a problem and the placement algorithm rejected our request outright")
+								self.progress = false
+							end
 						end
 					else
 						self.progress = true
@@ -154,6 +168,14 @@ function TaskQueueBehaviour:ProgressQueue()
 			end
 		end
 	end
+end
+
+function TaskQueueBehaviour:OnBuildingPlacementSuccess( job, pos )
+	self.progress = not self.unit:Internal():Build( job.unittype, pos )
+end
+
+function TaskQueueBehaviour:OnBuildingPlacementFailure( job )
+	self.progress = true
 end
 
 function TaskQueueBehaviour:Activate()
