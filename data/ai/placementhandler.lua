@@ -65,9 +65,6 @@ function PlacementHandler:NewJob( details )
 	if details["max_radius"] == nil then
 		details.max_radius = 1000
 	end
-	if details["max_radius"] == nil then
-		details.max_radius = 1000
-	end
 	if details["increment"] == nil then
 		details.increment = 8
 	end
@@ -126,7 +123,7 @@ function PlacementHandler:Update()
 	end
 
 	self:RunIterations()
-	--self:CleanupJobs()
+	self:CleanupJobs()
 end
 
 function PlacementHandler:RunIterations()
@@ -134,6 +131,7 @@ function PlacementHandler:RunIterations()
 		if j.status ~= 'cleanup' then
 			local job = self.jobs[i]
 			self:RunJobIterations( job )
+			return
 		end
 	end
 end
