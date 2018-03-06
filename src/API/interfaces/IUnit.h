@@ -20,17 +20,21 @@ public:
 
 	virtual bool CanMove()=0;
 	virtual bool CanDeploy()=0;
+	virtual bool CanMorph()=0;
 	virtual bool CanBuild()=0;
 	virtual bool IsBeingBuilt()=0;
+	virtual bool IsMorphing()=0;
 	
 	virtual bool CanAssistBuilding(IUnit* unit)=0;
 
 	virtual bool CanMoveWhenDeployed()=0;
 	virtual bool CanFireWhenDeployed()=0;
+	virtual bool CanMorphWhenDeployed()=0;
 	virtual bool CanBuildWhenDeployed()=0;
 	virtual bool CanBuildWhenNotDeployed()=0;
 
 	virtual void Wait(int timeout)=0;
+	virtual void Deploy()=0;
 	virtual void Stop()=0;
 	virtual void Move(Position p)=0;
 	virtual void MoveAndFire(Position p)=0;

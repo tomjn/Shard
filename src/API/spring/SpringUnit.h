@@ -27,16 +27,19 @@ public:
 	virtual bool CanMove() override;
 	virtual bool CanDeploy() override;
 	virtual bool CanBuild() override;
+	virtual bool CanMorph() override;
 	
 	virtual bool CanAssistBuilding(IUnit* unit) override;
 
 	virtual bool CanMoveWhenDeployed() override;
 	virtual bool CanFireWhenDeployed() override;
+	virtual bool CanMorphWhenDeployed() override;
 	virtual bool CanBuildWhenDeployed() override;
 	virtual bool CanBuildWhenNotDeployed() override;
 	
 	virtual void Wait(int timeout) override;
 	
+	virtual void Deploy() override;
 	virtual void Stop() override;
 	virtual void Move(Position p) override;
 	virtual void MoveAndFire(Position p) override;

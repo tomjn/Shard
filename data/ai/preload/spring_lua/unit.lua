@@ -64,9 +64,17 @@ function ShardSpringUnit:CanDeploy()
 	return self:Type():CanDeploy()
 end
 
+function ShardSpringUnit:CanMorph()
+	return self:Type():CanMorph()
+end
+
 function ShardSpringUnit:IsBeingBuilt()
 	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
 	return buildProgress < 1
+end
+
+function ShardSpringUnit:IsMorphing()
+	return false
 end
 
 
@@ -86,6 +94,9 @@ function ShardSpringUnit:CanFireWhenDeployed()
 	return false
 end
 
+function ShardSpringUnit:CanMorphWhenDeployed()
+	return false
+end
 
 function ShardSpringUnit:CanBuildWhenDeployed()
 	return false
@@ -155,8 +166,8 @@ end
 
 
 function ShardSpringUnit:MorphInto( type )
-	-- how?
-	return false
+	Spring.GiveOrderToUnit( self.id, CMD.MORPH, { unit:ID() }, {} )
+	return true
 end
 
 

@@ -13,6 +13,10 @@ public:
 
 	virtual std::string Name() override;
 
+	virtual bool CanDeploy() override;
+	virtual bool CanMorph() override;
+	virtual bool CanBuild() override;
+
 	virtual float ReclaimSpeed() override;
 	virtual bool Extractor() override;
 
