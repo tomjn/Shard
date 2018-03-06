@@ -364,6 +364,14 @@ bool CSpringUnit::IsBeingBuilt(){
 	return unit->IsBeingBuilt();
 }
 
+bool CSpringUnit::IsMorphing(){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in IsMorphing");
+		return false;
+	}
+	return false;
+}
+
 float CSpringUnit::GetHealth(){
 	if(!unit) {
 		game->SendToConsole("shard-runtime warning: Unit was NULL in GetHealth");

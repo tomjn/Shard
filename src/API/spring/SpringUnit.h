@@ -73,6 +73,7 @@ public:
 
 	virtual bool CanBuild(IUnitType* t) override;
 	virtual bool IsBeingBuilt() override;
+	virtual bool IsMorphing() override;
 
 	virtual SResourceTransfer GetResourceUsage(int idx) override;
 
