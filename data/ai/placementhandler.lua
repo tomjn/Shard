@@ -165,7 +165,7 @@ function PlacementHandler:IterateJob( job )
 	pos.z = job.start_position.z
 
 	-- test this particular step of the spiral
-	local buildable = self.ai.map:CanBuildHere(job.unittype, pos )
+	local buildable = self:CanBuildAt(job.unittype, pos )
 	if buildable then
 		-- we found a place!
 		job.result = pos
@@ -181,6 +181,59 @@ function PlacementHandler:IterateJob( job )
 		job.status = 'cleanup'
 		job.result = false
 	end
+end
+
+function PlacementHandler:CanBuildAt( unittype, pos )
+	local buildable = self.ai.map:CanBuildHere( unittype, pos )
+	if false == buildable then
+		return false
+	end
+
+	-- check spacing
+	-- we're going to do this in a hacky way for now until a blocking
+	-- map and footprints are added to the shard API, but on the other
+	-- hand it's simple
+
+	-- what we're going to do is enforce a standardised minimum
+	-- spacing, and check above below left and right of the position
+	-- to check, by shifting the position by a set amount and checking
+	-- that position
+
+	local fixed_spacing = 120
+
+	-- North
+	local testpos = pos
+	testpos.y = testpos.y - fixed_spacing
+	buildable = self.ai.map:CanBuildHere( unittype, testpos )
+	if false == buildable then
+		return false
+	end
+
+	-- South
+	testpos = pos
+	testpos.y = testpos.y + fixed_spacing
+	buildable = self.ai.map:CanBuildHere( unittype, testpos )
+	if false == buildable then
+		return false
+	end
+
+	-- East
+	testpos = pos
+	testpos.x = testpos.x + fixed_spacing
+	buildable = self.ai.map:CanBuildHere( unittype, testpos )
+	if false == buildable then
+		return false
+	end
+
+	-- West
+	testpos = pos
+	testpos.x = testpos.x - fixed_spacing
+	buildable = self.ai.map:CanBuildHere( unittype, testpos )
+	if false == buildable then
+		return false
+	end
+
+	return true
 end
 
 function is_not_cleanup( job )
