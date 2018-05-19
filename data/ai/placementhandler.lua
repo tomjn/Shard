@@ -203,7 +203,7 @@ function PlacementHandler:CanBuildAt( unittype, pos )
 
 	-- North
 	local testpos = pos
-	testpos.y = testpos.y - fixed_spacing
+	testpos.y = testpos.z - fixed_spacing
 	buildable = self.ai.map:CanBuildHere( unittype, testpos )
 	if false == buildable then
 		return false
@@ -211,7 +211,7 @@ function PlacementHandler:CanBuildAt( unittype, pos )
 
 	-- South
 	testpos = pos
-	testpos.y = testpos.y + fixed_spacing
+	testpos.y = testpos.z + fixed_spacing
 	buildable = self.ai.map:CanBuildHere( unittype, testpos )
 	if false == buildable then
 		return false
