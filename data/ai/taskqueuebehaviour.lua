@@ -176,6 +176,7 @@ function TaskQueueBehaviour:OnBuildingPlacementSuccess( job, pos )
 end
 
 function TaskQueueBehaviour:OnBuildingPlacementFailure( job )
+	self.game:SendToConsole("Shard could not find a location to build:"..job.unittype:Name())
 	self.progress = true
 end
 
