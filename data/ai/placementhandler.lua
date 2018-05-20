@@ -63,18 +63,18 @@ function PlacementHandler:NewJob( details )
 		return false
 	end
 	if details["max_radius"] == nil then
-		details.max_radius = 1000
+		details.max_radius = 1500
 	end
 	if details["increment"] == nil then
-		details.increment = 8
+		details.increment = 16
 	end
-	if details.increment < 8 then
-		details.increment = 8
+	if details.increment < 16 then
+		details.increment = 16
 	end
 	details.status = 'new'
 	details.step = 1
 
-	-- figure out the spiral search pattern necessary 
+	-- figure out the spiral search pattern necessary
 	local max_width = details.max_radius * 2
 	local spiral_width = max_width/details.increment
 	details.spiral = self:GenerateSpiral(spiral_width, spiral_width )
@@ -121,6 +121,10 @@ function PlacementHandler:Update()
 	if #self.jobs == 0 then
 		return
 	end
+	if #self.jobs > 20 then
+		SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_good")
+		return
+	end
 
 	self:RunIterations()
 	self:CleanupJobs()
@@ -131,13 +135,12 @@ function PlacementHandler:RunIterations()
 		if j.status ~= 'cleanup' then
 			local job = self.jobs[i]
 			self:RunJobIterations( job )
-			return
 		end
 	end
 end
 
 function PlacementHandler:RunJobIterations( job )
-	local stillGotTime = 500
+	local stillGotTime = 4 --500
 	-- given this particular job, lets give it a time budget and do as many
 	-- iterations as we can
 	while ( stillGotTime > 0 ) and ( job.status ~= 'cleanup' ) do
@@ -170,6 +173,7 @@ function PlacementHandler:IterateJob( job )
 		-- we found a place!
 		job.result = pos
 		job.status = 'cleanup'
+		SendToUnsynced("shard_debug_position",pos.x,pos.z,"final_choice")
 		job.onSuccess( job, pos )
 	end
 
@@ -186,8 +190,10 @@ end
 function PlacementHandler:CanBuildAt( unittype, pos )
 	local buildable = self.ai.map:CanBuildHere( unittype, pos )
 	if not buildable then
+		SendToUnsynced("shard_debug_position",pos.x,pos.z,"main_bad")
 		return false
 	end
+	SendToUnsynced("shard_debug_position",pos.x,pos.z,"main_good")
 
 	-- check spacing
 	-- we're going to do this in a hacky way for now until a blocking
@@ -199,39 +205,91 @@ function PlacementHandler:CanBuildAt( unittype, pos )
 	-- to check, by shifting the position by a set amount and checking
 	-- that position
 
-	local fixed_spacing = 64
+	local fixed_spacing = 80
 
 	-- North
-	local testpos = pos
+	local testpos = { x=pos.x, y=pos.y,  z= pos.z }
 	testpos.z = testpos.z - fixed_spacing
 	buildable = self.ai.map:CanBuildHere( unittype, testpos )
 	if false == buildable then
+		SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_bad")
 		return false
 	end
+	SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_good")
+
+	-- North East
+	local testpos = { x=pos.x, y=pos.y,  z= pos.z }
+	testpos.z = testpos.z - fixed_spacing
+	testpos.x = testpos.x + fixed_spacing
+	buildable = self.ai.map:CanBuildHere( unittype, testpos )
+	if false == buildable then
+		SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_bad")
+		return false
+	end
+	SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_good")
+
+	-- North West
+	local testpos = { x=pos.x, y=pos.y,  z= pos.z }
+	testpos.z = testpos.z - fixed_spacing
+	testpos.x = testpos.x - fixed_spacing
+	buildable = self.ai.map:CanBuildHere( unittype, testpos )
+	if false == buildable then
+		SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_bad")
+		return false
+	end
+	SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_good")
 
 	-- South
 	testpos = { x=pos.x, y=pos.y,  z= pos.z }
 	testpos.z = testpos.z + fixed_spacing
 	buildable = self.ai.map:CanBuildHere( unittype, testpos )
 	if not buildable then
+		SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_bad")
 		return false
 	end
+	SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_good")
+
+	-- South East
+	testpos = { x=pos.x, y=pos.y,  z= pos.z }
+	testpos.z = testpos.z + fixed_spacing
+	testpos.x = testpos.x + fixed_spacing
+	buildable = self.ai.map:CanBuildHere( unittype, testpos )
+	if not buildable then
+		SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_bad")
+		return false
+	end
+	SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_good")
+
+	-- South West
+	testpos = { x=pos.x, y=pos.y,  z= pos.z }
+	testpos.z = testpos.z + fixed_spacing
+	testpos.x = testpos.x - fixed_spacing
+	buildable = self.ai.map:CanBuildHere( unittype, testpos )
+	if not buildable then
+		SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_bad")
+		return false
+	end
+	SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_good")
 
 	-- East
 	testpos = { x=pos.x, y=pos.y,  z= pos.z }
 	testpos.x = testpos.x + fixed_spacing
 	buildable = self.ai.map:CanBuildHere( unittype, testpos )
 	if not buildable then
+		SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_bad")
 		return false
 	end
+	SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_good")
 
 	-- West
 	testpos = { x=pos.x, y=pos.y,  z= pos.z }
 	testpos.x = testpos.x - fixed_spacing
 	buildable = self.ai.map:CanBuildHere( unittype, testpos )
 	if not buildable then
+		SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_bad")
 		return false
 	end
+	SendToUnsynced("shard_debug_position",testpos.x,testpos.z,"secondary_good")
 
 	return true
 end
@@ -242,21 +300,29 @@ function is_not_cleanup( job )
 	end
 	return false
 end
+
 -- filter(function, table)
 -- e.g: filter(is_even, {1,2,3,4}) -> {2,4}
 function filter(func, tbl)
 	 local newtbl= {}
 	 for i,v in pairs(tbl) do
-		 if func(v) then
-		 newtbl[i]=v
-		 end
-	 end
-	 return newtbl
+		if func(v) then
+			newtbl[i]=v
+		end
+	end
+	return newtbl
 end
+
 function PlacementHandler:CleanupJobs()
-	--
 	-- try and clean up dead recruits where possible
-	self.jobs = filter( is_not_cleanup, self.jobs )
+	--self.jobs = filter( is_not_cleanup, self.jobs )
+	for i,j in ipairs(self.jobs) do
+		if j.status == 'cleanup' then
+			local job = self.jobs[i]
+			table.remove( self.jobs, i )
+			return
+		end
+	end
 end
 
 --[[
