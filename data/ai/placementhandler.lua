@@ -161,8 +161,8 @@ function PlacementHandler:IterateJob( job )
 	local spos = job.spiral[step]
 	local pos = { x=0,y=0,z=0}
 	pos.x = spos.x * job.increment + job.start_position.x
-	pos.y = spos.y * job.increment + job.start_position.y
-	pos.z = job.start_position.z
+	pos.z = spos.z * job.increment + job.start_position.z
+	pos.y = job.start_position.y
 
 	-- test this particular step of the spiral
 	local buildable = self:CanBuildAt(job.unittype, pos )
@@ -199,26 +199,26 @@ function PlacementHandler:CanBuildAt( unittype, pos )
 	-- to check, by shifting the position by a set amount and checking
 	-- that position
 
-	local fixed_spacing = 120
+	local fixed_spacing = 64
 
 	-- North
 	local testpos = pos
-	testpos.y = testpos.z - fixed_spacing
+	testpos.z = testpos.z - fixed_spacing
 	buildable = self.ai.map:CanBuildHere( unittype, testpos )
 	if false == buildable then
 		return false
 	end
 
 	-- South
-	testpos = pos
-	testpos.y = testpos.z + fixed_spacing
+	testpos = { x=pos.x, y=pos.y,  z= pos.z }
+	testpos.z = testpos.z + fixed_spacing
 	buildable = self.ai.map:CanBuildHere( unittype, testpos )
 	if false == buildable then
 		return false
 	end
 
 	-- East
-	testpos = pos
+	testpos = { x=pos.x, y=pos.y,  z= pos.z }
 	testpos.x = testpos.x + fixed_spacing
 	buildable = self.ai.map:CanBuildHere( unittype, testpos )
 	if false == buildable then
@@ -226,7 +226,7 @@ function PlacementHandler:CanBuildAt( unittype, pos )
 	end
 
 	-- West
-	testpos = pos
+	testpos = { x=pos.x, y=pos.y,  z= pos.z }
 	testpos.x = testpos.x - fixed_spacing
 	buildable = self.ai.map:CanBuildHere( unittype, testpos )
 	if false == buildable then
