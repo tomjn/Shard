@@ -16,18 +16,18 @@ function TaskQueueBehaviour:Init()
 end
 
 function dump(o)
-   if type(o) == 'table' then
-      local s = '{ '
-      for k,v in pairs(o) do
-         if type(k) ~= 'number' then
-             k = '"'..k..'"'
-         end
-         s = s .. '['..k..'] = ' .. dump(v) .. ','
-      end
-      return s .. '} '
-   else
-      return tostring(o)
-   end
+	if type(o) == 'table' then
+		local s = '{ '
+		for k,v in pairs(o) do
+			if type(k) ~= 'number' then
+				k = '"'..k..'"'
+			end
+			s = s .. '['..k..'] = ' .. dump(v) .. ','
+		end
+		return s .. '} '
+	else
+		return tostring(o)
+	end
 end
 
 function TaskQueueBehaviour:HasQueues()
@@ -60,15 +60,15 @@ function TaskQueueBehaviour:OwnerDead()
 	if self.waiting ~= nil then
 		for k,v in pairs(self.waiting) do
 			self.ai.modules.sleep.Kill(self.waiting[k])
- 		end
- 	end
+		end
+	end
 	self.waiting = nil
 	self.unit = nil
- end
+end
+
 function TaskQueueBehaviour:GetQueue()
 	q = taskqueues[self.name]
 	if type(q) == "function" then
-		--game:SendToConsole("function table found!")
 		q = q(self)
 	end
 	return q
@@ -122,7 +122,7 @@ function TaskQueueBehaviour:ProgressQueue()
 	self.progress = false
 
 	if self.queue == nil then
-		self.game:SendToConsole("Warning: A "..self.name..", has an empty task queue")
+		self.game:SendToConsole("Warning: A "..self.name.." unit, has an empty task queue")
 		self:OnToNextTask()
 		local p = unit:GetPosition()
 		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
@@ -164,6 +164,24 @@ function TaskQueueBehaviour:ProgressQueue()
 			newpos.y = upos.y + value.position.y
 			newpos.z = upos.z + value.position.z
 			self.unit:Internal():Move(newpos)
+		elseif action == "fight" then
+			self.unit:Internal():MoveAndFire(value.position)
+		elseif action == "fightrelative" then
+			local upos = self.unit:Internal():GetPosition()
+			local newpos = api.Position()
+			newpos.x = upos.x + value.position.x
+			newpos.y = upos.y + value.position.y
+			newpos.z = upos.z + value.position.z
+			self.unit:Internal():MoveAndFire(newpos)
+		elseif action == "patrol" then
+			self.unit:Internal():MoveAndPatrol(value.position)
+		elseif action == "patrolrelative" then
+			local upos = self.unit:Internal():GetPosition()
+			local newpos = api.Position()
+			newpos.x = upos.x + value.position.x
+			newpos.y = upos.y + value.position.y
+			newpos.z = upos.z + value.position.z
+			self.unit:Internal():MoveAndPatrol(newpos)
 		else
 			self.game:SendToConsole("Error: Unknown action task "..value.." given to a "..self.name)
 			local p = unit:GetPosition()
@@ -204,8 +222,8 @@ end
 function onsuccess( job, pos )
 	job.tqb:OnBuildingPlacementSuccess( job, pos )
 end
+
 function onfail( job )
-	game:SendToConsole( "Job finished with failure :(" )
 	job.tqb:OnBuildingPlacementFailure( job )
 end
 
@@ -239,7 +257,6 @@ function TaskQueueBehaviour:BuildOnMap(utype)
 	local success = self.ai.placementhandler:NewJob( job )
 	if success ~= true then
 		self:StopWaitingForPosition()
-		self.game:SendToConsole("Cannot build:"..value..", there was a problem and the placement algorithm rejected our request outright")
 		return false
 	end
 	self:BeginWaitingForPosition()
@@ -268,19 +285,14 @@ end
 function TaskQueueBehaviour:OnBuildingPlacementSuccess( job, pos )
 	self:StopWaitingForPosition()
 	local p = dump( pos )
-	self.game:SendToConsole("Shard recieved a location to build:"..job.unittype:Name() .. "at: "..p)
 	local success self.unit:Internal():Build( job.unittype, pos )
 	if success == false then
-		self.game:SendToConsole("Shard could not build:"..job.unittype:Name())
 		self:OnToNextTask()
-	else
-		self.game:SendToConsole("Shard sent build order for:"..job.unittype:Name())
 	end
 end
 
 function TaskQueueBehaviour:OnBuildingPlacementFailure( job )
 	self:StopWaitingForPosition()
-	self.game:SendToConsole("Shard could not find a location to build:"..job.unittype:Name())
 	self:OnToNextTask()
 end
 
