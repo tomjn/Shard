@@ -9,9 +9,9 @@ function TaskQueueBehaviour:Init()
 	if self:HasQueues() then
 		self.queue = self:GetQueue()
 	end
-	
+
 	self.waiting = {}
-	
+
 end
 
 function TaskQueueBehaviour:HasQueues()
@@ -44,7 +44,7 @@ end
 function TaskQueueBehaviour:OwnerDead()
 	if self.waiting ~= nil then
 		for k,v in pairs(self.waiting) do
-			ai.modules.sleep.Kill(self.waiting[k])
+			self.ai.modules.sleep.Kill(self.waiting[k])
  		end
  	end
 	self.waiting = nil
@@ -67,9 +67,9 @@ function TaskQueueBehaviour:Update()
 	local s = self.countdown
 	if self.progress == true then
 	--if math.mod(f,3) == 0 then
-		if (ai.tqblastframe ~= f) or (ai.tqblastframe == nil) or (self.countdown == 15) then
+		if (self.ai.tqblastframe ~= f) or (self.ai.tqblastframe == nil) or (self.countdown == 15) then
 			self.countdown = 0
-			ai.tqblastframe = f
+			self.ai.tqblastframe = f
 			self:ProgressQueue()
 		else
 			if self.countdown == nil then
@@ -96,7 +96,7 @@ function TaskQueueBehaviour:ProgressQueue()
 			self.progress = true
 			return
 		end
-		
+
 		local utype = nil
 		local value = val
 		if type(val) == "table" then
@@ -129,7 +129,7 @@ function TaskQueueBehaviour:ProgressQueue()
 					if unit:CanBuild(utype) then
 						if utype:Extractor() then
 							-- find a free spot!
-							
+
 							p = unit:GetPosition()
 							p = self.ai.metalspothandler:ClosestFreeSpot(utype,p)
 							if p ~= nil then
@@ -142,15 +142,25 @@ function TaskQueueBehaviour:ProgressQueue()
 							--p = self.map:FindClosestBuildSite(utype, unit:GetPosition())
 							--self.progress = not self.unit:Internal():Build(utype,p)
 							tqb = self
+							onsuccess = function( job, pos )
+								game:SendToConsole( "Job finished with success!" )
+								job.tqb:OnBuildingPlacementSuccess( job, pos )
+								game:SendToConsole( "Job results sent!" )
+							end
+							onfail = function( job )
+								game:SendToConsole( "Job finished with failure :(" )
+								job.tqb:OnBuildingPlacementFailure( job )
+							end
 							local job = {
 								start_position=unit:GetPosition(),
 								max_radius=500,
-								onSuccess=function( job, pos ) tqb:OnBuildingPlacementSuccess( job, pos ) end,
-								onFail=function( job ) tqb:OnBuildingPlacementFailure( job ) end,
+								onSuccess=onsuccess,
+								onFail=onfail,
 								unittype=utype,
-								cleanup_on_unit_death=self.unit.engineID
+								cleanup_on_unit_death=self.unit.engineID,
+								tqb=tqb
 							}
-							local success = ai.placementhandler:NewJob( job )
+							local success = self.ai.placementhandler:NewJob( job )
 							if success == false then
 								-- something went wrong
 								self.game:SendToConsole("Cannot build:"..value..", there was a problem and the placement algorithm rejected our request outright")
