@@ -161,7 +161,7 @@ function PlacementHandler:IterateJob( job )
 	local spos = job.spiral[step]
 	local pos = { x=0,y=0,z=0}
 	pos.x = spos.x * job.increment + job.start_position.x
-	pos.z = spos.z * job.increment + job.start_position.z
+	pos.z = spos.y * job.increment + job.start_position.z
 	pos.y = job.start_position.y
 
 	-- test this particular step of the spiral
