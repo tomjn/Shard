@@ -154,7 +154,7 @@ function TaskQueueBehaviour:ProgressQueue()
 							if success == false then
 								-- something went wrong
 								self.game:SendToConsole("Cannot build:"..value..", there was a problem and the placement algorithm rejected our request outright")
-								self.progress = false
+								self.progress = true
 							end
 						end
 					else
