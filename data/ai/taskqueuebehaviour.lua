@@ -11,7 +11,23 @@ function TaskQueueBehaviour:Init()
 	end
 
 	self.waiting = {}
+	self:OnToNextTask()
 
+end
+
+function dump(o)
+   if type(o) == 'table' then
+      local s = '{ '
+      for k,v in pairs(o) do
+         if type(k) ~= 'number' then
+             k = '"'..k..'"'
+         end
+         s = s .. '['..k..'] = ' .. dump(v) .. ','
+      end
+      return s .. '} '
+   else
+      return tostring(o)
+   end
 end
 
 function TaskQueueBehaviour:HasQueues()
@@ -22,16 +38,15 @@ function TaskQueueBehaviour:OwnerBuilt(unit)
 	if not self:IsActive() then
 		return
 	end
-	self.progress = true
+	self:OnToNextTask()
 end
 
 function TaskQueueBehaviour:OwnerIdle(unit)
 	if not self:IsActive() then
 		return
 	end
-	self.progress = true
 	self.countdown = 0
-		--self.unit:ElectBehaviour()
+	self:OnToNextTask()
 end
 
 function TaskQueueBehaviour:OwnerMoveFailed(unit)
@@ -61,15 +76,14 @@ end
 
 function TaskQueueBehaviour:Update()
 	if not self:IsActive() then
+		unit = self.unit:Internal()
+		local p = unit:GetPosition()
+		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
 		return
 	end
 	local f = self.game:Frame()
-	local s = self.countdown
 	if self.progress == true then
-	--if math.mod(f,3) == 0 then
-		if (self.ai.tqblastframe ~= f) or (self.ai.tqblastframe == nil) or (self.countdown == 15) then
-			self.countdown = 0
-			self.ai.tqblastframe = f
+		if self.countdown > 14 then
 			self:ProgressQueue()
 		else
 			if self.countdown == nil then
@@ -80,114 +94,194 @@ function TaskQueueBehaviour:Update()
 		end
 	end
 end
+
 TaskQueueWakeup = class(function(a,tqb)
 	a.tqb = tqb
 end)
 function TaskQueueWakeup:wakeup()
 	self.tqb:ProgressQueue()
 end
+
 function TaskQueueBehaviour:ProgressQueue()
-	self.progress = false
-	if self.queue ~= nil then
-		local idx, val = next(self.queue,self.idx)
-		self.idx = idx
-		if idx == nil then
-			self.queue = self:GetQueue(name)
-			self.progress = true
+	unit = self.unit:Internal()
+	if self:IsWaitingForPosition() then
+		local p = unit:GetPosition()
+		SendToUnsynced("shard_debug_position",p.x,p.z,"waiting")
+		return
+	end
+	if self.queue == nil then
+		if self:HasQueues() then
+			self.queue = self:GetQueue()
+		else
+			local p = unit:GetPosition()
+			SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
 			return
 		end
+	end
+	self.countdown = 0
+	self.progress = false
 
-		local utype = nil
-		local value = val
-		if type(val) == "table" then
-			local action = value.action
-			if action == "wait" then
-				t = TaskQueueWakeup(self)
-				tqb = self
-				self.ai.sleep:Wait({ wakeup = function() tqb:ProgressQueue() end, },value.frames)
-				return
-			elseif action == "move" then
-				self.unit:Internal():Move(value.position)
-				self.progress = false
-			elseif action == "moverelative" then
-				local upos = self.unit:Internal():GetPosition()
-				local newpos = api.Position()
-				newpos.x = upos.x + value.position.x
-				newpos.y = upos.y + value.position.y
-				newpos.z = upos.z + value.position.z
-				self.unit:Internal():Move(newpos)
-				self.progress = false
-			end
+	if self.queue == nil then
+		self.game:SendToConsole("Warning: A "..self.name..", has an empty task queue")
+		self:OnToNextTask()
+		local p = unit:GetPosition()
+		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		return
+	end
+	local idx, val = next(self.queue,self.idx)
+	self.idx = idx
+	if idx == nil then
+		local p = unit:GetPosition()
+		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		self.queue = self:GetQueue(name)
+		self:OnToNextTask()
+		return
+	end
+
+	local utype = nil
+	local value = val
+	if type(val) == "function" then
+		value = val(self)
+	end
+	if value == "next" then
+		local p = unit:GetPosition()
+		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		self:OnToNextTask()
+		return
+	end
+	if type(val) == "table" then
+		local action = value.action
+		if action == "wait" then
+			t = TaskQueueWakeup(self)
+			tqb = self
+			self.ai.sleep:Wait({ wakeup = function() tqb:ProgressQueue() end, },value.frames)
+		elseif action == "move" then
+			self.unit:Internal():Move(value.position)
+		elseif action == "moverelative" then
+			local upos = unit:GetPosition()
+			local newpos = api.Position()
+			newpos.x = upos.x + value.position.x
+			newpos.y = upos.y + value.position.y
+			newpos.z = upos.z + value.position.z
+			self.unit:Internal():Move(newpos)
 		else
-			if type(val) == "function" then
-				value = val(self)
-			end
-			if utype ~= "next" then
-				utype = self.game:GetTypeByName(value)
-				if utype ~= nil then
-					unit = self.unit:Internal()
-					if unit:CanBuild(utype) then
-						if utype:Extractor() then
-							-- find a free spot!
-
-							p = unit:GetPosition()
-							p = self.ai.metalspothandler:ClosestFreeSpot(utype,p)
-							if p ~= nil then
-								success = self.unit:Internal():Build(utype,p)
-								self.progress = not success
-							else
-								self.progress = true
-							end
-						else
-							--p = self.map:FindClosestBuildSite(utype, unit:GetPosition())
-							--self.progress = not self.unit:Internal():Build(utype,p)
-							tqb = self
-							onsuccess = function( job, pos )
-								game:SendToConsole( "Job finished with success!" )
-								job.tqb:OnBuildingPlacementSuccess( job, pos )
-								game:SendToConsole( "Job results sent!" )
-							end
-							onfail = function( job )
-								game:SendToConsole( "Job finished with failure :(" )
-								job.tqb:OnBuildingPlacementFailure( job )
-							end
-							local job = {
-								start_position=unit:GetPosition(),
-								max_radius=500,
-								onSuccess=onsuccess,
-								onFail=onfail,
-								unittype=utype,
-								cleanup_on_unit_death=self.unit.engineID,
-								tqb=tqb
-							}
-							local success = self.ai.placementhandler:NewJob( job )
-							if success == false then
-								-- something went wrong
-								self.game:SendToConsole("Cannot build:"..value..", there was a problem and the placement algorithm rejected our request outright")
-								self.progress = true
-							end
-						end
-					else
-						self.progress = true
-					end
-				else
-					self.game:SendToConsole("Cannot build:"..value..", couldnt grab the unit type from the engine")
-					self.progress = true
-				end
-			else
-				self.progress = true
-			end
+			self.game:SendToConsole("Error: Unknown action task "..value.." given to a "..self.name)
+			local p = unit:GetPosition()
+			SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+			self:OnToNextTask()
 		end
+		return
+	end
+
+	utype = self.game:GetTypeByName(value)
+	if not utype then
+		local p = unit:GetPosition()
+		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		self.game:SendToConsole("Cannot build:"..value..", could not grab the unit type from the engine")
+		self:OnToNextTask()
+		return
+	end
+	if unit:CanBuild(utype) == false then
+		local p = unit:GetPosition()
+		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		self:OnToNextTask()
+		return
+	end
+	local success = false
+	if utype:Extractor() then
+		success = self:BuildExtractor(utype)
+	elseif unit:Type():IsFactory() then
+		success = self.unit:Internal():Build(utype)
+	else
+		success = self:BuildOnMap(utype)
+	end
+	if success ~= true then
+		self:OnToNextTask()
+		return
 	end
 end
 
+function onsuccess( job, pos )
+	job.tqb:OnBuildingPlacementSuccess( job, pos )
+end
+function onfail( job )
+	game:SendToConsole( "Job finished with failure :(" )
+	job.tqb:OnBuildingPlacementFailure( job )
+end
+
+function TaskQueueBehaviour:IsWaitingForPosition()
+	return self.placementInProgress
+end
+
+
+function TaskQueueBehaviour:BeginWaitingForPosition()
+	self.placementInProgress = true
+end
+
+function TaskQueueBehaviour:StopWaitingForPosition()
+	self.placementInProgress = false
+end
+
+function TaskQueueBehaviour:BuildOnMap(utype)
+	--p = self.map:FindClosestBuildSite(utype, unit:GetPosition())
+	--self.progress = not self.unit:Internal():Build(utype,p)
+	unit = self.unit:Internal()
+
+	local job = {
+		start_position=unit:GetPosition(),
+		max_radius=1500,
+		onSuccess=onsuccess,
+		onFail=onfail,
+		unittype=utype,
+		cleanup_on_unit_death=self.unit.engineID,
+		tqb=self
+	}
+	local success = self.ai.placementhandler:NewJob( job )
+	if success ~= true then
+		self:StopWaitingForPosition()
+		self.game:SendToConsole("Cannot build:"..value..", there was a problem and the placement algorithm rejected our request outright")
+		return false
+	end
+	self:BeginWaitingForPosition()
+	return true
+end
+
+function TaskQueueBehaviour:BuildExtractor(utype)
+	-- find a free spot!
+	unit = self.unit:Internal()
+	p = unit:GetPosition()
+	p = self.ai.metalspothandler:ClosestFreeSpot(utype,p)
+	if p == nil then
+		return false
+	end
+	return self.unit:Internal():Build(utype,p)
+end
+
+function TaskQueueBehaviour:OnToNextTask()
+	self.progress = true
+end
+
+function TaskQueueBehaviour:IsDoingSomething()
+	return ( self.progress == false )
+end
+
 function TaskQueueBehaviour:OnBuildingPlacementSuccess( job, pos )
-	self.progress = not self.unit:Internal():Build( job.unittype, pos )
+	self:StopWaitingForPosition()
+	local p = dump( pos )
+	self.game:SendToConsole("Shard recieved a location to build:"..job.unittype:Name() .. "at: "..p)
+	local success self.unit:Internal():Build( job.unittype, pos )
+	if success == false then
+		self.game:SendToConsole("Shard could not build:"..job.unittype:Name())
+		self:OnToNextTask()
+	else
+		self.game:SendToConsole("Shard sent build order for:"..job.unittype:Name())
+	end
 end
 
 function TaskQueueBehaviour:OnBuildingPlacementFailure( job )
+	self:StopWaitingForPosition()
 	self.game:SendToConsole("Shard could not find a location to build:"..job.unittype:Name())
-	self.progress = true
+	self:OnToNextTask()
 end
 
 function TaskQueueBehaviour:Activate()
