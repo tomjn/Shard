@@ -143,43 +143,7 @@ function TaskQueueBehaviour:ProgressQueue()
 		return
 	end
 	if type(val) == "table" then
-		local action = value.action
-		if action == "wait" then
-			t = TaskQueueWakeup(self)
-			tqb = self
-			self.ai.sleep:Wait({ wakeup = function() tqb:ProgressQueue() end, },value.frames)
-		elseif action == "move" then
-			self.unit:Internal():Move(value.position)
-		elseif action == "moverelative" then
-			local upos = unit:GetPosition()
-			local newpos = api.Position()
-			newpos.x = upos.x + value.position.x
-			newpos.y = upos.y + value.position.y
-			newpos.z = upos.z + value.position.z
-			self.unit:Internal():Move(newpos)
-		elseif action == "fight" then
-			self.unit:Internal():MoveAndFire(value.position)
-		elseif action == "fightrelative" then
-			local upos = self.unit:Internal():GetPosition()
-			local newpos = api.Position()
-			newpos.x = upos.x + value.position.x
-			newpos.y = upos.y + value.position.y
-			newpos.z = upos.z + value.position.z
-			self.unit:Internal():MoveAndFire(newpos)
-		elseif action == "patrol" then
-			self.unit:Internal():MoveAndPatrol(value.position)
-		elseif action == "patrolrelative" then
-			local upos = self.unit:Internal():GetPosition()
-			local newpos = api.Position()
-			newpos.x = upos.x + value.position.x
-			newpos.y = upos.y + value.position.y
-			newpos.z = upos.z + value.position.z
-			self.unit:Internal():MoveAndPatrol(newpos)
-		else
-			self.game:SendToConsole("Error: Unknown action task "..value.." given to a "..self.name)
-			self:DebugPoint("nothing")
-			self:OnToNextTask()
-		end
+		self:HandleActionTask( value )
 		return
 	end
 
@@ -206,6 +170,46 @@ function TaskQueueBehaviour:ProgressQueue()
 	if success ~= true then
 		self:OnToNextTask()
 		return
+	end
+end
+
+function TaskQueueBehaviour:HandleActionTask( task )
+	local action = task.action
+	if action == "wait" then
+		t = TaskQueueWakeup(self)
+		tqb = self
+		self.ai.sleep:Wait({ wakeup = function() tqb:ProgressQueue() end, },task.frames)
+	elseif action == "move" then
+		self.unit:Internal():Move(task.position)
+	elseif action == "moverelative" then
+		local upos = unit:GetPosition()
+		local newpos = api.Position()
+		newpos.x = upos.x + task.position.x
+		newpos.y = upos.y + task.position.y
+		newpos.z = upos.z + task.position.z
+		self.unit:Internal():Move(newpos)
+	elseif action == "fight" then
+		self.unit:Internal():MoveAndFire(task.position)
+	elseif action == "fightrelative" then
+		local upos = self.unit:Internal():GetPosition()
+		local newpos = api.Position()
+		newpos.x = upos.x + task.position.x
+		newpos.y = upos.y + task.position.y
+		newpos.z = upos.z + task.position.z
+		self.unit:Internal():MoveAndFire(newpos)
+	elseif action == "patrol" then
+		self.unit:Internal():MoveAndPatrol(task.position)
+	elseif action == "patrolrelative" then
+		local upos = self.unit:Internal():GetPosition()
+		local newpos = api.Position()
+		newpos.x = upos.x + task.position.x
+		newpos.y = upos.y + task.position.y
+		newpos.z = upos.z + task.position.z
+		self.unit:Internal():MoveAndPatrol(newpos)
+	else
+		self.game:SendToConsole("Error: Unknown action task "..value.." given to a "..self.name)
+		self:DebugPoint("nothing")
+		self:OnToNextTask()
 	end
 end
 
