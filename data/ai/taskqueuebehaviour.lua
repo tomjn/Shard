@@ -76,9 +76,7 @@ end
 
 function TaskQueueBehaviour:Update()
 	if not self:IsActive() then
-		unit = self.unit:Internal()
-		local p = unit:GetPosition()
-		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		self:DebugPoint("nothing")
 		return
 	end
 	local f = self.game:Frame()
@@ -105,16 +103,14 @@ end
 function TaskQueueBehaviour:ProgressQueue()
 	unit = self.unit:Internal()
 	if self:IsWaitingForPosition() then
-		local p = unit:GetPosition()
-		SendToUnsynced("shard_debug_position",p.x,p.z,"waiting")
+		self:DebugPoint("waiting")
 		return
 	end
 	if self.queue == nil then
 		if self:HasQueues() then
 			self.queue = self:GetQueue()
 		else
-			local p = unit:GetPosition()
-			SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+			self:DebugPoint("nothing")
 			return
 		end
 	end
@@ -124,15 +120,13 @@ function TaskQueueBehaviour:ProgressQueue()
 	if self.queue == nil then
 		self.game:SendToConsole("Warning: A "..self.name.." unit, has an empty task queue")
 		self:OnToNextTask()
-		local p = unit:GetPosition()
-		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		self:DebugPoint("nothing")
 		return
 	end
 	local idx, val = next(self.queue,self.idx)
 	self.idx = idx
 	if idx == nil then
-		local p = unit:GetPosition()
-		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		self:DebugPoint("nothing")
 		self.queue = self:GetQueue(name)
 		self:OnToNextTask()
 		return
@@ -144,8 +138,7 @@ function TaskQueueBehaviour:ProgressQueue()
 		value = val(self)
 	end
 	if value == "next" then
-		local p = unit:GetPosition()
-		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		self:DebugPoint("nothing")
 		self:OnToNextTask()
 		return
 	end
@@ -184,8 +177,7 @@ function TaskQueueBehaviour:ProgressQueue()
 			self.unit:Internal():MoveAndPatrol(newpos)
 		else
 			self.game:SendToConsole("Error: Unknown action task "..value.." given to a "..self.name)
-			local p = unit:GetPosition()
-			SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+			self:DebugPoint("nothing")
 			self:OnToNextTask()
 		end
 		return
@@ -193,15 +185,13 @@ function TaskQueueBehaviour:ProgressQueue()
 
 	utype = self.game:GetTypeByName(value)
 	if not utype then
-		local p = unit:GetPosition()
-		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		self:DebugPoint("nothing")
 		self.game:SendToConsole("Cannot build:"..value..", could not grab the unit type from the engine")
 		self:OnToNextTask()
 		return
 	end
 	if unit:CanBuild(utype) == false then
-		local p = unit:GetPosition()
-		SendToUnsynced("shard_debug_position",p.x,p.z,"nothing")
+		self:DebugPoint("nothing")
 		self:OnToNextTask()
 		return
 	end
@@ -307,4 +297,10 @@ end
 
 function TaskQueueBehaviour:Priority()
 	return 50
+end
+
+function TaskQueueBehaviour:DebugPoint( type )
+	local unit = self.unit:Internal()
+	local p = unit:GetPosition()
+	SendToUnsynced("shard_debug_position",p.x,p.z,type)
 end
