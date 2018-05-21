@@ -154,7 +154,7 @@ function TaskQueueBehaviour:ProgressQueue()
 		self:OnToNextTask()
 		return
 	end
-	if unit:CanBuild(utype) == false then
+	if unit:CanBuild(utype) ~= true then
 		self:DebugPoint("nothing")
 		self:OnToNextTask()
 		return
