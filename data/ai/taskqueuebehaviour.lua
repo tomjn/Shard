@@ -147,17 +147,22 @@ function TaskQueueBehaviour:ProgressQueue()
 		return
 	end
 
-	utype = self.game:GetTypeByName(value)
-	if not utype then
+	success = self:TryToBuild( value )
+	if success ~= true then
 		self:DebugPoint("nothing")
-		self.game:SendToConsole("Cannot build:"..value..", could not grab the unit type from the engine")
 		self:OnToNextTask()
 		return
 	end
+end
+
+function TaskQueueBehaviour:TryTobuild( unit_name )
+	utype = self.game:GetTypeByName(unit_name)
+	if not utype then
+		self.game:SendToConsole("Cannot build:"..unit_name..", could not grab the unit type from the engine")
+		return false
+	end
 	if unit:CanBuild(utype) ~= true then
-		self:DebugPoint("nothing")
-		self:OnToNextTask()
-		return
+		return false
 	end
 	local success = false
 	if utype:Extractor() then
@@ -167,10 +172,7 @@ function TaskQueueBehaviour:ProgressQueue()
 	else
 		success = self:BuildOnMap(utype)
 	end
-	if success ~= true then
-		self:OnToNextTask()
-		return
-	end
+	return success
 end
 
 function TaskQueueBehaviour:HandleActionTask( task )
