@@ -155,7 +155,7 @@ function TaskQueueBehaviour:ProgressQueue()
 	end
 end
 
-function TaskQueueBehaviour:TryTobuild( unit_name )
+function TaskQueueBehaviour:TryToBuild( unit_name )
 	utype = self.game:GetTypeByName(unit_name)
 	if not utype then
 		self.game:SendToConsole("Cannot build:"..unit_name..", could not grab the unit type from the engine")
