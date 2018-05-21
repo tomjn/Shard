@@ -135,7 +135,7 @@ function TaskQueueBehaviour:ProgressQueue()
 	local utype = nil
 	local value = val
 	if type(val) == "function" then
-		value = val(self)
+		value = val(self, self.ai, unit)
 	end
 	if value == "next" then
 		self:DebugPoint("nothing")
