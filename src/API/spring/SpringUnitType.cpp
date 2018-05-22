@@ -41,6 +41,16 @@ std::string CSpringUnitType::Name(){
 	return this->unitDef->GetName();
 }
 
+bool CSpringUnitType::CanDeploy(){
+	return false; // @TODO
+}
+bool CSpringUnitType::CanMorph(){
+	return false; // @TODO
+}
+bool CSpringUnitType::CanBuild(){
+	return false; // @TODO
+}
+
 float CSpringUnitType::ReclaimSpeed(){
 	return unitDef->GetReclaimSpeed();
 }

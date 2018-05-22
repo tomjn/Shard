@@ -108,6 +108,9 @@ bool CSpringUnit::CanBuild(){
 	return false;
 }
 
+bool CSpringUnit::CanMorph(){
+	return false;
+}
 
 bool CSpringUnit::CanAssistBuilding(IUnit* unit){
 	if (def != NULL)
@@ -116,6 +119,10 @@ bool CSpringUnit::CanAssistBuilding(IUnit* unit){
 	return false;
 }
 
+
+bool CSpringUnit::CanMorphWhenDeployed(){
+	return false;
+}
 
 bool CSpringUnit::CanMoveWhenDeployed(){
 	return false;
@@ -142,6 +149,13 @@ void CSpringUnit::Wait(int timeout){
 	}
 
 	this->unit->Wait(timeout);
+}
+
+void CSpringUnit::Deploy(){
+	if (!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in Deploy");
+		return;
+	}
 }
 
 void CSpringUnit::Stop(){
@@ -348,6 +362,14 @@ bool CSpringUnit::IsBeingBuilt(){
 		return false;
 	}
 	return unit->IsBeingBuilt();
+}
+
+bool CSpringUnit::IsMorphing(){
+	if(!unit) {
+		game->SendToConsole("shard-runtime warning: Unit was NULL in IsMorphing");
+		return false;
+	}
+	return false;
 }
 
 float CSpringUnit::GetHealth(){

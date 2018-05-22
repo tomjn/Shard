@@ -5,6 +5,11 @@ public:
 	virtual ~IUnitType(){}
 	virtual std::string Name()=0;
 
+
+	virtual bool CanDeploy()=0;
+	virtual bool CanMorph()=0;
+	virtual bool CanBuild()=0;
+
 	virtual float ReclaimSpeed()=0;
 	virtual bool Extractor()=0;
 	virtual float ResourceCost(int idx)=0;
