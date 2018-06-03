@@ -1,42 +1,37 @@
 
-ShardSpringUnitType = class(function(a)
-   --
+ShardUnitType = class(function(a, id)
+	a.id = id
+	a.def = UnitDefs[id]
 end)
 
-
-function ShardSpringUnitType:Init( id )
-	self.id = id
-	self.def = UnitDefs[id]
-end
-
-function ShardSpringUnitType:ID()
+function ShardUnitType:ID()
 	return self.id
 end
 
-function ShardSpringUnitType:Name()
+function ShardUnitType:Name()
 	return self.def.name
 end
 
-function ShardSpringUnitType:CanMove()
+function ShardUnitType:CanMove()
 	return self.def.canMove
 end
 
-function ShardSpringUnitType:CanDeploy()
+function ShardUnitType:CanDeploy()
 	-- what does deploy mean for Spring?
 	return false
 end
 
-function ShardSpringUnitType:CanMorph()
+function ShardUnitType:CanMorph()
 	-- what does deploy mean for Spring?
 	return false
 end
 
-function ShardSpringUnitType:IsFactory()
+function ShardUnitType:IsFactory()
 	-- what does deploy mean for Spring?
 	return self.def.isFactory
 end
 
-function ShardSpringUnitType:CanBuild(type)
+function ShardUnitType:CanBuild(type)
 	if not type then
 		return self.def.buildOptions and #self.def.buildOptions > 0
 	end
@@ -51,10 +46,10 @@ function ShardSpringUnitType:CanBuild(type)
 	return self.canBuildType[type:ID()]
 end
 
-function ShardSpringUnitType:WeaponCount()
+function ShardUnitType:WeaponCount()
 	return #self.def.weapons -- test this. not sure the weapons table will give its length by the # operator
 end
 
-function ShardSpringUnitType:Extractor()
+function ShardUnitType:Extractor()
 	return self.def.extractsMetal > 0
 end

@@ -2,6 +2,8 @@
 ShardUnit = class(function(a, id)
 	a.id = id
 	a.className = "unit"
+	local udefid = Spring.GetUnitDefID(id)
+	a.type = ShardUnitType(udefid)
 end)
 
 function ShardUnit:ID()
@@ -13,10 +15,7 @@ function ShardUnit:Team()
 end
 
 function ShardUnit:Name()
-	if not self.name then
-		self.name = UnitDefs[Spring.GetUnitDefID(self.id)].name
-	end
-	return self.name
+	return self.type:Name()
 end
 
 
@@ -31,11 +30,6 @@ end
 
 
 function ShardUnit:Type()
-	if not self.type then
-		-- local ai = Shard.AIs[1]
-		-- self.type = ai.game:GetTypeByName( self:Name() )
-		self.type = game:GetTypeByName( self:Name() )
-	end
 	return self.type
 end
 
