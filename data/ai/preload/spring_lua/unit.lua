@@ -150,7 +150,7 @@ function ShardUnit:DGun(p)
 	return self:AltAttack( p )
 end
 
-function ShardUnit:AltAttack(p)
+function ShardUnit:ManualFire(p)
 	Spring.GiveOrderToUnit( self.id, CMD.DGUN, { p.x, p.y, p.z }, {} )
 	return true
 end

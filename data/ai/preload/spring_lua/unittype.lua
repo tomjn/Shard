@@ -155,6 +155,38 @@ function ShardUnitType:CanKamikaze()
 	return self.def.canKamikaze
 end
 
+function ShardUnitType:OnOffable()
+	return self.def.onOffable
+end
+
+function ShardUnitType:HasStealth()
+	return self.def.stealth
+end
+
+function ShardUnitType:HasSonarStealth()
+	return self.def.sonarStealth
+end
+
+function ShardUnitType:LosRadius()
+	return self.def.losRadius
+end
+
+function ShardUnitType:RadarRadius()
+	return self.def.radarRadius
+end
+
+function ShardUnitType:SonarRadius()
+	return self.def.sonarDistance
+end
+
+function ShardUnitType:SeismicRadius()
+	return self.def.seismicRadius
+end
+
+function ShardUnitType:CanManualFire()
+	return self.def.canManualFire
+end
+
 function ShardUnitType:isFeatureOnBuilt()
 	return self.def.isFeature
 end
@@ -165,4 +197,40 @@ end
 
 function ShardUnitType:BuildOptionsByName()
 	return self.def.buildOptions
+end
+
+function ShardUnitType:Repairable()
+	return self.def.repairable
+end
+
+function ShardUnitType:Capturable()
+	return self.def.capturable
+end
+
+function ShardUnitType:ReclaimSpeed()
+	return self.def.reclaimSpeed
+end
+
+function ShardUnitType:RepairSpeed()
+	return self.def.repairSpeed
+end
+
+function ShardUnitType:ResurrectSpeed()
+	return self.def.resurrectSpeed
+end
+
+function ShardUnitType:CaptureSpeed()
+	return self.def.captureSpeed
+end
+
+function ShardUnitType:TerraformSpeed()
+	return self.def.terraformSpeed
+end
+
+function ShardUnitType:FootprintX()
+	return self.def.footprintX
+end
+
+function ShardUnitType:FootprintZ()
+	return self.def.footprintZ
 end
