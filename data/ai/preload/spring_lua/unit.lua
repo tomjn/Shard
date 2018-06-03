@@ -340,10 +340,6 @@ function ShardUnit:GetPosition()
 end
 
 
-function ShardUnit:MaxRange()
-	return Spring.GetUnitMaxRange( self.id )
-end
-
 function ShardUnit:GetHealth()
 	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
 	return health
