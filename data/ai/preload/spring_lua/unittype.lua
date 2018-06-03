@@ -12,6 +12,10 @@ function ShardUnitType:Name()
 	return self.def.name
 end
 
+function ShardUnitType:Source()
+	return self.def
+end
+
 function ShardUnitType:CanMove()
 	return self.def.canMove
 end
