@@ -146,12 +146,6 @@ function ShardUnit:Repair( unit )
 	return true
 end
 
-function ShardUnit:Attack( unit )
-	local gid = self:Unit_to_id( unit )
-	Spring.GiveOrderToUnit( self.id, CMD.ATTACK, { gid }, {} )
-	return true
-end
-
 function ShardUnit:DGun(p)
 	return self:AltAttack( p )
 end
@@ -252,6 +246,12 @@ function ShardUnit:AreaRepair( p, radius )
 	return true
 end
 
+function ShardUnit:RestoreTerrain( p, radius )
+	local gid = self:Unit_to_id( unit )
+	Spring.GiveOrderToUnit( self.id, CMD.RESTORE, { p.x, p.y, p.z, radius }, {} )
+	return true
+end
+
 function ShardUnit:Capture( unit )
 	local gid = self:Unit_to_id( unit )
 	Spring.GiveOrderToUnit( self.id, CMD.CAPTURE, { gid }, {} )
@@ -264,12 +264,40 @@ function ShardUnit:AreaCapture( p, radius )
 	return true
 end
 
-
 function ShardUnit:MorphInto( type )
-	Spring.GiveOrderToUnit( self.id, CMD.MORPH, { unit:ID() }, {} )
+	Spring.GiveOrderToUnit( self.id, CMD.MORPH, { self.id }, {} )
 	return true
 end
 
+function ShardUnit:HoldFire()
+	Spring.GiveOrderToUnit( self.id, CMD.FIRE_STATE, { 0 }, {} )
+	return true
+end
+
+function ShardUnit:ReturnFire()
+	Spring.GiveOrderToUnit( self.id, CMD.FIRE_STATE, { 1 }, {} )
+	return true
+end
+
+function ShardUnit:FireAtWill()
+	Spring.GiveOrderToUnit( self.id, CMD.FIRE_STATE, { 2 }, {} )
+	return true
+end
+
+function ShardUnit:HoldPosition()
+	Spring.GiveOrderToUnit( self.id, CMD.MOVE_STATE, { 0 }, {} )
+	return true
+end
+
+function ShardUnit:Maneuvre()
+	Spring.GiveOrderToUnit( self.id, CMD.MOVE_STATE, { 1 }, {} )
+	return true
+end
+
+function ShardUnit:Roam()
+	Spring.GiveOrderToUnit( self.id, CMD.MOVE_STATE, { 2 }, {} )
+	return true
+end
 
 function ShardUnit:GetPosition()
 	local bpx, bpy, bpz = Spring.GetUnitPosition(self.id)
