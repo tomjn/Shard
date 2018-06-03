@@ -162,3 +162,7 @@ end
 function ShardUnitType:TargetingPriority()
 	return self.def.power -- buildCostMetal + (buildCostEnergy / 60.0) in spring engine
 end
+
+function ShardUnitType:BuildOptionsByName()
+	return self.def.buildOptions
+end

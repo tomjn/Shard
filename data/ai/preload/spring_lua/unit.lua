@@ -289,7 +289,7 @@ function ShardUnit:HoldPosition()
 	return true
 end
 
-function ShardUnit:Maneuvre()
+function ShardUnit:Manoeuvre()
 	Spring.GiveOrderToUnit( self.id, CMD.MOVE_STATE, { 1 }, {} )
 	return true
 end
