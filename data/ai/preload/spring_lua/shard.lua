@@ -22,7 +22,7 @@ end
 function Shard:shardify_unit( unitID )
 	if not unitID then return end
 	if not self.unitsByID[unitID] then
-		local unit = ShardSpringUnit()
+		local unit = ShardUnit( unitID )
 		unit:Init(unitID)
 		self.unitsByID[unitID] = unit
 	end

@@ -1,23 +1,18 @@
 
-ShardSpringUnit = class(function(a)
-   --
+ShardUnit = class(function(a, id)
+	a.id = id
+	a.className = "unit"
 end)
 
-function ShardSpringUnit:Init( id )
-	self.id = id
-	self.className = "unit"
-end
-
-function ShardSpringUnit:ID()
+function ShardUnit:ID()
 	return self.id
 end
 
-function ShardSpringUnit:Team()
+function ShardUnit:Team()
 	return Spring.GetUnitTeam(self.id)
 end
 
-
-function ShardSpringUnit:Name()
+function ShardUnit:Name()
 	if not self.name then
 		self.name = UnitDefs[Spring.GetUnitDefID(self.id)].name
 	end
@@ -25,27 +20,17 @@ function ShardSpringUnit:Name()
 end
 
 
-function ShardSpringUnit:IsAlive()
+function ShardUnit:IsAlive()
 	return not Spring.GetUnitIsDead(self.id)
 end
 
 
-function ShardSpringUnit:IsCloaked()
+function ShardUnit:IsCloaked()
 	return Spring.GetUnitIsCloaked(self.id)
 end
 
 
-function ShardSpringUnit:Forget()
-	return 0
-end
-
-
-function ShardSpringUnit:Forgotten()
-	return false
-end
-
-
-function ShardSpringUnit:Type()
+function ShardUnit:Type()
 	if not self.type then
 		-- local ai = Shard.AIs[1]
 		-- self.type = ai.game:GetTypeByName( self:Name() )
@@ -55,82 +40,82 @@ function ShardSpringUnit:Type()
 end
 
 
-function ShardSpringUnit:CanMove()
+function ShardUnit:CanMove()
 	return self:Type():CanMove()
 end
 
 
-function ShardSpringUnit:CanDeploy()
+function ShardUnit:CanDeploy()
 	return self:Type():CanDeploy()
 end
 
-function ShardSpringUnit:CanMorph()
+function ShardUnit:CanMorph()
 	return self:Type():CanMorph()
 end
 
-function ShardSpringUnit:IsBeingBuilt()
+function ShardUnit:IsBeingBuilt()
 	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
 	return buildProgress < 1
 end
 
-function ShardSpringUnit:IsMorphing()
+function ShardUnit:IsMorphing()
 	return false
 end
 
 
-function ShardSpringUnit:CanAssistBuilding( unit )-- IUnit* unit) -- the unit that is under construction to help with
+function ShardUnit:CanAssistBuilding( unit )-- IUnit* unit) -- the unit that is under construction to help with
 	return true -- not sure when this would not be true in Spring
 	-- return false
 end
 
 
-function ShardSpringUnit:CanMoveWhenDeployed()
+function ShardUnit:CanMoveWhenDeployed()
 	-- what does deployed mean in the case of Spring?
 	return false
 end
 
 
-function ShardSpringUnit:CanFireWhenDeployed()
+function ShardUnit:CanFireWhenDeployed()
 	return false
 end
 
-function ShardSpringUnit:CanMorphWhenDeployed()
+function ShardUnit:CanMorphWhenDeployed()
 	return false
 end
 
-function ShardSpringUnit:CanBuildWhenDeployed()
-	return false
-end
-
-
-function ShardSpringUnit:CanBuildWhenNotDeployed()
+function ShardUnit:CanBuildWhenDeployed()
 	return false
 end
 
 
-function ShardSpringUnit:Stop()
+function ShardUnit:CanBuildWhenNotDeployed()
+	return false
+end
+
+
+function ShardUnit:Stop()
 	Spring.GiveOrderToUnit( self.id, CMD.STOP, {}, {} )
 	return true
 end
 
 
-function ShardSpringUnit:Move(p)
+function ShardUnit:Move(p)
 	Spring.GiveOrderToUnit( self.id, CMD.MOVE, { p.x, p.y, p.z }, {} )
 	return true
 end
 
 
-function ShardSpringUnit:MoveAndFire(p)
+function ShardUnit:MoveAndFire(p)
 	Spring.GiveOrderToUnit( self.id, CMD.FIGHT, { p.x, p.y, p.z }, {} )
 	return true
 end
 
-function ShardSpringUnit:MoveAndPatrol(p)
+function ShardUnit:MoveAndPatrol(p)
 	Spring.GiveOrderToUnit( self.id, CMD.PATROL, { p.x, p.y, p.z }, {} )
 	return true
 end
 
-function ShardSpringUnit:Build(t, p) -- IUnitType*
+function ShardUnit:Build(t, p) -- IUnitType*
 	if type(t) == "string" then
 		-- local ai = Shard.AIs[1]
 		-- t = ai.game:GetTypeByName(t)
@@ -141,13 +126,13 @@ function ShardSpringUnit:Build(t, p) -- IUnitType*
 	return true
 end
 
-function ShardSpringUnit:AreaReclaim( p, radius )--Position p, double radius)
+function ShardUnit:AreaReclaim( p, radius )--Position p, double radius)
 	Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { p.x, p.y, p.z, radius }, {} )
 	return true
 end
 
 
-function ShardSpringUnit:Reclaim( thing )--IMapFeature* mapFeature)
+function ShardUnit:Reclaim( thing )--IMapFeature* mapFeature)
 	if not thing then return end
 	if thing.className == "feature" then
 		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { thing:ID() + Game.maxUnits }, {} )
@@ -157,25 +142,25 @@ function ShardSpringUnit:Reclaim( thing )--IMapFeature* mapFeature)
 	return true
 end
 
-function ShardSpringUnit:Attack( unit )
+function ShardUnit:Attack( unit )
 	Spring.GiveOrderToUnit( self.id, CMD.ATTACK, { unit:ID() }, {} )
 	return true
 end
 
 
-function ShardSpringUnit:Repair( unit )
+function ShardUnit:Repair( unit )
 	Spring.GiveOrderToUnit( self.id, CMD.REPAIR, { unit:ID() }, {} )
 	return true
 end
 
 
-function ShardSpringUnit:MorphInto( type )
+function ShardUnit:MorphInto( type )
 	Spring.GiveOrderToUnit( self.id, CMD.MORPH, { unit:ID() }, {} )
 	return true
 end
 
 
-function ShardSpringUnit:GetPosition()
+function ShardUnit:GetPosition()
 	local bpx, bpy, bpz = Spring.GetUnitPosition(self.id)
 	if not bpx then
 		Spring.Echo(self:Name(), self.id, "nil position")
@@ -189,34 +174,34 @@ function ShardSpringUnit:GetPosition()
 end
 
 
-function ShardSpringUnit:GetHealth()
+function ShardUnit:GetHealth()
 	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
 	return health
 end
 
 
-function ShardSpringUnit:GetMaxHealth()
+function ShardUnit:GetMaxHealth()
 	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
 	return maxHealth
 end
 
 
-function ShardSpringUnit:WeaponCount()
+function ShardUnit:WeaponCount()
 	return self:Type():WeaponCount()
 end
 
 
-function ShardSpringUnit:MaxWeaponsRange()
+function ShardUnit:MaxWeaponsRange()
 	return Spring.GetUnitMaxRange(self.id)
 end
 
 
-function ShardSpringUnit:CanBuild( type )
+function ShardUnit:CanBuild( type )
 	return self:Type():CanBuild(type)
 end
 
 
-function ShardSpringUnit:GetResourceUsage( idx )
+function ShardUnit:GetResourceUsage( idx )
 	local metalMake, metalUse, energyMake, energyUse = Spring.GetUnitResources(self.id)
 	local SResourceTransfer = { gameframe = Spring.GameFrame(), rate = 1 }
 	if Shard.resourceIds[idx] == "metal" then
@@ -230,7 +215,7 @@ function ShardSpringUnit:GetResourceUsage( idx )
 end
 
 
-function ShardSpringUnit:ExecuteCustomCommand(  cmdId, params_list, options, timeOut )
+function ShardUnit:ExecuteCustomCommand(  cmdId, params_list, options, timeOut )
 	params_list = params_list or {}
 	options = options or {}
 	if params_list and params_list.push_back then
@@ -241,13 +226,13 @@ function ShardSpringUnit:ExecuteCustomCommand(  cmdId, params_list, options, tim
 	return 0
 end
 
-function ShardSpringUnit:DrawHighlight( color, label, channel )
+function ShardUnit:DrawHighlight( color, label, channel )
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawAddUnit', self.id, color[1], color[2], color[3], color[4], label, ai.game:GetTeamID(), channel)
 end
 
-function ShardSpringUnit:EraseHighlight( color, label, channel )
+function ShardUnit:EraseHighlight( color, label, channel )
 	channel = channel or 1
 	color = color or {}
 	SendToUnsynced('ShardDrawEraseUnit', self.id, color[1], color[2], color[3], color[4], label, ai.game:GetTeamID(), channel)
