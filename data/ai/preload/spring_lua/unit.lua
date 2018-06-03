@@ -6,6 +6,19 @@ ShardUnit = class(function(a, id)
 	a.type = ShardUnitType(udefid)
 end)
 
+function ShardUnit:Unit_to_id( unit )
+	local gid = unit
+	if type( unit ) == 'table' then
+		if unit['id'] ~= nil then
+			gid = unit.id
+		else
+			-- error!
+			return false
+		end
+	end
+	return gid
+end
+
 function ShardUnit:ID()
 	return self.id
 end
@@ -86,22 +99,79 @@ function ShardUnit:CanBuildWhenNotDeployed()
 	return false
 end
 
-
 function ShardUnit:Stop()
 	Spring.GiveOrderToUnit( self.id, CMD.STOP, {}, {} )
 	return true
 end
 
+function ShardUnit:Stockpile()
+	Spring.GiveOrderToUnit( self.id, CMD.STOCKPILE, {}, {} )
+	return true
+end
+
+function ShardUnit:SelfDestruct()
+	Spring.GiveOrderToUnit( self.id, CMD.SELFD, {}, {} )
+	return true
+end
+
+function ShardUnit:Cloak()
+	Spring.GiveOrderToUnit( self.id, CMD.CLOAK, { 1 }, {} )
+	return true
+end
+
+function ShardUnit:UnCloak()
+	Spring.GiveOrderToUnit( self.id, CMD.CLOAK, { 0 }, {} )
+	return true
+end
+
+function ShardUnit:Guard( unit )
+	local gid = self:Unit_to_id( unit )
+	Spring.GiveOrderToUnit( self.id, CMD.GUARD, { gid }, {} )
+	return true
+end
+
+function ShardUnit:Repair( unit )
+	local gid = self:Unit_to_id( unit )
+	Spring.GiveOrderToUnit( self.id, CMD.REPAIR, { gid }, {} )
+	return true
+end
+
+function ShardUnit:Attack( unit )
+	local gid = self:Unit_to_id( unit )
+	Spring.GiveOrderToUnit( self.id, CMD.ATTACK, { gid }, {} )
+	return true
+end
+
+function ShardUnit:DGun(p)
+	return self:AltAttack( p )
+end
+
+function ShardUnit:AltAttack(p)
+	Spring.GiveOrderToUnit( self.id, CMD.DGUN, { p.x, p.y, p.z }, {} )
+	return true
+end
 
 function ShardUnit:Move(p)
 	Spring.GiveOrderToUnit( self.id, CMD.MOVE, { p.x, p.y, p.z }, {} )
 	return true
 end
 
+function ShardUnit:AttackMove(p)
+	return self:MoveAndFire(p)
+end
 
 function ShardUnit:MoveAndFire(p)
 	Spring.GiveOrderToUnit( self.id, CMD.FIGHT, { p.x, p.y, p.z }, {} )
 	return true
+end
+
+function ShardUnit:AreaAttack(p,radius)
+	Spring.GiveOrderToUnit( self.id, CMD.AREA_ATTACK, { p.x, p.y, p.z, radius }, {} )
+	return true
+end
+
+function ShardUnit:Patrol(p)
+	return self:MoveAndPatrol(p)
 end
 
 function ShardUnit:MoveAndPatrol(p)
