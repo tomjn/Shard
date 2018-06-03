@@ -124,6 +124,16 @@ function ShardUnit:UnCloak()
 	return true
 end
 
+function ShardUnit:TurnOn()
+	Spring.GiveOrderToUnit( self.id, CMD.ONOFF, { 1 }, {} )
+	return true
+end
+
+function ShardUnit:TurnOff()
+	Spring.GiveOrderToUnit( self.id, CMD.ONOFF, { 0 }, {} )
+	return true
+end
+
 function ShardUnit:Guard( unit )
 	local gid = self:Unit_to_id( unit )
 	Spring.GiveOrderToUnit( self.id, CMD.GUARD, { gid }, {} )
@@ -165,11 +175,6 @@ function ShardUnit:MoveAndFire(p)
 	return true
 end
 
-function ShardUnit:AreaAttack(p,radius)
-	Spring.GiveOrderToUnit( self.id, CMD.AREA_ATTACK, { p.x, p.y, p.z, radius }, {} )
-	return true
-end
-
 function ShardUnit:Patrol(p)
 	return self:MoveAndPatrol(p)
 end
@@ -190,30 +195,72 @@ function ShardUnit:Build(t, p) -- IUnitType*
 	return true
 end
 
+
+function ShardUnit:Reclaim( thing )--IMapFeature* mapFeature)
+	if not thing then return end
+	local gid = self:Unit_to_id( unit )
+	if thing.className == "feature" then
+		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { gid + Game.maxUnits }, {} )
+	elseif thing.className == "unit" then
+		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { gid }, {} )
+	end
+	return true
+end
+
 function ShardUnit:AreaReclaim( p, radius )--Position p, double radius)
 	Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { p.x, p.y, p.z, radius }, {} )
 	return true
 end
 
 
-function ShardUnit:Reclaim( thing )--IMapFeature* mapFeature)
+function ShardUnit:Ressurect( thing )--IMapFeature* mapFeature)
 	if not thing then return end
+	local gid = self:Unit_to_id( unit )
 	if thing.className == "feature" then
-		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { thing:ID() + Game.maxUnits }, {} )
+		Spring.GiveOrderToUnit( self.id, CMD.RESURRECT, { gid + Game.maxUnits }, {} )
 	elseif thing.className == "unit" then
-		Spring.GiveOrderToUnit( self.id, CMD.RECLAIM, { thing:ID() }, {} )
+		Spring.GiveOrderToUnit( self.id, CMD.RESURRECT, { gid }, {} )
 	end
 	return true
 end
 
-function ShardUnit:Attack( unit )
-	Spring.GiveOrderToUnit( self.id, CMD.ATTACK, { unit:ID() }, {} )
+function ShardUnit:AreaRESURRECT( p, radius )--Position p, double radius)
+	Spring.GiveOrderToUnit( self.id, CMD.RESURRECT, { p.x, p.y, p.z, radius }, {} )
 	return true
 end
 
+function ShardUnit:Attack( unit )
+	local gid = self:Unit_to_id( unit )
+	Spring.GiveOrderToUnit( self.id, CMD.ATTACK, { gid }, {} )
+	return true
+end
+
+function ShardUnit:AreaAttack(p,radius)
+	Spring.GiveOrderToUnit( self.id, CMD.AREA_ATTACK, { p.x, p.y, p.z, radius }, {} )
+	return true
+end
 
 function ShardUnit:Repair( unit )
-	Spring.GiveOrderToUnit( self.id, CMD.REPAIR, { unit:ID() }, {} )
+	local gid = self:Unit_to_id( unit )
+	Spring.GiveOrderToUnit( self.id, CMD.REPAIR, { gid }, {} )
+	return true
+end
+
+function ShardUnit:AreaRepair( p, radius )
+	local gid = self:Unit_to_id( unit )
+	Spring.GiveOrderToUnit( self.id, CMD.REPAIR, { p.x, p.y, p.z, radius }, {} )
+	return true
+end
+
+function ShardUnit:Capture( unit )
+	local gid = self:Unit_to_id( unit )
+	Spring.GiveOrderToUnit( self.id, CMD.CAPTURE, { gid }, {} )
+	return true
+end
+
+function ShardUnit:AreaCapture( p, radius )
+	local gid = self:Unit_to_id( unit )
+	Spring.GiveOrderToUnit( self.id, CMD.CAPTURE, { p.x, p.y, p.z, radius }, {} )
 	return true
 end
 
