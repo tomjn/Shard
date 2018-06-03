@@ -57,3 +57,108 @@ end
 function ShardUnitType:Extractor()
 	return self.def.extractsMetal > 0
 end
+
+function ShardUnitType:ExtractorEfficiency()
+	return self.def.extractsMetal
+end
+
+
+function ShardUnitType:CanAttack()
+	return self.def.canAttack
+end
+
+function ShardUnitType:CanCloak()
+	return self.def.canCloak
+end
+
+function ShardUnitType:CanAttackMove()
+	return self:CanFight()
+end
+
+function ShardUnitType:CanFight()
+	return self.def.canFight
+end
+
+function ShardUnitType:CanPatrol()
+	return self.def.canPatrol
+end
+
+function ShardUnitType:CanGuard()
+	return self.def.canGuard
+end
+
+function ShardUnitType:CanCloak()
+	return self.def.canCloak
+end
+
+function ShardUnitType:CanSelfDestruct()
+	return self.def.canSelfDestruct
+end
+
+function ShardUnitType:CanCloak()
+	return self.def.canCloak
+end
+
+function ShardUnitType:CanRestore()
+	return self.def.canRestore
+end
+
+function ShardUnitType:CanRepair()
+	return self.def.canCloak
+end
+
+function ShardUnitType:CanReclaim()
+	return self.def.canReclaim
+end
+
+function ShardUnitType:CanResurrect()
+	return self.def.canResurrect
+end
+
+function ShardUnitType:CanCapture()
+	return self.def.canCloak
+end
+
+function ShardUnitType:CanAssist()
+	return self.def.canAssist
+end
+
+function ShardUnitType:CanBeAssisted()
+	return self.def.canBeAssisted
+end
+
+function ShardUnitType:CanSelfRepair()
+	return self.def.canSelfRepair
+end
+
+function ShardUnitType:IsAirbase()
+	return self.def.isAirbase
+end
+
+function ShardUnitType:CanHover()
+	return self.def.canHover
+end
+
+function ShardUnitType:CanFly()
+	return self.def.canFly
+end
+
+function ShardUnitType:CanSubmerge()
+	return self.def.canSubmerge
+end
+
+function ShardUnitType:CanBeTransported()
+	return not self.def.cantBeTransported
+end
+
+function ShardUnitType:CanKamikaze()
+	return self.def.canKamikaze
+end
+
+function ShardUnitType:isFeatureOnBuilt()
+	return self.def.isFeature
+end
+
+function ShardUnitType:TargetingPriority()
+	return self.def.power -- buildCostMetal + (buildCostEnergy / 60.0) in spring engine
+end
