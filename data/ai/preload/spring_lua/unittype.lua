@@ -12,8 +12,24 @@ function ShardUnitType:Name()
 	return self.def.name
 end
 
+function ShardUnitType:HumanName()
+	return self.def.humanName
+end
+
+function ShardUnitType:Description()
+	return self.def.tooltip
+end
+
 function ShardUnitType:Source()
 	return self.def
+end
+
+function ShardUnitType:IsBuilder()
+	return self.def.isBuilder
+end
+
+function ShardUnitType:BuildRange()
+	return self.def.buildDistance
 end
 
 function ShardUnitType:CanMove()
@@ -215,6 +231,10 @@ function ShardUnitType:RepairSpeed()
 	return self.def.repairSpeed
 end
 
+function ShardUnitType:MaxRepairSpeed()
+	return self.def.maxRepairSpeed
+end
+
 function ShardUnitType:ResurrectSpeed()
 	return self.def.resurrectSpeed
 end
@@ -233,4 +253,36 @@ end
 
 function ShardUnitType:FootprintZ()
 	return self.def.footprintZ
+end
+
+function ShardUnitType:maxVelocity()
+	return self.def.speed
+end
+
+function ShardUnitType:MaxAcceleration()
+	return self.def.maxAcc
+end
+
+function ShardUnitType:MaxDeceleration()
+	return self.def.maxDec
+end
+
+function ShardUnitType:BuildSpeed()
+	return self.def.buildSpeed -- Time to build = (buildTime / buildspeed) * 32
+end
+
+function ShardUnitType:BuildTime()
+	return self.def.buildTime -- Time to build = (buildTime / buildspeed) * 32
+end
+
+function ShardUnitType:BuildCostMetal()
+	return self.def.buildCostMetal
+end
+
+function ShardUnitType:BuildCostEnergy()
+	return self.def.buildCostEnergy
+end
+
+function ShardUnitType:Health()
+	return self.def.health
 end
