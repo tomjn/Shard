@@ -27,6 +27,23 @@ function ShardUnit:Team()
 	return Spring.GetUnitTeam(self.id)
 end
 
+function ShardUnit:Radius()
+	return Spring.GetUnitRadius(self.id)
+end
+
+function ShardUnit:AllyTeam()
+	return Spring.GetUnitAllyTeam(self.id)
+end
+
+function ShardUnit:Neutral()
+	return Spring.GetUnitNeutral(self.id)
+end
+
+function ShardUnit:Stunned()
+	local stunned_or_inbuild, stunned, inbuild = Spring.GetUnitIsStunned(self.id)
+	return stunned
+end
+
 function ShardUnit:Name()
 	return self.type:Name()
 end
@@ -38,7 +55,17 @@ end
 
 
 function ShardUnit:IsCloaked()
+	return self:Cloaked()
+end
+
+function ShardUnit:Cloaked()
 	return Spring.GetUnitIsCloaked(self.id)
+end
+
+
+function ShardUnit:CurrentStockpile()
+	local numStockpiled, numStockpileQued, buildPercent = Spring.GetUnitStockpile(self.id)
+	return numStockpiled
 end
 
 
@@ -313,6 +340,10 @@ function ShardUnit:GetPosition()
 end
 
 
+function ShardUnit:MaxRange()
+	return Spring.GetUnitMaxRange( self.id )
+end
+
 function ShardUnit:GetHealth()
 	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
 	return health
@@ -322,6 +353,21 @@ end
 function ShardUnit:GetMaxHealth()
 	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
 	return maxHealth
+end
+
+function ShardUnit:ParalysisDamage()
+	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
+	return paralyzeDamage
+end
+
+function ShardUnit:CaptureProgress()
+	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
+	return captureProgress
+end
+
+function ShardUnit:BuildProgress()
+	local health, maxHealth, paralyzeDamage, captureProgress, buildProgress = Spring.GetUnitHealth( self.id )
+	return buildProgress
 end
 
 
