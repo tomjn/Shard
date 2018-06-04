@@ -83,7 +83,7 @@ function TaskQueueBehaviour:Update()
 	local f = game:Frame()
 	local s = self.countdown
 	if self.progress == true then
-	--if math.mod(f,3) == 0 then
+	--if math.fmod(f,3) == 0 then
 		if (ai.tqblastframe ~= f) or (ai.tqblastframe == nil) or (self.countdown == 15) then
 			self.countdown = 0
 			ai.tqblastframe = f
