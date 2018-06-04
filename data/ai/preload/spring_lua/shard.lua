@@ -34,7 +34,10 @@ function Shard:unshardify_unit( unitID )
 end
 
 function Shard:shardify_unittype( unitDefID )
-	if not unitDefID then return end
+	if not unitDefID then
+		Spring.Echo( 'shard: error: shardify_unittype recieved "'..unitDefID..'" of type "'.. type(unitDefID).. '" ' )
+		return nil
+	end
 	if not self.unittypesByID[unitDefID] then
 		local unittype = ShardUnitType(unitDefID)
 		self.unittypesByID[unitDefID] = unittype
