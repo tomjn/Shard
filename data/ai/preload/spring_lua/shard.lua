@@ -23,7 +23,6 @@ function Shard:shardify_unit( unitID )
 	if not unitID then return end
 	if not self.unitsByID[unitID] then
 		local unit = ShardUnit( unitID )
-		unit:Init(unitID)
 		self.unitsByID[unitID] = unit
 	end
 	return self.unitsByID[unitID]
@@ -37,8 +36,7 @@ end
 function Shard:shardify_unittype( unitDefID )
 	if not unitDefID then return end
 	if not self.unittypesByID[unitDefID] then
-		local unittype = ShardSpringUnitType()
-		unittype:Init(unitDefID)
+		local unittype = ShardUnitType()
 		self.unittypesByID[unitDefID] = unittype
 	end
 	return self.unittypesByID[unitDefID]
