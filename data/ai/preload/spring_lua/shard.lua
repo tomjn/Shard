@@ -36,7 +36,7 @@ end
 function Shard:shardify_unittype( unitDefID )
 	if not unitDefID then return end
 	if not self.unittypesByID[unitDefID] then
-		local unittype = ShardUnitType()
+		local unittype = ShardUnitType(unitDefID)
 		self.unittypesByID[unitDefID] = unittype
 	end
 	return self.unittypesByID[unitDefID]
