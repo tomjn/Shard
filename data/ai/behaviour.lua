@@ -5,9 +5,6 @@ function Behaviour:init()
 	self.priority = 0
 end
 
-function Behaviour:Init()
-end
-
 function Behaviour:Update()
 end
 
@@ -51,6 +48,7 @@ end
 
 function Behaviour:SetUnit(unit)
 	self.unit = unit
+	self.owner = unit:Internal()
 	self.engineID = unit.engineID
 end
 
