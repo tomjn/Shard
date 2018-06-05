@@ -52,6 +52,10 @@ function Behaviour:SetUnit(unit)
 	self.engineID = unit.engineID
 end
 
+function Behaviour:Owner()
+	return self.owner
+end
+
 function Behaviour:SetAI(ai)
 	self.ai = ai
 	self.game = ai.game
