@@ -11,7 +11,3 @@ function dump(o)
    end
 end
 require "boot"
-shard_include "ai"
-ai = ShardAI()
-ai:Init()
-u = UnitHandler(ai)

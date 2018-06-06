@@ -12,8 +12,7 @@ function UnitHandler:Init()
 	self.units = {}
 	self.myUnits = {}
 	self.reallyActuallyDead = {}
-	self.behaviourFactory = BehaviourFactory()
-	self.behaviourFactory:SetAI(self.ai)
+	self.behaviourFactory = BehaviourFactory( self.ai )
 	self.behaviourFactory:Init()
 end
 
@@ -98,8 +97,7 @@ function UnitHandler:AIRepresentation(engineUnit)
 	local u = unittable[engineUnit:ID()]
 	if u == nil then
 		-- self.game:SendToConsole(self.ai.id, "adding unit to unithandler tables", engineUnit:ID(), engineUnit:Name())
-		u = Unit()
-		u:SetAI( self.ai )
+		u = Unit( self.ai )
 		self.units[engineUnit:ID()] = u
 		
 		u:SetEngineRepresentation(engineUnit)

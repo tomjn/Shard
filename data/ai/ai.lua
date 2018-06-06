@@ -1,6 +1,4 @@
-ShardAI = class(AIBase)
-
-function ShardAI:Init()
+ShardAI = class(AIBase, function(self)
 	self.api = shard_include("preload/api")
 	self.game = self.api.game
 	self.map = self.api.map
@@ -8,10 +6,12 @@ function ShardAI:Init()
 	self.map.ai = self
 	self.game.map = self.map
 	self.game:SendToConsole("Shard by AF - playing: "..self.game:GameName().." on: "..self.map:MapName())
+end)
 
-	shard_include("behaviourfactory")
-	shard_include("unit")
-	shard_include("modules")
+function ShardAI:Init()
+	self:include("behaviourfactory")
+	self:include("unit")
+	self:include("modules")
 
 	self.modules = {}
 	if next(modules) ~= nil then
@@ -27,11 +27,11 @@ function ShardAI:Init()
 end
 
 function ShardAI:include( file )
-	return shard_include( file )
+	return self.game:include( file )
 end
 
 function ShardAI:require( file )
-	return shard_include( file )
+	return self.game:require( file )
 end
 
 function ShardAI:Update()

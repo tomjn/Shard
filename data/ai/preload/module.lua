@@ -1,4 +1,8 @@
-Module = class(AIBase)
+Module = class(AIBase, function(a, ai)
+	a.ai = ai
+	a.game = ai.game
+	a.map = ai.map
+end)
 
 function Module:Name()
 	return "no name defined"
