@@ -9,10 +9,6 @@ function NullBehaviour:OwnerIdle()
 	end
 end
 
-function NullBehaviour:Priority()
-	return 0
-end
-
 function NullBehaviour:Activate()
 	-- normally we would issue a command here, then when finished,
 	-- the behaviour would give up control of the unit
