@@ -1,15 +1,10 @@
 
-ShardSpringFeature = class(function(a)
-   --
+ShardSpringFeature = class(function(a, id)
+	a.id = id
+	a.defID = Spring.GetFeatureDefID(id)
+	a.def = FeatureDefs[a.defID]
+	a.name = a.def.name
 end)
-
-
-function ShardSpringFeature:Init( id )
-	self.id = id
-	self.defID = Spring.GetFeatureDefID(id)
-	self.def = FeatureDefs[self.defID]
-	self.name = self.def.name
-end
 
 function ShardSpringFeature:ID()
 	return self.id

@@ -1,29 +1,26 @@
-ShardSpringDamage = class(function(a)
-   --
+
+ShardSpringDamage = class(function(a, damage, weaponDefID, paralyzer, projectileID, engineAttacker)
+	a.damage = damage
+	a.weaponDefID = weaponDefID
+	a.paralyzer = paralyzer
+	a.projectileID = projectileID
+	a.attacker = engineAttacker
+	a.gameframe = spGetGameFrame()
+	if projectileID then
+		local dx, dy, dz = spGetProjectileDirection(projectileID)
+		a.direction = {x=dx, y=dy, z=dz}
+	end
+	a.damageType = weaponDefID
+	if weaponDefID then
+		local weaponDef = WeaponDefs[weaponDefID]
+		if weaponDef then
+			a.weaponType = weaponDef.name
+		end
+	end
 end)
 
 local spGetGameFrame = Spring.GetGameFrame
 local spGetProjectileDirection = Spring.GetProjectileDirection
-   
-function ShardSpringDamage:Init( damage, weaponDefID, paralyzer, projectileID, engineAttacker )
-	self.damage = damage
-	self.weaponDefID = weaponDefID
-	self.paralyzer = paralyzer
-	self.projectileID = projectileID
-	self.attacker = engineAttacker
-	self.gameframe = spGetGameFrame()
-	if projectileID then
-		local dx, dy, dz = spGetProjectileDirection(projectileID)
-		self.direction = {x=dx, y=dy, z=dz}
-	end
-	self.damageType = weaponDefID
-	if weaponDefID then
-		local weaponDef = WeaponDefs[weaponDefID]
-		if weaponDef then
-			self.weaponType = weaponDef.name
-		end
-	end
-end
 
 function ShardSpringDamage:Damage()
 	return self.damage
@@ -43,4 +40,4 @@ end
 
 function ShardSpringDamage:WeaponType()
 	return self.weaponType
-end 
+end

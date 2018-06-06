@@ -21,6 +21,14 @@ function game:IsPaused() -- if the game is paused, returns true
 	return paused
 end
 
+function game:include( file )
+	return self:require( file )
+end
+
+function game:require( file )
+	return shard_include( file )
+end
+
 function game:GetTypeByName(typename) -- returns unittype
 	if not UnitDefNames[typename] then
 		Spring.Echo( 'shard: debug: could not find "'..typename..'" in UnitDefNames' )
