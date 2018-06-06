@@ -1,13 +1,10 @@
 shard_include( "behaviour" )
+shard_include( "behaviours" )
+
 BehaviourFactory = class(AIBase)
 
-shard_include( "behaviours" )
-function BehaviourFactory:Init()
-	--
-end
-
 function BehaviourFactory:AddBehaviours(unit)
-	if unit == nil then
+	if not unit then
 		self.game:SendToConsole("Warning: Shard BehaviourFactory:AddBehaviours was asked to provide behaviours to a nil unit")
 		return
 	end
@@ -18,9 +15,7 @@ function BehaviourFactory:AddBehaviours(unit)
 		b = defaultBehaviours(unit, ai)
 	end
 	for i,behaviour in ipairs(b) do
-		t = behaviour()
-		t:SetAI(ai)
-		t:SetUnit(unit)
+		t = behaviour( ai, unit )
 		t:Init()
 		unit:AddBehaviour(t)
 	end

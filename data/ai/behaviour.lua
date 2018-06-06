@@ -1,8 +1,15 @@
-Behaviour = class(AIBase)
+Behaviour = class(AIBase, function( b, ai, unit )
+	b.ai = ai
+	b.game = ai.game
+	b.map = ai.map
+	b.unit = unit
+	b.owner = unit:Internal()
+	b.engineID = unit.engineID
+	b.active = false
+	b.priority = 0
+end)
 
 function Behaviour:init()
-	self.active = false
-	self.priority = 0
 end
 
 function Behaviour:Update()
@@ -46,20 +53,8 @@ function Behaviour:OwnerMoveFailed()
 	self:OwnerIdle()
 end
 
-function Behaviour:SetUnit(unit)
-	self.unit = unit
-	self.owner = unit:Internal()
-	self.engineID = unit.engineID
-end
-
 function Behaviour:Owner()
 	return self.owner
-end
-
-function Behaviour:SetAI(ai)
-	self.ai = ai
-	self.game = ai.game
-	self.map = ai.map
 end
 
 
