@@ -1,6 +1,8 @@
 
-AIBase = class(function(a)
-   --
+AIBase = class(function(a, ai)
+	a.ai = ai
+	a.game = ai.game
+	a.map = ai.map
 end)
 
 
@@ -36,11 +38,6 @@ end
 
 function AIBase:UnitDamaged(engineunit,enginedamage)
 end
-function AIBase:UnitMoveFailed(engineunit)
-end
 
-function AIBase:SetAI(ai)
-	self.ai = ai
-	self.game = ai.game
-	self.map = ai.map
+function AIBase:UnitMoveFailed(engineunit)
 end

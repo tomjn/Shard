@@ -14,6 +14,4 @@ require "boot"
 shard_include "ai"
 ai = ShardAI()
 ai:Init()
-u = UnitHandler()
-
-u:SetAI(ai)
+u = UnitHandler(ai)

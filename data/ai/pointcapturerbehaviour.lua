@@ -9,8 +9,6 @@ function IsPointCapturer(unit, ai)
 	return true
 end
 
-PointCapturerBehaviour = class(Behaviour)
-
 local function RandomAway(pos, dist, angle)
 	angle = angle or math.random() * math.pi * 2
 	local away = api.Position()
@@ -19,6 +17,8 @@ local function RandomAway(pos, dist, angle)
 	away.y = pos.y + 0
 	return away
 end
+
+PointCapturerBehaviour = class(Behaviour)
 
 function PointCapturerBehaviour:Init()
 	self.arePoints = self.game:UsesControlPoints()

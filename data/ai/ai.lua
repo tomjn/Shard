@@ -16,15 +16,22 @@ function ShardAI:Init()
 	self.modules = {}
 	if next(modules) ~= nil then
 		for i,m in ipairs(modules) do
-			newmodule = m()
-			self.game:SendToConsole("adding "..newmodule:Name().." module")
+			newmodule = m( self )
+			self.game:SendToConsole("Shard: Adding "..newmodule:Name().." module")
 			local internalname = newmodule:internalName()
 			self[internalname] = newmodule
 			table.insert(self.modules,newmodule)
-			newmodule:SetAI(self)
 			newmodule:Init()
 		end
 	end
+end
+
+function ShardAI:include( file )
+	return shard_include( file )
+end
+
+function ShardAI:require( file )
+	return shard_include( file )
 end
 
 function ShardAI:Update()
