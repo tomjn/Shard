@@ -252,6 +252,10 @@ function ShardUnit:FireAtWill()
 	return true
 end
 
+function ShardUnit:FireAtNeutrals()
+	return true
+end
+
 function ShardUnit:HoldPosition()
 	return true
 end

@@ -311,6 +311,11 @@ function ShardUnit:FireAtWill()
 	return true
 end
 
+function ShardUnit:FireAtNeutrals()
+	Spring.GiveOrderToUnit( self.id, CMD.FIRE_STATE, { 3 }, {} )
+	return true
+end
+
 function ShardUnit:HoldPosition()
 	Spring.GiveOrderToUnit( self.id, CMD.MOVE_STATE, { 0 }, {} )
 	return true
