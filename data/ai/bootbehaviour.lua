@@ -8,15 +8,9 @@
 
 BootBehaviour = class(Behaviour)
 
-local CMD_MOVE_STATE = 50
-local MOVESTATE_HOLDPOS = 0
-
 function BootBehaviour:Init()
 	self.waiting = true
-	local u = self.unit:Internal()
-	self.id = u:ID()
-	self.name = u:Name()
-	self.canmove = u:CanMove()
+	self.canmove = self:Owner():CanMove()
 	self.finished = false
 	self.count = 150
 end
@@ -38,14 +32,6 @@ function BootBehaviour:Update()
 	end
 end
 
-function BootBehaviour:Activate()
-	self.active = true
-end
-
-function BootBehaviour:Deactivate()
-	self.active = false
-end
-
 function BootBehaviour:Priority()
 	-- don't apply to starting units
 	if self.game:Frame() < 10 then
@@ -65,10 +51,5 @@ end
 
 -- set to hold position while being repaired after resurrect
 function BootBehaviour:SetMoveState()
-	local thisUnit = self.unit
-	if thisUnit then
-		local floats = api.vectorFloat()
-		floats:push_back(MOVESTATE_HOLDPOS)
-		thisUnit:Internal():ExecuteCustomCommand(CMD_MOVE_STATE, floats)
-	end
+	self:Owner():HoldPosition()
 end
