@@ -18,7 +18,7 @@ local function RandomAway(pos, dist, angle)
 	return away
 end
 
-PointCapturerBehaviour = class(Behaviour)
+PointCapturerBehaviour = class(Behaviour, behaviourSetup)
 
 function PointCapturerBehaviour:Init()
 	self.arePoints = self.game:UsesControlPoints()
