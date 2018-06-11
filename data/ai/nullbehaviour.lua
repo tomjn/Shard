@@ -1,4 +1,4 @@
-NullBehaviour = class(Behaviour)
+NullBehaviour = class(Behaviour, behaviourSetup)
 
 -- this gets called when the unit is idle, which means we finished our
 -- stop command, yield control. This probably won't work though because
