@@ -1,4 +1,4 @@
-Behaviour = class(AIBase, function( b, ai, unit )
+function behaviourSetup( b, ai, unit )
 	b.ai = ai
 	b.game = ai.game
 	b.map = ai.map
@@ -7,7 +7,9 @@ Behaviour = class(AIBase, function( b, ai, unit )
 	b.engineID = unit.engineID
 	b.active = false
 	b.priority = 0
-end)
+end
+
+Behaviour = class(AIBase, behaviourSetup)
 
 function Behaviour:init()
 end
