@@ -14,7 +14,7 @@ end
 local CMD_GUARD = 25
 local CMD_PATROL = 15
 
-AssistBehaviour = class(Behaviour)
+AssistBehaviour = class(Behaviour, behaviourSetup)
 
 function AssistBehaviour:DoIAssist()
 	if self.isNanoTurret then
