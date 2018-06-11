@@ -9,7 +9,7 @@ function IsCapturer(unit, ai)
 	return true
 end
 
-CapturerBehaviour = class(Behaviour)
+CapturerBehaviour = class(Behaviour, behaviourSetup)
 
 local function RandomAway(pos, dist, angle)
 	angle = angle or math.random() * math.pi * 2
