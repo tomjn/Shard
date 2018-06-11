@@ -27,11 +27,11 @@ function ShardAI:Init()
 end
 
 function ShardAI:include( file )
-	return self.game:include( file )
+	return self.api.include( file )
 end
 
 function ShardAI:require( file )
-	return self.game:require( file )
+	return self:include( file )
 end
 
 function ShardAI:Update()
