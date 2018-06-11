@@ -9,7 +9,7 @@ function IsAttacker(unit)
 	return false
 end
 
-AttackerBehaviour = class(Behaviour)
+AttackerBehaviour = class(Behaviour, behaviourSetup)
 
 function AttackerBehaviour:Init()
 	--game:SendToConsole("attacker!")
