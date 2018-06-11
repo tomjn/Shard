@@ -1,8 +1,13 @@
-Unit = class(AIBase)
+Unit = class(AIBase, function ( a, ai, engineUnit )
+	a.ai = ai
+	a.game = ai.game
+	a.map = ai.map
+	a.engineUnit = engineUnit
+	a.engineID = engineUnit:ID()
+end)
 
-function Unit:SetEngineRepresentation(engineUnit)
-	self.engineUnit = engineUnit
-	self.engineID = engineUnit:ID()
+function Unit:Owner()
+	return self.engineUnit
 end
 
 function Unit:Internal()
@@ -11,7 +16,7 @@ end
 
 function Unit:Init()
 	if self.engineUnit == nil then
-		self.game:SendToConsole("Warning: Shard Unit:Init nil engineUnit?!")
+		self.game:SendToConsole("Shard: Warning: Shard Unit:Init nil engineUnit?!")
 	end
 	self.behaviours = {}
 end

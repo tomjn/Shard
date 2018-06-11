@@ -45,6 +45,9 @@ end
 
 function UnitHandler:UnitCreated(engineUnit)
 	local u = self:AIRepresentation(engineUnit)
+	if u == nil then
+		return
+	end
 	for k,v in pairs(self.myUnits) do
 		v:UnitCreated(u)
 	end
@@ -52,19 +55,21 @@ end
 
 function UnitHandler:UnitBuilt(engineUnit)
 	local u = self:AIRepresentation(engineUnit)
-	if u ~= nil then
-		for k,v in pairs(self.myUnits) do
-			v:UnitBuilt(u)
-		end
+	if u == nil then
+		return
+	end
+	for k,v in pairs(self.myUnits) do
+		v:UnitBuilt(u)
 	end
 end
 
 function UnitHandler:UnitDead(engineUnit)
 	local u = self:AIRepresentation(engineUnit)
-	if u ~= nil then
-		for k,v in pairs(self.myUnits) do
-			v:UnitDead(u)
-		end
+	if u == nil then
+		return
+	end
+	for k,v in pairs(self.myUnits) do
+		v:UnitDead(u)
 	end
 	-- game:SendToConsole(self.ai.id, "removing unit from unithandler tables", engineUnit:ID(), engineUnit:Name())
 	self.units[engineUnit:ID()] = nil
@@ -74,7 +79,9 @@ end
 
 function UnitHandler:UnitDamaged(engineUnit,engineAttacker,damage)
 	local u = self:AIRepresentation(engineUnit)
-	-- local a = self:AIRepresentation(engineAttacker)
+	if u == nil then
+		return
+	end
 	for k,v in pairs(self.myUnits) do
 		v:UnitDamaged(u,engineAttacker,damage)
 	end
@@ -97,10 +104,9 @@ function UnitHandler:AIRepresentation(engineUnit)
 	local u = unittable[engineUnit:ID()]
 	if u == nil then
 		-- self.game:SendToConsole(self.ai.id, "adding unit to unithandler tables", engineUnit:ID(), engineUnit:Name())
-		u = Unit( self.ai )
+		u = Unit( self.ai, engineUnit )
 		self.units[engineUnit:ID()] = u
 		
-		u:SetEngineRepresentation(engineUnit)
 		u:Init()
 		if engineUnit:Team() == self.game:GetTeamID() then
 			-- game:SendToConsole(self.ai.id, "giving my unit behaviours", engineUnit:ID(), engineUnit:Name())
@@ -113,9 +119,10 @@ end
 
 function UnitHandler:UnitIdle(engineUnit)
 	local u = self:AIRepresentation(engineUnit)
-	if u ~= nil then
-		for k,v in pairs(self.units) do
-			v:UnitIdle(u)
-		end
+	if u == nil then
+		return
+	end
+	for k,v in pairs(self.units) do
+		v:UnitIdle(u)
 	end
 end
