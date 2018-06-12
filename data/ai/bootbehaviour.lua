@@ -6,7 +6,7 @@
 -- things or doing stuff before they've left the factory and
 -- blocking the factory from building the next unit
 
-BootBehaviour = class(Behaviour)
+BootBehaviour = class(Behaviour, behaviourSetup)
 
 function BootBehaviour:Init()
 	self.waiting = true
