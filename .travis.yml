@@ -13,5 +13,6 @@ before_script:
   - cmake .
 
 script:
+  - /usr/bin/luac5.2 data/ai/test.lua
   - make
   - find -name '*.lua' -print0 |xargs -0 /usr/bin/luac5.2 -p
